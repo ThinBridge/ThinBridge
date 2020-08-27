@@ -1,0 +1,34 @@
+// BHORedirector.idl : BHORedirector の IDL ソース
+//
+
+// このファイルは、タイプ ライブラリ (BHORedirector.tlb) およびマーシャリング コードを
+// 作成するために MIDL ツールによって処理されます。
+
+import "oaidl.idl";
+import "ocidl.idl";
+
+[
+	object,
+	uuid(6C863E4B-D867-48E9-9743-CCFE1D52EF67),
+	dual,
+	nonextensible,
+	pointer_default(unique)
+]
+interface IBHORedirector : IDispatch{
+};
+[
+	uuid(205B56F3-BB5B-429C-A488-1BEE36A72E2C),
+	version(1.0),
+]
+library BHORedirectorLib
+{
+	importlib("stdole2.tlb");
+	[
+		uuid(3A56619B-37AC-40DA-833E-410F3BEDCBDC)		
+	]
+	coclass BHORedirector
+	{
+		[default] interface IBHORedirector;
+	};
+};
+

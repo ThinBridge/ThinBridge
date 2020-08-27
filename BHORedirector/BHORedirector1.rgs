@@ -1,0 +1,68 @@
+HKCR
+{
+	NoRemove CLSID
+	{
+		ForceRemove {3A56619B-37AC-40DA-833E-410F3BEDCBDC} = s 'ThinBridge Browser Helper'
+		{
+			ForceRemove Programmable
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Apartment'
+			}
+			TypeLib = s '{205B56F3-BB5B-429C-A488-1BEE36A72E2C}'
+			Version = s '1.0'
+			'Implemented Categories' = s 'ThinBridge Browser Helper'
+			{
+				{7DD95801-9882-11CF-9FA9-00AA006C42C4} = s 'ThinBridge Browser Helper'
+				{7DD95802-9882-11CF-9FA9-00AA006C42C4} = s 'ThinBridge Browser Helper'
+				{59fb2056-d625-48d0-a944-1a85b5ab2640} = s 'ThinBridge Browser Helper'
+			}
+		}
+	}
+}
+HKLM
+{
+  NoRemove SOFTWARE
+  {
+    NoRemove Microsoft
+	{
+      NoRemove Windows
+	  {
+        NoRemove CurrentVersion
+		{
+          NoRemove Explorer
+		  {
+            NoRemove 'Browser Helper Objects'
+			{
+              ForceRemove '{3A56619B-37AC-40DA-833E-410F3BEDCBDC}' = s 'ThinBridge Browser Helper'
+			  {
+                val 'NoExplorer' = d '1'
+              }
+            }
+          }
+        }
+      }
+      NoRemove 'Internet Explorer'
+	  {
+        NoRemove 'Low Rights'
+		{
+          NoRemove ElevationPolicy
+		  {
+            ForceRemove '{3A56619B-37AC-40DA-833E-410F3BEDCBDC}' = s 'ThinBridge'
+			{
+                val 'AppName'= s 'ThinBridge.exe'
+				val 'AppPath' = s '%MODULE_FOLDER%'
+                val 'Policy' = d '3'
+            }
+            ForceRemove '{3A56619B-37AC-40DA-833E-410F3BEDCBDD}' = s 'ExternalP'
+			{
+                val 'AppName'= s 'ExternalP.exe'
+				val 'AppPath' = s '%MODULE_FOLDER%'
+                val 'Policy' = d '3'
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<policyDefinitionResources revision="3.0" schemaVersion="1.0">
+  <displayName></displayName>
+  <description></description>
+  <resources>
+    <stringTable>
+      <string id="TB">ThinBridge</string>
+      <string id="TB_CAP">IEリソース制限</string>
+      <string id="TB_CPU_H">高</string>
+      <string id="TB_CPU_HN">通常以上</string>
+      <string id="TB_CPU_N">通常</string>
+      <string id="TB_CPU_LN">通常以下</string>
+      <string id="TB_CPU_L">低</string>
+      <string id="unknown_0">ThinBridge</string>
+    </stringTable>
+    <presentationTable>
+      <presentation id="DefineYourSettingfortheThinBridge">
+        <checkBox refId="EnableIETabLimit">IEタブ数・ウインドウ数を制限する</checkBox>
+        <decimalTextBox refId="IETabLimit_WARNING" defaultValue="4">タブ警告表示:</decimalTextBox>
+        <decimalTextBox refId="IETabLimit_MAX" defaultValue="5">タブ最大値:</decimalTextBox>
+        <textBox refId="IETabLimit_WARNING_MSG">
+          <label>タブ警告メッセージ:(改行は\nで指定)</label>
+          <defaultValue>【お願い】\n現在開いているタブ・ウインドウ数が警告値に達しました。\n\nお手数ですが他の不要なタブ・ウインドウを閉じて下さい。\n\nコンピュータ資源の節約に、ご協力ください。</defaultValue>
+        </textBox>
+        <textBox refId="IETabLimit_MAX_MSG">
+          <label>タブ超過メッセージ:(改行は\nで指定)</label>
+          <defaultValue>【お知らせ】\n現在開いているタブ・ウインドウ数が上限値に達しました。\nこれ以上タブ・ウインドウを追加できません。\n\nお手数ですが他の不要なタブ・ウインドウを閉じてから再度実行して下さい。\n\nコンピュータ資源の節約に、ご協力ください。</defaultValue>
+        </textBox>
+        <decimalTextBox refId="IETabLimit_WARNING_MSG_TIME" defaultValue="5">タブ警告メッセージ表示秒:</decimalTextBox>
+        <decimalTextBox refId="IETabLimit_MAX_MSG_TIME" defaultValue="5">タブ超過メッセージ表示秒:</decimalTextBox>
+
+        <checkBox refId="EnableIEMemLimit">IE消費メモリーサイズ(コミットサイズ)を制限する</checkBox>
+        <decimalTextBox refId="IEMemLimit_WARNING" defaultValue="400">メモリー警告表示:</decimalTextBox>
+        <decimalTextBox refId="IEMemLimit_MAX" defaultValue="500">メモリー最大値:</decimalTextBox>
+        <textBox refId="IEMemLimit_WARNING_MSG">
+          <label>メモリー警告メッセージ:(改行は\nで指定)</label>
+          <defaultValue>【お願い】\n現在の使用メモリが警告値に達しました。\n\nお手数ですが他の不要なタブ・ウインドウを閉じて下さい。\n\nコンピュータ資源の節約に、ご協力ください。</defaultValue>
+        </textBox>
+        <textBox refId="IEMemLimit_MAX_MSG">
+          <label>メモリー超過メッセージ:(改行は\nで指定)</label>
+          <defaultValue>【お知らせ】\n現在の使用メモリが上限値に達しました。\n\nお手数ですが他の不要なタブ・ウインドウを閉じてから再度実行して下さい。\n\nコンピュータ資源の節約に、ご協力ください。</defaultValue>
+        </textBox>
+        <decimalTextBox refId="IEMemLimit_WARNING_MSG_TIME" defaultValue="5">メモリー警告メッセージ表示秒:</decimalTextBox>
+        <decimalTextBox refId="IEMemLimit_MAX_MSG_TIME" defaultValue="5">メモリー超過メッセージ表示秒:</decimalTextBox>
+
+        <checkBox refId="EnableIEPriority">IEXPLORE.exeプロセス優先度設定</checkBox>
+        <dropdownList refId="IEPriority" noSort="true" defaultItem="2">優先度選択</dropdownList>
+      </presentation>
+      <presentation id="allows" />
+    </presentationTable>
+  </resources>
+</policyDefinitionResources>

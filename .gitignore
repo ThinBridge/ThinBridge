@@ -1,0 +1,13 @@
+*.aps
+*.vcxproj.user
+BHORedirector/BHORedirector_i.c
+BHORedirector/BHORedirector_i.h
+BHORedirector/BHORedirector_p.c
+ThinBridge/Debug
+ThinBridge/Release
+Debug
+Release
+ThinBridge.opensdf
+ThinBridge.sdf
+ThinBridge.suo
+ipch

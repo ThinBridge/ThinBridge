@@ -1,0 +1,295 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+<title>ThinBridge</title>
+<style>
+<!--
+p {
+	font-family: Tahoma, verdana, arial, Geneva, sans-serif;
+	font-size: 16px;
+	color: #333333
+}
+a { text-decoration: none; }
+#maintbl {
+	background-color: #cce5ff;
+	}
+input.button4 {
+	font-size: 1.4em;
+	font-weight: bold;
+	padding: 10px 30px;
+	}
+-->
+</style>
+<script language="javascript"> 
+<!-- 
+var seconds = 3;
+var bCancel = false;
+var gPageAction=0;
+
+function InitPage()
+{
+	try{
+		var params=getUrlParams();
+		var pngi = params.type;
+		img = document.getElementById("IMG_PNG");
+		var imgsrc="PNG/202";
+		switch(pngi)
+		{
+			case "chrome": imgsrc = "PNG/206";break;
+			case "citrix": imgsrc = "PNG/207";break;
+			case "edge":   imgsrc = "PNG/208";break;
+			case "firefox":imgsrc = "PNG/209";break;
+			case "rdp":    imgsrc = "PNG/210";break;
+			case "vmware": imgsrc = "PNG/211";break;
+			default:break;
+		}
+		img.src=imgsrc;
+
+		var iCloseTimeOut = params.cto;
+		if(iCloseTimeOut > 0)
+			seconds = iCloseTimeOut;
+
+		var vPageAction = params.hb;
+
+		//auto close
+		if(vPageAction==0)
+		{
+			gPageAction=0;
+		}
+		//History Back
+		else if(vPageAction==1)
+		{
+			maintb = document.getElementById("maintbl");
+			maintb.style.backgroundColor="#FBFBBD";
+			gPageAction = 1;
+		}
+		//stay
+		else if(vPageAction==2)
+		{
+			maintb = document.getElementById("maintbl");
+			maintb.style.backgroundColor="#FFFFFF";
+			gPageAction=2;
+		}
+		else
+			gPageAction=0;
+		var bbu;
+		var cbu;
+		var msg_t1;
+		try{
+			bbu = document.getElementById("BackButton");
+			cbu = document.getElementById("CloseButton");
+			msg_t1 = document.getElementById("msg_t1");
+			if(IsNavigatorLanguageJa())
+			{
+				msg_t1.innerHTML = "<b>このページをリダイレクトしました。</b><br>ThinBridge Browser Helperは、このページを別のブラウザインスタンスで表示しました。";
+				bbu.value = "前のページに戻る";
+				cbu.value= "このページを閉じる";
+			}
+			else
+			{
+				msg_t1.innerHTML = "<b>ThinBridge redirected this page.</b><br>ThinBridge Browser Helper launched this page in another browser instance.";
+				bbu.value = "Return to previous page";
+				cbu.value= "Close this page";
+			}
+		}catch(e1){}
+		if(window!=parent)
+		{
+			bbu.parentNode.removeChild(bbu);
+			cbu.parentNode.removeChild(cbu);
+			return;
+		}
+
+		if(gPageAction!=2)
+			updateMessage();
+	}catch(e){}
+}
+function updateMessage()
+{
+	try{
+		if(bCancel==true)
+			return;
+		msg = document.getElementById("windowclosemessage");
+		if(IsNavigatorLanguageJa())
+			msg.innerHTML =  + seconds + " 秒後に、このウインドウを閉じます。";
+		else
+			msg.innerHTML = "Window will close in " + seconds + " seconds.";
+
+		cback = document.getElementById("clickback");
+		if(IsNavigatorLanguageJa())
+			cback.innerHTML = "クリックするとキャンセルします。";
+		else
+			cback.innerHTML = "Click to cancel.";
+		if (seconds > 0)
+		{
+			setTimeout("updateMessage()", 1000);
+		}
+		else if(seconds < 0)
+		{
+			msg.innerHTML = "";
+			cback.innerHTML = "";
+			WinClose();
+		}
+		else
+		{
+			if(gPageAction==1)
+			{
+				window.self.history.back();
+			}
+			setTimeout("updateMessage()", 1000);
+		}
+		seconds -= 1;
+		return;
+	}catch(e){}
+}
+function WinClose()
+{
+	try{
+		if (/MSIE (\d+\.\d+);/.test(navigator.userAgent))
+		{
+			var ieversion = new Number(RegExp.$1);
+			if (ieversion >= 7)
+			{
+				window.open('about:blank', '_self', '');
+				window.close();
+			}
+			else if (ieversion >= 6)
+			{
+				window.opener = null;
+				window.close();
+			}
+		}
+		else
+		{
+			window.open('about:blank', '_self', '');
+			window.close();
+		}
+	}catch(e){try{window.close();}catch(e2){}}
+}
+function CloseCancel()
+{
+	try{
+		msg = document.getElementById("windowclosemessage");
+		msg.innerHTML = "";
+		cback = document.getElementById("clickback");
+		cback.innerHTML = "";
+		seconds = 20;
+		bCancel=true;
+	}catch(e){}
+}
+function getUrlParams()
+{
+	try{
+		var vars = [], max = 0, hash = "", array = "";
+		var url = window.location.search;
+		hash  = url.slice(1).split('&');
+		max = hash.length;
+		for (var i = 0; i < max; i++)
+		{
+			array = hash[i].split('=');
+			vars.push(array[0]);
+			vars[array[0]] = array[1];
+		}
+		return vars;
+	}catch(e){}
+}
+function ClickCustom(bFlg)
+{
+	try{
+		msg = document.getElementById("windowclosemessage");
+		msg.innerHTML = "";
+		cback = document.getElementById("clickback");
+		cback.innerHTML = "";
+		seconds = 20;
+		bCancel=true;
+		if(bFlg==1)
+			WinClose();
+		else
+			window.self.history.back();
+
+	}catch(e){}
+}
+function IsNavigatorLanguageJa()
+{
+	try{
+		var retval;
+		retval="";
+		var navigator_obj = window.navigator;
+		if(navigator_obj.browserLanguage !== undefined)
+			retval=navigator_obj.browserLanguage;
+		if(retval.indexOf( 'ja' ) != -1)
+			return true;
+		return false;
+	}catch(e){return false;}
+}
+-->
+</script>
+</head>
+<body topmargin="0" leftmargin="0" rightmargin="0" onload="InitPage()">
+<center>
+<table width="100%" height="106" border="0" cellpadding="0" cellspacing="0" id="maintbl">
+<tr><td>
+	<table border="0" width="100%" height="100%" cellpadding="4">
+	<tr>
+		<td height="100%" valign="top"></td>
+		<td valign="top">
+		<img id="IMG_PNG" border="0" src="PNG/202">
+		</td>
+		<td width="100%" valign="top">
+			<table width="100%" border="0" cellpadding="0" cellspacing="0">
+			<tr><td>
+			<p id="msg_t1"><b>このページをリダイレクトしました。</b><br>
+			ThinBridge Browser Helperは、このページを 別のブラウザインスタンスで表示しました。</p>
+			</tr></td>
+			<tr><td>
+				<p style="font-size: larger; font-weight: bold;cursor:pointer;color:blue;" id="windowclosemessage" OnClick="javascript:CloseCancel()"></p>
+			</td></tr>
+			<tr><td>
+				<p style="font-size: smaller;  font-weight: bold;cursor:pointer;color:blue;text-decoration:underline" id="clickback" OnClick="javascript:CloseCancel()"></p>
+			</td></tr>
+			</table>
+		</td>
+		<td valign=top>
+			<a href="javascript:WinClose()">X</a>
+		</td>
+	</tr>
+	</table>
+</td></tr>
+<tr><td>&nbsp;</td></tr>
+<tr><td>
+	<table border="0" width="100%" height="100%" cellpadding="4">
+	<tr>
+		<td height="100%" valign="top"></td>
+		<td valign="top">&nbsp;
+		</td>
+		<td width="100%" valign="top">
+			<table width="100%" border="0" cellpadding="0" cellspacing="0">
+			<tr><td>
+			<input type="button" class="button4" id="BackButton" value="前のページに戻る" OnClick="javascript:ClickCustom(0)">
+			</td></tr>
+			</table>
+		</td>
+		<td valign=top>
+			&nbsp;
+		</td>
+	</tr>
+	<tr>
+		<td height="100%" valign="top"></td>
+		<td valign="top">&nbsp;
+		</td>
+		<td width="100%" valign="top">
+			<table width="100%" border="0" cellpadding="0" cellspacing="0">
+			<tr><td>
+			<input type="button" class="button4"  id="CloseButton" value="このページを閉じる" OnClick="javascript:ClickCustom(1)">
+			</td></tr>
+			</table>
+		</td>
+		<td valign=top>
+			&nbsp;
+		</td>
+	</tr>
+	</table>
+</td></tr>
+</table>
+</center>
+</body>
+</html>
