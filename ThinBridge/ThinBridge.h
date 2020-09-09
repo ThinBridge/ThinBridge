@@ -27,7 +27,7 @@
 
 #include <shlwapi.h>
 #pragma comment(lib, "ShLwApi.Lib")
-
+#pragma comment(lib, "Version.lib")
 
 #define WM_SETTINGSDIALOG_CLOSE				WM_USER+5
 #define ID_SETTING_OK 32770
@@ -53,9 +53,9 @@
 
 
 //FEATURE
-#define FE_RDP				0x00000001
-#define FE_VMW				0x00000010
-#define FE_CTX				0x00000100
+//#define FE_RDP				0x00000001
+//#define FE_VMW				0x00000010
+//#define FE_CTX				0x00000100
 #define FE_PLUS				0x00001000
 #define CAP_PLUS			0x00010000
 
@@ -224,26 +224,10 @@ namespace SBUtil
 		LPCTSTR szEllipsis = _T("...");
 		if(strRet.GetLength() > iTabStrLen)
 		{
-#ifdef _UNICODE
 			if(bAppend)
 				strRet = str1.Mid(0,iTabStrLen) + szEllipsis;
 			else
 				strRet = str1.Mid(0,iTabStrLen) + szEllipsis;
-#else
-			int nIndex = size;
-			int i=0;
-			for(i = nIndex; i > 0; i--)
-			{
-				if(!::IsDBCSLeadByte(str[i - 1]))
-					break;
-			}
-			if((nIndex > 0) && (((nIndex - i) & 1) != 0))
-				--nIndex;// one step back
-			if(bAppend)
-				strRet = str1.Left(nIndex) + szEllipsis;
-			else
-				strRet = str1.Left(nIndex);
-#endif
 		}
 		return;
 	}
@@ -615,6 +599,7 @@ public:
 	BOOL m_bURLOnly;
 	BOOL m_bTraceLog;
 	BOOL m_bUseScript;
+	BOOL m_bQuickRedirect;
 
 	CURLRedirectDataClass* m_pRDP;
 	CURLRedirectDataClass* m_pVMW;
@@ -680,6 +665,7 @@ public:
 		m_pCustom18=NULL;
 		m_pCustom19=NULL;
 		m_pCustom20=NULL;
+		m_bQuickRedirect = FALSE;
 	}
 	virtual ~CURLRedirectList()
 	{
@@ -731,6 +717,7 @@ public:
 		m_pCustom18=NULL;
 		m_pCustom19=NULL;
 		m_pCustom20=NULL;
+		m_bQuickRedirect = FALSE;
 	}
 	void InitSaveDataAll()
 	{
@@ -1020,6 +1007,12 @@ public:
 				out.WriteString(strTempFormat);
 				pstrOutPutData+=strTempFormat;
 			}
+			if (m_bQuickRedirect)
+			{
+				strTempFormat = _T("@INTRANET_ZONE\n");
+				out.WriteString(strTempFormat);
+				pstrOutPutData += strTempFormat;
+			}
 			out.WriteString(_T("\n"));
 			pstrOutPutData+=_T("\n");
 
@@ -1206,6 +1199,7 @@ public:
 							m_bURLOnly=bTopPageOnly;
 							m_bTraceLog=dRedirectPageAction==1?TRUE:FALSE;
 							m_bUseScript=dwCloseTimeout==1?TRUE:FALSE;
+							m_bQuickRedirect = (dwZone&INTRANET_ZONE) == INTRANET_ZONE ? TRUE : FALSE;
 						}
 						else if(strExecType.CompareNoCase(_T("RDP"))==0)
 							m_pRDP->Copy(pRedirectData);
@@ -1385,6 +1379,7 @@ public:
 						m_bURLOnly=bTopPageOnly;
 						m_bTraceLog=dRedirectPageAction==1?TRUE:FALSE;
 						m_bUseScript=dwCloseTimeout==1?TRUE:FALSE;
+						m_bQuickRedirect = (dwZone&INTRANET_ZONE) == INTRANET_ZONE ? TRUE : FALSE;
 					}
 					else if(strExecType.CompareNoCase(_T("RDP"))==0)
 						m_pRDP->Copy(pRedirectData);
@@ -1614,6 +1609,7 @@ public:
 	CString m_strTemplate_FileFullPath;
 	CString m_strTestConnect_FileFullPath;
 	CString m_strRDP_FileFullPath;
+	CString m_strO365ToolFullPath;
 
 	CString m_strRdp_Template_File_Data;
 
@@ -1796,9 +1792,7 @@ public:
 		strWriteLine.Format(_T("%s\t%s\t%s\n"),time.Format(_T("%Y-%m-%d %H:%M:%S")),sDEBUG_LOG_TYPE[iLogType],msg);
 		strDebugLine.Format(_T("ThinBridge:EXE\t%s"),strWriteLine);
 
-#ifdef _UNICODE
 		_wsetlocale(LC_ALL, _T("jpn")); 
-#endif
 
 		OutputDebugString(strDebugLine);
 
@@ -1850,66 +1844,89 @@ public:
 				stdFile.Close();
 			}
 		}
-#ifdef _UNICODE
 		_wsetlocale(LC_ALL, _T(""));
-#endif
 
 	}
 
-	CString ConvertUTF8(const CString& src)
+	//UTF16をUTF8に変換しURLEncodeした文字列を返却
+	CString ConvertUTF8_URLEncode(const CString& src)
 	{
+		_wsetlocale(LC_ALL, _T("jpn"));
 		CString strRet;
-		if(src.IsEmpty())return strRet;
-		long size = src.GetLength()*2+2;
-		wchar_t* lpWideString = new wchar_t[size];
-		memset(lpWideString,0x00,size);
-#ifdef _UNICODE
-		lstrcpyn(lpWideString,src,size);
-#else
-		MultiByteToWideChar(CP_ACP, 0,(LPCTSTR)src, -1, lpWideString, size);
-#endif
-		long size2 = src.GetLength()*3+2;
-		char* lpUTF8String = new char[size2];
-		memset(lpUTF8String,0x00,size2);
-		WideCharToMultiByte(CP_UTF8, 0,lpWideString,-1, lpUTF8String,size2, NULL, NULL);
-		strRet=lpUTF8String;
-		delete [] lpWideString;
-		delete [] lpUTF8String;
+		if (src.IsEmpty())return strRet;
+
+		try
+		{
+			//UTF16->UTF-8変換-----------------------------------↓
+			//UTF8格納
+			char* pstrData_UTF8 = NULL;
+			long UTF8Len = 0;
+			long size = src.GetLength() * 2 + 2;
+			wchar_t* lpWideString = NULL;
+			lpWideString = new wchar_t[size];
+			memset(lpWideString, 0x00, size);
+			lstrcpyn(lpWideString, src, size);
+			long size2 = src.GetLength() * 3 + 2;
+			pstrData_UTF8 = new char[size2];
+			memset(pstrData_UTF8, 0x00, size2);
+			UTF8Len = WideCharToMultiByte(CP_UTF8, 0, lpWideString, -1, pstrData_UTF8, size2, NULL, NULL);
+			if (lpWideString)
+				delete[] lpWideString;
+			//UTF16->UTF-8変換-----------------------------------↑
+
+			//URLEncode-----------------------------------↓
+			char* ptrDataURLEncode = NULL;
+			long URLEncodeLen = 0;
+			const int nLen = min((int)strlen(pstrData_UTF8), UTF8Len);
+			size = UTF8Len * 10;
+			ptrDataURLEncode = new char[size];
+			URLEncodeLen = size;
+			memset(ptrDataURLEncode, 0x00, size);
+			int iPos = 0;
+			BYTE cText = 0;
+			for (int i = 0; i < nLen; ++i)
+			{
+				cText = pstrData_UTF8[i];
+				if ((cText >= '0' && cText <= '9')
+					|| (cText >= 'a' && cText <= 'z')
+					|| (cText >= 'A' && cText <= 'Z')
+					|| cText == '-' || cText == '_' || cText == '.' || cText == '!' || cText == '~'
+					|| cText == '*' || cText == '\'' || cText == '(' || cText == ')'
+					)
+				{
+					memcpy(ptrDataURLEncode + iPos, &cText, 1);
+					iPos++;
+				}
+				else if (cText == ' ')
+				{
+					memcpy(ptrDataURLEncode + iPos, "%20", 3);
+					iPos += 3;
+				}
+				else
+				{
+					char szFmt[4] = { 0 };
+					_snprintf_s(szFmt, sizeof(szFmt), "%%%02X", cText & 0xff);
+					memcpy(ptrDataURLEncode + iPos, szFmt, 3);
+					iPos += 3;
+				}
+			}
+			if (pstrData_UTF8)
+				delete[] pstrData_UTF8;
+
+			strRet = ptrDataURLEncode;
+			if (ptrDataURLEncode)
+				delete[] ptrDataURLEncode;
+			//URLEncode-----------------------------------↑
+
+		}
+		catch (...)
+		{
+			ATLASSERT(0);
+		}
 		return strRet;
 	}
-	CString URLEncode(CString& r_strText)
-	{
-		CString strRet=_T("");
-		if (r_strText.IsEmpty())
-		{
-			return strRet;
-		}
+	CString GetVersionStr();
 
-		CString strCh = _T("");
-		const int nLen = r_strText.GetLength();
-		for (int i = 0; i < nLen; ++i)
-		{
-			WCHAR cText = r_strText[i] & 0xff;
-
-			// keep char: A-Z,a-z,0-9_*-.@
-			if (__iscsym(cText) || cText == 0x2A || cText == 0x2D || cText == 0x2E || cText == 0x40)
-			{
-				strCh.Format(_T("%c"), cText);
-			}
-			else if (cText == 0x20)
-			{
-				//strCh = _T("+");
-				strCh = _T("%20");
-			}
-			else
-			{
-				strCh.Format(_T("%%%02X"), cText);
-			}
-
-			strRet += strCh;
-		}
-		return strRet;
-	}
 	// 親プロセスIDの取得
 	BOOL GetParentPID(DWORD& pidResult)
 	{
@@ -2004,22 +2021,12 @@ public:
 
 	void InitFeatureSetting()
 	{
-		m_iFeatureType = FE_RDP|FE_VMW;
+		m_iFeatureType = FE_PLUS;
 		CString strFeatureType;
 
 		strFeatureType = GetProfileString(_T("Common"), _T("FeatureType"));
-		//Citrix XenApp設定なし。
-		if(strFeatureType.CompareNoCase(_T("WOCTX"))==0)
-		{
-			m_iFeatureType = FE_RDP|FE_VMW;
-		}
-		//フル機能
-		else if(strFeatureType.CompareNoCase(_T("FULL"))==0)
-		{
-			m_iFeatureType = FE_ALL;
-		}
 		//ThinBridgePlus フル機能
-		else if(strFeatureType.CompareNoCase(_T("FULL_PLUS"))==0)
+		if(strFeatureType.CompareNoCase(_T("FULL_PLUS"))==0)
 		{
 			m_iFeatureType = FE_PLUS;
 		}
@@ -2036,13 +2043,6 @@ public:
 	BOOL IsResourceCAP_IE();
 	void ShowPlusSettingDlgEx();
 	void ShowPlusSettingDlgCAP();
-	BOOL EnableCTX()
-	{
-		BOOL bRet=FALSE;
-		if((m_iFeatureType&FE_CTX)==FE_CTX)
-			bRet = TRUE;
-		return bRet;
-	}
 	inline BOOL IsWnd(CWnd* wnd)
 	{
 		if(wnd == NULL)

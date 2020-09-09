@@ -33,7 +33,7 @@ CRedirectApp::CRedirectApp()
 
 	m_strThisAppName=_T("ThinBridge");
 	SetAppID(m_strThisAppName);
-	m_iFeatureType = FE_RDP|FE_VMW;
+	m_iFeatureType = FE_PLUS;
 }
 
 
@@ -53,6 +53,10 @@ BOOL CRedirectApp::InitBaseFunction()
 	m_strExeFullPath=szPath;
 	m_strExeFileName = szFileName;
 	m_strExeFileName += szExt;
+
+	m_strO365ToolFullPath = szDrive;
+	m_strO365ToolFullPath += szDir;
+	m_strO365ToolFullPath += _T("TBo365URLSyncSetting.exe");
 
 	m_strLogFileFullPath = szDrive;
 	m_strLogFileFullPath += szDir;
@@ -180,11 +184,7 @@ void CRedirectApp::InitCommandParamOptionParam()
 		//パラメータが1つだけ
 		if(__argc ==2)
 		{
-#ifdef _UNICODE
 			Command1 = CString(__wargv[1]);
-#else
-			Command1 = CString(__argv[1]);
-#endif //_UNICODE
 			Command1.Replace(_T("\""),_T(""));
 			Command1.TrimLeft();
 			Command1.TrimRight();
@@ -216,13 +216,8 @@ void CRedirectApp::InitCommandParamOptionParam()
 		//コマンドラインが3つ以上、0番は、EXEパス
 		else if(__argc==3)
 		{
-#ifdef _UNICODE
 			Command1 = CString(__wargv[1]);
 			Command2 = CString(__wargv[2]);
-#else
-			Command1 = CString(__argv[1]);
-			Command2 = CString(__argv[2]);
-#endif //_UNICODE
 			Command1.Replace(_T("\""),_T(""));
 			Command1.TrimLeft();
 			Command1.TrimRight();
@@ -296,15 +291,9 @@ void CRedirectApp::InitCommandParamOptionParam()
 		//コマンドラインが3つ以上、0番は、EXEパス
 		else if(__argc>3)
 		{
-#ifdef _UNICODE
 			Command1 = CString(__wargv[1]);
 			Command2 = CString(__wargv[2]);
 			Command3 = CString(__wargv[3]);
-#else
-			Command1 = CString(__argv[1]);
-			Command2 = CString(__argv[2]);
-			Command3 = CString(__argv[3]);
-#endif //_UNICODE
 			Command1.Replace(_T("\""),_T(""));
 			Command1.TrimLeft();
 			Command1.TrimRight();
@@ -514,31 +503,11 @@ void CRedirectApp::InitShowSettingDlg()
 		return;
 	}
 
-	CRedirectDlg dlg;
-	//表示制限されている場合
-	if(SettingConf.m_iKeyCombination)
-	{
-		strMsg.Format(_T("%s\n%s"),_T("この機能へのアクセスは、システム管理者により制限されています。 "),_T("This Feature has been disabled by your administrator."));
-		::MessageBox(NULL,strMsg,theApp.m_strThisAppName,MB_ICONERROR);
-		//Keyキーコンビネーションが一致した場合は、設定画面を表示する。
-		if(theApp.bValidKeyCombi())
-		{
-			m_pMainWnd = &dlg;
-			nResponse = dlg.DoModal();
-		}
-	}
-	else
-	{
-		m_pMainWnd = &dlg;
-		nResponse = dlg.DoModal();
-	}
 }
 
 BOOL CRedirectApp::InitInstance()
 {
-#ifdef _UNICODE
-		_wsetlocale(LC_ALL, _T("jpn")); 
-#endif
+	_wsetlocale(LC_ALL, _T("jpn")); 
 	INITCOMMONCONTROLSEX InitCtrls={0};
 	InitCtrls.dwSize = sizeof(InitCtrls);
 	InitCtrls.dwICC = ICC_WIN95_CLASSES;
@@ -625,10 +594,10 @@ BOOL CRedirectApp::InitInstance()
 	//Command Lineなし
 	else
 	{
-		//コマンドラインが無い場合で、EXEの名称がOpera.exe ThinBridgeSetting.exeの場合は
+		//コマンドラインが無い場合で、EXEの名称がThinBridgeSetting.exeの場合は
 		//設定画面を表示する。
 		if(m_strExeFileName.CompareNoCase(_T("ThinBridgeSetting.exe"))==0
-		||m_strExeFileName.CompareNoCase(_T("Opera.exe"))==0)
+		|| m_OptionParam.CompareNoCase(_T("/Config")) == 0)
 		{
 			this->InitShowSettingDlg();
 		}
@@ -741,17 +710,11 @@ BOOL CRedirectApp::IsResourceCAP_IE()
 		{
 			if(ResourceCAPConf.m_uiTab_MAX_ShowTime>0)
 			{
-				//strMsg.Format(_T("Internet Explorerで開いているタブ数(%d)が上限値(%d)に達しているため表示することが出来ません。\n不要なタブを閉じてから再度実行して下さい。\n※空白(about:blank)ページを除く"),dwTabCnt,ResourceCAPConf.m_uiTabCntMAX);
 				strMsg=ResourceCAPConf.m_strTab_MAX_Msg;
 				ShowTimeoutMessageBox(strMsg,strCaption,MB_OK|MB_ICONWARNING|MB_SYSTEMMODAL,ResourceCAPConf.m_uiTab_MAX_ShowTime*1000);
 			}
 			return TRUE;
 		}
-		//else if(dwTabCnt >= ResourceCAPConf.m_uiTabCntWARM)
-		//{
-		//	strMsg.Format(_T("警告：Internet Explorerで開いているタブ数(%d)が警告値(%d)に達しています。\n不要なタブを閉じて下さい。\n※空白(about:blank)ページを除く"),dwTabCnt,ResourceCAPConf.m_uiTabCntWARM);
-		//	ShowTimeoutMessageBox(strMsg,MB_OK|MB_ICONWARNING|MB_SYSTEMMODAL,3000);
-		//}
 	}
 	if(ResourceCAPConf.m_bMemUsageCAP)
 	{
@@ -769,17 +732,11 @@ BOOL CRedirectApp::IsResourceCAP_IE()
 		{
 			if(ResourceCAPConf.m_uiMem_MAX_ShowTime>0)
 			{
-				//strMsg.Format(_T("Internet Explorerの使用メモリ(%s)が上限値(%s)に達しているため表示することが出来ません。\n不要なタブを閉じてから再度実行して下さい。"),memorysize,LimitMemorysize);
 				strMsg=ResourceCAPConf.m_strMem_MAX_Msg;
 				ShowTimeoutMessageBox(strMsg,strCaption,MB_OK|MB_ICONWARNING|MB_SYSTEMMODAL,ResourceCAPConf.m_uiMem_MAX_ShowTime*1000);
 			}
 			return TRUE;
 		}
-		//else if(iMem >= ResourceCAPConf.m_uiMemWARM*1024*1024)
-		//{
-		//	strMsg.Format(_T("警告：Internet Explorerの使用メモリ(%s)が警告値(%s)に達しています。\n不要なタブを閉じてください。"),memorysize,WarmMemorysize);
-		//	ShowTimeoutMessageBox(strMsg,MB_OK|MB_ICONWARNING|MB_SYSTEMMODAL,3000);
-		//}
 	}
 	return bRet;
 }
@@ -851,8 +808,19 @@ void CRedirectApp::ShowPlusSettingDlgEx()
 	SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU16),_T("指定ブラウザー16 (ローカル)"), IDD_DLG_RD_CUSTOM,_T("URLリダイレクト設定"));
 	SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU17),_T("指定ブラウザー17 (ローカル)"), IDD_DLG_RD_CUSTOM,_T("URLリダイレクト設定"));
 	SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU18),_T("指定ブラウザー18 (ローカル)"), IDD_DLG_RD_CUSTOM,_T("URLリダイレクト設定"));
-	SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU19),_T("指定ブラウザー19 (ローカル)"), IDD_DLG_RD_CUSTOM,_T("URLリダイレクト設定"));
-	SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU20),_T("指定ブラウザー20 (ローカル)"), IDD_DLG_RD_CUSTOM,_T("URLリダイレクト設定"));
+
+	//Office365対応
+	if (PathFileExists(m_strO365ToolFullPath))
+	{
+		SettingDlg.AddPage(RUNTIME_CLASS(CDlgO365), _T("Chrome(自動切り換え)"), IDD_DLG_RD_O365, _T("URLリダイレクト設定"));
+		SettingDlg.AddPage(RUNTIME_CLASS(CDlgO365), _T("Office365 WebApps"), IDD_DLG_RD_O365, _T("URLリダイレクト設定"));
+	}
+	else
+	{
+		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU19), _T("指定ブラウザー19 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
+		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU20), _T("指定ブラウザー20 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
+	}
+
 	m_pMainWnd = &SettingDlg;
 
 	SettingDlg.DoModal();
@@ -2253,6 +2221,60 @@ int CRedirectApp::ExitInstance()
 	//theApp.WriteDebugTraceDateTime(_T("------------------"),DEBUG_LOG_TYPE_GE);
 	return CWinApp::ExitInstance();
 }
+struct LANGANDCODEPAGE
+{
+	WORD wLanguage;
+	WORD wCodePage;
+} *lpTranslate;
+
+CString CRedirectApp::GetVersionStr()
+{
+	CString strDLLPath;
+	strDLLPath = theApp.m_strExeFullPath;
+	CString strRet;
+	DWORD dwDummy = 0;
+	DWORD dwSize = 0;
+	DWORD dwMajar = 0;
+	DWORD dwMinor = 0;
+	DWORD dwBuild = 0;
+	DWORD dwPrivate = 0;
+
+	strRet = theApp.m_strThisAppName;
+	strRet += _T(" Version N/A");
+
+	dwSize = ::GetFileVersionInfoSize(strDLLPath, &dwDummy);
+	if (dwSize > 0)
+	{
+		PBYTE pData = new BYTE[dwSize];
+		memset(pData, 0x00, dwSize);
+		UINT TranslateLen = 0;
+		if (::GetFileVersionInfo(strDLLPath, 0, dwSize, pData))
+		{
+			VerQueryValue(pData, _T("\\VarFileInfo\\Translation"),
+				(LPVOID*)&lpTranslate, &TranslateLen);
+			void *pvVersion = { 0 };
+			UINT VersionLen = 0;
+
+			for (UINT i = 0; i < TranslateLen / sizeof(*lpTranslate); i++)
+			{
+				//コードページを指定
+				CString name;
+
+				name.Format(_T("\\StringFileInfo\\%04x%04x\\%s"),
+					lpTranslate[i].wLanguage,
+					lpTranslate[i].wCodePage, _T("FileVersion"));
+				if (VerQueryValue(pData, name, &pvVersion, &VersionLen))
+				{
+					CString strVersionStr((LPCTSTR)pvVersion);
+					strRet.Format(_T("%s Version %s"), theApp.m_strThisAppName, strVersionStr);
+					break;
+				}
+			}
+		}
+		delete[] pData;
+	}
+	return strRet;
+}
 
 typedef int (__stdcall * TMessageBoxTimeout)(HWND, LPCTSTR, LPCTSTR, UINT, WORD, DWORD);
 void CRedirectApp::ShowTimeoutMessageBox(LPCTSTR strMsg,LPCTSTR strCaption,int iType,int iTimeOut)
@@ -2270,11 +2292,7 @@ void CRedirectApp::ShowTimeoutMessageBox(LPCTSTR strMsg,LPCTSTR strCaption,int i
 	if(hModule)
 	{
 		TMessageBoxTimeout  MessageBoxTimeout;
-#ifdef _UNICODE
 		MessageBoxTimeout = (TMessageBoxTimeout) GetProcAddress(hModule, "MessageBoxTimeoutW");
-#else
-		MessageBoxTimeout = (TMessageBoxTimeout) GetProcAddress(hModule, "MessageBoxTimeoutA");
-#endif
 		if(MessageBoxTimeout)
 		{
 			MessageBoxTimeout(NULL, strMsg,
@@ -2313,30 +2331,12 @@ void CCRre::IEStart(CString& strURL)
 	HDDEDATA hDDEData={0};
 	DWORD m_dwDDEID = 0;
 
-	//CIEStatusHelper IEStatus;
-	//DWORD iTabCnt=0;
-	//iTabCnt = IEStatus.GetTabCnt();
-
-
-	//if(iTabCnt > 5)
-	//{
-	//	CString strErr;
-	//	strErr.Format(_T("コンピューターリソースの節約に御協力ください。タブを(%d)枚開いています。\n最大5枚のタブまでに制限されています。"),iTabCnt);
-	//	::MessageBox(NULL,strErr,_T("ThinBridge Script Error"),MB_SYSTEMMODAL|MB_ICONWARNING);
-	//	return;
-	//}
-
 
 	if(!DdeInitialize(&m_dwDDEID,(PFNCALLBACK)MakeProcInstance((FARPROC)DDECallback, ghInstance),
 		CBF_SKIP_ALLNOTIFICATIONS | APPCMD_CLIENTONLY, 0L) != DMLERR_NO_ERROR)
 	{
-#ifdef _UNICODE
-		hszService = DdeCreateStringHandle(m_dwDDEID, _T("IEXPLORE"), CP_WINUNICODE);
-		hszTopic = DdeCreateStringHandle(m_dwDDEID, _T("WWW_OpenURL"), CP_WINUNICODE);
-#else // _UNICODE
-		hszService = DdeCreateStringHandle(m_dwDDEID, _T("IEXPLORE"), CP_WINANSI);
-		hszTopic = DdeCreateStringHandle(m_dwDDEID, _T("WWW_OpenURL"), CP_WINANSI);
-#endif // _UNICODE
+		hszService = DdeCreateStringHandle(m_dwDDEID, _T("IEXPLORE"), CP_WINNEUTRAL);
+		hszTopic = DdeCreateStringHandle(m_dwDDEID, _T("WWW_OpenURL"), CP_WINNEUTRAL);
 		{
 			hConv = DdeConnect(m_dwDDEID, hszService, hszTopic, NULL);
 			DdeFreeStringHandle(m_dwDDEID, hszService);
@@ -2604,17 +2604,6 @@ void CCRre::CitrixXenAppStart(CString& strCommand)
 	if(strCitrixSelfService.IsEmpty())
 		strCitrixSelfService=_T("c:\\program files\\Citrix\\ICA Client\\SelfServicePlugin\\SelfService.exe");
 
-	//CString strCommandProc;
-	//strCommandProc.Format(_T("\"%s\" %s"),strCitrixSelfService,strCommand);
-	//if(::ShellExecute(NULL,NULL,strCommandProc,NULL,NULL, SW_SHOW) <= HINSTANCE(32))
-	//{
-	//	theApp.WriteDebugTraceDateTime(_T("CitrixXenAppStart Stage1 Failed."),DEBUG_LOG_TYPE_GE);
-	//	theApp.WriteDebugTraceDateTime(strCommandProc,DEBUG_LOG_TYPE_GE);
-	//}
-	//else
-	//	theApp.WriteDebugTraceDateTime(_T("CitrixXenAppStart Stage1 Success."),DEBUG_LOG_TYPE_GE);
-
-
 	CString IEcmd;
 	IEcmd=_T("");
 	IEcmd.Format(_T("\"%s\" %s"),strCitrixSelfService,strCommand);
@@ -2870,16 +2859,14 @@ void CCRre::Exec()
 		{
 			CString strAppNameEncode;
 			CString strURLEncode;
-			CString strAppNameUTF8;
-			strAppNameUTF8 = theApp.ConvertUTF8(m_strHorizon_AppName);
-			strAppNameEncode = theApp.URLEncode(strAppNameUTF8);
+			strAppNameEncode = theApp.ConvertUTF8_URLEncode(m_strHorizon_AppName);
 			if(this->m_strURL.IsEmpty())
 			{
 				strCommand.Format(_T("vmware-view://%s/%s"),m_strHorizon_ConnectionServerName,strAppNameEncode);
 			}
 			else
 			{
-				strURLEncode = theApp.URLEncode(m_strURL);
+				strURLEncode = theApp.ConvertUTF8_URLEncode(m_strURL);
 				strCommand.Format(_T("vmware-view://%s/%s?url=%s"),m_strHorizon_ConnectionServerName,strAppNameEncode,strURLEncode);
 			}
 			//theApp.WriteDebugTraceDateTime(_T("OnExec--START--VMwareViewStart(strCommand)"),DEBUG_LOG_TYPE_GE);

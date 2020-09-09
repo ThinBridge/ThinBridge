@@ -293,6 +293,8 @@ void STDMETHODCALLTYPE CBHORedirector::BeforeNavigate(LPDISPATCH pDisp, VARIANT*
 	{
 		bTopPage=TRUE;
 		m_strTopURL=strURL;
+		//topのみがQuickリダイレクトの対象なので初期化FALSEする。
+		m_bQuickRedirectExecFlg = FALSE;
 	}
 
 	//ESCが押されている場合は、リダイレクトをしない。
@@ -399,9 +401,22 @@ void STDMETHODCALLTYPE CBHORedirector::BeforeNavigate(LPDISPATCH pDisp, VARIANT*
 			if(pRedirectData)
 			{
 				*Cancel = TRUE;
-				this->Navigate_RedirectHTM(m_spWebBrowser,
-						pRedirectData->m_strExecType,pRedirectData->m_dRedirectPageAction,
+				if (m_RedirectList.m_bQuickRedirect == FALSE)
+				{
+					this->Navigate_RedirectHTM(m_spWebBrowser,
+						pRedirectData->m_strExecType, pRedirectData->m_dRedirectPageAction,
 						pRedirectData->m_dwCloseTimeout);
+				}
+				else//QuickRedirect
+				{
+					m_bQuickRedirectExecFlg = TRUE;
+					if (IsEmptyPage())
+					{
+						//m_spWebBrowser->Quit();
+						CloseTabWindow(pDisp);
+					}
+				}
+
 				for(int i=0;i<iColMax;i++)
 				{
 					pRedirectData=(CURLRedirectDataClass*)arr_RedirectBrowserHit.GetAt(i);
@@ -431,9 +446,12 @@ void STDMETHODCALLTYPE CBHORedirector::BeforeNavigate(LPDISPATCH pDisp, VARIANT*
 						if(pRedirectData)
 						{
 							*Cancel = TRUE;
-							this->Navigate_RedirectHTM(spWebBrowserFrame,
-									pRedirectData->m_strExecType,pRedirectData->m_dRedirectPageAction,
+							if (m_RedirectList.m_bQuickRedirect == FALSE)
+							{
+								this->Navigate_RedirectHTM(spWebBrowserFrame,
+									pRedirectData->m_strExecType, pRedirectData->m_dRedirectPageAction,
 									pRedirectData->m_dwCloseTimeout);
+							}
 							for(int i=0;i<iColMax;i++)
 							{
 								pRedirectData=(CURLRedirectDataClass*)arr_RedirectBrowserHit.GetAt(i);
@@ -486,6 +504,17 @@ void STDMETHODCALLTYPE CBHORedirector::NavigateComplete(LPDISPATCH pDisp, VARIAN
 	{
 		bTopPage=TRUE;
 		m_strTopURL=strURL;
+	}
+
+	//Quickリダイレクトされている場合は、この後の処理は行わない。
+	if (m_RedirectList.m_bQuickRedirect)
+	{
+		if (bTopPage)
+		{
+			//既にBeforeNavigateでリダイレクト済み
+			if (m_bQuickRedirectExecFlg)
+				return;
+		}
 	}
 
 	//ESCが押されている場合は、リダイレクトをしない。
@@ -610,6 +639,50 @@ void STDMETHODCALLTYPE CBHORedirector::NavigateComplete(LPDISPATCH pDisp, VARIAN
 		StartResourceCAPChk();
 	}
 	return;
+}
+BOOL CBHORedirector::IsEmptyPage()
+{
+	if (!m_spWebBrowser)
+		return FALSE;
+
+	CComPtr<IDispatch> pDispDocument;
+	m_spWebBrowser->get_Document(&pDispDocument);
+	CComQIPtr<IHTMLDocument2> spHTMLDocument2 = pDispDocument;
+	HRESULT	hr = { 0 };
+	if (spHTMLDocument2)
+	{
+		CComBSTR	bstrURL;
+		CString	strURL;
+		hr = spHTMLDocument2->get_URL(&bstrURL);
+		if (SUCCEEDED(hr))
+		{
+			strURL = bstrURL;
+		}
+		//ナビゲーションキャンセル系は、閉じる候補
+		if (strURL.Find(_T("res://")) >= 0)
+		{
+			if (strURL.Find(_T("/navcancl")) >= 0)
+			{
+				return TRUE;
+			}
+		}
+		CComPtr<IHTMLElementCollection> lpAllElements = NULL;
+		hr = spHTMLDocument2->get_all(&lpAllElements);
+		if (SUCCEEDED(hr) && lpAllElements != NULL)
+		{
+			long nCnt = 0L;
+			hr = lpAllElements->get_length(&nCnt);
+			if (SUCCEEDED(hr))
+			{
+				//10個以下は閉じる候補にする。Google検索からのJump先は6個
+				if (nCnt <= 10)
+				{
+					return TRUE;
+				}
+			}
+		}
+	}
+	return FALSE;
 }
 
 
@@ -744,152 +817,6 @@ STDMETHODIMP CBHORedirector::ResourceCAPChk(void)
 }
 
 
-//void STDMETHODCALLTYPE CBHORedirector::TitleChange(BSTR bstrText)
-//{
-//	return;
-//	if(!m_spWebBrowser)
-//		return;
-//
-//	CComPtr<IDispatch> spDispatch;
-//	HRESULT hr = m_spWebBrowser->QueryInterface(IID_IDispatch, (void**)&spDispatch);
-//	if (FAILED(hr))
-//		return;
-//
-//	CString strMsg;
-//	CString logmsg;
-//	DWORD dRet=0;
-//	//tab
-//	if(m_ResourceCAPConf.m_bTabCntCAP)
-//	{
-//		DWORD dwTabCnt=0;
-//		dwTabCnt = m_IEStatus.GetTabCnt();
-//		//Tab Limit
-//		if(dwTabCnt >= m_ResourceCAPConf.m_uiTabCntMAX)
-//		{
-//			logmsg.Format(_T("現在開いているタブ数(%d)が上限値(%d)に達しています。\n他の不要なタブを閉じてから再度実行して下さい。\n※空白(about:blank)ページを除く"),dwTabCnt,m_ResourceCAPConf.m_uiTabCntMAX);
-//			this->WriteDebugTraceDateTime(logmsg,DEBUG_LOG_TYPE_EX);
-//			//::MessageBox(NULL,logmsg,_T("ThinBridge"),MB_OK|MB_ICONERROR|MB_SYSTEMMODAL);
-//			SBUtil::ShowTimeoutMessageBox(logmsg,_T("ThinBridge"),MB_OK|MB_ICONERROR|MB_SYSTEMMODAL,2000);
-//			CloseTabWindow(spDispatch);
-//			return;
-//		}
-//		//else if(dwTabCnt >= m_ResourceCAPConf.m_uiTabCntWARM)
-//		//{
-//		//	logmsg.Format(_T("警告：現在開いているタブ数(%d)が警告値(%d)に達しています。\n他の不要なタブを閉じて下さい。\n※空白(about:blank)ページを除く"),dwTabCnt,m_ResourceCAPConf.m_uiTabCntWARM);
-//		//	this->WriteDebugTraceDateTime(logmsg,DEBUG_LOG_TYPE_EX);
-//		//	//::MessageBox(NULL,logmsg,_T("ThinBridge"),MB_OK|MB_ICONWARNING|MB_SYSTEMMODAL);
-//		//	SBUtil::ShowTimeoutMessageBox(logmsg,_T("ThinBridge"),MB_OK|MB_ICONWARNING|MB_SYSTEMMODAL,2000);
-//		//}
-//	}
-//
-//	if(m_ResourceCAPConf.m_bMemUsageCAP)
-//	{
-//		UINT iMem=0;
-//		iMem = m_IEStatus.GetMemoryUsageSize();
-//		TCHAR memorysize[24] = _T("");
-//		TCHAR WarmMemorysize[24] = _T("");
-//		TCHAR LimitMemorysize[24] = _T("");
-//		::StrFormatByteSize(iMem, memorysize, 24);
-//		::StrFormatByteSize(m_ResourceCAPConf.m_uiMemWARM*1024*1024,WarmMemorysize,24);
-//		::StrFormatByteSize(m_ResourceCAPConf.m_uiMemMAX*1024*1024,LimitMemorysize,24);
-//
-//		//Mem Limit
-//		if(iMem >= m_ResourceCAPConf.m_uiMemMAX*1024*1024)
-//		{
-//			logmsg.Format(_T("現在の使用メモリ(%s)が上限値(%s)に達しています。\n他の不要なタブを閉じてから再度実行して下さい。"),memorysize,LimitMemorysize);
-//			this->WriteDebugTraceDateTime(logmsg,DEBUG_LOG_TYPE_EX);
-//			//::MessageBox(NULL,logmsg,_T("ThinBridge"),MB_OK|MB_ICONERROR|MB_SYSTEMMODAL);
-//			SBUtil::ShowTimeoutMessageBox(logmsg,_T("ThinBridge"),MB_OK|MB_ICONERROR|MB_SYSTEMMODAL,2000);
-//			CloseTabWindow(spDispatch);
-//			return;
-//		}
-//		//else if(iMem >= m_ResourceCAPConf.m_uiMemWARM*1024*1024)
-//		//{
-//		//	logmsg.Format(_T("警告：現在の使用メモリ(%s)が警告値(%s)に達しています。\n他の不要なタブを閉じてください。"),memorysize,WarmMemorysize);
-//		//	this->WriteDebugTraceDateTime(logmsg,DEBUG_LOG_TYPE_EX);
-//		//	//::MessageBox(NULL,logmsg,_T("ThinBridge"),MB_OK|MB_ICONWARNING|MB_SYSTEMMODAL);
-//		//	SBUtil::ShowTimeoutMessageBox(logmsg,_T("ThinBridge"),MB_OK|MB_ICONWARNING|MB_SYSTEMMODAL,2000);
-//		//}
-//	}
-//	return;
-//}
-//void STDMETHODCALLTYPE CBHORedirector::NewWindow2(IDispatch **ppDisp,VARIANT_BOOL *Cancel)
-//{
-//	return;
-//}
-//void STDMETHODCALLTYPE CBHORedirector::NewWindow3(IDispatch **ppDisp,VARIANT_BOOL *Cancel,VARIANT Flags,BSTR bstrUrlContext,BSTR bstrUrl)
-//{
-//	return;
-//	if(!m_spWebBrowser)
-//		return;
-//
-//	CComPtr<IDispatch> spDispatch;
-//	HRESULT hr = m_spWebBrowser->QueryInterface(IID_IDispatch, (void**)&spDispatch);
-//	if (FAILED(hr))
-//		return;
-//
-//	CString strMsg;
-//	CString logmsg;
-//	DWORD dRet=0;
-//	//tab
-//	if(m_ResourceCAPConf.m_bTabCntCAP)
-//	{
-//		DWORD dwTabCnt=0;
-//		dwTabCnt = m_IEStatus.GetTabCnt();
-//		//Tab Limit
-//		if(dwTabCnt >= m_ResourceCAPConf.m_uiTabCntMAX-1)
-//		{
-//			logmsg.Format(_T("現在開いているタブ数(%d)が上限値(%d)に達しています。\n他の不要なタブを閉じてから再度実行して下さい。\n※空白(about:blank)ページを除く"),dwTabCnt,m_ResourceCAPConf.m_uiTabCntMAX);
-//			this->WriteDebugTraceDateTime(logmsg,DEBUG_LOG_TYPE_EX);
-//			//::MessageBox(NULL,logmsg,_T("ThinBridge"),MB_OK|MB_ICONERROR|MB_SYSTEMMODAL);
-//			SBUtil::ShowTimeoutMessageBox(logmsg,_T("ThinBridge"),MB_OK|MB_ICONERROR|MB_SYSTEMMODAL,2000);
-//			*Cancel =VARIANT_TRUE;
-//
-//			//CloseTabWindow(spDispatch);
-//			return;
-//		}
-//		//else if(dwTabCnt >= m_ResourceCAPConf.m_uiTabCntWARM)
-//		//{
-//		//	logmsg.Format(_T("警告：現在開いているタブ数(%d)が警告値(%d)に達しています。\n他の不要なタブを閉じて下さい。\n※空白(about:blank)ページを除く"),dwTabCnt,m_ResourceCAPConf.m_uiTabCntWARM);
-//		//	this->WriteDebugTraceDateTime(logmsg,DEBUG_LOG_TYPE_EX);
-//		//	//::MessageBox(NULL,logmsg,_T("ThinBridge"),MB_OK|MB_ICONWARNING|MB_SYSTEMMODAL);
-//		//	SBUtil::ShowTimeoutMessageBox(logmsg,_T("ThinBridge"),MB_OK|MB_ICONWARNING|MB_SYSTEMMODAL,2000);
-//		//}
-//	}
-//
-//	if(m_ResourceCAPConf.m_bMemUsageCAP)
-//	{
-//		UINT iMem=0;
-//		iMem = m_IEStatus.GetMemoryUsageSize();
-//		TCHAR memorysize[24] = _T("");
-//		TCHAR WarmMemorysize[24] = _T("");
-//		TCHAR LimitMemorysize[24] = _T("");
-//		::StrFormatByteSize(iMem, memorysize, 24);
-//		::StrFormatByteSize(m_ResourceCAPConf.m_uiMemWARM*1024*1024,WarmMemorysize,24);
-//		::StrFormatByteSize(m_ResourceCAPConf.m_uiMemMAX*1024*1024,LimitMemorysize,24);
-//
-//		//Mem Limit
-//		if(iMem >= m_ResourceCAPConf.m_uiMemMAX*1024*1024)
-//		{
-//			logmsg.Format(_T("現在の使用メモリ(%s)が上限値(%s)に達しています。\n他の不要なタブを閉じてから再度実行して下さい。"),memorysize,LimitMemorysize);
-//			this->WriteDebugTraceDateTime(logmsg,DEBUG_LOG_TYPE_EX);
-//			//::MessageBox(NULL,logmsg,_T("ThinBridge"),MB_OK|MB_ICONERROR|MB_SYSTEMMODAL);
-//			SBUtil::ShowTimeoutMessageBox(logmsg,_T("ThinBridge"),MB_OK|MB_ICONERROR|MB_SYSTEMMODAL,2000);
-//			*Cancel =VARIANT_TRUE;
-////			CloseTabWindow(spDispatch);
-//			return;
-//		}
-//		//else if(iMem >= m_ResourceCAPConf.m_uiMemWARM*1024*1024)
-//		//{
-//		//	logmsg.Format(_T("警告：現在の使用メモリ(%s)が警告値(%s)に達しています。\n他の不要なタブを閉じてください。"),memorysize,WarmMemorysize);
-//		//	this->WriteDebugTraceDateTime(logmsg,DEBUG_LOG_TYPE_EX);
-//		//	//::MessageBox(NULL,logmsg,_T("ThinBridge"),MB_OK|MB_ICONWARNING|MB_SYSTEMMODAL);
-//		//	SBUtil::ShowTimeoutMessageBox(logmsg,_T("ThinBridge"),MB_OK|MB_ICONWARNING|MB_SYSTEMMODAL,2000);
-//		//}
-//	}
-//	return;
-//}
-
 void CBHORedirector::CloseTabWindow(LPDISPATCH pDisp)
 {
 	if(m_spWebBrowser == NULL)return;
@@ -991,18 +918,7 @@ URLZONE_UNTRUSTED:
 	if(pIInternetSecurityManager == NULL)
 		return	false;
 
-#ifndef _UNICODE
-	setlocale( LC_ALL, "ja" );
-	size_t     length = strURL.GetLength();
-	wchar_t*   wc = new wchar_t[ length+1 ];
-	memset(wc,0x00,sizeof(wchar_t)*(length+1));
-	length = mbstowcs( wc, strURL, length+1 );
-	hr = pIInternetSecurityManager->MapUrlToZone(wc,&dwZone,0);
-	if(wc)
-		delete [] wc;
-#else //_UNICODE
 	hr = pIInternetSecurityManager->MapUrlToZone(strURL,&dwZone,0);
-#endif //_UNICODE
 
 	//独自の形式に変換する。
 	DWORD dwRet=ZONE_NA;
@@ -1033,9 +949,7 @@ void CBHORedirector::WriteDebugTraceDateTime(LPCTSTR msg,int iLogType,BOOL bForc
 		strWriteLine = strWriteLine.Mid(0,4000);
 		strWriteLine+=_T("..DIV..");
 	}
-#ifdef _UNICODE
 	_wsetlocale(LC_ALL, _T("jpn")); 
-#endif
 	OutputDebugString(strWriteLine);
 	//BOOL bFileWriteFlg=FALSE;
 	//switch(m_iAdvancedLogLevel)
@@ -1074,10 +988,7 @@ void CBHORedirector::WriteDebugTraceDateTime(LPCTSTR msg,int iLogType,BOOL bForc
 	//		fclose(fp);
 	//	}
 	//}
-#ifdef _UNICODE
 	_wsetlocale(LC_ALL, _T(""));
-#endif
-
 }
 
 void CBHORedirector::OpenAnotherBrowser(CURLRedirectDataClass* pRedirectData,CString strURL)
@@ -1235,45 +1146,3 @@ void CBHORedirector::Navigate_RedirectHTM(CComPtr<IWebBrowser2>  spWebBrowse,CSt
 		ATLASSERT(0);
 	}
 }
-//
-//typedef int (__stdcall * TMessageBoxTimeout)(HWND, LPCTSTR, LPCTSTR, UINT, WORD, DWORD);
-//void CBHORedirector::ShowTimeoutMessageBox(HWND hwnd,LPCTSTR strMsg,int iType,int iTimeOut)
-//{
-//	BOOL bFreeLibrary = FALSE;
-//	HMODULE hModule = {0};
-//	hModule = ::GetModuleHandle(_T("user32.dll"));
-//	if(!hModule)
-//	{
-//		hModule = ::LoadLibrary(_T("user32.dll"));
-//		if(hModule)
-//			bFreeLibrary = TRUE;
-//	}
-//
-//	if(hModule)
-//	{
-//		TMessageBoxTimeout  MessageBoxTimeout;
-//#ifdef _UNICODE
-//		MessageBoxTimeout = (TMessageBoxTimeout) GetProcAddress(hModule, "MessageBoxTimeoutW");
-//#else
-//		MessageBoxTimeout = (TMessageBoxTimeout) GetProcAddress(hModule, "MessageBoxTimeoutA");
-//#endif
-//		if(MessageBoxTimeout)
-//		{
-//			MessageBoxTimeout(hwnd, strMsg,
-//                       _T("ThinBridge Browser Helper"), iType, LANG_NEUTRAL,iTimeOut);
-//		}
-//		else
-//		{
-//			::MessageBox(hwnd,strMsg,_T("ThinBridge Browser Helper"),iType);
-//		}
-//		if(bFreeLibrary)
-//		{
-//
-//			FreeLibrary(hModule);
-//			bFreeLibrary=FALSE;
-//			hModule=NULL;
-//		}
-//
-//	}
-//}
-//

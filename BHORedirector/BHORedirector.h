@@ -233,6 +233,8 @@ public:
 //private:
     CComPtr<IWebBrowser2>  m_spWebBrowser;
 	BOOL m_fAdvised;
+	BOOL IsEmptyPage();
+	BOOL m_bQuickRedirectExecFlg;
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(BHORedirector), CBHORedirector)

@@ -136,6 +136,8 @@ BOOL CDlgETC::OnInitDialog()
 	BOOL bTraceLog = theApp.m_RedirectList.m_bTraceLog;
 	((CButton*)GetDlgItem(IDC_CHK_GLOVAL_TRACE))->SetCheck(bTraceLog?1:0);
 
+	BOOL bQuickRedirect = theApp.m_RedirectList.m_bQuickRedirect;
+	((CButton*)GetDlgItem(IDC_CHK_GLOVAL_QUICK))->SetCheck(bQuickRedirect ? 1 : 0);
 
 	int iKeyCombination=0;
 	iKeyCombination=theApp.SettingConf.m_iKeyCombination;
@@ -163,6 +165,10 @@ BOOL CDlgETC::OnInitDialog()
 	if((iKeyCombination&KEY_COMB_DOWN)==KEY_COMB_DOWN)
 		((CButton*)GetDlgItem(IDC_CHK_DOWN))->SetCheck(1);
 
+	CString strVersion;
+	strVersion = theApp.GetVersionStr();
+	GetDlgItem(IDC_STATIC_VER)->SetWindowText(strVersion);
+
 	return FALSE;
 }
 
@@ -179,6 +185,9 @@ LRESULT CDlgETC::Set_OK(WPARAM wParam, LPARAM lParam)
 
 	BOOL bUseScript = ((CButton*)GetDlgItem(IDC_CHK_GLOVAL_RULE_BASE))->GetCheck() == 1?TRUE:FALSE;
 	theApp.m_RedirectListSaveData.m_bUseScript = bUseScript;
+
+	BOOL bQuickRedirect = ((CButton*)GetDlgItem(IDC_CHK_GLOVAL_QUICK))->GetCheck() == 1 ? TRUE : FALSE;
+	theApp.m_RedirectListSaveData.m_bQuickRedirect = bQuickRedirect;
 
 	DWORD dSetting=0;
 	if(((CButton*)GetDlgItem(IDC_CHK_SHIFT))->GetCheck()==1)

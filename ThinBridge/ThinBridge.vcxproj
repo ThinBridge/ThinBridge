@@ -118,6 +118,9 @@
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
+    <PostBuildEvent>
+      <Command>copy $(OutDir)$(TargetName)$(TargetExt) $(OutDir)$(TargetName)Setting$(TargetExt) /Y</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ThinBridgeSettingRelease|Win32'">
     <ClCompile>
@@ -172,8 +175,7 @@
       <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <PostBuildEvent>
-      <Command>
-      </Command>
+      <Command>copy $(OutDir)$(TargetName)$(TargetExt) $(OutDir)$(TargetName)Setting$(TargetExt) /Y</Command>
     </PostBuildEvent>
     <CustomBuildStep>
       <Command>copy "$(SolutionDir)$(Configuration)\$(ProjectName).exe" "$(SolutionDir)$(Configuration)\ThinBridgeSetting.exe"

@@ -466,3 +466,21 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 };
+
+//Office365
+class CDlgO365 : public CDlgRuleBase
+{
+	DECLARE_DYNCREATE(CDlgO365)
+public:
+	CDlgO365() {};
+	virtual ~CDlgO365() {};
+	void OnEnableCtrl();
+protected:
+	virtual BOOL OnInitDialog();
+	LRESULT Set_OK(WPARAM wParam, LPARAM lParam);
+	afx_msg void OnBnClickedButtonFdlg();
+	afx_msg void OnBnClickedButtonOffice365();
+	afx_msg void OnBnClickedButtonReload();
+	DECLARE_MESSAGE_MAP()
+public:
+};

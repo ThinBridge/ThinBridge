@@ -400,6 +400,7 @@ public:
 	CAtlArray<intptr_t> m_arr_RedirectBrowser;
 	BOOL m_bURLOnly;
 	BOOL m_bUseScript;
+	BOOL m_bQuickRedirect;
 
 	CString m_strHitReasonAll;
 	CString m_strSettingFilePath;
@@ -427,6 +428,7 @@ public:
 		m_bURLOnly=FALSE;
 		m_gbTraceLog=FALSE;
 		m_bUseScript=FALSE;
+		m_bQuickRedirect = FALSE;
 	}
 
 	virtual ~CURLRedirectList()
@@ -438,6 +440,7 @@ public:
 		m_bURLOnly=FALSE;
 		m_gbTraceLog=FALSE;
 		m_bUseScript=FALSE;
+		m_bQuickRedirect = FALSE;
 		m_HitURLCache_Manager.Clear();
 		m_MapPassThroughURLs.RemoveAll();
 
@@ -670,6 +673,10 @@ public:
 					else if(strTempUpper.Find(_T("@INTRANET_ZONE"))==0)
 					{
 						dwZone |= INTRANET_ZONE;
+						if (strExecType == _T("GLOBAL"))
+						{
+							m_bQuickRedirect = TRUE;
+						}
 					}
 					else if(strTempUpper.Find(_T("@TRUSTED_ZONE"))==0)
 					{
@@ -1359,9 +1366,7 @@ class CResourceCAPData
 		}
 		
 		if(lPath==NULL)return;
-#ifdef _UNICODE
 		_wsetlocale(LC_ALL, _T("jpn")); 
-#endif
 		setlocale( LC_ALL, "Japanese" );  
 		CAtlStdioFile in;
 		HRESULT		hr={0};
@@ -1558,9 +1563,7 @@ class CResourceCAPData
 		}
 		in.Close();
 		setlocale( LC_ALL, "" );
-#ifdef _UNICODE
 		_wsetlocale(LC_ALL, _T(""));
-#endif
 	}
 	BOOL IsEnableCAP()
 	{

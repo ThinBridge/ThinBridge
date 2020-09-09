@@ -123,26 +123,10 @@ namespace SBUtil
 		LPCTSTR szEllipsis = _T("...");
 		if(strRet.GetLength() > iTabStrLen)
 		{
-#ifdef _UNICODE
 			if(bAppend)
 				strRet = str1.Mid(0,iTabStrLen) + szEllipsis;
 			else
 				strRet = str1.Mid(0,iTabStrLen) + szEllipsis;
-#else
-			int nIndex = size;
-			int i=0;
-			for(i = nIndex; i > 0; i--)
-			{
-				if(!::IsDBCSLeadByte(str[i - 1]))
-					break;
-			}
-			if((nIndex > 0) && (((nIndex - i) & 1) != 0))
-				--nIndex;// one step back
-			if(bAppend)
-				strRet = str1.Left(nIndex) + szEllipsis;
-			else
-				strRet = str1.Left(nIndex);
-#endif
 		}
 		return;
 	}
@@ -268,11 +252,7 @@ namespace SBUtil
 		if(hModule)
 		{
 			TMessageBoxTimeout  MessageBoxTimeout;
-#ifdef _UNICODE
 			MessageBoxTimeout = (TMessageBoxTimeout) GetProcAddress(hModule, "MessageBoxTimeoutW");
-#else
-			MessageBoxTimeout = (TMessageBoxTimeout) GetProcAddress(hModule, "MessageBoxTimeoutA");
-#endif
 			if(MessageBoxTimeout)
 			{
 				MessageBoxTimeout(NULL, strMsg,

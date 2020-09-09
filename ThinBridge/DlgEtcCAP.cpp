@@ -228,6 +228,10 @@ BOOL CDlgEtcCAP::OnInitDialog()
 		((CButton*)GetDlgItem(IDC_CHK_RIGHT))->SetCheck(1);
 	if((m_iKeyCombination&KEY_COMB_DOWN)==KEY_COMB_DOWN)
 		((CButton*)GetDlgItem(IDC_CHK_DOWN))->SetCheck(1);
+	CString strVersion;
+	strVersion = theApp.GetVersionStr();
+	GetDlgItem(IDC_STATIC_VER)->SetWindowText(strVersion);
+
 	return FALSE;
 }
 
