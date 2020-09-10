@@ -2334,3 +2334,97 @@ void CDlgO365::OnBnClickedButtonReload()
 	UpdateListCounter(&this->m_List);
 	UpdateListCounter(&this->m_List2);
 }
+
+//CDlgChromeSwitcher
+IMPLEMENT_DYNCREATE(CDlgChromeSwitcher, CDlgRuleBase)
+BEGIN_MESSAGE_MAP(CDlgChromeSwitcher, CDlgRuleBase)
+	ON_MESSAGE(ID_SETTING_OK, Set_OK)
+	ON_BN_CLICKED(IDC_CHECK_DISABLE, OnEnableCtrl)
+	ON_BN_CLICKED(IDC_BUTTON_FDLG, OnBnClickedButtonFdlg)
+	ON_BN_CLICKED(IDC_BUTTON_CSW, OnBnClickedButtonChromeSwitcher)
+END_MESSAGE_MAP()
+BOOL CDlgChromeSwitcher::OnInitDialog()
+{
+	if (theApp.m_RedirectList.m_pCustom19)
+	{
+		m_URD.Copy(theApp.m_RedirectList.m_pCustom19);
+	}
+	BOOL bRet = CDlgRuleBase::OnInitDialog();
+	SetDlgItemText(IDC_EDIT_LCB, m_URD.m_strExecExeFullPath);
+	OnEnableCtrl();
+	OnEnableCtrl();
+	if (bRet)
+	{
+		CIconHelper ICoHelper;
+		ICoHelper = theApp.LoadIcon(IDR_MAINFRAME);
+		m_Image.SetIcon(ICoHelper);
+	}
+	return bRet;
+}
+LRESULT CDlgChromeSwitcher::Set_OK(WPARAM wParam, LPARAM lParam)
+{
+	if (CDlgRuleBase::Set_OK(wParam, lParam) == 0)
+	{
+		CString strExePath;
+		GetDlgItemText(IDC_EDIT_LCB, strExePath);
+		strExePath.TrimLeft();
+		strExePath.TrimRight();
+		if (strExePath.IsEmpty())
+		{
+			if (!m_URDSave.m_bDisabled)
+			{
+				::MessageBox(this->m_hWnd, _T("[Chrome(自動切り換え)]\n指定ブラウザーのパスを設定して下さい。"), theApp.m_strThisAppName, MB_OK | MB_ICONERROR);
+				return 1;
+			}
+		}
+		m_URDSave.m_strExecExeFullPath = strExePath;
+		theApp.m_RedirectListSaveData.m_pCustom19->Copy(&m_URDSave);
+	}
+	return 0;
+}
+void CDlgChromeSwitcher::OnEnableCtrl()
+{
+	CDlgRuleBase::OnEnableCtrl();
+	BOOL bChk = FALSE;
+	bChk = ((CButton*)GetDlgItem(IDC_CHECK_DISABLE))->GetCheck() ? FALSE : TRUE;
+	GetDlgItem(IDC_EDIT_LCB)->EnableWindow(bChk);
+	GetDlgItem(IDC_BUTTON_FDLG)->EnableWindow(bChk);
+	if (PathFileExists(theApp.m_strChromeSwitcherFullPath))
+	{
+		GetDlgItem(IDC_BUTTON_CSW)->EnableWindow(TRUE);
+	}
+	else
+	{
+		GetDlgItem(IDC_BUTTON_CSW)->EnableWindow(FALSE);
+	}
+}
+void CDlgChromeSwitcher::OnBnClickedButtonFdlg()
+{
+	CString szFilter;
+	szFilter = _T("実行ファイル(*.exe)|*.exe|全てのファイル(*.*)|*.*||");
+	CFileDialog fileDlg(TRUE, NULL, NULL, OFN_HIDEREADONLY, szFilter, this);
+	CString strTitle;
+	strTitle = _T("開く");
+	fileDlg.m_ofn.lpstrTitle = strTitle.GetBuffer(0);
+	if (fileDlg.DoModal() == IDOK)
+	{
+		SetDlgItemText(IDC_EDIT_LCB, fileDlg.GetPathName());
+	}
+}
+void CDlgChromeSwitcher::OnBnClickedButtonChromeSwitcher()
+{
+	PROCESS_INFORMATION pi = { 0 };
+	STARTUPINFO si = { 0 };
+	si.cb = sizeof(si);
+	CreateProcess(NULL, (LPTSTR)(LPCTSTR)theApp.m_strChromeSwitcherFullPath, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi);
+	if (pi.hThread)
+	{
+		CloseHandle(pi.hThread);
+		pi.hThread = 0;
+	}
+	if (pi.hProcess)
+	{
+		CloseHandle(pi.hProcess);
+		pi.hProcess = 0;
+	}
+}

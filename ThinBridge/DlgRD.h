@@ -484,3 +484,19 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 };
+//IDD_DLG_RD_CH_SWITCH
+class CDlgChromeSwitcher : public CDlgRuleBase
+{
+	DECLARE_DYNCREATE(CDlgChromeSwitcher)
+public:
+	CDlgChromeSwitcher() {};
+	virtual ~CDlgChromeSwitcher() {};
+	void OnEnableCtrl();
+protected:
+	virtual BOOL OnInitDialog();
+	LRESULT Set_OK(WPARAM wParam, LPARAM lParam);
+	afx_msg void OnBnClickedButtonFdlg();
+	afx_msg void OnBnClickedButtonChromeSwitcher();
+	DECLARE_MESSAGE_MAP()
+public:
+};

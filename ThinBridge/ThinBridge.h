@@ -357,13 +357,6 @@ public:
 	DWORD m_IETabCnt;
 	BOOL EnumChildProc(HWND hwnd)
 	{
-		//DWORD dwProcessId = 0;
-		//::GetWindowThreadProcessId(hwnd, &dwProcessId);
-		//if(::GetCurrentProcessId() != dwProcessId)
-		//{
-		//	return	TRUE;
-		//}
-
 		int nRet=0;
 		BOOL	bRet=FALSE;
 		HRESULT	hr={0};
@@ -426,9 +419,6 @@ public:
 	{
 		if(!SafeWnd(hWnd))
 			return;
-		//TCHAR szTitle[130]={0};
-		//::GetWindowText(hWnd,szTitle,128);
-		//str=szTitle;return;
 
 		CString strText;
 		int nLen = ::GetWindowTextLength(hWnd);
@@ -453,13 +443,6 @@ public:
 
 	BOOL EnumWindowsProc(HWND hwnd)
 	{
-//		DWORD dwProcessId = 0;
-//		::GetWindowThreadProcessId(hwnd, &dwProcessId);
-//		if(::GetCurrentProcessId() != dwProcessId)
-//		{
-//			return	TRUE;
-//		}
-
 		int nRet=0;
 		TCHAR pszName[64]={0};
 		//ウインドウクラスの取得
@@ -498,11 +481,6 @@ public:
 	CString m_strCitrix_AppName;
 	CString m_strURL;
 	CString m_strCustomBrowserPath;
-
-//	CString m_strIE_FullPath;
-//	CString m_strFirefox_FullPath;
-//	CString m_strChrome_FullPath;
-
 
 public:
 	void IEStart(CString& strURL);
@@ -1593,7 +1571,189 @@ class CResourceCAPData
 	CString m_strReadSettingType;
 	//////////////////////////////////////////////////
 };
+#define LB_OK 0
+#define LB_NG 1
+#define LB_NG_NO_MSG 2
+class CLoopBlocker
+{
+public:
+	CLoopBlocker(){}
+	virtual ~CLoopBlocker(){}
+	CString m_strLogFilePath;
+	void SetFilePath(LPCTSTR lp)
+	{
+		m_strLogFilePath=lp;
+	}
+	UINT CheckLoop(LPCTSTR lp)
+	{
+		UINT uRet = LB_NG;
+		_wsetlocale(LC_ALL, _T("jpn"));
+		CString strCommand;
+		strCommand = lp;
+		CString strReason;
 
+		//データを読み込む
+		CStdioFile in;
+		CString strTemp;
+		CStringArray strArrayData;
+		int iLineCnt=0;
+		if (in.Open(m_strLogFilePath, CFile::modeRead | CFile::shareDenyWrite))
+		{
+			while (in.ReadString(strTemp))
+			{
+				strArrayData.Add(strTemp);
+				//先頭行
+				if(iLineCnt==0)
+				{
+					CStringArray strArray;
+					SBUtil::Split(strArray, strTemp, _T("\t"));
+					if (strArray.GetSize() >= 3)
+					{
+						//時間の経過をチェック
+						DWORD dwPrev = _ttoi(strArray.GetAt(1));
+						DWORD dwPCon = 0;
+						//前回との差
+						dwPCon = ::GetTickCount() - dwPrev;
+						//15秒以上間隔が空いていたらOK
+						if (dwPCon >= 15 * 1000)
+						{
+							uRet = LB_OK;
+							strReason = _T("There are more than 15 seconds between them");
+							break;
+						}
+					}
+				}
+				iLineCnt++;
+				//最大50件
+				if(iLineCnt>=50-1)
+					break;
+			}
+			in.Close();
+		}
+
+		//チェック開始
+		if(uRet!= LB_OK)
+		{
+			//ループ発生?
+			DWORD dwNow = ::GetTickCount();
+			int iCntMax = strArrayData.GetSize() - 1;
+			DWORD dwBase = 0;
+			dwBase = dwNow;
+			DWORD iCounter = 0;
+			DWORD iCounter4sec = 0;
+			DWORD dwPrev = 0;
+			DWORD dwPrevVal = 0;
+			DWORD dwPrevVal4 = 0;
+
+			uRet = LB_OK;
+			strReason = _T("System checks are clear");
+
+			for (int i = 0;i<iCntMax;i++)
+			{
+				CString strLine;
+				strLine = strArrayData.GetAt(i);
+				CStringArray strArray;
+				SBUtil::Split(strArray, strLine, _T("\t"));
+				if (strArray.GetSize() >= 3)
+				{
+					//時間の経過をチェック
+					dwPrev = _ttoi(strArray.GetAt(1));
+					DWORD dwPCon = 0;
+					//前回との差
+					dwPCon = dwBase - dwPrev;
+					//直前の結果がBLOCKの場合で間隔が3.5秒以内はNG
+					if (i == 0)
+					{
+						if (_T("BLOCK") == strArray.GetAt(2) || _T("BLOCK_NO_MSG") == strArray.GetAt(2))
+						{
+							//3.5秒以内
+							if (dwPCon <= 3.5 * 1000)
+							{
+								//メッセージ表示なし
+								uRet = LB_NG_NO_MSG;
+								strReason = _T("Already notified");
+								break;
+							}
+						}
+					}
+
+					//2秒以内に同じパラメータはNG
+					if (dwPCon <= 2 * 1000)
+					{
+						//前回の実行コマンドが同じ(同一URL、同一リダイレクト先ブラウザー)
+						if (strCommand == strArray.GetAt(0))
+						{
+							dwBase = dwPrev;
+							//2回目でNG
+							if (iCounter > 1)
+							{
+								uRet = LB_NG;
+								strReason = _T("Calling the same command within 2 seconds");
+								break;
+							}
+						}
+						//2秒以内の起動回数
+						iCounter++;
+						dwPrevVal = dwPrev;
+					}
+					//4秒以内
+					else if (dwPCon <= 4 * 1000)
+					{
+						dwBase = dwPrev;
+						iCounter4sec++;
+						dwPrevVal4 = dwPrev;
+					}
+					else
+						break;
+				}
+			}
+			//2秒以内の呼び出しが5回あったらNG
+			if (iCounter >= 5)
+			{
+				//12秒間で1秒以下の呼び出しが5回
+				DWORD dwPCon = 0;
+				dwPCon = dwNow - dwPrevVal;
+				if (dwPCon <= 12 * 1000)
+				{
+					uRet = LB_NG;
+					strReason = _T("Due to 5 calls of 2 seconds or less in 12 seconds");
+				}
+			}
+			//4秒以内の呼び出しが3回あったらNG
+			else if (iCounter4sec >= 3)
+			{
+				//12秒間で4秒以下の呼び出しが3回
+				DWORD dwPCon = 0;
+				dwPCon = dwNow - dwPrevVal4;
+				if (dwPCon <= 12 * 1000)
+				{
+					uRet = LB_NG;
+					strReason = _T("Due to 3 calls of 4 seconds or less in 12 seconds");
+				}
+			}
+		}
+		//ログに追記
+		CString strLine;
+		strLine.Format(_T("%s\t%d\t%s\t%s\n"), lp, ::GetTickCount(), uRet == LB_OK ? _T("OK") : uRet == LB_NG ? _T("BLOCK") : _T("BLOCK_NO_MSG"), strReason);
+		CStdioFile out;
+		if (out.Open(m_strLogFilePath, CFile::modeCreate | CFile::modeWrite | CFile::shareDenyNone))
+		{
+			//command1
+			CString strWriteData;
+			//先頭行書込み （直近の値）
+			out.WriteString(strLine);
+			for (int i = 0; i < strArrayData.GetSize(); i++)
+			{
+				strWriteData.Format(_T("%s\n"), strArrayData.GetAt(i));
+				out.WriteString(strWriteData);
+			}
+			out.Close();
+		}
+		_wsetlocale(LC_ALL, _T(""));
+		return uRet;
+	}
+
+};
 class CRedirectApp : public CWinApp
 {
 public:
@@ -1609,7 +1769,11 @@ public:
 	CString m_strTemplate_FileFullPath;
 	CString m_strTestConnect_FileFullPath;
 	CString m_strRDP_FileFullPath;
+	CString m_strChromeSwitcherFullPath;
 	CString m_strO365ToolFullPath;
+
+	CLoopBlocker m_LoopBlock;
+	CString m_strLoopBlockFilePath;
 
 	CString m_strRdp_Template_File_Data;
 

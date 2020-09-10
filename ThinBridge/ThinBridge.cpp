@@ -58,6 +58,11 @@ BOOL CRedirectApp::InitBaseFunction()
 	m_strO365ToolFullPath += szDir;
 	m_strO365ToolFullPath += _T("TBo365URLSyncSetting.exe");
 
+	m_strChromeSwitcherFullPath = szDrive;
+	m_strChromeSwitcherFullPath += szDir;
+	m_strChromeSwitcherFullPath += _T("TBChromeSwitcher.exe");
+
+
 	m_strLogFileFullPath = szDrive;
 	m_strLogFileFullPath += szDir;
 
@@ -109,6 +114,11 @@ BOOL CRedirectApp::InitBaseFunction()
 	m_strRDP_FileFullPath = strTempPath;
 	m_strRDP_FileFullPath += _T("\\");
 	m_strRDP_FileFullPath += theApp.m_strThisAppName;
+
+	//ループ防止
+	m_strLoopBlockFilePath=strTempPath;
+	m_strLoopBlockFilePath+= _T("\\STP.dat");
+	m_LoopBlock.SetFilePath(m_strLoopBlockFilePath);
 
 	//PIDを付加する。大量に同時起動されると、コンフリクトする可能性があるため。
 	//タイミングにより削除できないケースも考えられるため、下1桁の数字0-9を利用する事にする。
@@ -589,7 +599,34 @@ BOOL CRedirectApp::InitInstance()
 	//CommandLineがある場合。	
 	if(!m_CommandParam.IsEmpty())
 	{
-		this->InitExecCommandParam();
+		CString strCmd;
+		strCmd.Format(_T("%s %s"), m_CommandParam,m_OptionParam);
+		UINT uRet=0;
+		CString strLogMsg;
+		uRet = m_LoopBlock.CheckLoop(strCmd);
+		if(uRet == LB_OK)
+			this->InitExecCommandParam();
+		else if(uRet == LB_NG)
+		{
+			strLogMsg.Format(_T("%s\t%s\tLoopBlock"), m_OptionParam, m_CommandParam);
+			theApp.WriteDebugTraceDateTime(strLogMsg, DEBUG_LOG_LEVEL_OUTPUT_URL);
+			CString strSafeGuardMsg;
+			strSafeGuardMsg.Format(_T("%s\n%s"), _T("短時間に連続したブラウザー リダイレクトを検出しました。\n\nブラウザー リダイレクト処理を中断します。\n少し時間をおいてから再試行してください。"), m_CommandParam);
+			ShowTimeoutMessageBox(strSafeGuardMsg, m_strThisAppName, MB_OK | MB_ICONWARNING| MB_SYSTEMMODAL,10000);
+			return FALSE;
+		}
+		else if (uRet == LB_NG_NO_MSG)
+		{
+			strLogMsg.Format(_T("%s\t%s\tLoopBlock"), m_OptionParam, m_CommandParam);
+			theApp.WriteDebugTraceDateTime(strLogMsg, DEBUG_LOG_LEVEL_OUTPUT_URL);
+			return FALSE;
+		}
+		else
+		{
+			strLogMsg.Format(_T("%s\t%s\UnExpected"), m_OptionParam, m_CommandParam);
+			theApp.WriteDebugTraceDateTime(strLogMsg, DEBUG_LOG_LEVEL_OUTPUT_URL);
+			return FALSE;
+		}
 	}
 	//Command Lineなし
 	else
@@ -812,7 +849,7 @@ void CRedirectApp::ShowPlusSettingDlgEx()
 	//Office365対応
 	if (PathFileExists(m_strO365ToolFullPath))
 	{
-		SettingDlg.AddPage(RUNTIME_CLASS(CDlgO365), _T("Chrome(自動切り換え)"), IDD_DLG_RD_O365, _T("URLリダイレクト設定"));
+		SettingDlg.AddPage(RUNTIME_CLASS(CDlgChromeSwitcher), _T("Chrome(自動切り換え)"), IDD_DLG_RD_CH_SWITCH, _T("URLリダイレクト設定"));
 		SettingDlg.AddPage(RUNTIME_CLASS(CDlgO365), _T("Office365 WebApps"), IDD_DLG_RD_O365, _T("URLリダイレクト設定"));
 	}
 	else
