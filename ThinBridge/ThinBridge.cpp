@@ -54,6 +54,9 @@ BOOL CRedirectApp::InitBaseFunction()
 	m_strExeFileName = szFileName;
 	m_strExeFileName += szExt;
 
+	m_strExeFolderPath =szDrive;
+	m_strExeFolderPath += szDir;
+
 	m_strO365ToolFullPath = szDrive;
 	m_strO365ToolFullPath += szDir;
 	m_strO365ToolFullPath += _T("TBo365URLSyncSetting.exe");
@@ -593,6 +596,41 @@ BOOL CRedirectApp::InitInstance()
 		{
 			this->SettingConf.m_iSolutionType=PROC_LCustom;
 			this->SettingConf.m_strCustomBrowserPath=m_OptionParam;
+			//相対パスもOKにする。
+			if (!IsCustomInstalled(this->SettingConf.m_strCustomBrowserPath))
+			{
+				if (m_OptionParam.Find(_T("..\\")) >= 0
+					|| m_OptionParam.Find(_T("../")) >= 0
+					|| m_OptionParam.Find(_T(".\\")) >= 0
+					|| m_OptionParam.Find(_T("./")) >= 0
+					|| m_OptionParam.Find(_T("/")) >= 0
+					|| m_OptionParam.Find(_T("\\.\\")) >= 0
+					|| m_OptionParam.Find(_T("/./")) >= 0
+					|| m_OptionParam.Find(_T("\\..\\")) >= 0
+					|| m_OptionParam.Find(_T("/../")) >= 0
+					|| m_OptionParam.Find(_T("\\\\")) >= 0
+					)
+				{
+					//危険なパス設定はNG 空白にしてしまう。
+					this->SettingConf.m_strCustomBrowserPath.Empty();
+				}
+				else
+				{
+					//環境変数の解決
+					if (m_OptionParam.Find(_T("%")) >= 0)
+					{
+						TCHAR szExpPath[MAX_PATH * 2] = { 0 };
+						ExpandEnvironmentStrings(m_OptionParam, szExpPath, MAX_PATH * 2);
+						m_OptionParam = szExpPath;
+					}
+					//相対パスの場合
+					if (PathIsRelative(m_OptionParam))
+					{
+						this->SettingConf.m_strCustomBrowserPath = m_strExeFolderPath;
+						this->SettingConf.m_strCustomBrowserPath += m_OptionParam;
+					}
+				}
+			}
 		}
 	}
 

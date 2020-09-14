@@ -2137,7 +2137,6 @@ BOOL CDlgCU20::OnInitDialog()
 	BOOL bRet =CDlgRuleBase::OnInitDialog();
 	SetDlgItemText(IDC_EDIT_LCB,m_URD.m_strExecExeFullPath);
 	OnEnableCtrl();
-	OnEnableCtrl();
 	if(bRet)
 	{
 		CIconHelper ICoHelper;
@@ -2204,8 +2203,10 @@ BOOL CDlgO365::OnInitDialog()
 		m_URD.Copy(theApp.m_RedirectList.m_pCustom20);
 	}
 	BOOL bRet = CDlgRuleBase::OnInitDialog();
+	if (m_URD.m_strExecExeFullPath.IsEmpty())
+		m_URD.m_strExecExeFullPath = _T("TBChromeSwitcher.exe");
+
 	SetDlgItemText(IDC_EDIT_LCB, m_URD.m_strExecExeFullPath);
-	OnEnableCtrl();
 	OnEnableCtrl();
 	if (bRet)
 	{
@@ -2350,8 +2351,11 @@ BOOL CDlgChromeSwitcher::OnInitDialog()
 		m_URD.Copy(theApp.m_RedirectList.m_pCustom19);
 	}
 	BOOL bRet = CDlgRuleBase::OnInitDialog();
+
+	if(m_URD.m_strExecExeFullPath.IsEmpty())
+		m_URD.m_strExecExeFullPath=_T("TBChromeSwitcher.exe");
+
 	SetDlgItemText(IDC_EDIT_LCB, m_URD.m_strExecExeFullPath);
-	OnEnableCtrl();
 	OnEnableCtrl();
 	if (bRet)
 	{

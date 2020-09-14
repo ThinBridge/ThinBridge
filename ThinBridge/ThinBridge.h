@@ -1765,6 +1765,7 @@ public:
 
 	CString m_strExeFullPath;
 	CString m_strExeFileName;
+	CString m_strExeFolderPath;
 	CString m_strSetting_FileFullPath;
 	CString m_strTemplate_FileFullPath;
 	CString m_strTestConnect_FileFullPath;
