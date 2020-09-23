@@ -214,7 +214,7 @@ void CDlgRuleBase::PopUpdate(CListCtrl* ptrList)
 
 		if(Dlg.DoModal() == IDOK)
 		{
-			int iRet = DuplicateChk(&m_List,Dlg.m_strURL);
+			int iRet = DuplicateChk(ptrList,Dlg.m_strURL);
 			//èdï°Ç»ÇµÅB
 			if(iRet==-1 || iRet==iSelCount)
 			{
