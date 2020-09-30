@@ -578,6 +578,8 @@ public:
 	BOOL m_bTraceLog;
 	BOOL m_bUseScript;
 	BOOL m_bQuickRedirect;
+	BOOL m_bOffice365;
+	BOOL m_bTopURLOnly;
 
 	CURLRedirectDataClass* m_pRDP;
 	CURLRedirectDataClass* m_pVMW;
@@ -644,6 +646,8 @@ public:
 		m_pCustom19=NULL;
 		m_pCustom20=NULL;
 		m_bQuickRedirect = FALSE;
+		m_bOffice365=FALSE;
+		m_bTopURLOnly=FALSE;
 	}
 	virtual ~CURLRedirectList()
 	{
@@ -696,237 +700,285 @@ public:
 		m_pCustom19=NULL;
 		m_pCustom20=NULL;
 		m_bQuickRedirect = FALSE;
+		m_bOffice365=FALSE;
+		m_bTopURLOnly=FALSE;
 	}
-	void InitSaveDataAll()
+	void InitSaveDataAll(BOOL bOffice365=FALSE)
 	{
 		Clear();
 		CURLRedirectDataClass* pRedirectData=NULL;
 
-		pRedirectData = NULL;
-		pRedirectData = new CURLRedirectDataClass;
-		pRedirectData->m_bDisabled=FALSE;
-		pRedirectData->m_strExecType=_T("RDP");
-		pRedirectData->m_dwCloseTimeout=3;
-		m_pRDP=pRedirectData;
-		m_arr_RedirectBrowser.Add(pRedirectData);
+		//Office365‘Î‰ž
+		if (bOffice365)
+		{
+			m_bURLOnly=TRUE;
+			m_bQuickRedirect=TRUE;
+			m_bOffice365=TRUE;
+			m_bTopURLOnly=TRUE;
 
-		pRedirectData = NULL;
-		pRedirectData = new CURLRedirectDataClass;
-		pRedirectData->m_bDisabled=FALSE;
-		pRedirectData->m_strExecType=_T("VMWARE");
-		pRedirectData->m_dwCloseTimeout=3;
-		m_pVMW=pRedirectData;
-		m_arr_RedirectBrowser.Add(pRedirectData);
+			pRedirectData = NULL;
+			pRedirectData = new CURLRedirectDataClass;
+			pRedirectData->m_bDisabled = FALSE;
+			pRedirectData->m_bTopPageOnly = TRUE;
+			pRedirectData->m_strExecType = _T("Chrome");
+			pRedirectData->m_dwCloseTimeout = 3;
+			m_pChrome = pRedirectData;
+			m_arr_RedirectBrowser.Add(pRedirectData);
 
-		pRedirectData = NULL;
-		pRedirectData = new CURLRedirectDataClass;
-		pRedirectData->m_bDisabled=FALSE;
-		pRedirectData->m_strExecType=_T("CITRIX");
-		pRedirectData->m_dwCloseTimeout=3;
-		m_pCTX=pRedirectData;
-		m_arr_RedirectBrowser.Add(pRedirectData);
+			pRedirectData = NULL;
+			pRedirectData = new CURLRedirectDataClass;
+			pRedirectData->m_bDisabled = FALSE;
+			pRedirectData->m_bTopPageOnly = TRUE;
+			pRedirectData->m_strExecType = _T("CUSTOM18");
+			pRedirectData->m_dwCloseTimeout = 3;
+			m_pCustom18 = pRedirectData;
+			m_arr_RedirectBrowser.Add(pRedirectData);
 
-		pRedirectData = NULL;
-		pRedirectData = new CURLRedirectDataClass;
-		pRedirectData->m_bDisabled=FALSE;
-		pRedirectData->m_strExecType=_T("Firefox");
-		pRedirectData->m_dwCloseTimeout=3;
-		m_pFirefox=pRedirectData;
-		m_arr_RedirectBrowser.Add(pRedirectData);
+			pRedirectData = NULL;
+			pRedirectData = new CURLRedirectDataClass;
+			pRedirectData->m_bDisabled = FALSE;
+			pRedirectData->m_bTopPageOnly = TRUE;
+			pRedirectData->m_strExecType = _T("CUSTOM19");
+			pRedirectData->m_dwCloseTimeout = 3;
+			m_pCustom19 = pRedirectData;
+			m_arr_RedirectBrowser.Add(pRedirectData);
 
-		pRedirectData = NULL;
-		pRedirectData = new CURLRedirectDataClass;
-		pRedirectData->m_bDisabled=FALSE;
-		pRedirectData->m_strExecType=_T("Chrome");
-		pRedirectData->m_dwCloseTimeout=3;
-		m_pChrome=pRedirectData;
-		m_arr_RedirectBrowser.Add(pRedirectData);
+			pRedirectData = NULL;
+			pRedirectData = new CURLRedirectDataClass;
+			pRedirectData->m_bDisabled = FALSE;
+			pRedirectData->m_bTopPageOnly = TRUE;
+			pRedirectData->m_strExecType = _T("CUSTOM20");
+			pRedirectData->m_dwCloseTimeout = 3;
+			m_pCustom20 = pRedirectData;
+			m_arr_RedirectBrowser.Add(pRedirectData);
+		}
+		else
+		{
+			pRedirectData = NULL;
+			pRedirectData = new CURLRedirectDataClass;
+			pRedirectData->m_bDisabled=FALSE;
+			pRedirectData->m_strExecType=_T("RDP");
+			pRedirectData->m_dwCloseTimeout=3;
+			m_pRDP=pRedirectData;
+			m_arr_RedirectBrowser.Add(pRedirectData);
 
-		pRedirectData = NULL;
-		pRedirectData = new CURLRedirectDataClass;
-		pRedirectData->m_bDisabled=FALSE;
-		pRedirectData->m_strExecType=_T("Edge");
-		pRedirectData->m_dwCloseTimeout=3;
-		m_pEdge=pRedirectData;
-		m_arr_RedirectBrowser.Add(pRedirectData);
+			pRedirectData = NULL;
+			pRedirectData = new CURLRedirectDataClass;
+			pRedirectData->m_bDisabled=FALSE;
+			pRedirectData->m_strExecType=_T("VMWARE");
+			pRedirectData->m_dwCloseTimeout=3;
+			m_pVMW=pRedirectData;
+			m_arr_RedirectBrowser.Add(pRedirectData);
 
-		pRedirectData = NULL;
-		pRedirectData = new CURLRedirectDataClass;
-		pRedirectData->m_bDisabled=FALSE;
-		pRedirectData->m_strExecType=_T("IE");
-		pRedirectData->m_dwCloseTimeout=3;
-		m_pIE=pRedirectData;
-		m_arr_RedirectBrowser.Add(pRedirectData);
+			pRedirectData = NULL;
+			pRedirectData = new CURLRedirectDataClass;
+			pRedirectData->m_bDisabled=FALSE;
+			pRedirectData->m_strExecType=_T("CITRIX");
+			pRedirectData->m_dwCloseTimeout=3;
+			m_pCTX=pRedirectData;
+			m_arr_RedirectBrowser.Add(pRedirectData);
 
-		pRedirectData = NULL;
-		pRedirectData = new CURLRedirectDataClass;
-		pRedirectData->m_bDisabled=FALSE;
-		pRedirectData->m_strExecType=_T("Default");
-		pRedirectData->m_dwCloseTimeout=3;
-		m_pDefault=pRedirectData;
-		m_arr_RedirectBrowser.Add(pRedirectData);
+			pRedirectData = NULL;
+			pRedirectData = new CURLRedirectDataClass;
+			pRedirectData->m_bDisabled=FALSE;
+			pRedirectData->m_strExecType=_T("Firefox");
+			pRedirectData->m_dwCloseTimeout=3;
+			m_pFirefox=pRedirectData;
+			m_arr_RedirectBrowser.Add(pRedirectData);
 
+			pRedirectData = NULL;
+			pRedirectData = new CURLRedirectDataClass;
+			pRedirectData->m_bDisabled=FALSE;
+			pRedirectData->m_strExecType=_T("Chrome");
+			pRedirectData->m_dwCloseTimeout=3;
+			m_pChrome=pRedirectData;
+			m_arr_RedirectBrowser.Add(pRedirectData);
 
-		pRedirectData = NULL;
-		pRedirectData = new CURLRedirectDataClass;
-		pRedirectData->m_bDisabled=TRUE;
-		pRedirectData->m_strExecType=_T("CUSTOM01");
-		pRedirectData->m_dwCloseTimeout=3;
-		m_pCustom01=pRedirectData;
-		m_arr_RedirectBrowser.Add(pRedirectData);
+			pRedirectData = NULL;
+			pRedirectData = new CURLRedirectDataClass;
+			pRedirectData->m_bDisabled=FALSE;
+			pRedirectData->m_strExecType=_T("Edge");
+			pRedirectData->m_dwCloseTimeout=3;
+			m_pEdge=pRedirectData;
+			m_arr_RedirectBrowser.Add(pRedirectData);
 
-		pRedirectData = NULL;
-		pRedirectData = new CURLRedirectDataClass;
-		pRedirectData->m_bDisabled=TRUE;
-		pRedirectData->m_strExecType=_T("CUSTOM02");
-		pRedirectData->m_dwCloseTimeout=3;
-		m_pCustom02=pRedirectData;
-		m_arr_RedirectBrowser.Add(pRedirectData);
+			pRedirectData = NULL;
+			pRedirectData = new CURLRedirectDataClass;
+			pRedirectData->m_bDisabled=FALSE;
+			pRedirectData->m_strExecType=_T("IE");
+			pRedirectData->m_dwCloseTimeout=3;
+			m_pIE=pRedirectData;
+			m_arr_RedirectBrowser.Add(pRedirectData);
 
-		pRedirectData = NULL;
-		pRedirectData = new CURLRedirectDataClass;
-		pRedirectData->m_bDisabled=TRUE;
-		pRedirectData->m_strExecType=_T("CUSTOM03");
-		pRedirectData->m_dwCloseTimeout=3;
-		m_pCustom03=pRedirectData;
-		m_arr_RedirectBrowser.Add(pRedirectData);
+			pRedirectData = NULL;
+			pRedirectData = new CURLRedirectDataClass;
+			pRedirectData->m_bDisabled=FALSE;
+			pRedirectData->m_strExecType=_T("Default");
+			pRedirectData->m_dwCloseTimeout=3;
+			m_pDefault=pRedirectData;
+			m_arr_RedirectBrowser.Add(pRedirectData);
 
-		pRedirectData = NULL;
-		pRedirectData = new CURLRedirectDataClass;
-		pRedirectData->m_bDisabled=TRUE;
-		pRedirectData->m_strExecType=_T("CUSTOM04");
-		pRedirectData->m_dwCloseTimeout=3;
-		m_pCustom04=pRedirectData;
-		m_arr_RedirectBrowser.Add(pRedirectData);
+			pRedirectData = NULL;
+			pRedirectData = new CURLRedirectDataClass;
+			pRedirectData->m_bDisabled=TRUE;
+			pRedirectData->m_strExecType=_T("CUSTOM01");
+			pRedirectData->m_dwCloseTimeout=3;
+			m_pCustom01=pRedirectData;
+			m_arr_RedirectBrowser.Add(pRedirectData);
 
-		pRedirectData = NULL;
-		pRedirectData = new CURLRedirectDataClass;
-		pRedirectData->m_bDisabled=TRUE;
-		pRedirectData->m_strExecType=_T("CUSTOM05");
-		pRedirectData->m_dwCloseTimeout=3;
-		m_pCustom05=pRedirectData;
-		m_arr_RedirectBrowser.Add(pRedirectData);
+			pRedirectData = NULL;
+			pRedirectData = new CURLRedirectDataClass;
+			pRedirectData->m_bDisabled=TRUE;
+			pRedirectData->m_strExecType=_T("CUSTOM02");
+			pRedirectData->m_dwCloseTimeout=3;
+			m_pCustom02=pRedirectData;
+			m_arr_RedirectBrowser.Add(pRedirectData);
 
-		pRedirectData = NULL;
-		pRedirectData = new CURLRedirectDataClass;
-		pRedirectData->m_bDisabled=TRUE;
-		pRedirectData->m_strExecType=_T("CUSTOM06");
-		pRedirectData->m_dwCloseTimeout=3;
-		m_pCustom06=pRedirectData;
-		m_arr_RedirectBrowser.Add(pRedirectData);
+			pRedirectData = NULL;
+			pRedirectData = new CURLRedirectDataClass;
+			pRedirectData->m_bDisabled=TRUE;
+			pRedirectData->m_strExecType=_T("CUSTOM03");
+			pRedirectData->m_dwCloseTimeout=3;
+			m_pCustom03=pRedirectData;
+			m_arr_RedirectBrowser.Add(pRedirectData);
 
-		pRedirectData = NULL;
-		pRedirectData = new CURLRedirectDataClass;
-		pRedirectData->m_bDisabled=TRUE;
-		pRedirectData->m_strExecType=_T("CUSTOM07");
-		pRedirectData->m_dwCloseTimeout=3;
-		m_pCustom07=pRedirectData;
-		m_arr_RedirectBrowser.Add(pRedirectData);
+			pRedirectData = NULL;
+			pRedirectData = new CURLRedirectDataClass;
+			pRedirectData->m_bDisabled=TRUE;
+			pRedirectData->m_strExecType=_T("CUSTOM04");
+			pRedirectData->m_dwCloseTimeout=3;
+			m_pCustom04=pRedirectData;
+			m_arr_RedirectBrowser.Add(pRedirectData);
 
-		pRedirectData = NULL;
-		pRedirectData = new CURLRedirectDataClass;
-		pRedirectData->m_bDisabled=TRUE;
-		pRedirectData->m_strExecType=_T("CUSTOM08");
-		pRedirectData->m_dwCloseTimeout=3;
-		m_pCustom08=pRedirectData;
-		m_arr_RedirectBrowser.Add(pRedirectData);
+			pRedirectData = NULL;
+			pRedirectData = new CURLRedirectDataClass;
+			pRedirectData->m_bDisabled=TRUE;
+			pRedirectData->m_strExecType=_T("CUSTOM05");
+			pRedirectData->m_dwCloseTimeout=3;
+			m_pCustom05=pRedirectData;
+			m_arr_RedirectBrowser.Add(pRedirectData);
 
-		pRedirectData = NULL;
-		pRedirectData = new CURLRedirectDataClass;
-		pRedirectData->m_bDisabled=TRUE;
-		pRedirectData->m_strExecType=_T("CUSTOM09");
-		pRedirectData->m_dwCloseTimeout=3;
-		m_pCustom09=pRedirectData;
-		m_arr_RedirectBrowser.Add(pRedirectData);
+			pRedirectData = NULL;
+			pRedirectData = new CURLRedirectDataClass;
+			pRedirectData->m_bDisabled=TRUE;
+			pRedirectData->m_strExecType=_T("CUSTOM06");
+			pRedirectData->m_dwCloseTimeout=3;
+			m_pCustom06=pRedirectData;
+			m_arr_RedirectBrowser.Add(pRedirectData);
 
-		pRedirectData = NULL;
-		pRedirectData = new CURLRedirectDataClass;
-		pRedirectData->m_bDisabled=TRUE;
-		pRedirectData->m_strExecType=_T("CUSTOM10");
-		pRedirectData->m_dwCloseTimeout=3;
-		m_pCustom10=pRedirectData;
-		m_arr_RedirectBrowser.Add(pRedirectData);
+			pRedirectData = NULL;
+			pRedirectData = new CURLRedirectDataClass;
+			pRedirectData->m_bDisabled=TRUE;
+			pRedirectData->m_strExecType=_T("CUSTOM07");
+			pRedirectData->m_dwCloseTimeout=3;
+			m_pCustom07=pRedirectData;
+			m_arr_RedirectBrowser.Add(pRedirectData);
 
-		pRedirectData = NULL;
-		pRedirectData = new CURLRedirectDataClass;
-		pRedirectData->m_bDisabled=TRUE;
-		pRedirectData->m_strExecType=_T("CUSTOM11");
-		pRedirectData->m_dwCloseTimeout=3;
+			pRedirectData = NULL;
+			pRedirectData = new CURLRedirectDataClass;
+			pRedirectData->m_bDisabled=TRUE;
+			pRedirectData->m_strExecType=_T("CUSTOM08");
+			pRedirectData->m_dwCloseTimeout=3;
+			m_pCustom08=pRedirectData;
+			m_arr_RedirectBrowser.Add(pRedirectData);
 
-		m_pCustom11=pRedirectData;
-		m_arr_RedirectBrowser.Add(pRedirectData);
+			pRedirectData = NULL;
+			pRedirectData = new CURLRedirectDataClass;
+			pRedirectData->m_bDisabled=TRUE;
+			pRedirectData->m_strExecType=_T("CUSTOM09");
+			pRedirectData->m_dwCloseTimeout=3;
+			m_pCustom09=pRedirectData;
+			m_arr_RedirectBrowser.Add(pRedirectData);
 
-		pRedirectData = NULL;
-		pRedirectData = new CURLRedirectDataClass;
-		pRedirectData->m_bDisabled=TRUE;
-		pRedirectData->m_strExecType=_T("CUSTOM12");
-		pRedirectData->m_dwCloseTimeout=3;
-		m_pCustom12=pRedirectData;
-		m_arr_RedirectBrowser.Add(pRedirectData);
+			pRedirectData = NULL;
+			pRedirectData = new CURLRedirectDataClass;
+			pRedirectData->m_bDisabled=TRUE;
+			pRedirectData->m_strExecType=_T("CUSTOM10");
+			pRedirectData->m_dwCloseTimeout=3;
+			m_pCustom10=pRedirectData;
+			m_arr_RedirectBrowser.Add(pRedirectData);
 
-		pRedirectData = NULL;
-		pRedirectData = new CURLRedirectDataClass;
-		pRedirectData->m_bDisabled=TRUE;
-		pRedirectData->m_strExecType=_T("CUSTOM13");
-		pRedirectData->m_dwCloseTimeout=3;
-		m_pCustom13=pRedirectData;
-		m_arr_RedirectBrowser.Add(pRedirectData);
+			pRedirectData = NULL;
+			pRedirectData = new CURLRedirectDataClass;
+			pRedirectData->m_bDisabled=TRUE;
+			pRedirectData->m_strExecType=_T("CUSTOM11");
+			pRedirectData->m_dwCloseTimeout=3;
 
-		pRedirectData = NULL;
-		pRedirectData = new CURLRedirectDataClass;
-		pRedirectData->m_bDisabled=TRUE;
-		pRedirectData->m_strExecType=_T("CUSTOM14");
-		pRedirectData->m_dwCloseTimeout=3;
-		m_pCustom14=pRedirectData;
-		m_arr_RedirectBrowser.Add(pRedirectData);
+			m_pCustom11=pRedirectData;
+			m_arr_RedirectBrowser.Add(pRedirectData);
 
-		pRedirectData = NULL;
-		pRedirectData = new CURLRedirectDataClass;
-		pRedirectData->m_bDisabled=TRUE;
-		pRedirectData->m_strExecType=_T("CUSTOM15");
-		pRedirectData->m_dwCloseTimeout=3;
-		m_pCustom15=pRedirectData;
-		m_arr_RedirectBrowser.Add(pRedirectData);
+			pRedirectData = NULL;
+			pRedirectData = new CURLRedirectDataClass;
+			pRedirectData->m_bDisabled=TRUE;
+			pRedirectData->m_strExecType=_T("CUSTOM12");
+			pRedirectData->m_dwCloseTimeout=3;
+			m_pCustom12=pRedirectData;
+			m_arr_RedirectBrowser.Add(pRedirectData);
 
-		pRedirectData = NULL;
-		pRedirectData = new CURLRedirectDataClass;
-		pRedirectData->m_bDisabled=TRUE;
-		pRedirectData->m_strExecType=_T("CUSTOM16");
-		pRedirectData->m_dwCloseTimeout=3;
-		m_pCustom16=pRedirectData;
-		m_arr_RedirectBrowser.Add(pRedirectData);
+			pRedirectData = NULL;
+			pRedirectData = new CURLRedirectDataClass;
+			pRedirectData->m_bDisabled=TRUE;
+			pRedirectData->m_strExecType=_T("CUSTOM13");
+			pRedirectData->m_dwCloseTimeout=3;
+			m_pCustom13=pRedirectData;
+			m_arr_RedirectBrowser.Add(pRedirectData);
 
-		pRedirectData = NULL;
-		pRedirectData = new CURLRedirectDataClass;
-		pRedirectData->m_bDisabled=TRUE;
-		pRedirectData->m_strExecType=_T("CUSTOM17");
-		pRedirectData->m_dwCloseTimeout=3;
-		m_pCustom17=pRedirectData;
-		m_arr_RedirectBrowser.Add(pRedirectData);
+			pRedirectData = NULL;
+			pRedirectData = new CURLRedirectDataClass;
+			pRedirectData->m_bDisabled=TRUE;
+			pRedirectData->m_strExecType=_T("CUSTOM14");
+			pRedirectData->m_dwCloseTimeout=3;
+			m_pCustom14=pRedirectData;
+			m_arr_RedirectBrowser.Add(pRedirectData);
 
-		pRedirectData = NULL;
-		pRedirectData = new CURLRedirectDataClass;
-		pRedirectData->m_bDisabled=TRUE;
-		pRedirectData->m_strExecType=_T("CUSTOM18");
-		pRedirectData->m_dwCloseTimeout=3;
-		m_pCustom18=pRedirectData;
-		m_arr_RedirectBrowser.Add(pRedirectData);
+			pRedirectData = NULL;
+			pRedirectData = new CURLRedirectDataClass;
+			pRedirectData->m_bDisabled=TRUE;
+			pRedirectData->m_strExecType=_T("CUSTOM15");
+			pRedirectData->m_dwCloseTimeout=3;
+			m_pCustom15=pRedirectData;
+			m_arr_RedirectBrowser.Add(pRedirectData);
 
-		pRedirectData = NULL;
-		pRedirectData = new CURLRedirectDataClass;
-		pRedirectData->m_bDisabled=TRUE;
-		pRedirectData->m_strExecType=_T("CUSTOM19");
-		pRedirectData->m_dwCloseTimeout=3;
-		m_pCustom19=pRedirectData;
-		m_arr_RedirectBrowser.Add(pRedirectData);
+			pRedirectData = NULL;
+			pRedirectData = new CURLRedirectDataClass;
+			pRedirectData->m_bDisabled=TRUE;
+			pRedirectData->m_strExecType=_T("CUSTOM16");
+			pRedirectData->m_dwCloseTimeout=3;
+			m_pCustom16=pRedirectData;
+			m_arr_RedirectBrowser.Add(pRedirectData);
 
-		pRedirectData = NULL;
-		pRedirectData = new CURLRedirectDataClass;
-		pRedirectData->m_bDisabled=TRUE;
-		pRedirectData->m_strExecType=_T("CUSTOM20");
-		pRedirectData->m_dwCloseTimeout=3;
-		m_pCustom20=pRedirectData;
-		m_arr_RedirectBrowser.Add(pRedirectData);
+			pRedirectData = NULL;
+			pRedirectData = new CURLRedirectDataClass;
+			pRedirectData->m_bDisabled=TRUE;
+			pRedirectData->m_strExecType=_T("CUSTOM17");
+			pRedirectData->m_dwCloseTimeout=3;
+			m_pCustom17=pRedirectData;
+			m_arr_RedirectBrowser.Add(pRedirectData);
+
+			pRedirectData = NULL;
+			pRedirectData = new CURLRedirectDataClass;
+			pRedirectData->m_bDisabled=TRUE;
+			pRedirectData->m_strExecType=_T("CUSTOM18");
+			pRedirectData->m_dwCloseTimeout=3;
+			m_pCustom18=pRedirectData;
+			m_arr_RedirectBrowser.Add(pRedirectData);
+
+			pRedirectData = NULL;
+			pRedirectData = new CURLRedirectDataClass;
+			pRedirectData->m_bDisabled=TRUE;
+			pRedirectData->m_strExecType=_T("CUSTOM19");
+			pRedirectData->m_dwCloseTimeout=3;
+			m_pCustom19=pRedirectData;
+			m_arr_RedirectBrowser.Add(pRedirectData);
+
+			pRedirectData = NULL;
+			pRedirectData = new CURLRedirectDataClass;
+			pRedirectData->m_bDisabled=TRUE;
+			pRedirectData->m_strExecType=_T("CUSTOM20");
+			pRedirectData->m_dwCloseTimeout=3;
+			m_pCustom20=pRedirectData;
+			m_arr_RedirectBrowser.Add(pRedirectData);
+		}
 	}
 
 
@@ -991,6 +1043,18 @@ public:
 				out.WriteString(strTempFormat);
 				pstrOutPutData += strTempFormat;
 			}
+			if (m_bOffice365)
+			{
+				strTempFormat = _T("@TRUSTED_ZONE\n");
+				out.WriteString(strTempFormat);
+				pstrOutPutData += strTempFormat;
+			}
+			if (m_bTopURLOnly)
+			{
+				strTempFormat = _T("@UNTRUSTED_ZONE\n");
+				out.WriteString(strTempFormat);
+				pstrOutPutData += strTempFormat;
+			}
 			out.WriteString(_T("\n"));
 			pstrOutPutData+=_T("\n");
 
@@ -1025,13 +1089,26 @@ public:
 
 					}
 
-					if(ptr->m_bTopPageOnly)
+					//Office365
+					if (m_bOffice365)
 					{
-						strTempFormat=_T("@TOP_PAGE_ONLY\n");
-						out.WriteString(strTempFormat);
-						pstrOutPutData+=strTempFormat;
+						//GLOVAL‚Ìê‡
+						if (m_bTopURLOnly)
+						{
+							strTempFormat = _T("@TOP_PAGE_ONLY\n");
+							out.WriteString(strTempFormat);
+							pstrOutPutData += strTempFormat;
+						}
 					}
-
+					else
+					{
+						if(ptr->m_bTopPageOnly)
+						{
+							strTempFormat=_T("@TOP_PAGE_ONLY\n");
+							out.WriteString(strTempFormat);
+							pstrOutPutData+=strTempFormat;
+						}
+					}
 					strTempFormat.Format(_T("@REDIRECT_PAGE_ACTION:%d\n"),ptr->m_dRedirectPageAction);
 					out.WriteString(strTempFormat);
 					pstrOutPutData+=strTempFormat;
@@ -1096,12 +1173,13 @@ public:
 		}
 		return bRet;
 	}
-	void SetArrayData(LPCTSTR lPath)
+	void SetArrayData(LPCTSTR lPath, BOOL bOffice365 = FALSE)
 	{
 		if(lPath==NULL)return;
 		this->Clear();
 
-		InitSaveDataAll();
+		InitSaveDataAll(bOffice365);
+		m_bOffice365=bOffice365;
 
 		CStdioFile in;
 		//if(in.Open(lPath,CFile::modeRead|CFile::modeCreate|CFile::modeNoTruncate))
@@ -1178,62 +1256,64 @@ public:
 							m_bTraceLog=dRedirectPageAction==1?TRUE:FALSE;
 							m_bUseScript=dwCloseTimeout==1?TRUE:FALSE;
 							m_bQuickRedirect = (dwZone&INTRANET_ZONE) == INTRANET_ZONE ? TRUE : FALSE;
+							//m_bOffice365 = (dwZone&TRUSTED_ZONE) == TRUSTED_ZONE ? TRUE : FALSE;
+							m_bTopURLOnly = (dwZone&UNTRUSTED_ZONE) == UNTRUSTED_ZONE ? TRUE : FALSE;
 						}
-						else if(strExecType.CompareNoCase(_T("RDP"))==0)
+						else if(strExecType.CompareNoCase(_T("RDP"))==0 && m_pRDP)
 							m_pRDP->Copy(pRedirectData);
-						else if(strExecType.CompareNoCase(_T("VMWARE"))==0)
+						else if(strExecType.CompareNoCase(_T("VMWARE"))==0 && m_pVMW)
 							m_pVMW->Copy(pRedirectData);
-						else if(strExecType.CompareNoCase(_T("CITRIX"))==0)
+						else if(strExecType.CompareNoCase(_T("CITRIX"))==0 && m_pCTX)
 							m_pCTX->Copy(pRedirectData);
-						else if(strExecType.CompareNoCase(_T("Firefox"))==0)
+						else if(strExecType.CompareNoCase(_T("Firefox"))==0 && m_pFirefox)
 							m_pFirefox->Copy(pRedirectData);
-						else if(strExecType.CompareNoCase(_T("Chrome"))==0)
+						else if(strExecType.CompareNoCase(_T("Chrome"))==0 && m_pChrome)
 							m_pChrome->Copy(pRedirectData);
-						else if(strExecType.CompareNoCase(_T("Edge"))==0)
+						else if(strExecType.CompareNoCase(_T("Edge"))==0 && m_pEdge)
 							m_pEdge->Copy(pRedirectData);
-						else if(strExecType.CompareNoCase(_T("IE"))==0)
+						else if(strExecType.CompareNoCase(_T("IE"))==0 && m_pIE)
 							m_pIE->Copy(pRedirectData);
-						else if(strExecType.CompareNoCase(_T("Default"))==0)
+						else if(strExecType.CompareNoCase(_T("Default"))==0 && m_pDefault)
 							m_pDefault->Copy(pRedirectData);
-						else if(strExecType.CompareNoCase(_T("CUSTOM01"))==0)
+						else if(strExecType.CompareNoCase(_T("CUSTOM01"))==0 && m_pCustom01)
 							m_pCustom01->Copy(pRedirectData);
-						else if(strExecType.CompareNoCase(_T("CUSTOM02"))==0)
+						else if(strExecType.CompareNoCase(_T("CUSTOM02"))==0 && m_pCustom02)
 							m_pCustom02->Copy(pRedirectData);
-						else if(strExecType.CompareNoCase(_T("CUSTOM03"))==0)
+						else if(strExecType.CompareNoCase(_T("CUSTOM03"))==0 && m_pCustom03)
 							m_pCustom03->Copy(pRedirectData);
-						else if(strExecType.CompareNoCase(_T("CUSTOM04"))==0)
+						else if(strExecType.CompareNoCase(_T("CUSTOM04"))==0 && m_pCustom04)
 							m_pCustom04->Copy(pRedirectData);
-						else if(strExecType.CompareNoCase(_T("CUSTOM05"))==0)
+						else if(strExecType.CompareNoCase(_T("CUSTOM05"))==0 && m_pCustom05)
 							m_pCustom05->Copy(pRedirectData);
-						else if(strExecType.CompareNoCase(_T("CUSTOM06"))==0)
+						else if(strExecType.CompareNoCase(_T("CUSTOM06"))==0 && m_pCustom06)
 							m_pCustom06->Copy(pRedirectData);
-						else if(strExecType.CompareNoCase(_T("CUSTOM07"))==0)
+						else if(strExecType.CompareNoCase(_T("CUSTOM07"))==0 && m_pCustom07)
 							m_pCustom07->Copy(pRedirectData);
-						else if(strExecType.CompareNoCase(_T("CUSTOM08"))==0)
+						else if(strExecType.CompareNoCase(_T("CUSTOM08"))==0 && m_pCustom08)
 							m_pCustom08->Copy(pRedirectData);
-						else if(strExecType.CompareNoCase(_T("CUSTOM09"))==0)
+						else if(strExecType.CompareNoCase(_T("CUSTOM09"))==0 && m_pCustom09)
 							m_pCustom09->Copy(pRedirectData);
-						else if(strExecType.CompareNoCase(_T("CUSTOM10"))==0)
+						else if(strExecType.CompareNoCase(_T("CUSTOM10"))==0 && m_pCustom10)
 							m_pCustom10->Copy(pRedirectData);
-						else if(strExecType.CompareNoCase(_T("CUSTOM11"))==0)
+						else if(strExecType.CompareNoCase(_T("CUSTOM11"))==0 && m_pCustom11)
 							m_pCustom11->Copy(pRedirectData);
-						else if(strExecType.CompareNoCase(_T("CUSTOM12"))==0)
+						else if(strExecType.CompareNoCase(_T("CUSTOM12"))==0 && m_pCustom12)
 							m_pCustom12->Copy(pRedirectData);
-						else if(strExecType.CompareNoCase(_T("CUSTOM13"))==0)
+						else if(strExecType.CompareNoCase(_T("CUSTOM13"))==0 && m_pCustom13)
 							m_pCustom13->Copy(pRedirectData);
-						else if(strExecType.CompareNoCase(_T("CUSTOM14"))==0)
+						else if(strExecType.CompareNoCase(_T("CUSTOM14"))==0 && m_pCustom14)
 							m_pCustom14->Copy(pRedirectData);
-						else if(strExecType.CompareNoCase(_T("CUSTOM15"))==0)
+						else if(strExecType.CompareNoCase(_T("CUSTOM15"))==0 && m_pCustom15)
 							m_pCustom15->Copy(pRedirectData);
-						else if(strExecType.CompareNoCase(_T("CUSTOM16"))==0)
+						else if(strExecType.CompareNoCase(_T("CUSTOM16"))==0 && m_pCustom16)
 							m_pCustom16->Copy(pRedirectData);
-						else if(strExecType.CompareNoCase(_T("CUSTOM17"))==0)
+						else if(strExecType.CompareNoCase(_T("CUSTOM17"))==0 && m_pCustom17)
 							m_pCustom17->Copy(pRedirectData);
-						else if(strExecType.CompareNoCase(_T("CUSTOM18"))==0)
+						else if(strExecType.CompareNoCase(_T("CUSTOM18"))==0 && m_pCustom18)
 							m_pCustom18->Copy(pRedirectData);
-						else if(strExecType.CompareNoCase(_T("CUSTOM19"))==0)
+						else if(strExecType.CompareNoCase(_T("CUSTOM19"))==0 && m_pCustom19)
 							m_pCustom19->Copy(pRedirectData);
-						else if(strExecType.CompareNoCase(_T("CUSTOM20"))==0)
+						else if(strExecType.CompareNoCase(_T("CUSTOM20"))==0 && m_pCustom20)
 							m_pCustom20->Copy(pRedirectData);
 						else
 							;
@@ -1358,6 +1438,8 @@ public:
 						m_bTraceLog=dRedirectPageAction==1?TRUE:FALSE;
 						m_bUseScript=dwCloseTimeout==1?TRUE:FALSE;
 						m_bQuickRedirect = (dwZone&INTRANET_ZONE) == INTRANET_ZONE ? TRUE : FALSE;
+						//m_bOffice365 = (dwZone&TRUSTED_ZONE) == TRUSTED_ZONE ? TRUE : FALSE;
+						m_bTopURLOnly = (dwZone&UNTRUSTED_ZONE) == UNTRUSTED_ZONE ? TRUE : FALSE;
 					}
 					else if(strExecType.CompareNoCase(_T("RDP"))==0)
 						m_pRDP->Copy(pRedirectData);
@@ -1762,6 +1844,7 @@ public:
 
 	CString m_strProfileFullPath;
 	int m_iFeatureType;
+	BOOL m_bOffice365;
 
 	CString m_strExeFullPath;
 	CString m_strExeFileName;

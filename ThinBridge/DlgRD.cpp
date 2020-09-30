@@ -437,26 +437,33 @@ BOOL CDlgRuleBase::OnInitDialog()
 	else
 		((CButton*)GetDlgItem(IDC_CHECK_DISABLE))->SetCheck(0);
 
-	if(m_URD.m_bTopPageOnly)
-		((CButton*)GetDlgItem(IDC_CHECK_TOP_PAGE_ONLY))->SetCheck(1);
-	else
-		((CButton*)GetDlgItem(IDC_CHECK_TOP_PAGE_ONLY))->SetCheck(0);
-
-	for(int i=0;i<3;i++)
+	if(GetDlgItem(IDC_CHECK_TOP_PAGE_ONLY))
 	{
-		m_Combo.AddString(gRedirectPageActionList[i]);
+		if(m_URD.m_bTopPageOnly)
+			((CButton*)GetDlgItem(IDC_CHECK_TOP_PAGE_ONLY))->SetCheck(1);
+		else
+			((CButton*)GetDlgItem(IDC_CHECK_TOP_PAGE_ONLY))->SetCheck(0);
+	}
+	if(m_Combo.m_hWnd)
+	{
+		for(int i=0;i<3;i++)
+		{
+			m_Combo.AddString(gRedirectPageActionList[i]);
+		}
+
+		if( 0 <= m_URD.m_dRedirectPageAction && m_URD.m_dRedirectPageAction <= 2)
+			m_Combo.SetCurSel(m_URD.m_dRedirectPageAction);
+		else
+			m_Combo.SetCurSel(0);
 	}
 
-	if( 0 <= m_URD.m_dRedirectPageAction && m_URD.m_dRedirectPageAction <= 2)
-		m_Combo.SetCurSel(m_URD.m_dRedirectPageAction);
-	else
-		m_Combo.SetCurSel(0);
-
-	if( 1 <= m_URD.m_dwCloseTimeout && m_URD.m_dwCloseTimeout <= 60)
-		SetDlgItemInt(IDC_EDIT1,m_URD.m_dwCloseTimeout);
-	else
-		SetDlgItemInt(IDC_EDIT1,3);
-
+	if(GetDlgItem(IDC_EDIT1))
+	{
+		if( 1 <= m_URD.m_dwCloseTimeout && m_URD.m_dwCloseTimeout <= 60)
+			SetDlgItemInt(IDC_EDIT1,m_URD.m_dwCloseTimeout);
+		else
+			SetDlgItemInt(IDC_EDIT1,3);
+	}
 	if (GetDlgItem(IDC_CHECK_INTERNET))
 	{
 		((CButton*)GetDlgItem(IDC_CHECK_INTERNET))->SetCheck(0);
@@ -554,24 +561,31 @@ LRESULT CDlgRuleBase::Set_OK(WPARAM wParam, LPARAM lParam)
 	else
 		m_URDSave.m_bDisabled=FALSE;
 
-	if(((CButton*)GetDlgItem(IDC_CHECK_TOP_PAGE_ONLY))->GetCheck())
-		m_URDSave.m_bTopPageOnly=TRUE;
-	else
-		m_URDSave.m_bTopPageOnly=FALSE;
-
+	if(GetDlgItem(IDC_CHECK_TOP_PAGE_ONLY))
+	{
+		if(((CButton*)GetDlgItem(IDC_CHECK_TOP_PAGE_ONLY))->GetCheck())
+			m_URDSave.m_bTopPageOnly=TRUE;
+		else
+			m_URDSave.m_bTopPageOnly=FALSE;
+	}
 	int iID=0;
-	iID = m_Combo.GetCurSel();
-	if(0<=iID && iID<=2)
-		m_URDSave.m_dRedirectPageAction=iID;
-	else
-		m_URDSave.m_dRedirectPageAction=0;
+	if(m_Combo.m_hWnd)
+	{
+		iID = m_Combo.GetCurSel();
+		if(0<=iID && iID<=2)
+			m_URDSave.m_dRedirectPageAction=iID;
+		else
+			m_URDSave.m_dRedirectPageAction=0;
+	}
 
-	int iTimeout=GetDlgItemInt(IDC_EDIT1);
-	if( 1 <= iTimeout && iTimeout <= 60)
-		m_URDSave.m_dwCloseTimeout=iTimeout;
-	else
-		m_URDSave.m_dwCloseTimeout=3;
-
+	if(GetDlgItem(IDC_EDIT1))
+	{
+		int iTimeout=GetDlgItemInt(IDC_EDIT1);
+		if( 1 <= iTimeout && iTimeout <= 60)
+			m_URDSave.m_dwCloseTimeout=iTimeout;
+		else
+			m_URDSave.m_dwCloseTimeout=3;
+	}
 	int iZone=0;
 	if (GetDlgItem(IDC_CHECK_INTERNET))
 	{
@@ -786,6 +800,16 @@ BOOL CDlgCHR::OnInitDialog()
 	}
 	BOOL bRet =CDlgRuleBase::OnInitDialog();
 
+	//Office365に場合
+	if (theApp.m_bOffice365)
+	{
+		//TOPページのみは、非表示GLOVAL設定に移動（個別設定をやめ全体で設定する）
+		if (GetDlgItem(IDC_CHECK_TOP_PAGE_ONLY))
+		{
+			((CButton*)GetDlgItem(IDC_CHECK_TOP_PAGE_ONLY))->SetCheck(0);
+			((CButton*)GetDlgItem(IDC_CHECK_TOP_PAGE_ONLY))->ShowWindow(SW_HIDE);
+		}
+	}
 	if(bRet)
 	{
 		CIconHelper ICoHelper;
@@ -2203,6 +2227,13 @@ BOOL CDlgO365::OnInitDialog()
 		m_URD.Copy(theApp.m_RedirectList.m_pCustom20);
 	}
 	BOOL bRet = CDlgRuleBase::OnInitDialog();
+
+	//TOPページのみは、非表示GLOVAL設定に移動（個別設定をやめ全体で設定する）
+	if (GetDlgItem(IDC_CHECK_TOP_PAGE_ONLY))
+	{
+		((CButton*)GetDlgItem(IDC_CHECK_TOP_PAGE_ONLY))->SetCheck(0);
+		((CButton*)GetDlgItem(IDC_CHECK_TOP_PAGE_ONLY))->ShowWindow(SW_HIDE);
+	}
 	if (m_URD.m_strExecExeFullPath.IsEmpty())
 		m_URD.m_strExecExeFullPath = _T("TBChromeSwitcher.exe");
 
@@ -2211,7 +2242,7 @@ BOOL CDlgO365::OnInitDialog()
 	if (bRet)
 	{
 		CIconHelper ICoHelper;
-		ICoHelper = theApp.LoadIcon(IDR_MAINFRAME);
+		ICoHelper = theApp.LoadIcon(IDI_ICON_Chrome);
 		m_Image.SetIcon(ICoHelper);
 	}
 	return bRet;
@@ -2351,6 +2382,12 @@ BOOL CDlgChromeSwitcher::OnInitDialog()
 		m_URD.Copy(theApp.m_RedirectList.m_pCustom19);
 	}
 	BOOL bRet = CDlgRuleBase::OnInitDialog();
+	//TOPページのみは、非表示GLOVAL設定に移動（個別設定をやめ全体で設定する）
+	if (GetDlgItem(IDC_CHECK_TOP_PAGE_ONLY))
+	{
+		((CButton*)GetDlgItem(IDC_CHECK_TOP_PAGE_ONLY))->SetCheck(0);
+		((CButton*)GetDlgItem(IDC_CHECK_TOP_PAGE_ONLY))->ShowWindow(SW_HIDE);
+	}
 
 	if(m_URD.m_strExecExeFullPath.IsEmpty())
 		m_URD.m_strExecExeFullPath=_T("TBChromeSwitcher.exe");
@@ -2360,7 +2397,7 @@ BOOL CDlgChromeSwitcher::OnInitDialog()
 	if (bRet)
 	{
 		CIconHelper ICoHelper;
-		ICoHelper = theApp.LoadIcon(IDR_MAINFRAME);
+		ICoHelper = theApp.LoadIcon(IDI_ICON_Chrome);
 		m_Image.SetIcon(ICoHelper);
 	}
 	return bRet;
@@ -2431,4 +2468,413 @@ void CDlgChromeSwitcher::OnBnClickedButtonChromeSwitcher()
 		CloseHandle(pi.hProcess);
 		pi.hProcess = 0;
 	}
+}
+//////////////////////////////////////////////////////
+//CDlgDMZ
+IMPLEMENT_DYNCREATE(CDlgDMZ, CPropertyPage)
+void CDlgDMZ::DoDataExchange(CDataExchange* pDX)
+{
+	CPropertyPage::DoDataExchange(pDX);
+	//{{AFX_DATA_MAP(CDlgRuleBase)
+	DDX_Control(pDX, IDC_LIST1, m_List);
+	DDX_Control(pDX, IDC_STATIC_IMAGE, m_Image);
+	//}}AFX_DATA_MAP
+}
+
+BEGIN_MESSAGE_MAP(CDlgDMZ, CPropertyPage)
+	ON_MESSAGE(ID_SETTING_OK, Set_OK)
+	ON_BN_CLICKED(IDC_CHECK_DISABLE, OnEnableCtrl)
+
+	ON_WM_DESTROY()
+	ON_NOTIFY(NM_DBLCLK, IDC_LIST1, OnDblclkList1)
+	ON_BN_CLICKED(IDC_BUTTON_INS, OnButtonPopIns)
+	ON_BN_CLICKED(IDC_BUTTON_DEL, OnButtonPopDel)
+	ON_BN_CLICKED(IDC_BUTTON_UP, OnButtonUp)
+	ON_BN_CLICKED(IDC_BUTTON_DOWN, OnButtonDown)
+
+	//}}AFX_MSG_MAP
+	ON_BN_CLICKED(IDC_BUTTON_UPDATE, OnBnClickedButtonUpdate)
+	ON_BN_CLICKED(IDC_BUTTON_EDITALL, OnBnClickedButtonEditall)
+
+END_MESSAGE_MAP()
+BOOL CDlgDMZ::OnInitDialog()
+{
+	CPropertyPage::OnInitDialog();
+	if (theApp.m_RedirectList.m_pCustom18)
+	{
+		m_URD.Copy(theApp.m_RedirectList.m_pCustom18);
+	}
+
+	m_List.InsertColumn(URL, _T("共用URL ルール"), LVCFMT_LEFT, 700);
+	m_List.InsertColumn(ENABLE, _T("有効"), LVCFMT_CENTER, 40);
+	ListView_SetExtendedListViewStyle(m_List.m_hWnd, LVS_EX_FULLROWSELECT);
+
+	if (m_URD.m_bDisabled)
+		((CButton*)GetDlgItem(IDC_CHECK_DISABLE))->SetCheck(1);
+	else
+		((CButton*)GetDlgItem(IDC_CHECK_DISABLE))->SetCheck(0);
+
+	int iMaxCnt = 0;
+	BOOL bEnable = TRUE;
+	CString strLineData;
+
+	//対象List
+	iMaxCnt = m_URD.m_arr_URL.GetCount();
+	for (int i = 0; i < iMaxCnt; i++)
+	{
+		bEnable = TRUE;
+		strLineData = m_URD.m_arr_URL.GetAt(i);
+		int index = this->m_List.GetItemCount();
+		int iItem = this->m_List.InsertItem(index, _T(""));
+
+		if (strLineData.Find(_T("#")) == 0)
+		{
+			bEnable = FALSE;
+			strLineData = strLineData.Mid(1);
+		}
+		else if (strLineData.Find(_T(";")) == 0)
+		{
+			bEnable = FALSE;
+			strLineData = strLineData.Mid(1);
+		}
+		this->m_List.SetItemText(iItem, URL, strLineData);
+		this->m_List.SetItemText(iItem, ENABLE, bEnable ? _T("○") : _T("－"));
+	}
+
+	OnEnableCtrl();
+	UpdateListCounter(&this->m_List);
+	m_URD.m_strExecExeFullPath = _T("");
+	CIconHelper ICoHelper;
+	ICoHelper = theApp.LoadIcon(IDR_MAINFRAME);
+	m_Image.SetIcon(ICoHelper);
+	return TRUE;
+}
+LRESULT CDlgDMZ::Set_OK(WPARAM wParam, LPARAM lParam)
+{
+	m_URDSave.m_strExecType = m_URD.m_strExecType;
+
+	if (((CButton*)GetDlgItem(IDC_CHECK_DISABLE))->GetCheck())
+		m_URDSave.m_bDisabled = TRUE;
+	else
+		m_URDSave.m_bDisabled = FALSE;
+
+	CString strData;
+	CString strURL;
+	CString strTemp;
+	int iSelCount = -1;
+
+	m_URDSave.m_arr_URL.RemoveAll();
+	while ((iSelCount = m_List.GetNextItem(iSelCount, LVNI_ALL)) != -1)
+	{
+		strURL.Empty();
+		strTemp.Empty();
+		strURL = m_List.GetItemText(iSelCount, URL);
+		strURL.TrimLeft();
+		strURL.TrimRight();
+		strTemp = m_List.GetItemText(iSelCount, ENABLE);
+		strTemp.TrimLeft();
+		strTemp.TrimRight();
+
+		if (!strURL.IsEmpty())
+		{
+			if (strTemp == _T("－"))
+			{
+				strData = _T("#");
+				strData += strURL;
+			}
+			else
+			{
+				strData = strURL;
+			}
+			m_URDSave.m_arr_URL.Add(strData);
+		}
+	}
+
+	//除外対象List
+	m_URDSave.m_arr_URL_EX.RemoveAll();
+	m_URDSave.m_strExecExeFullPath = _T("");
+	theApp.m_RedirectListSaveData.m_pCustom18->Copy(&m_URDSave);
+	return 0;
+}
+void CDlgDMZ::OnEnableCtrl()
+{
+	BOOL bChk = FALSE;
+	bChk = ((CButton*)GetDlgItem(IDC_CHECK_DISABLE))->GetCheck() ? FALSE : TRUE;
+
+	if (GetDlgItem(IDC_LIST1))
+		GetDlgItem(IDC_LIST1)->EnableWindow(bChk);
+	if (GetDlgItem(IDC_BUTTON_INS))
+		GetDlgItem(IDC_BUTTON_INS)->EnableWindow(bChk);
+	if (GetDlgItem(IDC_BUTTON_DEL))
+		GetDlgItem(IDC_BUTTON_DEL)->EnableWindow(bChk);
+	if (GetDlgItem(IDC_BUTTON_UP))
+		GetDlgItem(IDC_BUTTON_UP)->EnableWindow(bChk);
+	if (GetDlgItem(IDC_BUTTON_DOWN))
+		GetDlgItem(IDC_BUTTON_DOWN)->EnableWindow(bChk);
+	if (GetDlgItem(IDC_BUTTON_UPDATE))
+		GetDlgItem(IDC_BUTTON_UPDATE)->EnableWindow(bChk);
+	if (GetDlgItem(IDC_BUTTON_EDITALL))
+		GetDlgItem(IDC_BUTTON_EDITALL)->EnableWindow(bChk);
+	return;
+}
+int CDlgDMZ::DuplicateChk(CListCtrl* ptrList, LPCTSTR sURL)
+{
+	int iRet = -1; //重複なしは、-1を返す。
+	CString strURL;
+	int iSelCount = -1;
+	while ((iSelCount = ptrList->GetNextItem(iSelCount, LVNI_ALL)) != -1)
+	{
+		strURL.Empty();
+		strURL = ptrList->GetItemText(iSelCount, URL);
+		if (strURL == sURL)
+		{
+			iRet = iSelCount;
+			break;
+		}
+	}
+	return iRet;
+}
+void CDlgDMZ::UpdateListCounter(CListCtrl* ptrList)
+{
+	CString str;
+	str.Format(_T("%d件"), ptrList->GetItemCount());
+	if (ptrList == &this->m_List)
+	{
+		SetDlgItemText(IDC_STATIC_CNT, str);
+	}
+}
+void CDlgDMZ::PopIns(CListCtrl* ptrList)
+{
+	CDlgRDEdit Dlg(this);
+	Dlg.m_bEnable = TRUE;
+
+	if (Dlg.DoModal() == IDOK)
+	{
+		int iRet = DuplicateChk(ptrList, Dlg.m_strURL);
+		//重複なし。
+		if (iRet == -1)
+		{
+			int index = ptrList->GetItemCount();
+			int iItem = ptrList->InsertItem(index, _T(""));
+			CString strTemp;
+			ptrList->SetItemText(iItem, URL, Dlg.m_strURL);
+			strTemp = Dlg.m_bEnable ? _T("○") : _T("－");
+			ptrList->SetItemText(iItem, ENABLE, strTemp);
+			ptrList->SetItemState(iItem, LVIS_SELECTED, LVIS_SELECTED);
+		}
+		else
+		{
+			ptrList->SetFocus();
+			ptrList->SetItemState(iRet, LVIS_SELECTED, LVIS_SELECTED);
+			CString strErrMsg;
+			strErrMsg.Format(_T("このURLは、既に登録されています。\n%d行目\n%s\n"), iRet + 1, Dlg.m_strURL);
+			::MessageBox(this->m_hWnd, strErrMsg, theApp.m_strThisAppName, MB_OK | MB_ICONWARNING);
+		}
+	}
+	UpdateListCounter(ptrList);
+}
+void CDlgDMZ::PopDel(CListCtrl* ptrList)
+{
+	int iSelCount = 0;
+	iSelCount = ptrList->GetSelectedCount();
+	if (iSelCount == 0)
+		return;
+
+	int nItemCount = ptrList->GetItemCount();
+	while (nItemCount--)
+	{
+		if (ptrList->GetItemState(nItemCount, LVIS_SELECTED) == LVIS_SELECTED)
+		{
+			ptrList->DeleteItem(nItemCount);
+			{
+				int nItemNowCount = ptrList->GetItemCount();
+				if (nItemNowCount == nItemCount)
+					ptrList->SetItemState(nItemCount - 1, LVIS_SELECTED, LVIS_SELECTED);
+				else if (nItemNowCount > 0)
+					ptrList->SetItemState(nItemCount, LVIS_SELECTED, LVIS_SELECTED);
+				break;
+			}
+		}
+	}
+	UpdateListCounter(ptrList);
+}
+
+void CDlgDMZ::PopUpdate(CListCtrl* ptrList)
+{
+	int iSelCount = 0;
+	iSelCount = ptrList->GetSelectedCount();
+	if (iSelCount != 1)
+		return;
+	iSelCount = ptrList->GetNextItem(-1, LVNI_ALL | LVNI_SELECTED);
+	if (iSelCount != -1)
+	{
+		CDlgRDEdit Dlg(this);
+		BOOL bEnable = FALSE;
+		CString strURL;
+		CString strTemp;
+		strURL = ptrList->GetItemText(iSelCount, URL);
+		strTemp = ptrList->GetItemText(iSelCount, ENABLE);
+		bEnable = strTemp == _T("○") ? TRUE : FALSE;
+
+		Dlg.m_strURL = strURL;
+		Dlg.m_bEnable = bEnable;
+
+		if (Dlg.DoModal() == IDOK)
+		{
+			int iRet = DuplicateChk(ptrList, Dlg.m_strURL);
+			//重複なし。
+			if (iRet == -1 || iRet == iSelCount)
+			{
+				CString strTemp;
+				ptrList->SetItemText(iSelCount, URL, Dlg.m_strURL);
+				strTemp = Dlg.m_bEnable ? _T("○") : _T("－");
+				ptrList->SetItemText(iSelCount, ENABLE, strTemp);
+			}
+			else
+			{
+				ptrList->SetFocus();
+				ptrList->SetItemState(iRet, LVIS_SELECTED, LVIS_SELECTED);
+				CString strErrMsg;
+				strErrMsg.Format(_T("このURLは、既に登録されています。\n%d行目\n%s\n"), iRet + 1, Dlg.m_strURL);
+				::MessageBox(this->m_hWnd, strErrMsg, theApp.m_strThisAppName, MB_OK | MB_ICONWARNING);
+			}
+		}
+	}
+	UpdateListCounter(ptrList);
+}
+void CDlgDMZ::PopEditAll(CListCtrl* ptrList)
+{
+	CString strData;
+
+	CString strURL;
+	CString strTemp;
+	int iSelCount = -1;
+	while ((iSelCount = ptrList->GetNextItem(iSelCount, LVNI_ALL)) != -1)
+	{
+		strURL.Empty();
+		strTemp.Empty();
+		strURL = ptrList->GetItemText(iSelCount, URL);
+		strTemp = ptrList->GetItemText(iSelCount, ENABLE);
+		if (strTemp == _T("－"))
+		{
+			strData += _T("#");
+		}
+		strData += strURL;
+		strData += _T("\r\n");
+	}
+
+	CDlgEditURLML Dlg;
+	if (ptrList == &m_List)
+		Dlg.m_strTitle = _T("【共用URL ルール】 一括登録・編集");
+
+	Dlg.m_strEditData = strData;
+	if (IDOK == Dlg.DoModal())
+	{
+		//一旦全部消す。
+		ptrList->DeleteAllItems();
+		int iMaxCnt = 0;
+		iMaxCnt = Dlg.m_strArrayResult.GetCount();
+		CString strLineData;
+		for (int i = 0; i < iMaxCnt; i++)
+		{
+			strLineData = Dlg.m_strArrayResult.GetAt(i);
+			int index = ptrList->GetItemCount();
+			int iItem = ptrList->InsertItem(index, _T(""));
+			CString strLowString;
+			ptrList->SetItemText(iItem, URL, strLineData);
+			strLowString = Dlg.m_strArrayResult_Enable.GetAt(i);
+			ptrList->SetItemText(iItem, ENABLE, strLowString);
+		}
+	}
+	UpdateListCounter(ptrList);
+}
+void CDlgDMZ::PopUp(CListCtrl* ptrList)
+{
+	int iSelCount = 0;
+	int iAfterPos = 0;
+	iSelCount = ptrList->GetSelectedCount();
+	if (iSelCount != 1)
+		return;
+	iSelCount = ptrList->GetNextItem(-1, LVNI_ALL | LVNI_SELECTED);
+	if (iSelCount == -1)
+		return;
+
+	CString strURL;
+	CString strEnable;
+	strURL = ptrList->GetItemText(iSelCount, URL);
+	strEnable = ptrList->GetItemText(iSelCount, ENABLE);
+	iAfterPos = iSelCount - 1;
+	if (iAfterPos < 0)
+	{
+		ptrList->SetItemState(0, LVIS_SELECTED, LVIS_SELECTED);
+		ptrList->SetFocus();
+		return;
+	}
+	ptrList->DeleteItem(iSelCount);
+	int iItem = ptrList->InsertItem(iAfterPos, _T(""));
+	ptrList->SetItemText(iItem, URL, strURL);
+	ptrList->SetItemText(iItem, ENABLE, strEnable);
+	ptrList->SetItemState(iAfterPos, LVIS_SELECTED, LVIS_SELECTED);
+	ptrList->SetFocus();
+}
+void CDlgDMZ::PopDown(CListCtrl* ptrList)
+{
+	int iSelCount = 0;
+	int iAfterPos = 0;
+	iSelCount = ptrList->GetSelectedCount();
+	if (iSelCount != 1)
+		return;
+	iSelCount = ptrList->GetNextItem(-1, LVNI_ALL | LVNI_SELECTED);
+	if (iSelCount == -1)
+		return;
+
+	CString strURL;
+	CString strEnable;
+	strURL = ptrList->GetItemText(iSelCount, URL);
+	strEnable = ptrList->GetItemText(iSelCount, ENABLE);
+	iAfterPos = iSelCount + 1;
+	if (iAfterPos >= ptrList->GetItemCount())
+	{
+		ptrList->SetItemState(iSelCount, LVIS_SELECTED, LVIS_SELECTED);
+		ptrList->SetFocus();
+		return;
+	}
+	ptrList->DeleteItem(iSelCount);
+	int iItem = ptrList->InsertItem(iAfterPos, _T(""));
+	ptrList->SetItemText(iItem, URL, strURL);
+	ptrList->SetItemText(iItem, ENABLE, strEnable);
+	ptrList->SetItemState(iAfterPos, LVIS_SELECTED, LVIS_SELECTED);
+	ptrList->SetFocus();
+}
+
+void CDlgDMZ::OnButtonPopIns()
+{
+	PopIns(&m_List);
+}
+
+void CDlgDMZ::OnButtonPopDel()
+{
+	PopDel(&m_List);
+}
+
+void CDlgDMZ::OnDblclkList1(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	PopUpdate(&m_List);
+	*pResult = 0;
+}
+void CDlgDMZ::OnButtonUp()
+{
+	PopUp(&m_List);
+}
+void CDlgDMZ::OnButtonDown()
+{
+	PopDown(&m_List);
+}
+void CDlgDMZ::OnBnClickedButtonUpdate()
+{
+	PopUpdate(&m_List);
+}
+void CDlgDMZ::OnBnClickedButtonEditall()
+{
+	PopEditAll(&m_List);
 }

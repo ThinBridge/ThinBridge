@@ -401,6 +401,8 @@ public:
 	BOOL m_bURLOnly;
 	BOOL m_bUseScript;
 	BOOL m_bQuickRedirect;
+	BOOL m_bOffice365;
+	BOOL m_bTopURLOnly;
 
 	CString m_strHitReasonAll;
 	CString m_strSettingFilePath;
@@ -429,6 +431,8 @@ public:
 		m_gbTraceLog=FALSE;
 		m_bUseScript=FALSE;
 		m_bQuickRedirect = FALSE;
+		m_bOffice365=FALSE;
+		m_bTopURLOnly=FALSE;
 	}
 
 	virtual ~CURLRedirectList()
@@ -441,6 +445,8 @@ public:
 		m_gbTraceLog=FALSE;
 		m_bUseScript=FALSE;
 		m_bQuickRedirect = FALSE;
+		m_bOffice365=FALSE;
+		m_bTopURLOnly=FALSE;
 		m_HitURLCache_Manager.Clear();
 		m_MapPassThroughURLs.RemoveAll();
 
@@ -681,6 +687,12 @@ public:
 					else if(strTempUpper.Find(_T("@TRUSTED_ZONE"))==0)
 					{
 						dwZone |= TRUSTED_ZONE;
+						if (strExecType == _T("GLOBAL"))
+						{
+							m_bOffice365 = TRUE;
+							//Office365の場合は、カスタムスクリプトは必ず無効にしておく
+							m_bUseScript=FALSE;
+						}
 					}
 					else if(strTempUpper.Find(_T("@INTERNET_ZONE"))==0)
 					{
@@ -689,6 +701,10 @@ public:
 					else if(strTempUpper.Find(_T("@UNTRUSTED_ZONE"))==0)
 					{
 						dwZone |= UNTRUSTED_ZONE;
+						if (strExecType == _T("GLOBAL"))
+						{
+							m_bTopURLOnly = TRUE;
+						}
 					}
 
 				}
@@ -875,31 +891,116 @@ public:
 		}
 		else
 		{
-			for(int i=0;i<imax;i++)
+			//Office365
+			if (m_bOffice365)
 			{
-				pRedirectData = (CURLRedirectDataClass*)m_arr_RedirectBrowser.GetAt(i);
-				if(pRedirectData)
+				//DMZ(Custom18)を始めにチェック
+				//HITしたら、リダイレクトをしない。
+				//HITしない場合は、DMZを除くルールの判定を行う。
+				BOOL bDMZFlg=FALSE;
+				for (int i = 0; i < imax; i++)
 				{
-					//frameの場合でオブジェクトの判定条件がTOPのみの場合は、次へ。
-					if(bTopPage == FALSE && pRedirectData->m_bTopPageOnly==TRUE)
-						continue;
-					BOOL bRe=pRedirectData->IsRedirect(strURL,dwZone);
-					CString strReasonLine;
-					if(bRe)
+					pRedirectData = (CURLRedirectDataClass*)m_arr_RedirectBrowser.GetAt(i);
+					if (pRedirectData)
 					{
-						arr_RedirectBrowserHit->Add((intptr_t)pRedirectData);
-						bRet = TRUE;
-						//続行する。最後までチェック。
-					}
-					if(m_gbTraceLog)
-					{
-						if(!pRedirectData->m_strHitReason.IsEmpty())
+						//[CUSTOM18]
+						if (pRedirectData->m_strExecType == _T("CUSTOM18"))
 						{
-							if(bRe)
-								strReasonLine.Format(_T("HIT [%s] %s / "),pRedirectData->m_strExecType,pRedirectData->m_strHitReason);
-							else
-								strReasonLine.Format(_T("SKIP [%s] %s / "),pRedirectData->m_strExecType,pRedirectData->m_strHitReason);
-							m_strHitReasonAll+=strReasonLine;
+							//frameの場合でオブジェクトの判定条件がTOPのみの場合は、次へ。
+							if (bTopPage == FALSE && pRedirectData->m_bTopPageOnly == TRUE)
+								break;
+							//リダイレクトを無効にするリストにHITした。
+							if (pRedirectData->IsRedirect(strURL, dwZone))
+							{
+								bDMZFlg=TRUE;
+								if (m_gbTraceLog)
+								{
+									if (!pRedirectData->m_strHitReason.IsEmpty())
+									{
+										CString strReasonLine;
+										strReasonLine.Format(_T("HIT [%s] %s / "), pRedirectData->m_strExecType, pRedirectData->m_strHitReason);
+										m_strHitReasonAll += strReasonLine;
+									}
+								}
+							}
+							break;
+						}
+					}
+				}
+				//DMZルールにHITした場合は、リダイレクトしない。
+				if (bDMZFlg)
+				{
+					//キャッシュしない。
+					//リダイレクトしない。
+					return FALSE;
+				}
+				//DMZを除くルールを判定する。
+				for (int i = 0; i < imax; i++)
+				{
+					pRedirectData = (CURLRedirectDataClass*)m_arr_RedirectBrowser.GetAt(i);
+					if (pRedirectData)
+					{
+						//DMZ [CUSTOM18]
+						if (pRedirectData->m_strExecType == _T("CUSTOM18"))
+						{
+							//スキップする。
+							continue;
+						}
+
+						//frameの場合でオブジェクトの判定条件がTOPのみの場合は、次へ。
+						if (bTopPage == FALSE && pRedirectData->m_bTopPageOnly == TRUE)
+							continue;
+						BOOL bRe = pRedirectData->IsRedirect(strURL, dwZone);
+						CString strReasonLine;
+						if (bRe)
+						{
+							arr_RedirectBrowserHit->Add((intptr_t)pRedirectData);
+							bRet = TRUE;
+							//続行する。最後までチェック。
+						}
+						if (m_gbTraceLog)
+						{
+							if (!pRedirectData->m_strHitReason.IsEmpty())
+							{
+								if (bRe)
+									strReasonLine.Format(_T("HIT [%s] %s / "), pRedirectData->m_strExecType, pRedirectData->m_strHitReason);
+								else
+									strReasonLine.Format(_T("SKIP [%s] %s / "), pRedirectData->m_strExecType, pRedirectData->m_strHitReason);
+								m_strHitReasonAll += strReasonLine;
+							}
+						}
+					}
+				}
+			}
+			//通常の処理
+			else
+			{
+				for(int i=0;i<imax;i++)
+				{
+					pRedirectData = (CURLRedirectDataClass*)m_arr_RedirectBrowser.GetAt(i);
+					if(pRedirectData)
+					{
+						//frameの場合でオブジェクトの判定条件がTOPのみの場合は、次へ。
+						if(bTopPage == FALSE && pRedirectData->m_bTopPageOnly==TRUE)
+							continue;
+						BOOL bRe=pRedirectData->IsRedirect(strURL,dwZone);
+						CString strReasonLine;
+						if(bRe)
+						{
+							arr_RedirectBrowserHit->Add((intptr_t)pRedirectData);
+							bRet = TRUE;
+							//続行する。最後までチェック。
+						}
+						if(m_gbTraceLog)
+						{
+							if(!pRedirectData->m_strHitReason.IsEmpty())
+							{
+								if(bRe)
+									strReasonLine.Format(_T("HIT [%s] %s / "),pRedirectData->m_strExecType,pRedirectData->m_strHitReason);
+								else
+									strReasonLine.Format(_T("SKIP [%s] %s / "),pRedirectData->m_strExecType,pRedirectData->m_strHitReason);
+								m_strHitReasonAll+=strReasonLine;
+							}
 						}
 					}
 				}

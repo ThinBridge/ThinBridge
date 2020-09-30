@@ -34,6 +34,8 @@ CRedirectApp::CRedirectApp()
 	m_strThisAppName=_T("ThinBridge");
 	SetAppID(m_strThisAppName);
 	m_iFeatureType = FE_PLUS;
+	//Office365対応
+	m_bOffice365 = FALSE;
 }
 
 
@@ -60,6 +62,8 @@ BOOL CRedirectApp::InitBaseFunction()
 	m_strO365ToolFullPath = szDrive;
 	m_strO365ToolFullPath += szDir;
 	m_strO365ToolFullPath += _T("TBo365URLSyncSetting.exe");
+	m_bOffice365 = PathFileExists(m_strO365ToolFullPath);
+
 
 	m_strChromeSwitcherFullPath = szDrive;
 	m_strChromeSwitcherFullPath += szDir;
@@ -841,8 +845,8 @@ void CRedirectApp::ShowPlusSettingDlgEx()
 	theApp.ReadResourceCAPSetting();
 	theApp.ResourceCAPConfMod.Copy(&theApp.ResourceCAPConf);
 
-	m_RedirectList.SetArrayData(m_strRedirectFilePath);
-	m_RedirectListSaveData.InitSaveDataAll();
+	m_RedirectList.SetArrayData(m_strRedirectFilePath, theApp.m_bOffice365);
+	m_RedirectListSaveData.InitSaveDataAll(theApp.m_bOffice365);
 	CSettingsDialog SettingDlg;
 	CString strTitle;
 	SettingDlg.SetLogoText(theApp.m_strThisAppName);
@@ -850,48 +854,49 @@ void CRedirectApp::ShowPlusSettingDlgEx()
 	strTitle.Replace(_T("\\"),_T("/"));
 	SettingDlg.SetTitle(strTitle);
 
-	SettingDlg.AddPage(RUNTIME_CLASS(CDlgRemoteSettingGEN),_T("全般設定"), IDD_DLG_REMOTE,_T("全般設定"));
-	SettingDlg.AddPage(RUNTIME_CLASS(CDlgETC),_T("URLリダイレクト全般設定"), IDD_DLG_ETC,_T("全般設定"));
-	SettingDlg.AddPage(RUNTIME_CLASS(CDlgEco),_T("リソース設定"), IDD_DLG_ECO,_T("全般設定"));
-	SettingDlg.AddPage(RUNTIME_CLASS(CDlgRemoteSetting),_T("リモートブラウザー設定"), IDD_DLG_REMOTE,_T("リモートブラウザー設定"));
-	SettingDlg.AddPage(RUNTIME_CLASS(CDlgSetRDP),_T("Microsoft RDP 設定"), IDD_DLG_RDP,_T("リモートブラウザー設定"));
-	SettingDlg.AddPage(RUNTIME_CLASS(CDlgSetVMW),_T("VMware Horizon 設定"), IDD_DLG_VMW,_T("リモートブラウザー設定"));
-	SettingDlg.AddPage(RUNTIME_CLASS(CDlgSetCX),_T("Citrix XenApp 設定"), IDD_DLG_CX,_T("リモートブラウザー設定"));
-
-	SettingDlg.AddPage(RUNTIME_CLASS(CDlgRemoteSettingRD),_T("URLリダイレクト設定"), IDD_DLG_REMOTE,_T("URLリダイレクト設定"));
-	SettingDlg.AddPage(RUNTIME_CLASS(CDlgRD),_T("Microsoft RDP (リモート)"), IDD_DLG_RD_RDP,_T("URLリダイレクト設定"));
-	SettingDlg.AddPage(RUNTIME_CLASS(CDlgVM),_T("VMware Horizon (リモート)"), IDD_DLG_RD_RDP,_T("URLリダイレクト設定"));
-	SettingDlg.AddPage(RUNTIME_CLASS(CDlgCTX),_T("Citrix XenApp (リモート)"), IDD_DLG_RD_RDP,_T("URLリダイレクト設定"));
-	SettingDlg.AddPage(RUNTIME_CLASS(CDlgFF),_T("Mozilla Firefox (ローカル)"), IDD_DLG_RD_RDP,_T("URLリダイレクト設定"));
-	SettingDlg.AddPage(RUNTIME_CLASS(CDlgCHR),_T("Google Chrome (ローカル)"), IDD_DLG_RD_RDP,_T("URLリダイレクト設定"));
-	SettingDlg.AddPage(RUNTIME_CLASS(CDlgEDG),_T("Microsoft Edge (ローカル)"), IDD_DLG_RD_RDP,_T("URLリダイレクト設定"));
-	SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU01),_T("指定ブラウザー01 (ローカル)"), IDD_DLG_RD_CUSTOM,_T("URLリダイレクト設定"));
-	SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU02),_T("指定ブラウザー02 (ローカル)"), IDD_DLG_RD_CUSTOM,_T("URLリダイレクト設定"));
-	SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU03),_T("指定ブラウザー03 (ローカル)"), IDD_DLG_RD_CUSTOM,_T("URLリダイレクト設定"));
-	SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU04),_T("指定ブラウザー04 (ローカル)"), IDD_DLG_RD_CUSTOM,_T("URLリダイレクト設定"));
-	SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU05),_T("指定ブラウザー05 (ローカル)"), IDD_DLG_RD_CUSTOM,_T("URLリダイレクト設定"));
-	SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU06),_T("指定ブラウザー06 (ローカル)"), IDD_DLG_RD_CUSTOM,_T("URLリダイレクト設定"));
-	SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU07),_T("指定ブラウザー07 (ローカル)"), IDD_DLG_RD_CUSTOM,_T("URLリダイレクト設定"));
-	SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU08),_T("指定ブラウザー08 (ローカル)"), IDD_DLG_RD_CUSTOM,_T("URLリダイレクト設定"));
-	SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU09),_T("指定ブラウザー09 (ローカル)"), IDD_DLG_RD_CUSTOM,_T("URLリダイレクト設定"));
-	SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU10),_T("指定ブラウザー10 (ローカル)"), IDD_DLG_RD_CUSTOM,_T("URLリダイレクト設定"));
-	SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU11),_T("指定ブラウザー11 (ローカル)"), IDD_DLG_RD_CUSTOM,_T("URLリダイレクト設定"));
-	SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU12),_T("指定ブラウザー12 (ローカル)"), IDD_DLG_RD_CUSTOM,_T("URLリダイレクト設定"));
-	SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU13),_T("指定ブラウザー13 (ローカル)"), IDD_DLG_RD_CUSTOM,_T("URLリダイレクト設定"));
-	SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU14),_T("指定ブラウザー14 (ローカル)"), IDD_DLG_RD_CUSTOM,_T("URLリダイレクト設定"));
-	SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU15),_T("指定ブラウザー15 (ローカル)"), IDD_DLG_RD_CUSTOM,_T("URLリダイレクト設定"));
-	SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU16),_T("指定ブラウザー16 (ローカル)"), IDD_DLG_RD_CUSTOM,_T("URLリダイレクト設定"));
-	SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU17),_T("指定ブラウザー17 (ローカル)"), IDD_DLG_RD_CUSTOM,_T("URLリダイレクト設定"));
-	SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU18),_T("指定ブラウザー18 (ローカル)"), IDD_DLG_RD_CUSTOM,_T("URLリダイレクト設定"));
-
 	//Office365対応
-	if (PathFileExists(m_strO365ToolFullPath))
+	if(theApp.m_bOffice365)
 	{
-		SettingDlg.AddPage(RUNTIME_CLASS(CDlgChromeSwitcher), _T("Chrome(自動切り換え)"), IDD_DLG_RD_CH_SWITCH, _T("URLリダイレクト設定"));
-		SettingDlg.AddPage(RUNTIME_CLASS(CDlgO365), _T("Office365 WebApps"), IDD_DLG_RD_O365, _T("URLリダイレクト設定"));
+		SettingDlg.AddPage(RUNTIME_CLASS(CDlgETC), _T("URLリダイレクト全般設定"), IDD_DLG_ETC, _T(""));
+		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCHR), _T("Google Chrome (ローカル専用)"), IDD_DLG_RD_RDP, _T(""));
+		SettingDlg.AddPage(RUNTIME_CLASS(CDlgChromeSwitcher), _T("Google Chrome(自動切り換え)"), IDD_DLG_RD_CH_SWITCH, _T(""));
+		SettingDlg.AddPage(RUNTIME_CLASS(CDlgO365), _T("Office365 WebApps"), IDD_DLG_RD_O365, _T("Google Chrome(自動切り換え)"));
+		SettingDlg.AddPage(RUNTIME_CLASS(CDlgDMZ), _T("共用URL(SSO/SAML対応サイト)"), IDD_DLG_RD_DMZ, _T(""));
 	}
 	else
 	{
+		SettingDlg.AddPage(RUNTIME_CLASS(CDlgRemoteSettingGEN), _T("全般設定"), IDD_DLG_REMOTE, _T("全般設定"));
+		SettingDlg.AddPage(RUNTIME_CLASS(CDlgETC), _T("URLリダイレクト全般設定"), IDD_DLG_ETC, _T("全般設定"));
+		SettingDlg.AddPage(RUNTIME_CLASS(CDlgEco), _T("リソース設定"), IDD_DLG_ECO, _T("全般設定"));
+		SettingDlg.AddPage(RUNTIME_CLASS(CDlgRemoteSetting), _T("リモートブラウザー設定"), IDD_DLG_REMOTE, _T("リモートブラウザー設定"));
+		SettingDlg.AddPage(RUNTIME_CLASS(CDlgSetRDP), _T("Microsoft RDP 設定"), IDD_DLG_RDP, _T("リモートブラウザー設定"));
+		SettingDlg.AddPage(RUNTIME_CLASS(CDlgSetVMW), _T("VMware Horizon 設定"), IDD_DLG_VMW, _T("リモートブラウザー設定"));
+		SettingDlg.AddPage(RUNTIME_CLASS(CDlgSetCX), _T("Citrix XenApp 設定"), IDD_DLG_CX, _T("リモートブラウザー設定"));
+		SettingDlg.AddPage(RUNTIME_CLASS(CDlgRemoteSettingRD), _T("URLリダイレクト設定"), IDD_DLG_REMOTE, _T("URLリダイレクト設定"));
+		SettingDlg.AddPage(RUNTIME_CLASS(CDlgRD), _T("Microsoft RDP (リモート)"), IDD_DLG_RD_RDP, _T("URLリダイレクト設定"));
+		SettingDlg.AddPage(RUNTIME_CLASS(CDlgVM), _T("VMware Horizon (リモート)"), IDD_DLG_RD_RDP, _T("URLリダイレクト設定"));
+		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCTX), _T("Citrix XenApp (リモート)"), IDD_DLG_RD_RDP, _T("URLリダイレクト設定"));
+		SettingDlg.AddPage(RUNTIME_CLASS(CDlgFF), _T("Mozilla Firefox (ローカル)"), IDD_DLG_RD_RDP, _T("URLリダイレクト設定"));
+		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCHR), _T("Google Chrome (ローカル)"), IDD_DLG_RD_RDP, _T("URLリダイレクト設定"));
+		SettingDlg.AddPage(RUNTIME_CLASS(CDlgEDG), _T("Microsoft Edge (ローカル)"), IDD_DLG_RD_RDP, _T("URLリダイレクト設定"));
+		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU01), _T("指定ブラウザー01 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
+		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU02), _T("指定ブラウザー02 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
+		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU03), _T("指定ブラウザー03 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
+		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU04), _T("指定ブラウザー04 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
+		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU05), _T("指定ブラウザー05 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
+		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU06), _T("指定ブラウザー06 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
+		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU07), _T("指定ブラウザー07 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
+		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU08), _T("指定ブラウザー08 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
+		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU09), _T("指定ブラウザー09 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
+		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU10), _T("指定ブラウザー10 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
+		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU11), _T("指定ブラウザー11 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
+		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU12), _T("指定ブラウザー12 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
+		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU13), _T("指定ブラウザー13 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
+		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU14), _T("指定ブラウザー14 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
+		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU15), _T("指定ブラウザー15 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
+		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU16), _T("指定ブラウザー16 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
+		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU17), _T("指定ブラウザー17 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
+		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU18), _T("指定ブラウザー18 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
 		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU19), _T("指定ブラウザー19 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
 		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU20), _T("指定ブラウザー20 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
 	}

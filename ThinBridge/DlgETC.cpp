@@ -131,7 +131,34 @@ BOOL CDlgETC::OnInitDialog()
 	((CButton*)GetDlgItem(IDC_CHK_GLOVAL_URL_ONLY))->SetCheck(bURLOnly?1:0);
 
 	BOOL bUseScript = theApp.m_RedirectList.m_bUseScript;
-	((CButton*)GetDlgItem(IDC_CHK_GLOVAL_RULE_BASE))->SetCheck(bUseScript?1:0);
+	((CButton*)GetDlgItem(IDC_CHK_GLOVAL_RULE_BASE))->SetCheck(bUseScript ? 1 : 0);
+
+	//Office365に場合は、スクリプトを非表示
+	if(theApp.m_bOffice365)
+	{
+		BOOL bTopURLOnly = theApp.m_RedirectList.m_bTopURLOnly;
+		((CButton*)GetDlgItem(IDC_CHK_GLOVAL_TOP_PAGE_ONLY))->SetCheck(bTopURLOnly ? 1 : 0);
+
+		if (GetDlgItem(IDC_CHK_GLOVAL_RULE_BASE))
+		{
+			GetDlgItem(IDC_CHK_GLOVAL_RULE_BASE)->ShowWindow(SW_HIDE);
+		}
+		if (GetDlgItem(IDC_BUTTON_SC))
+		{
+			GetDlgItem(IDC_BUTTON_SC)->ShowWindow(SW_HIDE);
+		}
+		if (GetDlgItem(IDC_STATIC_INFO))
+		{
+			GetDlgItem(IDC_STATIC_INFO)->ShowWindow(SW_HIDE);
+		}
+	}
+	else
+	{
+		if (GetDlgItem(IDC_CHK_GLOVAL_TOP_PAGE_ONLY))
+		{
+			GetDlgItem(IDC_CHK_GLOVAL_TOP_PAGE_ONLY)->ShowWindow(SW_HIDE);
+		}
+	}
 
 	BOOL bTraceLog = theApp.m_RedirectList.m_bTraceLog;
 	((CButton*)GetDlgItem(IDC_CHK_GLOVAL_TRACE))->SetCheck(bTraceLog?1:0);
@@ -188,6 +215,17 @@ LRESULT CDlgETC::Set_OK(WPARAM wParam, LPARAM lParam)
 
 	BOOL bQuickRedirect = ((CButton*)GetDlgItem(IDC_CHK_GLOVAL_QUICK))->GetCheck() == 1 ? TRUE : FALSE;
 	theApp.m_RedirectListSaveData.m_bQuickRedirect = bQuickRedirect;
+
+	//Office365の場合
+	if (theApp.m_bOffice365)
+	{
+		BOOL bTopURLOnly = ((CButton*)GetDlgItem(IDC_CHK_GLOVAL_TOP_PAGE_ONLY))->GetCheck() == 1 ? TRUE : FALSE;
+		theApp.m_RedirectListSaveData.m_bTopURLOnly= bTopURLOnly;
+	}
+	else
+	{
+		theApp.m_RedirectListSaveData.m_bTopURLOnly = FALSE;
+	}
 
 	DWORD dSetting=0;
 	if(((CButton*)GetDlgItem(IDC_CHK_SHIFT))->GetCheck()==1)

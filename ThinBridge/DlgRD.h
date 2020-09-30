@@ -500,3 +500,51 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 };
+
+//IDD_DLG_RD_DMZ
+class CDlgDMZ : public CPropertyPage
+{
+	DECLARE_DYNCREATE(CDlgDMZ)
+public:
+	CDlgDMZ() {};
+	virtual ~CDlgDMZ() {};
+	CURLRedirectDataClass m_URD;
+	CURLRedirectDataClass m_URDSave;
+
+	enum LIST_INDEX
+	{
+		URL,
+		ENABLE
+	};
+	int DuplicateChk(CListCtrl* ptrList, LPCTSTR sURL);
+	void PopIns(CListCtrl* ptrList);
+	void PopDel(CListCtrl* ptrList);
+	void PopUpdate(CListCtrl* ptrList);
+	void PopEditAll(CListCtrl* ptrList);
+	void PopUp(CListCtrl* ptrList);
+	void PopDown(CListCtrl* ptrList);
+
+	void UpdateListCounter(CListCtrl* ptrList);
+
+	CListCtrl	m_List;
+	CStatic		m_Image;
+
+protected:
+	virtual void DoDataExchange(CDataExchange* pDX);
+	afx_msg void OnDestroy() { CPropertyPage::OnDestroy(); }
+	afx_msg void OnEnableCtrl();
+
+	afx_msg void OnButtonPopIns();
+	afx_msg void OnButtonPopDel();
+	afx_msg void OnDblclkList1(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnBnClickedButtonUpdate();
+	afx_msg void OnBnClickedButtonEditall();
+	afx_msg void OnButtonUp();
+	afx_msg void OnButtonDown();
+
+
+	virtual BOOL OnInitDialog();
+	LRESULT Set_OK(WPARAM wParam, LPARAM lParam);
+	DECLARE_MESSAGE_MAP()
+public:
+};
