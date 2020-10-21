@@ -541,7 +541,6 @@ void CSettingsDialog::OnOK()
 			}
 		}
 	}
-
 	//Office365モードの場合以外
 	if(!theApp.m_bOffice365)
 	{
@@ -705,6 +704,9 @@ void CSettingsDialog::OnOK()
 	::CopyFile(theApp.m_strRedirectFilePath+".bak0", theApp.m_strRedirectFilePath+".bak1", FALSE);
 	::CopyFile(theApp.m_strRedirectFilePath, theApp.m_strRedirectFilePath+".bak0", FALSE);
 
+	//読み取り専用のチェックを外す。
+	DWORD dwAttributes = 0;
+	SetFileAttributes(theApp.m_strRedirectFilePath, dwAttributes);
 	//::DeleteFile(theApp.m_strRedirectFilePath);
 	SetLastError(NO_ERROR);
 	BOOL bWriteFlg=FALSE;
@@ -716,6 +718,36 @@ void CSettingsDialog::OnOK()
 		if(theApp.m_RedirectListSaveData.SaveData(theApp.m_strRedirectFilePath,strOutPutDataString))
 		{
 			bWriteFlg=TRUE;
+			//差分を出力する。
+			CTime time = CTime::GetCurrentTime();
+			CString strLogFileNow;
+			CString strHistoryDir;
+			strHistoryDir = theApp.m_strExeFolderPath;
+			strHistoryDir += _T("History\\");
+			::CreateDirectory(strHistoryDir, NULL);
+
+			CString strBefore;
+			strBefore = strHistoryDir;
+			strLogFileNow.Format(_T("%s_%s_Before.ini"), _T("ThinBridgeBHO"), time.Format(_T("%Y-%m-%d-%H%M%S")));
+			strBefore += strLogFileNow;
+			::CopyFile(theApp.m_strRedirectFilePath + ".bak0", strBefore, FALSE);
+			this->LogRotateETC(strHistoryDir, _T("ThinBridgeBHO_"), _T("_Before.ini"));
+
+			CString strAfter;
+			strAfter = strHistoryDir;
+			strLogFileNow.Format(_T("%s_%s_After.ini"), _T("ThinBridgeBHO"), time.Format(_T("%Y-%m-%d-%H%M%S")));
+			strAfter += strLogFileNow;
+			::CopyFile(theApp.m_strRedirectFilePath, strAfter, FALSE);
+			this->LogRotateETC(strHistoryDir, _T("ThinBridgeBHO_"), _T("_After.ini"));
+
+
+			CString strDiffFile;
+			strDiffFile = strHistoryDir;
+			strLogFileNow.Format(_T("%s_%s_Diff.ini"), _T("ThinBridgeBHO"), time.Format(_T("%Y-%m-%d-%H%M%S")));
+			strDiffFile += strLogFileNow;
+			this->LogRotateETC(strHistoryDir, _T("ThinBridgeBHO_"), _T("_Diff.ini"));
+
+			CompareFiles(strBefore, strAfter, strDiffFile);
 			break;
 		}
 		::Sleep(500);

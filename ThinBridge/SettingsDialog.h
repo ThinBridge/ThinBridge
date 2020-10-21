@@ -312,6 +312,305 @@ public:
 	CTreeCtrl		m_TreeCtrl;
 	CPrefsStatic	m_CaptionBarCtrl;
 	//}}AFX_DATA
+	void LogRotateETC(LPCTSTR LogFolderPath, LPCTSTR lpPattern, LPCTSTR lpext)
+	{
+		CTime time = CTime::GetCurrentTime();
+		long number = 0;
+		CString strTemp;
+		//面倒なので、用意してしまう。3年分保持。
+		CMapStringToString strASaveFileList;
+		for (number = 365*3; number > 0; number--)
+		{
+			CTimeSpan span;
+			span = CTimeSpan(number, 0, 0, 0);
+			CTime timeStart = CTime::GetCurrentTime() - span;
+			strTemp.Format(_T("%s%s%s"), lpPattern, timeStart.Format(_T("%Y-%m-%d")), lpext);
+			strTemp.MakeUpper();
+			strASaveFileList.SetAt(strTemp, strTemp);
+		}
+		//念の為　未来日に関しても366日分は消さない。
+		for (number = 0; number <= 366; number++)
+		{
+			CTimeSpan span;
+			span = CTimeSpan(number, 0, 0, 0);
+			CTime timeStart = CTime::GetCurrentTime() + span;
+			strTemp.Format(_T("%s%s%s"), lpPattern, timeStart.Format(_T("%Y-%m-%d")), lpext);
+			strTemp.MakeUpper();
+			strASaveFileList.SetAt(strTemp, strTemp);
+		}
+
+		//ログファイルを確認する。
+		//基準
+		CString strFindPath = LogFolderPath;
+		strFindPath += lpPattern;
+		strFindPath += _T("????-??-??-??????");
+		strFindPath += lpext;
+		WIN32_FIND_DATA wfd = { 0 };
+		HANDLE h = ::FindFirstFile(strFindPath, &wfd);
+		CString strFileNameTemp;
+		CString strDelFilePath;
+		//削除対象List
+		CStringArray strADeleteFileList;
+		if (h == INVALID_HANDLE_VALUE)
+		{
+			return;
+		}
+		do
+		{
+			BOOL bDirectory = wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY;
+			if (bDirectory)
+			{
+				if (::lstrcmp(wfd.cFileName, _T(".")) == 0 || ::lstrcmp(wfd.cFileName, _T("..")) == 0)
+					continue;
+			}
+			else
+			{
+				BOOL bHit = FALSE;
+				strFileNameTemp = wfd.cFileName;
+				strFileNameTemp.MakeUpper();
+				CString strFileTmp;
+				int ipos = 0;
+				ipos = strFileNameTemp.ReverseFind('-');
+				strFileTmp = strFileNameTemp.Mid(0, ipos);
+				strFileTmp += lpext;
+				strFileTmp.MakeUpper();
+				if (strASaveFileList.Lookup(strFileTmp, strFileTmp))
+				{
+					bHit = TRUE;
+				}
+				else
+				{
+					strDelFilePath = LogFolderPath;
+					strDelFilePath += strFileNameTemp;
+					strADeleteFileList.Add(strDelFilePath);
+					bHit = FALSE;
+				}
+			}
+
+		} while (::FindNextFile(h, &wfd));
+		::FindClose(h);
+
+		for (int iiii = 0; iiii < strADeleteFileList.GetCount(); iiii++)
+		{
+			strDelFilePath = strADeleteFileList.GetAt(iiii);
+			::DeleteFile(strDelFilePath);
+		}
+		SetLastError(NO_ERROR);
+	}
+
+	void CompareFiles(LPCTSTR lpszFirstFile, LPCTSTR lpszSecondFile, LPCTSTR lpszOutputFile)
+	{
+		_wsetlocale(LC_ALL, _T("jpn"));
+		CString strRet;
+		#define MAX_LINE_LENGTH		4096
+		int iCurrentLine1 = 0;
+		int iCurrentLine2 = 0;
+		int iTotalLines1 = 0;
+		int iTotalLines2 = 0;
+		int off1 = -1;
+		int off2 = -1;
+		TCHAR* lpszT1 = NULL;
+		TCHAR* lpszT2 = NULL;
+		TCHAR lpszText1[MAX_LINE_LENGTH] = { 0 };
+		TCHAR lpszText2[MAX_LINE_LENGTH] = { 0 };
+		TCHAR lpszText3[MAX_LINE_LENGTH] = { 0 };
+		TCHAR lpszText1_Temp[MAX_LINE_LENGTH] = { 0 };
+		TCHAR lpszText2_Temp[MAX_LINE_LENGTH] = { 0 };
+		TCHAR* lpszT1_Temp = NULL;
+		TCHAR* lpszT2_Temp = NULL;
+
+		// Check for valid file names
+		if ((lpszFirstFile != NULL) && (lpszSecondFile != NULL))
+		{
+			if(!PathFileExists(lpszFirstFile))
+				return;
+			if (!PathFileExists(lpszSecondFile))
+				return;
+			// Try to open files
+			FILE* f1 = { 0 };
+			_tfopen_s(&f1, lpszFirstFile, _T("r"));
+			FILE* f2 = { 0 };
+			_tfopen_s(&f2, lpszSecondFile, _T("r"));
+
+			// Open log file
+			FILE* f3 = NULL;
+			_tfopen_s(&f3, lpszOutputFile, _T("w"));
+			_stprintf_s(lpszText3, MAX_LINE_LENGTH, _T("Comparing files...\n"));
+			_fputts(lpszText3, f3);
+			_stprintf_s(lpszText3, MAX_LINE_LENGTH, _T("[File1]: %s\n"), lpszFirstFile);
+			_fputts(lpszText3, f3);
+			_stprintf_s(lpszText3, MAX_LINE_LENGTH, _T("[File2]: %s\n\n"), lpszSecondFile);
+			_fputts(lpszText3, f3);
+
+			// Check for valid files
+			if ((f1 != NULL) && (f2 != NULL))
+			{
+				do
+				{
+					// Increment line counters
+					iCurrentLine1++;
+					iCurrentLine2++;
+
+					// Read single line of text from files
+					lpszT1 = _fgetts(lpszText1, MAX_LINE_LENGTH, f1);
+					lpszT2 = _fgetts(lpszText2, MAX_LINE_LENGTH, f2);
+
+					// Compare lines of text
+					if (_tcscmp(lpszText1, lpszText2) != 0)
+					{
+						// Scan through second file looking for equal lines
+						iTotalLines2 = 0;
+						off2 = ftell(f2);
+						FILE* f2t = { 0 };
+						_tfopen_s(&f2t, lpszSecondFile, _T("r"));
+						fseek(f2t, off2, SEEK_SET);
+						do
+						{
+							// Skip different lines
+							iTotalLines2++;
+							lpszT2_Temp = _fgetts(lpszText2_Temp, MAX_LINE_LENGTH, f2t);
+						} while ((lpszT2_Temp != NULL) && ((_tcscmp(lpszText1,
+							lpszText2_Temp) != 0)));
+						fclose(f2t);
+
+						// Scan through first file looking for equal lines
+						iTotalLines1 = 0;
+						off1 = ftell(f1);
+						FILE* f1t = { 0 };
+						_tfopen_s(&f1t, lpszFirstFile, _T("r"));
+						fseek(f1t, off1, SEEK_SET);
+						do
+						{
+							// Skip different lines
+							iTotalLines1++;
+							lpszT1_Temp = _fgetts(lpszText1_Temp, MAX_LINE_LENGTH, f1t);
+						} while ((lpszT1_Temp != NULL) && ((_tcscmp(lpszText2,
+							lpszText1_Temp) != 0)));
+						fclose(f1t);
+
+						// Compare lines passed (find minimum)
+						if ((lpszT1_Temp != NULL) || (lpszT2_Temp != NULL))
+						{
+							if (iTotalLines2 < iTotalLines1)
+							{
+								_stprintf_s(lpszText3, MAX_LINE_LENGTH, _T("\n******************************\n"));
+								_fputts(lpszText3, f3);
+								_stprintf_s(lpszText3, MAX_LINE_LENGTH, _T("*       StartOfSection       *\n"));
+								_fputts(lpszText3, f3);
+								_stprintf_s(lpszText3, MAX_LINE_LENGTH, _T("******************************\n"));
+								_fputts(lpszText3, f3);
+								_stprintf_s(lpszText3, MAX_LINE_LENGTH, _T("[File2, %d]: %s"),
+									iCurrentLine2, lpszText2);
+								_fputts(lpszText3, f3);
+								off2 = ftell(f2);
+								FILE* f2t = { 0 };
+								_tfopen_s(&f2t, lpszSecondFile, _T("r"));
+								fseek(f2t, off2, SEEK_SET);
+								for (int i = 0; i < iTotalLines2 - 1; i++)
+								{
+									_fgetts(lpszText2_Temp, MAX_LINE_LENGTH, f2t);
+									_stprintf_s(lpszText3, MAX_LINE_LENGTH, _T("[File2, %d]: %s"),
+										iCurrentLine2 + i + 1, lpszText2_Temp);
+									_fputts(lpszText3, f3);
+								}
+								_fgetts(lpszText2_Temp, MAX_LINE_LENGTH, f2t);
+								off2 = ftell(f2t);
+								fseek(f2, off2, SEEK_SET);
+								fclose(f2t);
+								iCurrentLine2 += iTotalLines2;
+								_stprintf_s(lpszText3, MAX_LINE_LENGTH, _T("******************************\n"));
+								_fputts(lpszText3, f3);
+								_stprintf_s(lpszText3, MAX_LINE_LENGTH, _T("*        EndOfSection        *\n"));
+								_fputts(lpszText3, f3);
+								_stprintf_s(lpszText3, MAX_LINE_LENGTH, _T("******************************\n\n"));
+								_fputts(lpszText3, f3);
+							}
+							else
+							{
+								_stprintf_s(lpszText3, MAX_LINE_LENGTH, _T("\n******************************\n"));
+								_fputts(lpszText3, f3);
+								_stprintf_s(lpszText3, MAX_LINE_LENGTH, _T("*       StartOfSection       *\n"));
+								_fputts(lpszText3, f3);
+								_stprintf_s(lpszText3, MAX_LINE_LENGTH, _T("******************************\n"));
+								_fputts(lpszText3, f3);
+								_stprintf_s(lpszText3, MAX_LINE_LENGTH, _T("[File1, %d]: %s"), iCurrentLine1,
+									lpszText1);
+								_fputts(lpszText3, f3);
+								off1 = ftell(f1);
+								FILE* f1t = { 0 };
+								_tfopen_s(&f1t, lpszFirstFile, _T("r"));
+								fseek(f1t, off1, SEEK_SET);
+								for (int i = 0; i < iTotalLines1 - 1; i++)
+								{
+									_fgetts(lpszText1_Temp, MAX_LINE_LENGTH, f1t);
+									_stprintf_s(lpszText3, MAX_LINE_LENGTH, _T("[File1, %d]: %s"),
+										iCurrentLine1 + i + 1, lpszText1_Temp);
+									_fputts(lpszText3, f3);
+								}
+								_fgetts(lpszText1_Temp, MAX_LINE_LENGTH, f1t);
+								off1 = ftell(f1t);
+								fseek(f1, off1, SEEK_SET);
+								fclose(f1t);
+								iCurrentLine1 += iTotalLines1;
+								_stprintf_s(lpszText3, MAX_LINE_LENGTH, _T("******************************\n"));
+								_fputts(lpszText3, f3);
+								_stprintf_s(lpszText3, MAX_LINE_LENGTH, _T("*        EndOfSection        *\n"));
+								_fputts(lpszText3, f3);
+								_stprintf_s(lpszText3, MAX_LINE_LENGTH, _T("******************************\n\n"));
+								_fputts(lpszText3, f3);
+							}
+						}
+						else
+						{
+							_stprintf_s(lpszText3, MAX_LINE_LENGTH, _T("\n******************************\n"));
+							_fputts(lpszText3, f3);
+							_stprintf_s(lpszText3, MAX_LINE_LENGTH, _T("*       StartOfSection       *\n"));
+							_fputts(lpszText3, f3);
+							_stprintf_s(lpszText3, MAX_LINE_LENGTH, _T("******************************\n"));
+							_fputts(lpszText3, f3);
+							_stprintf_s(lpszText3, MAX_LINE_LENGTH, _T("[File1, %d]: %s"), iCurrentLine1,
+								lpszText1);
+							_fputts(lpszText3, f3);
+							_stprintf_s(lpszText3, MAX_LINE_LENGTH, _T("[File2, %d]: %s"), iCurrentLine2,
+								lpszText2);
+							_fputts(lpszText3, f3);
+							_stprintf_s(lpszText3, MAX_LINE_LENGTH, _T("******************************\n"));
+							_fputts(lpszText3, f3);
+							_stprintf_s(lpszText3, MAX_LINE_LENGTH, _T("*        EndOfSection        *\n"));
+							_fputts(lpszText3, f3);
+							_stprintf_s(lpszText3, MAX_LINE_LENGTH, _T("******************************\n\n"));
+							_fputts(lpszText3, f3);
+						}
+					}
+				} while ((lpszT1 != NULL) && (lpszT2 != NULL));
+
+				_fputts(_T("\nSuccess: The files compared.\n"), f3);
+			}
+			else
+			{
+				// The first file can not be found
+				if (f1 == NULL)
+				{
+					_fputts(_T("Error: The first file can not be found.\n"), f3);
+				}
+
+				// The second file can not be found
+				if (f2 == NULL)
+				{
+					_fputts(_T("Error: The second file can not be found.\n"), f3);
+				}
+			}
+			// Close files
+			if(f1)
+				fclose(f1);
+			if(f2)
+				fclose(f2);
+
+			// Close log file
+			if(f3)
+				fclose(f3);
+		}
+	}
 
 
 	virtual BOOL CreateWnd(CWnd *pWnd, CCreateContext *pContext = NULL);

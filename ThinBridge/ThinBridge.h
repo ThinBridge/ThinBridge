@@ -1055,12 +1055,12 @@ public:
 				out.WriteString(strTempFormat);
 				pstrOutPutData += strTempFormat;
 			}
-			out.WriteString(_T("\n"));
-			pstrOutPutData+=_T("\n");
 
 			int imax = (int)m_arr_RedirectBrowser.GetCount();
 			for(int i=0;i<imax;i++)
 			{
+				out.WriteString(_T("\n"));
+				pstrOutPutData += _T("\n");
 				strWriteLine.Empty();
 				strTemp.Empty();
 				strTempFormat.Empty();
@@ -1164,8 +1164,8 @@ public:
 						out.WriteString(strTempFormat);
 						pstrOutPutData+=strTempFormat;
 					}
-					out.WriteString(_T("\n"));
-					pstrOutPutData+=_T("\n");
+//					out.WriteString(_T("\n"));
+//					pstrOutPutData+=_T("\n");
 				}
 			}
 			bRet=TRUE;

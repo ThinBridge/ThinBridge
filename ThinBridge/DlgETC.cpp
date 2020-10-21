@@ -133,9 +133,49 @@ BOOL CDlgETC::OnInitDialog()
 	BOOL bUseScript = theApp.m_RedirectList.m_bUseScript;
 	((CButton*)GetDlgItem(IDC_CHK_GLOVAL_RULE_BASE))->SetCheck(bUseScript ? 1 : 0);
 
+	int iKeyCombination = 0;
+	iKeyCombination = theApp.SettingConf.m_iKeyCombination;
+
+	((CButton*)GetDlgItem(IDC_CHK_SHIFT))->SetCheck(0);
+	((CButton*)GetDlgItem(IDC_CHK_CTRL))->SetCheck(0);
+	((CButton*)GetDlgItem(IDC_CHK_ALT))->SetCheck(0);
+	((CButton*)GetDlgItem(IDC_CHK_LEFT))->SetCheck(0);
+	((CButton*)GetDlgItem(IDC_CHK_UP))->SetCheck(0);
+	((CButton*)GetDlgItem(IDC_CHK_RIGHT))->SetCheck(0);
+	((CButton*)GetDlgItem(IDC_CHK_DOWN))->SetCheck(0);
+
+	if ((iKeyCombination&KEY_COMB_SHIFT) == KEY_COMB_SHIFT)
+		((CButton*)GetDlgItem(IDC_CHK_SHIFT))->SetCheck(1);
+	if ((iKeyCombination&KEY_COMB_CTRL) == KEY_COMB_CTRL)
+		((CButton*)GetDlgItem(IDC_CHK_CTRL))->SetCheck(1);
+	if ((iKeyCombination&KEY_COMB_ALT) == KEY_COMB_ALT)
+		((CButton*)GetDlgItem(IDC_CHK_ALT))->SetCheck(1);
+	if ((iKeyCombination&KEY_COMB_LEFT) == KEY_COMB_LEFT)
+		((CButton*)GetDlgItem(IDC_CHK_LEFT))->SetCheck(1);
+	if ((iKeyCombination&KEY_COMB_UP) == KEY_COMB_UP)
+		((CButton*)GetDlgItem(IDC_CHK_UP))->SetCheck(1);
+	if ((iKeyCombination&KEY_COMB_RIGHT) == KEY_COMB_RIGHT)
+		((CButton*)GetDlgItem(IDC_CHK_RIGHT))->SetCheck(1);
+	if ((iKeyCombination&KEY_COMB_DOWN) == KEY_COMB_DOWN)
+		((CButton*)GetDlgItem(IDC_CHK_DOWN))->SetCheck(1);
+
 	//Office365に場合は、スクリプトを非表示
 	if(theApp.m_bOffice365)
 	{
+		if (GetDlgItem(IDC_CHECK4))
+		{
+			GetDlgItem(IDC_CHECK4)->ShowWindow(SW_HIDE);
+		}
+		((CButton*)GetDlgItem(IDC_CHK_SHIFT))->ShowWindow(SW_HIDE);
+		((CButton*)GetDlgItem(IDC_CHK_CTRL))->ShowWindow(SW_HIDE);
+		((CButton*)GetDlgItem(IDC_CHK_ALT))->ShowWindow(SW_HIDE);
+		((CButton*)GetDlgItem(IDC_CHK_LEFT))->ShowWindow(SW_HIDE);
+		((CButton*)GetDlgItem(IDC_CHK_UP))->ShowWindow(SW_HIDE);
+		((CButton*)GetDlgItem(IDC_CHK_RIGHT))->ShowWindow(SW_HIDE);
+		((CButton*)GetDlgItem(IDC_CHK_DOWN))->ShowWindow(SW_HIDE);
+		GetDlgItem(IDC_KEYTESTBUTTON)->ShowWindow(SW_HIDE);
+		GetDlgItem(IDC_STATIC_KEY)->ShowWindow(SW_HIDE);
+
 		BOOL bTopURLOnly = theApp.m_RedirectList.m_bTopURLOnly;
 		((CButton*)GetDlgItem(IDC_CHK_GLOVAL_TOP_PAGE_ONLY))->SetCheck(bTopURLOnly ? 1 : 0);
 
@@ -166,31 +206,6 @@ BOOL CDlgETC::OnInitDialog()
 	BOOL bQuickRedirect = theApp.m_RedirectList.m_bQuickRedirect;
 	((CButton*)GetDlgItem(IDC_CHK_GLOVAL_QUICK))->SetCheck(bQuickRedirect ? 1 : 0);
 
-	int iKeyCombination=0;
-	iKeyCombination=theApp.SettingConf.m_iKeyCombination;
-
-	((CButton*)GetDlgItem(IDC_CHK_SHIFT))->SetCheck(0);
-	((CButton*)GetDlgItem(IDC_CHK_CTRL))->SetCheck(0);
-	((CButton*)GetDlgItem(IDC_CHK_ALT))->SetCheck(0);
-	((CButton*)GetDlgItem(IDC_CHK_LEFT))->SetCheck(0);
-	((CButton*)GetDlgItem(IDC_CHK_UP))->SetCheck(0);
-	((CButton*)GetDlgItem(IDC_CHK_RIGHT))->SetCheck(0);
-	((CButton*)GetDlgItem(IDC_CHK_DOWN))->SetCheck(0);
-
-	if((iKeyCombination&KEY_COMB_SHIFT)==KEY_COMB_SHIFT)
-		((CButton*)GetDlgItem(IDC_CHK_SHIFT))->SetCheck(1);
-	if((iKeyCombination&KEY_COMB_CTRL)==KEY_COMB_CTRL)
-		((CButton*)GetDlgItem(IDC_CHK_CTRL))->SetCheck(1);
-	if((iKeyCombination&KEY_COMB_ALT)==KEY_COMB_ALT)
-		((CButton*)GetDlgItem(IDC_CHK_ALT))->SetCheck(1);
-	if((iKeyCombination&KEY_COMB_LEFT)==KEY_COMB_LEFT)
-		((CButton*)GetDlgItem(IDC_CHK_LEFT))->SetCheck(1);
-	if((iKeyCombination&KEY_COMB_UP)==KEY_COMB_UP)
-		((CButton*)GetDlgItem(IDC_CHK_UP))->SetCheck(1);
-	if((iKeyCombination&KEY_COMB_RIGHT)==KEY_COMB_RIGHT)
-		((CButton*)GetDlgItem(IDC_CHK_RIGHT))->SetCheck(1);
-	if((iKeyCombination&KEY_COMB_DOWN)==KEY_COMB_DOWN)
-		((CButton*)GetDlgItem(IDC_CHK_DOWN))->SetCheck(1);
 
 	CString strVersion;
 	strVersion = theApp.GetVersionStr();

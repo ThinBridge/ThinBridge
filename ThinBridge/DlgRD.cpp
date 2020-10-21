@@ -2291,19 +2291,56 @@ void CDlgO365::OnBnClickedButtonFdlg()
 }
 void CDlgO365::OnBnClickedButtonOffice365()
 {
-	PROCESS_INFORMATION pi = { 0 };
+	CString IEcmd;
+	IEcmd = _T("");
+	IEcmd.Format(_T("\"%s\""), theApp.m_strO365ToolFullPath);
+	CString strPathQ;
+	strPathQ.Format(_T("\"%s\""), theApp.m_strO365ToolFullPath);
 	STARTUPINFO si = { 0 };
+	PROCESS_INFORMATION pi = { 0 };
 	si.cb = sizeof(si);
-	CreateProcess(NULL, (LPTSTR)(LPCTSTR)theApp.m_strO365ToolFullPath, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi);
-	if (pi.hThread)
+	if (!CreateProcess(NULL, (LPTSTR)(LPCTSTR)IEcmd, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi))
 	{
-		CloseHandle(pi.hThread);
-		pi.hThread = 0;
+		SetLastError(NO_ERROR);
+		//Retry
+		STARTUPINFO si2 = { 0 };
+		PROCESS_INFORMATION pi2 = { 0 };
+		si2.cb = sizeof(si2);
+		if (!CreateProcess(strPathQ,NULL, NULL, NULL, FALSE, 0, NULL, NULL, &si2, &pi2))
+		{
+			SetLastError(NO_ERROR);
+			if (::ShellExecute(NULL, _T("open"), strPathQ,NULL, NULL, SW_SHOW) <= HINSTANCE(32))
+			{
+				SetLastError(NO_ERROR);
+				::ShellExecute(NULL, NULL, IEcmd, NULL, NULL, SW_SHOW);
+			}
+		}
+		else
+		{
+			if (pi2.hThread)
+			{
+				CloseHandle(pi2.hThread);  // スレッドのハンドルは使わないのですぐ破棄
+				pi2.hThread = 0;
+			}
+			if (pi2.hProcess)
+			{
+				CloseHandle(pi2.hProcess); // もうプロセスのハンドルは使わないので破棄
+				pi2.hProcess = 0;
+			}
+		}
 	}
-	if (pi.hProcess)
+	else
 	{
-		CloseHandle(pi.hProcess);
-		pi.hProcess = 0;
+		if (pi.hThread)
+		{
+			CloseHandle(pi.hThread);  // スレッドのハンドルは使わないのですぐ破棄
+			pi.hThread = 0;
+		}
+		if (pi.hProcess)
+		{
+			CloseHandle(pi.hProcess); // もうプロセスのハンドルは使わないので破棄
+			pi.hProcess = 0;
+		}
 	}
 }
 void CDlgO365::OnBnClickedButtonReload()
@@ -2454,19 +2491,56 @@ void CDlgChromeSwitcher::OnBnClickedButtonFdlg()
 }
 void CDlgChromeSwitcher::OnBnClickedButtonChromeSwitcher()
 {
-	PROCESS_INFORMATION pi = { 0 };
+	CString IEcmd;
+	IEcmd = _T("");
+	IEcmd.Format(_T("\"%s\""), theApp.m_strChromeSwitcherFullPath);
+	CString strPathQ;
+	strPathQ.Format(_T("\"%s\""), theApp.m_strChromeSwitcherFullPath);
 	STARTUPINFO si = { 0 };
+	PROCESS_INFORMATION pi = { 0 };
 	si.cb = sizeof(si);
-	CreateProcess(NULL, (LPTSTR)(LPCTSTR)theApp.m_strChromeSwitcherFullPath, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi);
-	if (pi.hThread)
+	if (!CreateProcess(NULL, (LPTSTR)(LPCTSTR)IEcmd, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi))
 	{
-		CloseHandle(pi.hThread);
-		pi.hThread = 0;
+		SetLastError(NO_ERROR);
+		//Retry
+		STARTUPINFO si2 = { 0 };
+		PROCESS_INFORMATION pi2 = { 0 };
+		si2.cb = sizeof(si2);
+		if (!CreateProcess(strPathQ, NULL, NULL, NULL, FALSE, 0, NULL, NULL, &si2, &pi2))
+		{
+			SetLastError(NO_ERROR);
+			if (::ShellExecute(NULL, _T("open"), strPathQ, NULL, NULL, SW_SHOW) <= HINSTANCE(32))
+			{
+				SetLastError(NO_ERROR);
+				::ShellExecute(NULL, NULL, IEcmd, NULL, NULL, SW_SHOW);
+			}
+		}
+		else
+		{
+			if (pi2.hThread)
+			{
+				CloseHandle(pi2.hThread);  // スレッドのハンドルは使わないのですぐ破棄
+				pi2.hThread = 0;
+			}
+			if (pi2.hProcess)
+			{
+				CloseHandle(pi2.hProcess); // もうプロセスのハンドルは使わないので破棄
+				pi2.hProcess = 0;
+			}
+		}
 	}
-	if (pi.hProcess)
+	else
 	{
-		CloseHandle(pi.hProcess);
-		pi.hProcess = 0;
+		if (pi.hThread)
+		{
+			CloseHandle(pi.hThread);  // スレッドのハンドルは使わないのですぐ破棄
+			pi.hThread = 0;
+		}
+		if (pi.hProcess)
+		{
+			CloseHandle(pi.hProcess); // もうプロセスのハンドルは使わないので破棄
+			pi.hProcess = 0;
+		}
 	}
 }
 //////////////////////////////////////////////////////
