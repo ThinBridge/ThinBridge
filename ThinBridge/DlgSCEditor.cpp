@@ -381,11 +381,11 @@ void CDlgSCEditor::ReadText()
 
 void CDlgSCEditor::WriteText()
 {
+	::CopyFile(m_strFilePath+".bak4", m_strFilePath+".bak5", FALSE);
 	::CopyFile(m_strFilePath+".bak3", m_strFilePath+".bak4", FALSE);
 	::CopyFile(m_strFilePath+".bak2", m_strFilePath+".bak3", FALSE);
 	::CopyFile(m_strFilePath+".bak1", m_strFilePath+".bak2", FALSE);
-	::CopyFile(m_strFilePath+".bak0", m_strFilePath+".bak1", FALSE);
-	::CopyFile(m_strFilePath, m_strFilePath+".bak0", FALSE);
+	::CopyFile(m_strFilePath, m_strFilePath+".bak1", FALSE);
 	SetLastError(NO_ERROR);
 
 	CFile file;

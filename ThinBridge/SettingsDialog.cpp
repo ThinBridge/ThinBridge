@@ -698,11 +698,11 @@ void CSettingsDialog::OnOK()
 		}
 	}
 	//file backup
+	::CopyFile(theApp.m_strRedirectFilePath+".bak4", theApp.m_strRedirectFilePath+".bak5", FALSE);
 	::CopyFile(theApp.m_strRedirectFilePath+".bak3", theApp.m_strRedirectFilePath+".bak4", FALSE);
 	::CopyFile(theApp.m_strRedirectFilePath+".bak2", theApp.m_strRedirectFilePath+".bak3", FALSE);
 	::CopyFile(theApp.m_strRedirectFilePath+".bak1", theApp.m_strRedirectFilePath+".bak2", FALSE);
-	::CopyFile(theApp.m_strRedirectFilePath+".bak0", theApp.m_strRedirectFilePath+".bak1", FALSE);
-	::CopyFile(theApp.m_strRedirectFilePath, theApp.m_strRedirectFilePath+".bak0", FALSE);
+	::CopyFile(theApp.m_strRedirectFilePath, theApp.m_strRedirectFilePath+".bak1", FALSE);
 
 	//読み取り専用のチェックを外す。
 	DWORD dwAttributes = 0;
@@ -730,7 +730,7 @@ void CSettingsDialog::OnOK()
 			strBefore = strHistoryDir;
 			strLogFileNow.Format(_T("%s_%s_Before.ini"), _T("ThinBridgeBHO"), time.Format(_T("%Y-%m-%d-%H%M%S")));
 			strBefore += strLogFileNow;
-			::CopyFile(theApp.m_strRedirectFilePath + ".bak0", strBefore, FALSE);
+			::CopyFile(theApp.m_strRedirectFilePath + ".bak1", strBefore, FALSE);
 			this->LogRotateETC(strHistoryDir, _T("ThinBridgeBHO_"), _T("_Before.ini"));
 
 			CString strAfter;
