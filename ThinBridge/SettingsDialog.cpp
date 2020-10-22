@@ -731,6 +731,7 @@ void CSettingsDialog::OnOK()
 			strLogFileNow.Format(_T("%s_%s_Before.ini"), _T("ThinBridgeBHO"), time.Format(_T("%Y-%m-%d-%H%M%S")));
 			strBefore += strLogFileNow;
 			::CopyFile(theApp.m_strRedirectFilePath + ".bak1", strBefore, FALSE);
+			SetFileAttributes(strBefore, 0);
 			this->LogRotateETC(strHistoryDir, _T("ThinBridgeBHO_"), _T("_Before.ini"));
 
 			CString strAfter;
@@ -738,6 +739,7 @@ void CSettingsDialog::OnOK()
 			strLogFileNow.Format(_T("%s_%s_After.ini"), _T("ThinBridgeBHO"), time.Format(_T("%Y-%m-%d-%H%M%S")));
 			strAfter += strLogFileNow;
 			::CopyFile(theApp.m_strRedirectFilePath, strAfter, FALSE);
+			SetFileAttributes(strAfter, 0);
 			this->LogRotateETC(strHistoryDir, _T("ThinBridgeBHO_"), _T("_After.ini"));
 
 
