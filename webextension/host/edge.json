@@ -4,6 +4,7 @@
   "path": "ThinBridgeTalk.exe",
   "type": "stdio",
   "allowed_origins": [
+    "chrome-extension://famoofbkcpjdkihdngnhgbdfkfenhcnf/",
     "chrome-extension://knldjmfmopnpolahpmmgbagdohdnhkik/"
   ]
 }
