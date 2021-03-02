@@ -57,7 +57,7 @@
 //#define FE_VMW				0x00000010
 //#define FE_CTX				0x00000100
 #define FE_PLUS				0x00001000
-#define CAP_PLUS			0x00010000
+//#define CAP_PLUS			0x00010000
 
 #define FE_ALL FE_RDP|FE_VMW|FE_CTX
 
@@ -294,172 +294,6 @@ public:
 #include "Psapi.h"
 #include <TlHelp32.h>
 
-class CIEStatusHelper
-{
-	static BOOL CALLBACK EnumWindowsProc_(HWND hwnd,LPARAM lParam)
-	{
-		if(lParam == NULL)
-			return	FALSE;
-		return	((CIEStatusHelper*)lParam)->EnumWindowsProc(hwnd);
-	}
-	static BOOL CALLBACK EnumChildProc_(HWND hwnd,LPARAM lParam)
-	{
-		if(lParam == NULL)
-			return	FALSE;
-		return	((CIEStatusHelper*)lParam)->EnumChildProc(hwnd);
-	}
-public:
-	CString m_strProcessName;
-	CIEStatusHelper()
-	{
-		m_IETabCnt=0;
-		m_strProcessName=_T("iexplore.exe");
-	}
-	virtual ~CIEStatusHelper()
-	{
-	}
-
-	size_t GetMemoryUsageSize()
-	{
-		if(m_strProcessName.IsEmpty())
-			m_strProcessName=_T("iexplore.exe");
-
-		HANDLE snapshot = ::CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
-		if(snapshot == INVALID_HANDLE_VALUE)return 0;
-		PROCESSENTRY32 entry={0};
-		entry.dwSize = sizeof(entry);
-		BOOL has_entry = ::Process32First(snapshot, &entry);
-		TCHAR	pszName[64]={0};
-		size_t iMem=0;
-		while(has_entry)
-		{
-			lstrcpyn(pszName,entry.szExeFile,64);
-			//ウインドウクラスの取得
-			if(::_tcsicmp(pszName,m_strProcessName)==0)
-			{
-				DWORD dwProcessId = entry.th32ProcessID;
-				CHandle hProcess;
-				hProcess.Attach(::OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, dwProcessId));
-				//EmptyWorkingSet(hProcess);
-
-				PROCESS_MEMORY_COUNTERS_EX pmcs = { sizeof(PROCESS_MEMORY_COUNTERS_EX) };
-				::GetProcessMemoryInfo(hProcess,(PROCESS_MEMORY_COUNTERS*) &pmcs, sizeof(PROCESS_MEMORY_COUNTERS_EX));
-				//::CoFreeUnusedLibrariesEx(0,0);
-				iMem += pmcs.PrivateUsage;
-			}
-			has_entry = ::Process32Next(snapshot, &entry);
-		}
-		::CloseHandle(snapshot);
-		return iMem;
-	}
-
-
-	DWORD m_IETabCnt;
-	BOOL EnumChildProc(HWND hwnd)
-	{
-		int nRet=0;
-		BOOL	bRet=FALSE;
-		HRESULT	hr={0};
-		TCHAR	pszName[64]={0};
-		//ウインドウクラスの取得
-		nRet = ::GetClassName(hwnd,pszName,64);
-		if(nRet == 0)
-			return	TRUE;
-
-		nRet = ::_tcscmp(pszName,_T("Frame Tab"));
-		if(nRet != 0)
-			return	TRUE;
-
-		if(hwnd == NULL || ::IsWindow(hwnd) == FALSE)
-			return	FALSE;
-
-		//空白のタブをカウントしない。
-		// TabWindowClass
-		HWND hWndTabWindow = {0};
-		hWndTabWindow = ::FindWindowEx(hwnd,NULL,_T("TabWindowClass"),NULL);
-		if(hWndTabWindow)
-		{
-			CString strTitle;
-			SafeGetWindowText(hWndTabWindow,strTitle);
-			if(strTitle.IsEmpty()
-			||strTitle.Find(_T("空白のページ"))==0
-			||strTitle.Find(_T("about:blank"))==0
-			||strTitle.Find(_T("Blank Page"))==0)
-				return TRUE;
-		}
-
-
-		m_IETabCnt++;
-		return	TRUE;
-
-	}
-	inline HWND SafeWnd(HWND wnd)
-	{
-		HWND hRetNULL={0};
-		if(wnd == NULL)
-			return hRetNULL;
-		__try
-		{
-			if(IsWindow(wnd))
-			{
-				return wnd;
-			}
-			else
-			{
-				return hRetNULL;
-			}
-		}
-		__except(GetExceptionCode()==EXCEPTION_ACCESS_VIOLATION)
-		{
-			return hRetNULL;
-		}
-		return hRetNULL;
-	}
-	inline void SafeGetWindowText(HWND hWnd,CString& str)
-	{
-		if(!SafeWnd(hWnd))
-			return;
-
-		CString strText;
-		int nLen = ::GetWindowTextLength(hWnd);
-		int nRetLen = ::GetWindowText(hWnd, strText.GetBufferSetLength(nLen+2), nLen + 2);
-		strText.ReleaseBuffer();
-
-		if(nRetLen < nLen)
-		{
-			str.Empty();
-			return;
-		}
-		str=strText;
-		return;
-	}
-
-	DWORD  GetTabCnt(void)
-	{
-		m_IETabCnt=0;
-		::EnumWindows(EnumWindowsProc_,(LPARAM)this);
-		return	m_IETabCnt;
-	}
-
-	BOOL EnumWindowsProc(HWND hwnd)
-	{
-		int nRet=0;
-		TCHAR pszName[64]={0};
-		//ウインドウクラスの取得
-		nRet = ::GetClassName(hwnd,pszName,64);
-		if(nRet == 0)
-			return	TRUE;
-		nRet = ::_tcscmp(pszName,_T("IEFrame"));
-		if(nRet != 0)
-		{
-			return TRUE;
-		}
-		//子ウインドウの列挙方法
-		::EnumChildWindows(hwnd,EnumChildProc_,(LPARAM)this);
-		return	TRUE;
-	}
-};
-
 class CCRre : public CWinThread
 {
 	DECLARE_DYNCREATE(CCRre)
@@ -524,7 +358,6 @@ public:
 	{
 		m_bDisabled=FALSE;
 		m_bTopPageOnly=FALSE;
-		m_dwZone=ZONE_NA;
 		m_dRedirectPageAction=0;
 		m_dwCloseTimeout=3;
 	}
@@ -536,7 +369,6 @@ public:
 	{
 		m_bDisabled=FALSE;
 		m_bTopPageOnly=FALSE;
-		m_dwZone=ZONE_NA;
 		m_dRedirectPageAction=0;
 		m_dwCloseTimeout=3;
 		m_strExecType.Empty();
@@ -549,7 +381,6 @@ public:
 		if(ptr==NULL)return;
 		m_bDisabled = ptr->m_bDisabled;
 		m_bTopPageOnly = ptr->m_bTopPageOnly;
-		m_dwZone = ptr->m_dwZone;
 		m_dRedirectPageAction = ptr->m_dRedirectPageAction;
 		m_dwCloseTimeout = ptr->m_dwCloseTimeout;
 		m_strExecType = ptr->m_strExecType;
@@ -560,7 +391,6 @@ public:
 public:
 	BOOL m_bDisabled;
 	BOOL m_bTopPageOnly;
-	DWORD m_dwZone;
 	DWORD m_dRedirectPageAction;
 	DWORD m_dwCloseTimeout;
 
@@ -576,9 +406,8 @@ public:
 	CPtrArray m_arr_RedirectBrowser;
 	BOOL m_bURLOnly;
 	BOOL m_bTraceLog;
-	BOOL m_bUseScript;
 	BOOL m_bQuickRedirect;
-	BOOL m_bOffice365;
+	BOOL m_bCitrixCustomEnv;
 	BOOL m_bTopURLOnly;
 
 	CURLRedirectDataClass* m_pRDP;
@@ -616,7 +445,6 @@ public:
 	{
 		m_bURLOnly=FALSE;
 		m_bTraceLog=FALSE;
-		m_bUseScript=FALSE;
 		m_pRDP=NULL;
 		m_pVMW=NULL;
 		m_pCTX=NULL;
@@ -646,7 +474,7 @@ public:
 		m_pCustom19=NULL;
 		m_pCustom20=NULL;
 		m_bQuickRedirect = FALSE;
-		m_bOffice365=FALSE;
+		m_bCitrixCustomEnv =FALSE;
 		m_bTopURLOnly=FALSE;
 	}
 	virtual ~CURLRedirectList()
@@ -657,7 +485,6 @@ public:
 	{
 		m_bURLOnly=FALSE;
 		m_bTraceLog=FALSE;
-		m_bUseScript=FALSE;
 		CURLRedirectDataClass* ptr=NULL;
 		int imax = (int)m_arr_RedirectBrowser.GetCount();
 		for(int i=0;i<imax;i++)
@@ -700,20 +527,20 @@ public:
 		m_pCustom19=NULL;
 		m_pCustom20=NULL;
 		m_bQuickRedirect = FALSE;
-		m_bOffice365=FALSE;
+		m_bCitrixCustomEnv =FALSE;
 		m_bTopURLOnly=FALSE;
 	}
-	void InitSaveDataAll(BOOL bOffice365=FALSE)
+	void InitSaveDataAll(BOOL bCitrixCustomEnv =FALSE)
 	{
 		Clear();
 		CURLRedirectDataClass* pRedirectData=NULL;
 
-		//Office365対応
-		if (bOffice365)
+		//Citrix特殊環境フラグ
+		if (bCitrixCustomEnv)
 		{
 			m_bURLOnly=TRUE;
 			m_bQuickRedirect=TRUE;
-			m_bOffice365=TRUE;
+			m_bCitrixCustomEnv =TRUE;
 			m_bTopURLOnly=TRUE;
 
 			pRedirectData = NULL;
@@ -754,9 +581,16 @@ public:
 		}
 		else
 		{
+			m_bURLOnly = TRUE;
+			m_bQuickRedirect = TRUE;
+			m_bCitrixCustomEnv = FALSE;
+			m_bTopURLOnly = TRUE;
+
+
 			pRedirectData = NULL;
 			pRedirectData = new CURLRedirectDataClass;
 			pRedirectData->m_bDisabled=FALSE;
+			pRedirectData->m_bTopPageOnly = TRUE;
 			pRedirectData->m_strExecType=_T("RDP");
 			pRedirectData->m_dwCloseTimeout=3;
 			m_pRDP=pRedirectData;
@@ -765,6 +599,7 @@ public:
 			pRedirectData = NULL;
 			pRedirectData = new CURLRedirectDataClass;
 			pRedirectData->m_bDisabled=FALSE;
+			pRedirectData->m_bTopPageOnly = TRUE;
 			pRedirectData->m_strExecType=_T("VMWARE");
 			pRedirectData->m_dwCloseTimeout=3;
 			m_pVMW=pRedirectData;
@@ -773,6 +608,7 @@ public:
 			pRedirectData = NULL;
 			pRedirectData = new CURLRedirectDataClass;
 			pRedirectData->m_bDisabled=FALSE;
+			pRedirectData->m_bTopPageOnly = TRUE;
 			pRedirectData->m_strExecType=_T("CITRIX");
 			pRedirectData->m_dwCloseTimeout=3;
 			m_pCTX=pRedirectData;
@@ -781,6 +617,7 @@ public:
 			pRedirectData = NULL;
 			pRedirectData = new CURLRedirectDataClass;
 			pRedirectData->m_bDisabled=FALSE;
+			pRedirectData->m_bTopPageOnly = TRUE;
 			pRedirectData->m_strExecType=_T("Firefox");
 			pRedirectData->m_dwCloseTimeout=3;
 			m_pFirefox=pRedirectData;
@@ -788,15 +625,17 @@ public:
 
 			pRedirectData = NULL;
 			pRedirectData = new CURLRedirectDataClass;
-			pRedirectData->m_bDisabled=FALSE;
-			pRedirectData->m_strExecType=_T("Chrome");
-			pRedirectData->m_dwCloseTimeout=3;
-			m_pChrome=pRedirectData;
+			pRedirectData->m_bDisabled = FALSE;
+			pRedirectData->m_bTopPageOnly = TRUE;
+			pRedirectData->m_strExecType = _T("Chrome");
+			pRedirectData->m_dwCloseTimeout = 3;
+			m_pChrome = pRedirectData;
 			m_arr_RedirectBrowser.Add(pRedirectData);
 
 			pRedirectData = NULL;
 			pRedirectData = new CURLRedirectDataClass;
 			pRedirectData->m_bDisabled=FALSE;
+			pRedirectData->m_bTopPageOnly = TRUE;
 			pRedirectData->m_strExecType=_T("Edge");
 			pRedirectData->m_dwCloseTimeout=3;
 			m_pEdge=pRedirectData;
@@ -804,23 +643,8 @@ public:
 
 			pRedirectData = NULL;
 			pRedirectData = new CURLRedirectDataClass;
-			pRedirectData->m_bDisabled=FALSE;
-			pRedirectData->m_strExecType=_T("IE");
-			pRedirectData->m_dwCloseTimeout=3;
-			m_pIE=pRedirectData;
-			m_arr_RedirectBrowser.Add(pRedirectData);
-
-			pRedirectData = NULL;
-			pRedirectData = new CURLRedirectDataClass;
-			pRedirectData->m_bDisabled=FALSE;
-			pRedirectData->m_strExecType=_T("Default");
-			pRedirectData->m_dwCloseTimeout=3;
-			m_pDefault=pRedirectData;
-			m_arr_RedirectBrowser.Add(pRedirectData);
-
-			pRedirectData = NULL;
-			pRedirectData = new CURLRedirectDataClass;
 			pRedirectData->m_bDisabled=TRUE;
+			pRedirectData->m_bTopPageOnly = TRUE;
 			pRedirectData->m_strExecType=_T("CUSTOM01");
 			pRedirectData->m_dwCloseTimeout=3;
 			m_pCustom01=pRedirectData;
@@ -829,6 +653,7 @@ public:
 			pRedirectData = NULL;
 			pRedirectData = new CURLRedirectDataClass;
 			pRedirectData->m_bDisabled=TRUE;
+			pRedirectData->m_bTopPageOnly = TRUE;
 			pRedirectData->m_strExecType=_T("CUSTOM02");
 			pRedirectData->m_dwCloseTimeout=3;
 			m_pCustom02=pRedirectData;
@@ -837,6 +662,7 @@ public:
 			pRedirectData = NULL;
 			pRedirectData = new CURLRedirectDataClass;
 			pRedirectData->m_bDisabled=TRUE;
+			pRedirectData->m_bTopPageOnly = TRUE;
 			pRedirectData->m_strExecType=_T("CUSTOM03");
 			pRedirectData->m_dwCloseTimeout=3;
 			m_pCustom03=pRedirectData;
@@ -845,6 +671,7 @@ public:
 			pRedirectData = NULL;
 			pRedirectData = new CURLRedirectDataClass;
 			pRedirectData->m_bDisabled=TRUE;
+			pRedirectData->m_bTopPageOnly = TRUE;
 			pRedirectData->m_strExecType=_T("CUSTOM04");
 			pRedirectData->m_dwCloseTimeout=3;
 			m_pCustom04=pRedirectData;
@@ -853,6 +680,7 @@ public:
 			pRedirectData = NULL;
 			pRedirectData = new CURLRedirectDataClass;
 			pRedirectData->m_bDisabled=TRUE;
+			pRedirectData->m_bTopPageOnly = TRUE;
 			pRedirectData->m_strExecType=_T("CUSTOM05");
 			pRedirectData->m_dwCloseTimeout=3;
 			m_pCustom05=pRedirectData;
@@ -860,124 +688,168 @@ public:
 
 			pRedirectData = NULL;
 			pRedirectData = new CURLRedirectDataClass;
-			pRedirectData->m_bDisabled=TRUE;
-			pRedirectData->m_strExecType=_T("CUSTOM06");
-			pRedirectData->m_dwCloseTimeout=3;
-			m_pCustom06=pRedirectData;
+			pRedirectData->m_bDisabled = FALSE;
+			pRedirectData->m_bTopPageOnly = TRUE;
+			pRedirectData->m_strExecType = _T("CUSTOM18");
+			pRedirectData->m_dwCloseTimeout = 3;
+			m_pCustom18 = pRedirectData;
 			m_arr_RedirectBrowser.Add(pRedirectData);
 
 			pRedirectData = NULL;
 			pRedirectData = new CURLRedirectDataClass;
-			pRedirectData->m_bDisabled=TRUE;
-			pRedirectData->m_strExecType=_T("CUSTOM07");
-			pRedirectData->m_dwCloseTimeout=3;
-			m_pCustom07=pRedirectData;
+			pRedirectData->m_bDisabled = FALSE;
+			pRedirectData->m_bTopPageOnly = TRUE;
+			pRedirectData->m_strExecType = _T("CUSTOM19");
+			pRedirectData->m_dwCloseTimeout = 3;
+			m_pCustom19 = pRedirectData;
 			m_arr_RedirectBrowser.Add(pRedirectData);
 
 			pRedirectData = NULL;
 			pRedirectData = new CURLRedirectDataClass;
-			pRedirectData->m_bDisabled=TRUE;
-			pRedirectData->m_strExecType=_T("CUSTOM08");
-			pRedirectData->m_dwCloseTimeout=3;
-			m_pCustom08=pRedirectData;
+			pRedirectData->m_bDisabled = FALSE;
+			pRedirectData->m_bTopPageOnly = TRUE;
+			pRedirectData->m_strExecType = _T("CUSTOM20");
+			pRedirectData->m_dwCloseTimeout = 3;
+			m_pCustom20 = pRedirectData;
 			m_arr_RedirectBrowser.Add(pRedirectData);
 
-			pRedirectData = NULL;
-			pRedirectData = new CURLRedirectDataClass;
-			pRedirectData->m_bDisabled=TRUE;
-			pRedirectData->m_strExecType=_T("CUSTOM09");
-			pRedirectData->m_dwCloseTimeout=3;
-			m_pCustom09=pRedirectData;
-			m_arr_RedirectBrowser.Add(pRedirectData);
 
-			pRedirectData = NULL;
-			pRedirectData = new CURLRedirectDataClass;
-			pRedirectData->m_bDisabled=TRUE;
-			pRedirectData->m_strExecType=_T("CUSTOM10");
-			pRedirectData->m_dwCloseTimeout=3;
-			m_pCustom10=pRedirectData;
-			m_arr_RedirectBrowser.Add(pRedirectData);
+			//pRedirectData = NULL;
+			//pRedirectData = new CURLRedirectDataClass;
+			//pRedirectData->m_bDisabled=FALSE;
+			//pRedirectData->m_strExecType=_T("IE");
+			//pRedirectData->m_dwCloseTimeout=3;
+			//m_pIE=pRedirectData;
+			//m_arr_RedirectBrowser.Add(pRedirectData);
 
-			pRedirectData = NULL;
-			pRedirectData = new CURLRedirectDataClass;
-			pRedirectData->m_bDisabled=TRUE;
-			pRedirectData->m_strExecType=_T("CUSTOM11");
-			pRedirectData->m_dwCloseTimeout=3;
+			//pRedirectData = NULL;
+			//pRedirectData = new CURLRedirectDataClass;
+			//pRedirectData->m_bDisabled=FALSE;
+			//pRedirectData->m_strExecType=_T("Default");
+			//pRedirectData->m_dwCloseTimeout=3;
+			//m_pDefault=pRedirectData;
+			//m_arr_RedirectBrowser.Add(pRedirectData);
 
-			m_pCustom11=pRedirectData;
-			m_arr_RedirectBrowser.Add(pRedirectData);
+			//pRedirectData = NULL;
+			//pRedirectData = new CURLRedirectDataClass;
+			//pRedirectData->m_bDisabled=TRUE;
+			//pRedirectData->m_strExecType=_T("CUSTOM06");
+			//pRedirectData->m_dwCloseTimeout=3;
+			//m_pCustom06=pRedirectData;
+			//m_arr_RedirectBrowser.Add(pRedirectData);
 
-			pRedirectData = NULL;
-			pRedirectData = new CURLRedirectDataClass;
-			pRedirectData->m_bDisabled=TRUE;
-			pRedirectData->m_strExecType=_T("CUSTOM12");
-			pRedirectData->m_dwCloseTimeout=3;
-			m_pCustom12=pRedirectData;
-			m_arr_RedirectBrowser.Add(pRedirectData);
+			//pRedirectData = NULL;
+			//pRedirectData = new CURLRedirectDataClass;
+			//pRedirectData->m_bDisabled=TRUE;
+			//pRedirectData->m_strExecType=_T("CUSTOM07");
+			//pRedirectData->m_dwCloseTimeout=3;
+			//m_pCustom07=pRedirectData;
+			//m_arr_RedirectBrowser.Add(pRedirectData);
 
-			pRedirectData = NULL;
-			pRedirectData = new CURLRedirectDataClass;
-			pRedirectData->m_bDisabled=TRUE;
-			pRedirectData->m_strExecType=_T("CUSTOM13");
-			pRedirectData->m_dwCloseTimeout=3;
-			m_pCustom13=pRedirectData;
-			m_arr_RedirectBrowser.Add(pRedirectData);
+			//pRedirectData = NULL;
+			//pRedirectData = new CURLRedirectDataClass;
+			//pRedirectData->m_bDisabled=TRUE;
+			//pRedirectData->m_strExecType=_T("CUSTOM08");
+			//pRedirectData->m_dwCloseTimeout=3;
+			//m_pCustom08=pRedirectData;
+			//m_arr_RedirectBrowser.Add(pRedirectData);
 
-			pRedirectData = NULL;
-			pRedirectData = new CURLRedirectDataClass;
-			pRedirectData->m_bDisabled=TRUE;
-			pRedirectData->m_strExecType=_T("CUSTOM14");
-			pRedirectData->m_dwCloseTimeout=3;
-			m_pCustom14=pRedirectData;
-			m_arr_RedirectBrowser.Add(pRedirectData);
+			//pRedirectData = NULL;
+			//pRedirectData = new CURLRedirectDataClass;
+			//pRedirectData->m_bDisabled=TRUE;
+			//pRedirectData->m_strExecType=_T("CUSTOM09");
+			//pRedirectData->m_dwCloseTimeout=3;
+			//m_pCustom09=pRedirectData;
+			//m_arr_RedirectBrowser.Add(pRedirectData);
 
-			pRedirectData = NULL;
-			pRedirectData = new CURLRedirectDataClass;
-			pRedirectData->m_bDisabled=TRUE;
-			pRedirectData->m_strExecType=_T("CUSTOM15");
-			pRedirectData->m_dwCloseTimeout=3;
-			m_pCustom15=pRedirectData;
-			m_arr_RedirectBrowser.Add(pRedirectData);
+			//pRedirectData = NULL;
+			//pRedirectData = new CURLRedirectDataClass;
+			//pRedirectData->m_bDisabled=TRUE;
+			//pRedirectData->m_strExecType=_T("CUSTOM10");
+			//pRedirectData->m_dwCloseTimeout=3;
+			//m_pCustom10=pRedirectData;
+			//m_arr_RedirectBrowser.Add(pRedirectData);
 
-			pRedirectData = NULL;
-			pRedirectData = new CURLRedirectDataClass;
-			pRedirectData->m_bDisabled=TRUE;
-			pRedirectData->m_strExecType=_T("CUSTOM16");
-			pRedirectData->m_dwCloseTimeout=3;
-			m_pCustom16=pRedirectData;
-			m_arr_RedirectBrowser.Add(pRedirectData);
+			//pRedirectData = NULL;
+			//pRedirectData = new CURLRedirectDataClass;
+			//pRedirectData->m_bDisabled=TRUE;
+			//pRedirectData->m_strExecType=_T("CUSTOM11");
+			//pRedirectData->m_dwCloseTimeout=3;
 
-			pRedirectData = NULL;
-			pRedirectData = new CURLRedirectDataClass;
-			pRedirectData->m_bDisabled=TRUE;
-			pRedirectData->m_strExecType=_T("CUSTOM17");
-			pRedirectData->m_dwCloseTimeout=3;
-			m_pCustom17=pRedirectData;
-			m_arr_RedirectBrowser.Add(pRedirectData);
+			//m_pCustom11=pRedirectData;
+			//m_arr_RedirectBrowser.Add(pRedirectData);
 
-			pRedirectData = NULL;
-			pRedirectData = new CURLRedirectDataClass;
-			pRedirectData->m_bDisabled=TRUE;
-			pRedirectData->m_strExecType=_T("CUSTOM18");
-			pRedirectData->m_dwCloseTimeout=3;
-			m_pCustom18=pRedirectData;
-			m_arr_RedirectBrowser.Add(pRedirectData);
+			//pRedirectData = NULL;
+			//pRedirectData = new CURLRedirectDataClass;
+			//pRedirectData->m_bDisabled=TRUE;
+			//pRedirectData->m_strExecType=_T("CUSTOM12");
+			//pRedirectData->m_dwCloseTimeout=3;
+			//m_pCustom12=pRedirectData;
+			//m_arr_RedirectBrowser.Add(pRedirectData);
 
-			pRedirectData = NULL;
-			pRedirectData = new CURLRedirectDataClass;
-			pRedirectData->m_bDisabled=TRUE;
-			pRedirectData->m_strExecType=_T("CUSTOM19");
-			pRedirectData->m_dwCloseTimeout=3;
-			m_pCustom19=pRedirectData;
-			m_arr_RedirectBrowser.Add(pRedirectData);
+			//pRedirectData = NULL;
+			//pRedirectData = new CURLRedirectDataClass;
+			//pRedirectData->m_bDisabled=TRUE;
+			//pRedirectData->m_strExecType=_T("CUSTOM13");
+			//pRedirectData->m_dwCloseTimeout=3;
+			//m_pCustom13=pRedirectData;
+			//m_arr_RedirectBrowser.Add(pRedirectData);
 
-			pRedirectData = NULL;
-			pRedirectData = new CURLRedirectDataClass;
-			pRedirectData->m_bDisabled=TRUE;
-			pRedirectData->m_strExecType=_T("CUSTOM20");
-			pRedirectData->m_dwCloseTimeout=3;
-			m_pCustom20=pRedirectData;
-			m_arr_RedirectBrowser.Add(pRedirectData);
+			//pRedirectData = NULL;
+			//pRedirectData = new CURLRedirectDataClass;
+			//pRedirectData->m_bDisabled=TRUE;
+			//pRedirectData->m_strExecType=_T("CUSTOM14");
+			//pRedirectData->m_dwCloseTimeout=3;
+			//m_pCustom14=pRedirectData;
+			//m_arr_RedirectBrowser.Add(pRedirectData);
+
+			//pRedirectData = NULL;
+			//pRedirectData = new CURLRedirectDataClass;
+			//pRedirectData->m_bDisabled=TRUE;
+			//pRedirectData->m_strExecType=_T("CUSTOM15");
+			//pRedirectData->m_dwCloseTimeout=3;
+			//m_pCustom15=pRedirectData;
+			//m_arr_RedirectBrowser.Add(pRedirectData);
+
+			//pRedirectData = NULL;
+			//pRedirectData = new CURLRedirectDataClass;
+			//pRedirectData->m_bDisabled=TRUE;
+			//pRedirectData->m_strExecType=_T("CUSTOM16");
+			//pRedirectData->m_dwCloseTimeout=3;
+			//m_pCustom16=pRedirectData;
+			//m_arr_RedirectBrowser.Add(pRedirectData);
+
+			//pRedirectData = NULL;
+			//pRedirectData = new CURLRedirectDataClass;
+			//pRedirectData->m_bDisabled=TRUE;
+			//pRedirectData->m_strExecType=_T("CUSTOM17");
+			//pRedirectData->m_dwCloseTimeout=3;
+			//m_pCustom17=pRedirectData;
+			//m_arr_RedirectBrowser.Add(pRedirectData);
+
+			//pRedirectData = NULL;
+			//pRedirectData = new CURLRedirectDataClass;
+			//pRedirectData->m_bDisabled=TRUE;
+			//pRedirectData->m_strExecType=_T("CUSTOM18");
+			//pRedirectData->m_dwCloseTimeout=3;
+			//m_pCustom18=pRedirectData;
+			//m_arr_RedirectBrowser.Add(pRedirectData);
+
+			//pRedirectData = NULL;
+			//pRedirectData = new CURLRedirectDataClass;
+			//pRedirectData->m_bDisabled=TRUE;
+			//pRedirectData->m_strExecType=_T("CUSTOM19");
+			//pRedirectData->m_dwCloseTimeout=3;
+			//m_pCustom19=pRedirectData;
+			//m_arr_RedirectBrowser.Add(pRedirectData);
+
+			//pRedirectData = NULL;
+			//pRedirectData = new CURLRedirectDataClass;
+			//pRedirectData->m_bDisabled=TRUE;
+			//pRedirectData->m_strExecType=_T("CUSTOM20");
+			//pRedirectData->m_dwCloseTimeout=3;
+			//m_pCustom20=pRedirectData;
+			//m_arr_RedirectBrowser.Add(pRedirectData);
 		}
 	}
 
@@ -1031,19 +903,13 @@ public:
 				out.WriteString(strTempFormat);
 				pstrOutPutData+=strTempFormat;
 			}
-			if(m_bUseScript)
-			{
-				strTempFormat=_T("@CLOSE_TIMEOUT:1\n");
-				out.WriteString(strTempFormat);
-				pstrOutPutData+=strTempFormat;
-			}
 			if (m_bQuickRedirect)
 			{
 				strTempFormat = _T("@INTRANET_ZONE\n");
 				out.WriteString(strTempFormat);
 				pstrOutPutData += strTempFormat;
 			}
-			if (m_bOffice365)
+			//共用URLなどを有効にするためのフラグセット
 			{
 				strTempFormat = _T("@TRUSTED_ZONE\n");
 				out.WriteString(strTempFormat);
@@ -1089,25 +955,11 @@ public:
 
 					}
 
-					//Office365
-					if (m_bOffice365)
+					if (m_bTopURLOnly)
 					{
-						//GLOVALの場合
-						if (m_bTopURLOnly)
-						{
-							strTempFormat = _T("@TOP_PAGE_ONLY\n");
-							out.WriteString(strTempFormat);
-							pstrOutPutData += strTempFormat;
-						}
-					}
-					else
-					{
-						if(ptr->m_bTopPageOnly)
-						{
-							strTempFormat=_T("@TOP_PAGE_ONLY\n");
-							out.WriteString(strTempFormat);
-							pstrOutPutData+=strTempFormat;
-						}
+						strTempFormat = _T("@TOP_PAGE_ONLY\n");
+						out.WriteString(strTempFormat);
+						pstrOutPutData += strTempFormat;
 					}
 					strTempFormat.Format(_T("@REDIRECT_PAGE_ACTION:%d\n"),ptr->m_dRedirectPageAction);
 					out.WriteString(strTempFormat);
@@ -1116,34 +968,6 @@ public:
 					strTempFormat.Format(_T("@CLOSE_TIMEOUT:%d\n"),ptr->m_dwCloseTimeout);
 					out.WriteString(strTempFormat);
 					pstrOutPutData+=strTempFormat;
-
-					if((ptr->m_dwZone&INTRANET_ZONE)==INTRANET_ZONE)
-					{
-						strTempFormat=_T("@INTRANET_ZONE\n");
-						out.WriteString(strTempFormat);
-						pstrOutPutData+=strTempFormat;
-					}
-
-					if((ptr->m_dwZone&TRUSTED_ZONE)==TRUSTED_ZONE)
-					{
-						strTempFormat=_T("@TRUSTED_ZONE\n");
-						out.WriteString(strTempFormat);
-						pstrOutPutData+=strTempFormat;
-					}
-
-					if((ptr->m_dwZone&INTERNET_ZONE)==INTERNET_ZONE)
-					{
-						strTempFormat=_T("@INTERNET_ZONE\n");
-						out.WriteString(strTempFormat);
-						pstrOutPutData+=strTempFormat;
-					}
-
-					if((ptr->m_dwZone&UNTRUSTED_ZONE)==UNTRUSTED_ZONE)
-					{
-						strTempFormat=_T("@UNTRUSTED_ZONE\n");
-						out.WriteString(strTempFormat);
-						pstrOutPutData+=strTempFormat;
-					}
 
 					int iMaxCnt=0;
 					iMaxCnt = ptr->m_arr_URL.GetCount();
@@ -1164,8 +988,6 @@ public:
 						out.WriteString(strTempFormat);
 						pstrOutPutData+=strTempFormat;
 					}
-//					out.WriteString(_T("\n"));
-//					pstrOutPutData+=_T("\n");
 				}
 			}
 			bRet=TRUE;
@@ -1173,16 +995,15 @@ public:
 		}
 		return bRet;
 	}
-	void SetArrayData(LPCTSTR lPath, BOOL bOffice365 = FALSE)
+	void SetArrayData(LPCTSTR lPath, BOOL bCitrixCustomEnv = FALSE)
 	{
 		if(lPath==NULL)return;
 		this->Clear();
 
-		InitSaveDataAll(bOffice365);
-		m_bOffice365=bOffice365;
+		InitSaveDataAll(bCitrixCustomEnv);
+		m_bCitrixCustomEnv = bCitrixCustomEnv;
 
 		CStdioFile in;
-		//if(in.Open(lPath,CFile::modeRead|CFile::modeCreate|CFile::modeNoTruncate))
 		if(in.Open(lPath,CFile::modeRead|CFile::shareDenyNone))
 		{
 			CURLRedirectDataClass* pRedirectData=NULL;
@@ -1248,15 +1069,12 @@ public:
 						pRedirectData->m_bTopPageOnly=bTopPageOnly;
 						pRedirectData->m_dRedirectPageAction=dRedirectPageAction;
 						pRedirectData->m_dwCloseTimeout=dwCloseTimeout;
-						pRedirectData->m_dwZone=dwZone;
 						
 						if(strExecType.CompareNoCase(_T("GLOBAL"))==0)
 						{
 							m_bURLOnly=bTopPageOnly;
 							m_bTraceLog=dRedirectPageAction==1?TRUE:FALSE;
-							m_bUseScript=dwCloseTimeout==1?TRUE:FALSE;
 							m_bQuickRedirect = (dwZone&INTRANET_ZONE) == INTRANET_ZONE ? TRUE : FALSE;
-							//m_bOffice365 = (dwZone&TRUSTED_ZONE) == TRUSTED_ZONE ? TRUE : FALSE;
 							m_bTopURLOnly = (dwZone&UNTRUSTED_ZONE) == UNTRUSTED_ZONE ? TRUE : FALSE;
 						}
 						else if(strExecType.CompareNoCase(_T("RDP"))==0 && m_pRDP)
@@ -1430,15 +1248,12 @@ public:
 					pRedirectData->m_bTopPageOnly=bTopPageOnly;
 					pRedirectData->m_dRedirectPageAction=dRedirectPageAction;
 					pRedirectData->m_dwCloseTimeout=dwCloseTimeout;
-					pRedirectData->m_dwZone=dwZone;
 					
 					if(strExecType.CompareNoCase(_T("GLOBAL"))==0)
 					{
 						m_bURLOnly=bTopPageOnly;
 						m_bTraceLog=dRedirectPageAction==1?TRUE:FALSE;
-						m_bUseScript=dwCloseTimeout==1?TRUE:FALSE;
 						m_bQuickRedirect = (dwZone&INTRANET_ZONE) == INTRANET_ZONE ? TRUE : FALSE;
-						//m_bOffice365 = (dwZone&TRUSTED_ZONE) == TRUSTED_ZONE ? TRUE : FALSE;
 						m_bTopURLOnly = (dwZone&UNTRUSTED_ZONE) == UNTRUSTED_ZONE ? TRUE : FALSE;
 					}
 					else if(strExecType.CompareNoCase(_T("RDP"))==0)
@@ -1523,20 +1338,17 @@ class CConfData
 	public:
 	CConfData()
 	{
-		m_iKeyCombination=0;
 		m_iSolutionType=0;
 		m_bRemoteAppMode=TRUE;
 		m_bRedirect_Clipboard=FALSE;
 		m_bRedirect_Printer=FALSE;
 		m_bRedirect_Drive=FALSE;
-		m_bEnableDebugLog=FALSE;
 	}
 	~CConfData(){}
 	void Copy(CConfData* ptr)
 	{
 		if(ptr==NULL)return;
 
-		m_iKeyCombination = ptr->m_iKeyCombination;
 		m_iSolutionType = ptr->m_iSolutionType;
 
 		m_strCustomBrowserPath = ptr->m_strCustomBrowserPath;
@@ -1554,11 +1366,9 @@ class CConfData
 		m_bRedirect_Clipboard = ptr->m_bRedirect_Clipboard;
 		m_bRedirect_Printer = ptr->m_bRedirect_Printer;
 		m_bRedirect_Drive = ptr->m_bRedirect_Drive;
-		m_bEnableDebugLog = ptr->m_bEnableDebugLog;
 	}
 
 	///////////////////////////////////////////////////
-	int m_iKeyCombination;
 	UINT m_iSolutionType;
 	CString m_strCustomBrowserPath;
 	CString m_strHorizon_ConnectionServerName;
@@ -1572,86 +1382,8 @@ class CConfData
 	BOOL m_bRedirect_Clipboard;
 	BOOL m_bRedirect_Printer;
 	BOOL m_bRedirect_Drive;
-	BOOL m_bEnableDebugLog;
-
 	//////////////////////////////////////////////////
 
-};
-
-class CResourceCAPData
-{
-	public:
-	CResourceCAPData()
-	{
-		m_bTabCntCAP=FALSE;
-		m_uiTabCntWARM=10;
-		m_uiTabCntMAX=15;
-		m_strTab_WARM_Msg  =_T("【お願い】\n現在開いているタブ・ウインドウ数が警告値に達しました。\n\nお手数ですが他の不要なタブ・ウインドウを閉じて下さい。\n\nコンピュータ資源の節約に、ご協力ください。");
-		m_strTab_MAX_Msg =_T("【お知らせ】\n現在開いているタブ・ウインドウ数が上限値に達しました。\nこれ以上タブ・ウインドウを追加できません。\n\nお手数ですが他の不要なタブ・ウインドウを閉じてから再度実行して下さい。\n\nコンピュータ資源の節約に、ご協力ください。");
-		m_uiTab_WARM_ShowTime=5;
-		m_uiTab_MAX_ShowTime=5;
-
-		m_bMemUsageCAP=FALSE;
-		m_uiMemWARM=600;
-		m_uiMemMAX=1024;
-		m_strMem_WARM_Msg  =_T("【お願い】\n現在の使用メモリが警告値に達しました。\n\nお手数ですが他の不要なタブ・ウインドウを閉じて下さい。\n\nコンピュータ資源の節約に、ご協力ください。");
-		m_strMem_MAX_Msg =_T("【お知らせ】\n現在の使用メモリが上限値に達しました。\n\nお手数ですが他の不要なタブ・ウインドウを閉じてから再度実行して下さい。\n\nコンピュータ資源の節約に、ご協力ください。");
-		m_uiMem_WARM_ShowTime=5;
-		m_uiMem_MAX_ShowTime=5;
-
-		m_bCPUPriorityCAP=FALSE;
-		m_uiCPUPriority=2;
-		m_strReadSettingType=_T("(N/A Default)");
-	}
-	~CResourceCAPData(){}
-	void Copy(CResourceCAPData* ptr)
-	{
-		if(ptr==NULL)return;
-
-		m_bTabCntCAP = ptr->m_bTabCntCAP;
-		m_uiTabCntWARM = ptr->m_uiTabCntWARM;
-		m_uiTabCntMAX = ptr->m_uiTabCntMAX;
-		m_strTab_WARM_Msg = ptr->m_strTab_WARM_Msg;
-		m_strTab_MAX_Msg = ptr->m_strTab_MAX_Msg;
-		m_uiTab_WARM_ShowTime = ptr->m_uiTab_WARM_ShowTime;
-		m_uiTab_MAX_ShowTime = ptr->m_uiTab_MAX_ShowTime;
-
-		m_bMemUsageCAP = ptr->m_bMemUsageCAP;
-		m_uiMemWARM = ptr->m_uiMemWARM;
-		m_uiMemMAX = ptr->m_uiMemMAX;
-		m_strMem_WARM_Msg = ptr->m_strMem_WARM_Msg;
-		m_strMem_MAX_Msg = ptr->m_strMem_MAX_Msg;
-		m_uiMem_WARM_ShowTime = ptr->m_uiMem_WARM_ShowTime;
-		m_uiMem_MAX_ShowTime = ptr->m_uiMem_MAX_ShowTime;
-
-		m_bCPUPriorityCAP = ptr->m_bCPUPriorityCAP;
-		m_uiCPUPriority = ptr->m_uiCPUPriority;
-		m_strReadSettingType=ptr->m_strReadSettingType;
-
-	}
-
-	///////////////////////////////////////////////////
-	BOOL m_bTabCntCAP;
-	UINT m_uiTabCntWARM;
-	UINT m_uiTabCntMAX;
-	CString m_strTab_WARM_Msg;
-	CString m_strTab_MAX_Msg;
-	UINT m_uiTab_WARM_ShowTime;
-	UINT m_uiTab_MAX_ShowTime;
-
-	BOOL m_bMemUsageCAP;
-	UINT m_uiMemWARM;
-	UINT m_uiMemMAX;
-	CString m_strMem_WARM_Msg;
-	CString m_strMem_MAX_Msg;
-	UINT m_uiMem_WARM_ShowTime;
-	UINT m_uiMem_MAX_ShowTime;
-
-	BOOL m_bCPUPriorityCAP;
-	UINT m_uiCPUPriority;
-
-	CString m_strReadSettingType;
-	//////////////////////////////////////////////////
 };
 #define LB_OK 0
 #define LB_NG 1
@@ -1844,7 +1576,7 @@ public:
 
 	CString m_strProfileFullPath;
 	int m_iFeatureType;
-	BOOL m_bOffice365;
+	BOOL m_bCitrixCustomEnv;//Citrix特殊環境フラグ
 
 	CString m_strExeFullPath;
 	CString m_strExeFileName;
@@ -1884,7 +1616,6 @@ public:
 	CURLRedirectList m_RedirectList;
 	CURLRedirectList m_RedirectListSaveData;
 	CString m_strRedirectFilePath;
-	CString m_strRedirect_Script_FilePath;
 	CConfData SettingConf;
 	CConfData SettingConfMod;
 
@@ -1894,13 +1625,6 @@ public:
 	void ReadSetting();
 	void ReadTemplate();
 	void ReadRDP_ReadOnceFile();
-
-	//ResourceCAP
-	CString m_strResourceCAPFullPath;
-	CResourceCAPData ResourceCAPConf;
-	CResourceCAPData ResourceCAPConfMod;
-	void ReadResourceCAPSetting();
-	BOOL ReadResourceCAPSettingFromReg();
 
 	void Exec_VMwareHorizon_Start(CString& CommandParam);
 	void Exec_VMware_Horizon(CString& strServerHostName,CString& strAppName,CString& strURL);
@@ -1924,11 +1648,6 @@ public:
 	CCRre* m_pReExecThread;
 	ProgressDlg* m_pDlgMsg;
 
-	//log
-	CString m_strLogFileDir;
-	CString m_strLogFileFullPath;
-	int m_iAdvancedLogLevel;
-
 	BOOL PumpMessage()
 	{
 		__try
@@ -1937,164 +1656,10 @@ public:
 		}
 		__except(GetExceptionCode()==EXCEPTION_ACCESS_VIOLATION)
 		{
-			WriteDebugTraceDateTime(_T("PumpMessage_EXCEPTION_ACCESS_VIOLATION"),DEBUG_LOG_TYPE_EX);
 			return FALSE;
 		}
 	}
 
-
-	void LogRotate(LPCTSTR LogFolderPath)
-	{
-		//12ヶ月分のログを保持する。ファイル名は、ThinBridgeYYYY-MM.log
-		int iMaxLogCnt=12;
-		CTime time = CTime::GetCurrentTime();
-		CString strLogFileNow;
-		strLogFileNow.Format(_T("%s%s.log"),m_strThisAppName,time.Format(_T("%Y-%m")));
-
-		int NowY=0;
-		int NowM=0;
-		NowY=time.GetYear();
-		NowM=time.GetMonth();
-		CString strTemp;
-		//面倒なので、用意してしまう。
-		CStringArray strASaveFileList;
-		for(int ii=0;ii<iMaxLogCnt;ii++)
-		{
-			if(NowM-ii <= 0)
-			{
-				strTemp.Format(_T("%s%04d-%02d.log"),m_strThisAppName,NowY-1,12+NowM-ii);
-				strASaveFileList.Add(strTemp);
-			}
-			else
-			{
-				strTemp.Format(_T("%s%04d-%02d.log"),m_strThisAppName,NowY,NowM-ii);
-				strASaveFileList.Add(strTemp);
-			}
-		}
-
-		//ログファイルを確認する。
-		//基準
-		CString strFindPath = LogFolderPath;
-		strFindPath += m_strThisAppName;
-		strFindPath += _T("*.log");
-		WIN32_FIND_DATA wfd={0};
-		HANDLE h = ::FindFirstFile(strFindPath, &wfd);
-		CString strFileNameTemp;
-		CString strDelFilePath;
-		//削除対象List
-		CStringArray strADeleteFileList;
-		if (h == INVALID_HANDLE_VALUE)
-		{
-			return;
-		}
-		do
-		{
-			BOOL bDirectory = wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY;
-			if (bDirectory)
-			{
-				if (::lstrcmp(wfd.cFileName, _T(".")) == 0 || ::lstrcmp(wfd.cFileName, _T("..")) == 0)
-					continue;
-			}
-			else
-			{
-				BOOL bHit=FALSE;
-				strFileNameTemp=wfd.cFileName;
-				for(int iii=0;iii<iMaxLogCnt;iii++)
-				{
-					//Listに一致した場合は抜ける
-					if(strFileNameTemp.CompareNoCase(strASaveFileList.GetAt(iii))==0)
-					{
-						bHit=TRUE;
-						break;
-					}
-				}
-				//Listに見つからない。
-				if(!bHit)
-				{
-					strDelFilePath=LogFolderPath;
-					strDelFilePath+=strFileNameTemp;
-					strADeleteFileList.Add(strDelFilePath);
-				}
-			}
-
-		} while (::FindNextFile(h, &wfd));
-		::FindClose(h);
-
-		for(int iiii=0;iiii<strADeleteFileList.GetCount() ;iiii++)
-		{
-			strDelFilePath=strADeleteFileList.GetAt(iiii);
-			::DeleteFile(strDelFilePath);
-		}
-		SetLastError(NO_ERROR);
-	}
-
-	void WriteDebugTraceDateTime(LPCTSTR msg,int iLogType)
-	{
-		if(msg==NULL)return;
-		if(_tcslen(msg)==0)return;
-		if(!SettingConf.m_bEnableDebugLog)return;
-
-		CString strWriteLine;
-		CString strDebugLine;
-		CTime time = CTime::GetCurrentTime();
-		strWriteLine.Format(_T("%s\t%s\t%s\n"),time.Format(_T("%Y-%m-%d %H:%M:%S")),sDEBUG_LOG_TYPE[iLogType],msg);
-		strDebugLine.Format(_T("ThinBridge:EXE\t%s"),strWriteLine);
-
-		_wsetlocale(LC_ALL, _T("jpn")); 
-
-		OutputDebugString(strDebugLine);
-
-		CStdioFile stdFile;
-
-		BOOL bFileWriteFlg=FALSE;
-		switch(m_iAdvancedLogLevel)
-		{
-			//全てのログを出力
-			case DEBUG_LOG_LEVEL_OUTPUT_ALL:
-			{
-				bFileWriteFlg=TRUE;
-				break;
-			}
-			//ファイル書き込み無し。
-			case DEBUG_LOG_LEVEL_OUTPUT_NO_FILE:
-			{
-				bFileWriteFlg=FALSE;
-				break;
-			}
-			//URL関連のみ
-			case DEBUG_LOG_LEVEL_OUTPUT_URL:
-			{
-				//ログの種類が一般、URLの場合
-				//if(iLogType==DEBUG_LOG_TYPE_GE || iLogType==DEBUG_LOG_TYPE_URL)
-				//{
-				//	bFileWriteFlg=TRUE;
-				//}
-				if(iLogType==DEBUG_LOG_TYPE_URL)
-				{
-					bFileWriteFlg=TRUE;
-				}
-				break;
-			}
-			default:
-				break;
-		}
-		if(bFileWriteFlg)
-		{
-			if(stdFile.Open(m_strLogFileFullPath,CFile::modeWrite|CFile::shareDenyNone|CFile::modeCreate|CFile::modeNoTruncate))
-			{
-				TRY
-				{
-					stdFile.SeekToEnd();
-					stdFile.WriteString(strWriteLine);
-				}
-				CATCH (CFileException, eP) {}
-				END_CATCH
-				stdFile.Close();
-			}
-		}
-		_wsetlocale(LC_ALL, _T(""));
-
-	}
 
 	//UTF16をUTF8に変換しURLEncodeした文字列を返却
 	CString ConvertUTF8_URLEncode(const CString& src)
@@ -2229,42 +1794,6 @@ public:
 		return strRet;
 	}
 
-	DWORD GetKeyCombi()
-	{
-		//#define KEY_COMB_SHIFT	0x00000001
-		//#define KEY_COMB_CTRL		0x00000010
-		//#define KEY_COMB_ALT		0x00000100
-		//#define KEY_COMB_LEFT		0x00001000
-		//#define KEY_COMB_UP		0x00010000
-		//#define KEY_COMB_RIGHT	0x00100000
-		//#define KEY_COMB_DOWN		0x01000000
-
-		DWORD dRet=0;
-		dRet = dRet | (::GetKeyState(VK_SHIFT)<0?KEY_COMB_SHIFT:0);
-		dRet = dRet | (::GetKeyState(VK_CONTROL)<0?KEY_COMB_CTRL:0);
-		dRet = dRet | (::GetKeyState(VK_MENU)<0?KEY_COMB_ALT:0);
-
-		dRet = dRet | (::GetKeyState(VK_LEFT)<0?KEY_COMB_LEFT:0);
-		dRet = dRet | (::GetKeyState(VK_UP)<0?KEY_COMB_UP:0);
-		dRet = dRet | (::GetKeyState(VK_RIGHT)<0?KEY_COMB_RIGHT:0);
-		dRet = dRet | (::GetKeyState(VK_DOWN)<0?KEY_COMB_DOWN:0);
-
-		return dRet;
-	}
-	BOOL bValidKeyCombi()
-	{
-		BOOL bRet=FALSE;
-		int iKeyCombination=0;
-		iKeyCombination=SettingConf.m_iKeyCombination;
-		if(iKeyCombination==0)
-		{
-			return TRUE;
-		}
-		DWORD dwKC = GetKeyCombi();
-		if(iKeyCombination==dwKC)
-			bRet=TRUE;
-		return bRet;
-	}
 	void ShowTimeoutMessageBox(LPCTSTR strMsg,LPCTSTR strCaption,int iType,int iTimeOut);
 
 	void InitFeatureSetting()
@@ -2278,19 +1807,12 @@ public:
 		{
 			m_iFeatureType = FE_PLUS;
 		}
-		//ThinBridgePlusリソースキャップ
-		else if(strFeatureType.CompareNoCase(_T("CAP_PLUS"))==0)
-		{
-			m_iFeatureType = CAP_PLUS;
-		}
 		else
 		{
 			m_iFeatureType = FE_PLUS;
 		}
 	}
-	BOOL IsResourceCAP_IE();
 	void ShowPlusSettingDlgEx();
-	void ShowPlusSettingDlgCAP();
 	inline BOOL IsWnd(CWnd* wnd)
 	{
 		if(wnd == NULL)

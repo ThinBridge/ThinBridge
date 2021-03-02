@@ -191,10 +191,12 @@ copy "$(SolutionDir)$(Configuration)\$(ProjectName).exe" "$(SolutionDir)$(Config
   <ItemGroup>
     <None Include="res\chrome.ico" />
     <None Include="res\ctx.ico" />
+    <None Include="res\DMZ.ico" />
     <None Include="res\edge.ico" />
     <None Include="res\firefox.ico" />
     <None Include="res\icon1.ico" />
     <None Include="res\ie.ico" />
+    <None Include="res\o365.ico" />
     <None Include="res\ThinBridge.ico" />
     <None Include="res\ThinBridge.rc2" />
     <None Include="res\rdp.ico" />
@@ -204,15 +206,12 @@ copy "$(SolutionDir)$(Configuration)\$(ProjectName).exe" "$(SolutionDir)$(Config
   <ItemGroup>
     <ClInclude Include="DetailEdit.h" />
     <ClInclude Include="DlgDebugWnd.h" />
-    <ClInclude Include="DlgEco.h" />
     <ClInclude Include="DlgEditURLML.h" />
     <ClInclude Include="DlgETC.h" />
-    <ClInclude Include="DlgEtcCAP.h" />
     <ClInclude Include="DlgMsgBox.h" />
     <ClInclude Include="DlgRD.h" />
     <ClInclude Include="DlgRDEdit.h" />
     <ClInclude Include="DlgRemoteSetting.h" />
-    <ClInclude Include="DlgSCEditor.h" />
     <ClInclude Include="DlgSetCX.h" />
     <ClInclude Include="DlgSetRDP.h" />
     <ClInclude Include="DlgSetVMW.h" />
@@ -228,15 +227,12 @@ copy "$(SolutionDir)$(Configuration)\$(ProjectName).exe" "$(SolutionDir)$(Config
   <ItemGroup>
     <ClCompile Include="DetailEdit.cpp" />
     <ClCompile Include="DlgDebugWnd.cpp" />
-    <ClCompile Include="DlgEco.cpp" />
     <ClCompile Include="DlgEditURLML.cpp" />
     <ClCompile Include="DlgETC.cpp" />
-    <ClCompile Include="DlgEtcCAP.cpp" />
     <ClCompile Include="DlgMsgBox.cpp" />
     <ClCompile Include="DlgRD.cpp" />
     <ClCompile Include="DlgRDEdit.cpp" />
     <ClCompile Include="DlgRemoteSetting.cpp" />
-    <ClCompile Include="DlgSCEditor.cpp" />
     <ClCompile Include="DlgSetCX.cpp" />
     <ClCompile Include="DlgSetRDP.cpp" />
     <ClCompile Include="DlgSetVMW.cpp" />

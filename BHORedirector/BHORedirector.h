@@ -15,7 +15,6 @@
 #include <string>
 #include "TBGlobal.h"
 #include "SBUtil.h"
-#include "ScriptHost.h"
 #include "AtlStdioFile.h"
 #include "URLRedirectCore.h"
 
@@ -39,8 +38,11 @@ public:
 	CBHORedirector()
 	{
 		m_fAdvised=FALSE;
-		m_bInVOS=FALSE;
-		m_hEventLog=NULL;
+		//m_hEventLog=NULL;
+		m_bInEdgeIEMode=FALSE;
+		m_iPrevMS_Sum = 0;
+		m_iPrevMS = 0;
+		m_iBreakerCnt = 0;
 	}
 	bool IsPageIWebBrowser(IDispatch* pDisp);
 	void CloseTabWindow(LPDISPATCH pDisp);
@@ -51,6 +53,9 @@ public:
 
 	CString m_strSafeGuardURL;
 	CString m_strSafeGuard_chkURL;
+	DWORD m_iPrevMS_Sum;
+	DWORD m_iPrevMS;
+	DWORD m_iBreakerCnt;
 
 	BOOL IsSafeGuard(LPCTSTR sURL,DWORD oTimeout=3)
 	{
@@ -60,23 +65,23 @@ public:
 
 		ATLTRACE(_T("====================\n"));
 		//前回の実行時間がない。現在をセット
-		if(g_iPrevMS==0)
-			g_iPrevMS=dwNow;
-		ATLTRACE(_T("g_iPrevMS:%d\n"),g_iPrevMS);
+		if(m_iPrevMS==0)
+			m_iPrevMS=dwNow;
+		ATLTRACE(_T("m_iPrevMS:%d\n"),m_iPrevMS);
 
-		dwPCon = dwNow - g_iPrevMS;
+		dwPCon = dwNow - m_iPrevMS;
 		ATLTRACE(_T("dwPCon:%d\n"),dwPCon);
 		//前回と今回の時間差を入れる。
-		g_iPrevMS_Sum+=dwPCon;
-		ATLTRACE(_T("g_iPrevMS_Sum:%d\n"),g_iPrevMS_Sum);
+		m_iPrevMS_Sum+=dwPCon;
+		ATLTRACE(_T("m_iPrevMS_Sum:%d\n"),m_iPrevMS_Sum);
 
 		//起動回数をインクリメント
-		InterlockedIncrement(&g_iBreakerCnt);
-		ATLTRACE(_T("g_iBreakerCnt:%d\n"),g_iBreakerCnt);
+		InterlockedIncrement(&m_iBreakerCnt);
+		ATLTRACE(_T("m_iBreakerCnt:%d\n"),m_iBreakerCnt);
 
 
 		//差分時間：2秒間に３回起動されている場合は、ループを疑う
-		if(g_iPrevMS_Sum<=1000)
+		if(m_iPrevMS_Sum<=1000)
 		{
 			//if(g_iBreakerCnt>=2)
 			//{
@@ -88,25 +93,25 @@ public:
 			//}
 			;
 		}
-		else if(g_iPrevMS_Sum<=2000)
+		else if(m_iPrevMS_Sum<=2000)
 		{
-			if(g_iBreakerCnt>=3)
+			if(m_iBreakerCnt>=3)
 			{
 				bRet=FALSE;
-				g_iPrevMS_Sum=0;
-				g_iPrevMS=0;
-				g_iBreakerCnt=0;
+				m_iPrevMS_Sum=0;
+				m_iPrevMS=0;
+				m_iBreakerCnt=0;
 				return bRet;
 			}
 		}
-		else if(g_iPrevMS_Sum<=3000)
+		else if(m_iPrevMS_Sum<=3000)
 		{
-			if(g_iBreakerCnt>=4)
+			if(m_iBreakerCnt>=4)
 			{
 				bRet=FALSE;
-				g_iPrevMS_Sum=0;
-				g_iPrevMS=0;
-				g_iBreakerCnt=0;
+				m_iPrevMS_Sum=0;
+				m_iPrevMS=0;
+				m_iBreakerCnt=0;
 				return bRet;
 			}
 		}
@@ -116,16 +121,16 @@ public:
 			if(dwPCon>3000)
 			{
 				//カウンター類をリセットする。
-				g_iPrevMS_Sum=0;
-				g_iPrevMS=0;
-				g_iBreakerCnt=0;
+				m_iPrevMS_Sum=0;
+				m_iPrevMS=0;
+				m_iBreakerCnt=0;
 			}
-			if(g_iBreakerCnt>=10)
+			if(m_iBreakerCnt>=10)
 			{
 				//カウンター類をリセットする。
-				g_iPrevMS_Sum=0;
-				g_iPrevMS=0;
-				g_iBreakerCnt=0;
+				m_iPrevMS_Sum=0;
+				m_iPrevMS=0;
+				m_iBreakerCnt=0;
 			}
 		}
 
@@ -135,16 +140,16 @@ public:
 			if(dwPCon>0 && dwPCon<oTimeout*1000+1000)
 			{
 				bRet=FALSE;
-				g_iPrevMS_Sum=0;
-				g_iPrevMS=0;
-				g_iBreakerCnt=0;
+				m_iPrevMS_Sum=0;
+				m_iPrevMS=0;
+				m_iBreakerCnt=0;
 				return bRet;
 			}
 		}
 		//抜ける前に前回の時間として今回の時間をセット
-		g_iPrevMS=dwNow;
+		m_iPrevMS=dwNow;
 		m_strSafeGuard_chkURL=sURL;
-		ATLTRACE(_T("g_iPrevMS:%d\n"),g_iPrevMS);
+		ATLTRACE(_T("m_iPrevMS:%d\n"),m_iPrevMS);
 		ATLTRACE(_T("-------------------\n"));
 		return bRet;
 	}
@@ -152,28 +157,19 @@ public:
 	CString m_strThinBridge_EXE_FullPath;
 	void Navigate_RedirectHTM(CComPtr<IWebBrowser2>  spWebBrowse,CString OptionParam,DWORD dRedirectPageAction,DWORD dwCloseTimeout);
 
-	//log
-	//CString m_strLogFileFullPath;
-	//int m_iAdvancedLogLevel;
 
-	BOOL m_bInVOS;
+	//MS-EdgeのIEMode判定用 2021-02-26
+	BOOL m_bInEdgeIEMode;
 
 	int m_IE_M_Ver;
 	CURLRedirectList m_RedirectList;
 	CString m_strRedirectFilePath;
-	CString m_strRedirect_Script_FilePath;
-
-	CString m_strResourceCAPFullPath;
-	CResourceCAPData m_ResourceCAPConf;
-	CIEStatusHelper m_IEStatus;
 
 	CString m_strUserDataPath;
 
 
 	void WriteDebugTraceDateTime(LPCTSTR msg,int iLogType,BOOL bForce=FALSE);
 	void OpenAnotherBrowser(CURLRedirectDataClass* pRedirectData,CString strURL);
-
-	DWORD GetURLZone(LPCTSTR pszURL);
 
 	STDMETHOD(SetSite)(IUnknown *pUnkSite);
 DECLARE_REGISTRY_RESOURCEID(IDR_BHOREDIRECTOR1)
@@ -211,12 +207,8 @@ END_SINK_MAP()
 	//void STDMETHODCALLTYPE NewWindow2(IDispatch **ppDisp,VARIANT_BOOL *Cancel);
 	//void STDMETHODCALLTYPE NewWindow3(IDispatch **ppDisp,VARIANT_BOOL *Cancel,VARIANT Flags,BSTR bstrUrlContext,BSTR bstrUrl);
 
-	HANDLE m_hEventLog;
-	STDMETHODIMP CBHORedirector::StartResourceCAPChk(void);
-	STDMETHODIMP CBHORedirector::ResourceCAPChk(void);
 	CAtlMap<intptr_t, intptr_t> m_MapCloseWebBrowserPtrs;
 
-//	void ShowTimeoutMessageBox(HWND hwnd,LPCTSTR strMsg,int iType,int iTimeOut);
 	DECLARE_PROTECT_FINAL_CONSTRUCT()
 
 	HRESULT FinalConstruct()

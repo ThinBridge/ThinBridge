@@ -231,7 +231,7 @@ void CDlgSetRDP::OnBnClickedButtonSt()
 void CDlgSetRDP::OnBnClickedButtonIe()
 {
 	SetDlgItemText(IDC_EDIT2,_T("InternetExplorer"));
-	SetDlgItemText(IDC_EDIT3,_T("C:\\Program Files (x86)\\Internet Explorer\\iexplore.exe"));
+	SetDlgItemText(IDC_EDIT3,_T("C:\\Program Files\\Internet Explorer\\iexplore.exe"));
 	SetDlgItemText(IDC_EDIT4,_T(""));
 }
 
@@ -239,7 +239,7 @@ void CDlgSetRDP::OnBnClickedButtonIe()
 void CDlgSetRDP::OnBnClickedButtonFf()
 {
 	SetDlgItemText(IDC_EDIT2,_T("MozillaFirefox"));
-	SetDlgItemText(IDC_EDIT3,_T("C:\\Program Files (x86)\\Mozilla Firefox\\firefox.exe"));
+	SetDlgItemText(IDC_EDIT3,_T("C:\\Program Files\\Mozilla Firefox\\firefox.exe"));
 	SetDlgItemText(IDC_EDIT4,_T(""));
 }
 
@@ -247,9 +247,9 @@ void CDlgSetRDP::OnBnClickedButtonFf()
 void CDlgSetRDP::OnBnClickedButtonGc()
 {
 	SetDlgItemText(IDC_EDIT2,_T("GoogleChrome"));
-	SetDlgItemText(IDC_EDIT3,_T("C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe"));
+	SetDlgItemText(IDC_EDIT3,_T("C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"));
 	//http://support.citrix.com/article/CTX132057
-	SetDlgItemText(IDC_EDIT4,_T("--allow-no-sandbox-job --disable-gpu"));
+	SetDlgItemText(IDC_EDIT4,_T(""));
 }
 
 

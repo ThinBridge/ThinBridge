@@ -77,54 +77,20 @@ STDMETHODIMP CBHORedirector::SetSite(IUnknown* pUnkSite)
 		m_strUserDataPath=lpszPath;
 		m_strUserDataPath+=_T("\\ThinBridge\\");
 
-		//ThinApp環境
-		if(SBUtil::InThinApp())// && m_IE_M_Ver==8)
+		//2021-02-26 MS-EdgeのIEMode判定用
+		m_bInEdgeIEMode=SBUtil::InEdgeIEMode();
+		if(m_bInEdgeIEMode)
 		{
-			m_bInVOS=TRUE;
-			m_strThinBridge_EXE_FullPath=_AtlModule.m_gSZFullPath;
-			m_strThinBridge_EXE_FullPath += _T("ExternalP.exe");
-			m_strRedirect_Script_FilePath=_AtlModule.m_gSZFullPath;
-			m_strRedirect_Script_FilePath+=_T("ThinBridgeBHO_VOS.tbs");
+			logmsg = _T("EdgeIEMode:TRUE");
+			this->WriteDebugTraceDateTime(logmsg, DEBUG_LOG_TYPE_GE, TRUE);
 		}
-		else
-		{
-			m_bInVOS=FALSE;
-			m_strThinBridge_EXE_FullPath=_AtlModule.m_gSZFullPath;
-			m_strThinBridge_EXE_FullPath += _T("ThinBridge.exe");
 
-			m_strRedirect_Script_FilePath=_AtlModule.m_gSZFullPath;
-			m_strRedirect_Script_FilePath+=_T("ThinBridgeBHO.tbs");
+		m_strThinBridge_EXE_FullPath=_AtlModule.m_gSZFullPath;
+		m_strThinBridge_EXE_FullPath += _T("ThinBridge.exe");
 
-			CString strUserScriptFile;
-			strUserScriptFile = m_strUserDataPath;
-			strUserScriptFile += _T("ThinBridgeBHO.tbs");
-			//ユーザー設定を優先させる。
-			if(PathFileExists(strUserScriptFile))
-			{
-				m_strRedirect_Script_FilePath=strUserScriptFile;
-			}
-			logmsg.Format(_T("ThinBridgeBHO.tbs [%s]"),m_strRedirect_Script_FilePath);
-			this->WriteDebugTraceDateTime(logmsg,DEBUG_LOG_TYPE_EX,TRUE);
-		}
 
 		m_strRedirectFilePath=_AtlModule.m_gSZFullPath;
 		m_strRedirectFilePath+=_T("ThinBridgeBHO.ini");
-
-		m_strResourceCAPFullPath=_AtlModule.m_gSZFullPath;
-		m_strResourceCAPFullPath+=_T("ResourceCap.ini");
-
-		CString strUserResourceCapFile;
-		strUserResourceCapFile = m_strUserDataPath;
-		strUserResourceCapFile += _T("ResourceCap.ini");
-		//ユーザー設定を優先させる。
-		if(PathFileExists(strUserResourceCapFile))
-		{
-			m_strResourceCAPFullPath=strUserResourceCapFile;
-		}
-		logmsg.Format(_T("ResourceCap.ini [%s]"),m_strResourceCAPFullPath);
-		this->WriteDebugTraceDateTime(logmsg,DEBUG_LOG_TYPE_EX,TRUE);
-		//ResouceCAPファイル内容の読込
-		m_ResourceCAPConf.ReadResourceCAPSetting(m_strResourceCAPFullPath);
 
 		CString strUserThinBridgeBHOINIFile;
 		strUserThinBridgeBHOINIFile = m_strUserDataPath;
@@ -140,49 +106,9 @@ STDMETHODIMP CBHORedirector::SetSite(IUnknown* pUnkSite)
 		logmsg=_T("SetSite Stage:01");
 		this->WriteDebugTraceDateTime(logmsg,DEBUG_LOG_TYPE_GE),TRUE;
 
-		if(m_ResourceCAPConf.m_bCPUPriorityCAP)
-		{
-			//0 _T("高"),
-			//1 _T("通常以上"),
-			//2 _T("通常"),
-			//3_T("通常以下"),
-			//4_T("低"),
-			if(m_ResourceCAPConf.m_uiCPUPriority==0)
-			{
-				::SetPriorityClass(::GetCurrentProcess(),HIGH_PRIORITY_CLASS);
-				::SetThreadPriority(::GetCurrentThread(),THREAD_PRIORITY_HIGHEST);
-			}
-			else if(m_ResourceCAPConf.m_uiCPUPriority==1)
-			{
-				::SetPriorityClass(::GetCurrentProcess(),ABOVE_NORMAL_PRIORITY_CLASS);
-				::SetThreadPriority(::GetCurrentThread(),THREAD_PRIORITY_ABOVE_NORMAL);
-			}
-			else if(m_ResourceCAPConf.m_uiCPUPriority==2)
-			{
-				::SetPriorityClass(::GetCurrentProcess(),NORMAL_PRIORITY_CLASS);
-				::SetThreadPriority(::GetCurrentThread(),THREAD_PRIORITY_NORMAL);
-			}
-			else if(m_ResourceCAPConf.m_uiCPUPriority==3)
-			{
-				::SetPriorityClass(::GetCurrentProcess(),BELOW_NORMAL_PRIORITY_CLASS);
-				::SetThreadPriority(::GetCurrentThread(),THREAD_PRIORITY_BELOW_NORMAL);
-			}
-			else if(m_ResourceCAPConf.m_uiCPUPriority==4)
-			{
-				::SetPriorityClass(::GetCurrentProcess(),IDLE_PRIORITY_CLASS);
-				::SetThreadPriority(::GetCurrentThread(),THREAD_PRIORITY_IDLE);
-			}
-		}
-
-		m_IEStatus.m_strProcessName=_AtlModule.m_gSZParentProcessName;
-		logmsg=_T("SetSite Stage:02");
-		this->WriteDebugTraceDateTime(logmsg,DEBUG_LOG_TYPE_GE,TRUE);
-
 		//Delay load
 		m_RedirectList.SetArrayDataDelayLoad(m_strRedirectFilePath);
-		//m_RedirectList.SetArrayData(m_strRedirectFilePath);
-		m_RedirectList.m_ScMgr.SetDataDelayLoad(m_strRedirect_Script_FilePath);
-		logmsg=_T("SetSite Stage:03");
+		logmsg=_T("SetSite Stage:02");
 		this->WriteDebugTraceDateTime(logmsg,DEBUG_LOG_TYPE_GE,TRUE);
 
 		try
@@ -191,7 +117,7 @@ STDMETHODIMP CBHORedirector::SetSite(IUnknown* pUnkSite)
 			HRESULT hr = pUnkSite->QueryInterface(IID_IWebBrowser2, (void **)&m_spWebBrowser);
 			if (SUCCEEDED(hr)&&m_spWebBrowser)
 			{
-				logmsg=_T("SetSite Stage:04");
+				logmsg=_T("SetSite Stage:03");
 				this->WriteDebugTraceDateTime(logmsg,DEBUG_LOG_TYPE_GE,TRUE);
 
 				// DWebBrowserEvents2 からのイベントをシンクに登録します。
@@ -201,8 +127,8 @@ STDMETHODIMP CBHORedirector::SetSite(IUnknown* pUnkSite)
 					m_fAdvised = TRUE;
 				}
 			}
-			m_hEventLog = CreateEvent(NULL, FALSE, TRUE, _T("TB_EventCAPChkg"));
-			logmsg=_T("SetSite Stage:05 End");
+			//m_hEventLog = CreateEvent(NULL, FALSE, TRUE, _T("TB_EventCAPChkg"));
+			logmsg=_T("SetSite Stage:04 End");
 			this->WriteDebugTraceDateTime(logmsg,DEBUG_LOG_TYPE_GE,TRUE);
 		}
 		catch (...)
@@ -231,12 +157,6 @@ STDMETHODIMP CBHORedirector::SetSite(IUnknown* pUnkSite)
 				// ここで、キャッシュしたポインタなどのリソースを解放します。
 				m_spWebBrowser.Release();
 				m_spWebBrowser=NULL;
-			}
-			//Global_WindowTabCnt_Decrement((DWORD)m_hWnd);
-			if(m_hEventLog)
-			{
-				CloseHandle(m_hEventLog);
-				m_hEventLog=NULL;
 			}
 		}
 		catch (...)
@@ -277,12 +197,6 @@ void STDMETHODCALLTYPE CBHORedirector::BeforeNavigate(LPDISPATCH pDisp, VARIANT*
 	if(!SBUtil::IsURL_HTTP(strURL))
 		return;
 
-	//HWND hwnd={0};
-	//HRESULT hr = m_spWebBrowser->get_HWND((LONG_PTR*)&hwnd);
-	//logmsg.Format(_T("CV_WND:0x%08x BeforeNavigate:%s"),hwnd,strURL);
-	//this->WriteDebugTraceDateTime(logmsg,DEBUG_LOG_TYPE_URL);
-	//hwnd=NULL;
-
 	CString strMsg;
 	DWORD dRet=0;
 
@@ -318,22 +232,19 @@ void STDMETHODCALLTYPE CBHORedirector::BeforeNavigate(LPDISPATCH pDisp, VARIANT*
 
 	strURL = SBUtil::Trim_URLOnly(strURL);
 
-	DWORD dwZone=ZONE_NA;
-	dwZone = GetURLZone(strURL);
-
 	//HitしたObjectコレクション格納
 	CAtlArray<intptr_t> arr_RedirectBrowserHit;
 	CURLRedirectDataClass* pRedirectData=NULL;
 
 	BOOL bResultRedirectURL=FALSE;
-	//VOSの中では無い。物理環境
-	if(!m_bInVOS)
+	//Edge IEModeの中の場合
+	if(m_bInEdgeIEMode)
 	{
-		bResultRedirectURL = m_RedirectList.IsRedirect(strURL_FULL,bTopPage,dwZone,&arr_RedirectBrowserHit,TRUE);
+		bResultRedirectURL = m_RedirectList.IsRedirectIEMode(strURL_FULL, bTopPage, &arr_RedirectBrowserHit, TRUE);
 	}
 	else
 	{
-		bResultRedirectURL = m_RedirectList.IsRedirectInVOS(strURL_FULL,bTopPage,dwZone,&arr_RedirectBrowserHit,TRUE);
+		bResultRedirectURL = m_RedirectList.IsRedirect(strURL_FULL,bTopPage,&arr_RedirectBrowserHit,TRUE);
 	}
 
 	//判定結果 リダイレクトする。
@@ -485,11 +396,6 @@ void STDMETHODCALLTYPE CBHORedirector::NavigateComplete(LPDISPATCH pDisp, VARIAN
 	if(!SBUtil::IsURL_HTTP(strURL))
 		return;
 
-//	HWND hwnd={0};
-//	HRESULT hr = m_spWebBrowser->get_HWND((LONG_PTR*)&hwnd);
-//	logmsg.Format(_T("CV_WND:0x%08x NavigateComplete:%s"),hwnd,strURL);
-//	this->WriteDebugTraceDateTime(logmsg,DEBUG_LOG_TYPE_URL);
-//	hwnd=NULL;
 	logmsg.Format(_T("NavigateComplete\t%s"),strURL);
 	this->WriteDebugTraceDateTime(logmsg,DEBUG_LOG_TYPE_URL);
 
@@ -523,22 +429,20 @@ void STDMETHODCALLTYPE CBHORedirector::NavigateComplete(LPDISPATCH pDisp, VARIAN
 
 	strURL = SBUtil::Trim_URLOnly(strURL);
 
-	DWORD dwZone=ZONE_NA;
-	dwZone = GetURLZone(strURL);
-
 	//HitしたObjectコレクション格納
 	CAtlArray<intptr_t> arr_RedirectBrowserHit;
 	CURLRedirectDataClass* pRedirectData=NULL;
 
 	BOOL bResultRedirectURL=FALSE;
-	//VOSの中では無い。物理環境
-	if(!m_bInVOS)
+
+	//Edge IEModeの中の場合
+	if (m_bInEdgeIEMode)
 	{
-		bResultRedirectURL = m_RedirectList.IsRedirect(strURL_FULL,bTopPage,dwZone,&arr_RedirectBrowserHit,FALSE);
+		bResultRedirectURL = m_RedirectList.IsRedirectIEMode(strURL_FULL, bTopPage,&arr_RedirectBrowserHit, FALSE);
 	}
 	else
 	{
-		bResultRedirectURL = m_RedirectList.IsRedirectInVOS(strURL_FULL,bTopPage,dwZone,&arr_RedirectBrowserHit,FALSE);
+		bResultRedirectURL = m_RedirectList.IsRedirect(strURL_FULL,bTopPage,&arr_RedirectBrowserHit,FALSE);
 	}
 
 	//判定結果 リダイレクトする。
@@ -633,11 +537,6 @@ void STDMETHODCALLTYPE CBHORedirector::NavigateComplete(LPDISPATCH pDisp, VARIAN
 			}
 		}
 	}
-	if(bTopPage)
-	{
-		//Threadに切り離す。
-		StartResourceCAPChk();
-	}
 	return;
 }
 BOOL CBHORedirector::IsEmptyPage()
@@ -683,137 +582,6 @@ BOOL CBHORedirector::IsEmptyPage()
 		}
 	}
 	return FALSE;
-}
-
-
-DWORD WINAPI Thread1(LPVOID ptr){
-	HRESULT hr={0};
-	__try
-	{
-		while(TRUE){
-			Sleep(200);
-			hr = ((CBHORedirector*)ptr)->ResourceCAPChk();
-			break;
-		}
-		ExitThread(TRUE);
-	}
-	__except( EXCEPTION_EXECUTE_HANDLER)
-	{
-		return 0;
-	}
-	return 0;
-}
-
-STDMETHODIMP CBHORedirector::StartResourceCAPChk(void)
-{
-	__try
-	{
-		if(m_ResourceCAPConf.IsEnableCAP())
-			CreateThread(NULL, 0,Thread1,(LPVOID)this, 0, NULL);//Thread1を開始
-	}
-	__except( EXCEPTION_EXECUTE_HANDLER)
-	{
-		return S_OK;
-	}
-	return S_OK;
-}
-
-STDMETHODIMP CBHORedirector::ResourceCAPChk(void)
-{
-	HANDLE hEvent={0};
-	hEvent = OpenEvent(EVENT_ALL_ACCESS, FALSE,_T("TB_EventCAPChkg"));
-	DWORD waitRes=WaitForSingleObject(hEvent,300);
-	if(waitRes == WAIT_TIMEOUT)
-	{
-		;
-	}
-	else
-	{
-		CString logmsg;
-		CString strCaption;
-		strCaption.Format(_T("ThinBridge %s"),m_ResourceCAPConf.m_strReadSettingType);
-		//それぞれ警告メッセージは1回しか表示しない。
-		for(;;)
-		{
-			//Tabチェック
-			if(m_ResourceCAPConf.m_bTabCntCAP)
-			{
-				DWORD dwTabCnt=0;
-				dwTabCnt = m_IEStatus.GetTabCnt();
-				//Tab Limit
-				if(dwTabCnt >= m_ResourceCAPConf.m_uiTabCntMAX)
-				{
-					if(!IsClosedTabWindow())
-					{
-						//logmsg.Format(_T("現在開いているタブ数(%d)が上限値(%d)に達しています。\n他の不要なタブを閉じてから再度実行して下さい。\n※空白(about:blank)ページを除く"),dwTabCnt,m_ResourceCAPConf.m_uiTabCntMAX);
-						logmsg=m_ResourceCAPConf.m_strTab_MAX_Msg;
-						this->WriteDebugTraceDateTime(logmsg,DEBUG_LOG_TYPE_EX);
-						if(m_ResourceCAPConf.m_uiTab_MAX_ShowTime>0)
-							SBUtil::ShowTimeoutMessageBox(logmsg,strCaption,MB_OK|MB_ICONWARNING|MB_SYSTEMMODAL,m_ResourceCAPConf.m_uiTab_MAX_ShowTime*1000);
-						CloseTabWindow();
-						break;
-					}
-				}
-				else if(dwTabCnt >= m_ResourceCAPConf.m_uiTabCntWARM)
-				{
-					if(!IsClosedTabWindow())
-					{
-						//logmsg.Format(_T("警告：現在開いているタブ数(%d)が警告値(%d)に達しています。\n他の不要なタブを閉じて下さい。\n※空白(about:blank)ページを除く"),dwTabCnt,m_ResourceCAPConf.m_uiTabCntWARM);
-						logmsg=m_ResourceCAPConf.m_strTab_WARM_Msg;
-						this->WriteDebugTraceDateTime(logmsg,DEBUG_LOG_TYPE_EX);
-						if(m_ResourceCAPConf.m_uiTab_WARM_ShowTime>0)
-							SBUtil::ShowTimeoutMessageBox(logmsg,strCaption,MB_OK|MB_ICONINFORMATION|MB_SYSTEMMODAL,m_ResourceCAPConf.m_uiTab_WARM_ShowTime*1000);
-						//break;警告は、続行
-					}
-				}
-			}
-			//mem チェック
-			if(m_ResourceCAPConf.m_bMemUsageCAP)
-			{
-				size_t iMem=0;
-				iMem = m_IEStatus.GetMemoryUsageSize();
-				TCHAR memorysize[24] = _T("");
-				TCHAR WarmMemorysize[24] = _T("");
-				TCHAR LimitMemorysize[24] = _T("");
-				::StrFormatByteSize(iMem, memorysize, 24);
-				::StrFormatByteSize(m_ResourceCAPConf.m_uiMemWARM*1024*1024,WarmMemorysize,24);
-				::StrFormatByteSize(m_ResourceCAPConf.m_uiMemMAX*1024*1024,LimitMemorysize,24);
-
-				//Mem Limit
-				if(iMem >= m_ResourceCAPConf.m_uiMemMAX*1024*1024)
-				{
-					if(!IsClosedTabWindow())
-					{
-						//logmsg.Format(_T("現在の使用メモリ(%s)が上限値(%s)に達しています。\n他の不要なタブを閉じてから再度実行して下さい。"),memorysize,LimitMemorysize);
-						logmsg=m_ResourceCAPConf.m_strMem_MAX_Msg;
-						this->WriteDebugTraceDateTime(logmsg,DEBUG_LOG_TYPE_EX);
-						if(m_ResourceCAPConf.m_uiMem_MAX_ShowTime>0)
-							SBUtil::ShowTimeoutMessageBox(logmsg,strCaption,MB_OK|MB_ICONWARNING|MB_SYSTEMMODAL,m_ResourceCAPConf.m_uiMem_MAX_ShowTime*1000);
-						CloseTabWindow();
-						break;
-					}
-				}
-				else if(iMem >= m_ResourceCAPConf.m_uiMemWARM*1024*1024)
-				{
-					if(!IsClosedTabWindow())
-					{
-						//logmsg.Format(_T("警告：現在の使用メモリ(%s)が警告値(%s)に達しています。\n他の不要なタブを閉じてください。"),memorysize,WarmMemorysize);
-						logmsg=m_ResourceCAPConf.m_strMem_WARM_Msg;
-						this->WriteDebugTraceDateTime(logmsg,DEBUG_LOG_TYPE_EX);
-						if(m_ResourceCAPConf.m_uiMem_WARM_ShowTime>0)
-							SBUtil::ShowTimeoutMessageBox(logmsg,strCaption,MB_OK|MB_ICONINFORMATION|MB_SYSTEMMODAL,m_ResourceCAPConf.m_uiMem_WARM_ShowTime*1000);
-						//break;警告は、続行
-					}
-				}
-			}
-			break;
-		}
-		SetEvent(hEvent);
-		CloseHandle(hEvent);
-		return S_OK;
-	}
-	CloseHandle(hEvent);
-	return S_FALSE;
 }
 
 
@@ -891,46 +659,6 @@ void CBHORedirector::CloseTabWindow()
 	{
 		;
 	}
-}
-DWORD CBHORedirector::GetURLZone(LPCTSTR pszURL)
-{
-/*
-URLZONE_INTRANET:
-URLZONE_TRUSTED:
-URLZONE_INTERNET:
-URLZONE_UNTRUSTED:
-
-#define ZONE_NA        0x0000
-#define INTRANET_ZONE  0x0001
-#define TRUSTED_ZONE   0x0010
-#define INTERNET_ZONE  0x0100
-#define UNTRUSTED_ZONE 0x1000
-*/
-	DWORD dwZone=0;
-	HRESULT hr={0};
-	CString strURL;//(pszURL);
-	SBUtil::GetDivChar(pszURL,260,strURL);
-	
-	CComPtr<IInternetSecurityManager>	pIInternetSecurityManager;
-
-	dwZone = URLZONE_INVALID;
-	pIInternetSecurityManager.CoCreateInstance(CLSID_InternetSecurityManager,NULL,CLSCTX_INPROC_SERVER);
-	if(pIInternetSecurityManager == NULL)
-		return	false;
-
-	hr = pIInternetSecurityManager->MapUrlToZone(strURL,&dwZone,0);
-
-	//独自の形式に変換する。
-	DWORD dwRet=ZONE_NA;
-	switch(dwZone)
-	{
-		case URLZONE_INTRANET:dwRet=INTRANET_ZONE;break;
-		case URLZONE_TRUSTED:dwRet=TRUSTED_ZONE;break;
-		case URLZONE_INTERNET:dwRet=INTERNET_ZONE;break;
-		case URLZONE_UNTRUSTED:dwRet=UNTRUSTED_ZONE;break;
-		default:dwRet=ZONE_NA;break;
-	}
-	return	dwRet;
 }
 
 void CBHORedirector::WriteDebugTraceDateTime(LPCTSTR msg,int iLogType,BOOL bForce/*=FALSE*/)
@@ -1016,6 +744,25 @@ void CBHORedirector::OpenAnotherBrowser(CURLRedirectDataClass* pRedirectData,CSt
 			strCommand.Format(_T("\"%s\" \"%s\" \"%s\""),m_strThinBridge_EXE_FullPath,strURL,pRedirectData->m_strExecType);
 			strCommand2.Format(_T("%s \"%s\""),strURL,pRedirectData->m_strExecType);
 		}
+		//Office365対応[CUSTOM20]
+		else if (strExecTypeUpper.Find(_T("CUSTOM20")) == 0)
+		{
+			if (pRedirectData->m_strExecExeFullPath.CompareNoCase(_T("RDP")) == 0
+				|| pRedirectData->m_strExecExeFullPath.CompareNoCase(_T("VMWARE")) == 0
+				|| pRedirectData->m_strExecExeFullPath.CompareNoCase(_T("CITRIX")) == 0
+				|| pRedirectData->m_strExecExeFullPath.CompareNoCase(_T("FIREFOX")) == 0
+				|| pRedirectData->m_strExecExeFullPath.CompareNoCase(_T("CHROME")) == 0
+				|| pRedirectData->m_strExecExeFullPath.CompareNoCase(_T("EDGE")) == 0)
+			{
+				strCommand.Format(_T("\"%s\" \"%s\" \"%s\""), m_strThinBridge_EXE_FullPath, strURL, pRedirectData->m_strExecExeFullPath);
+				strCommand2.Format(_T("%s \"%s\""), strURL, pRedirectData->m_strExecExeFullPath);
+			}
+			else
+			{
+				strCommand.Format(_T("\"%s\" \"%s\" \"%s\""), m_strThinBridge_EXE_FullPath, strURL, pRedirectData->m_strExecExeFullPath);
+				strCommand2.Format(_T("%s \"%s\""), strURL, pRedirectData->m_strExecExeFullPath);
+			}
+		}
 		//Custom系の場合は、m_strExecExeFullPath
 		else if(strExecTypeUpper.Find(_T("CUSTOM"))==0)
 		{
@@ -1079,7 +826,7 @@ void CBHORedirector::Navigate_RedirectHTM(CComPtr<IWebBrowser2>  spWebBrowse,CSt
 	if(spWebBrowse==NULL)
 		return;
 	//https://kb.vmware.com/selfservice/microsites/search.do?language=en_US&cmd=displayKC&externalId=2073845
-	if(!(m_IE_M_Ver==8 && m_bInVOS==TRUE))
+	if(!(m_IE_M_Ver==8))
 		spWebBrowse->Stop();
 	CString strURL;
 	strURL.Format(_T("res://%s/205?q=1"),_AtlModule.m_gSZModuleName);

@@ -46,14 +46,22 @@ extern "C" BOOL WINAPI DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpRes
 		memset(_AtlModule.m_gSZParentProcessName,0x00,sizeof(TCHAR)*MAX_PATH);
 		lstrcpyn(_AtlModule.m_gSZParentProcessName,str,MAX_PATH);
 
+
+		//コマンドラインを出力 2021-02-26 MS-EdgeのIEMode判定用
+		ATL::CString strCommandLine;
+		strCommandLine=GetCommandLine();
+
 		ATL::CString strLog;
-		strLog.Format(_T("ThinBridge:BHO DllMain ProcessAttach Dll:[%s] EXE:[%s] PID:[%d]"),_AtlModule.m_gSZModuleName,_AtlModule.m_gSZParentProcessName,pid);
+		strLog.Format(_T("ThinBridge:BHO DllMain ProcessAttach Dll:[%s] EXE:[%s] PID:[%d] CMD:[%s]"),_AtlModule.m_gSZModuleName,_AtlModule.m_gSZParentProcessName,pid, strCommandLine);
 		OutputDebugString(strLog);
     }
 	else if(dwReason == DLL_PROCESS_DETACH)
 	{
+		//コマンドラインを出力 2021-02-26 MS-EdgeのIEMode判定用
+		ATL::CString strCommandLine;
+		strCommandLine = GetCommandLine();
 		ATL::CString strLog;
-		strLog.Format(_T("ThinBridge:BHO DllMain ProcessDetach Dll:[%s] EXE:[%s] PID:[%d]"),_AtlModule.m_gSZModuleName,_AtlModule.m_gSZParentProcessName,pid);
+		strLog.Format(_T("ThinBridge:BHO DllMain ProcessDetach Dll:[%s] EXE:[%s] PID:[%d] CMD:[%s]"),_AtlModule.m_gSZModuleName,_AtlModule.m_gSZParentProcessName,pid, strCommandLine);
 		OutputDebugString(strLog);
 
 	}

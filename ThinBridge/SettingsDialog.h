@@ -643,19 +643,3 @@ public:
 	afx_msg void OnBnClickedOk();
 };
 
-class CSettingsDialogCAP : public CSettingsDialog
-{
-public:
-	CSettingsDialogCAP(CWnd* pParent = NULL)
-	{
-	}
-	virtual ~CSettingsDialogCAP()
-	{
-	}
-protected:
-	virtual void OnOK();
-	DECLARE_MESSAGE_MAP()
-public:
-	afx_msg void OnBnClickedOk();
-
-};

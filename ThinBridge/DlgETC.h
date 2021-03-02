@@ -2,7 +2,6 @@
 
 
 #include "DlgDebugWnd.h"
-#include "DlgSCEditor.h"
 class CDlgETC : public CPropertyPage
 {
 	DECLARE_DYNCREATE(CDlgETC)
@@ -20,7 +19,5 @@ protected:
 	LRESULT Set_OK(WPARAM wParam, LPARAM lParam);
 	DECLARE_MESSAGE_MAP()
 public:
-	afx_msg void OnBnClickedKeytestbutton();
 	afx_msg void OnBnClickedButton1();
-	afx_msg void OnBnClickedButtonSc();
 };

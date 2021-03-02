@@ -56,21 +56,11 @@ void CDlgRuleBase::OnEnableCtrl()
 	BOOL bChk=FALSE;
 	bChk=((CButton*)GetDlgItem(IDC_CHECK_DISABLE))->GetCheck()?FALSE:TRUE;
 
-	if (GetDlgItem(IDC_CHECK_TOP_PAGE_ONLY))
-		GetDlgItem(IDC_CHECK_TOP_PAGE_ONLY)->EnableWindow(bChk);
 	if (GetDlgItem(IDC_EDIT1))
 		GetDlgItem(IDC_EDIT1)->EnableWindow(bChk);
 	if (GetDlgItem(IDC_COMBO1))
 		GetDlgItem(IDC_COMBO1)->EnableWindow(bChk);
 
-	if (GetDlgItem(IDC_CHECK_INTERNET))
-		GetDlgItem(IDC_CHECK_INTERNET)->EnableWindow(bChk);
-	if (GetDlgItem(IDC_CHECK_INTRANET))
-		GetDlgItem(IDC_CHECK_INTRANET)->EnableWindow(bChk);
-	if (GetDlgItem(IDC_CHECK_TRUST))
-		GetDlgItem(IDC_CHECK_TRUST)->EnableWindow(bChk);
-	if (GetDlgItem(IDC_CHECK_UNTRUST))
-		GetDlgItem(IDC_CHECK_UNTRUST)->EnableWindow(bChk);
 	if (GetDlgItem(IDC_LIST1))
 		GetDlgItem(IDC_LIST1)->EnableWindow(bChk);
 	if (GetDlgItem(IDC_BUTTON_INS))
@@ -437,13 +427,6 @@ BOOL CDlgRuleBase::OnInitDialog()
 	else
 		((CButton*)GetDlgItem(IDC_CHECK_DISABLE))->SetCheck(0);
 
-	if(GetDlgItem(IDC_CHECK_TOP_PAGE_ONLY))
-	{
-		if(m_URD.m_bTopPageOnly)
-			((CButton*)GetDlgItem(IDC_CHECK_TOP_PAGE_ONLY))->SetCheck(1);
-		else
-			((CButton*)GetDlgItem(IDC_CHECK_TOP_PAGE_ONLY))->SetCheck(0);
-	}
 	if(m_Combo.m_hWnd)
 	{
 		for(int i=0;i<3;i++)
@@ -464,31 +447,6 @@ BOOL CDlgRuleBase::OnInitDialog()
 		else
 			SetDlgItemInt(IDC_EDIT1,3);
 	}
-	if (GetDlgItem(IDC_CHECK_INTERNET))
-	{
-		((CButton*)GetDlgItem(IDC_CHECK_INTERNET))->SetCheck(0);
-		if ((m_URD.m_dwZone&INTERNET_ZONE) == INTERNET_ZONE)
-			((CButton*)GetDlgItem(IDC_CHECK_INTERNET))->SetCheck(1);
-	}
-	if (GetDlgItem(IDC_CHECK_INTRANET))
-	{
-		((CButton*)GetDlgItem(IDC_CHECK_INTRANET))->SetCheck(0);
-		if ((m_URD.m_dwZone&INTRANET_ZONE) == INTRANET_ZONE)
-			((CButton*)GetDlgItem(IDC_CHECK_INTRANET))->SetCheck(1);
-	}
-	if (GetDlgItem(IDC_CHECK_TRUST))
-	{
-		((CButton*)GetDlgItem(IDC_CHECK_TRUST))->SetCheck(0);
-		if ((m_URD.m_dwZone&TRUSTED_ZONE) == TRUSTED_ZONE)
-			((CButton*)GetDlgItem(IDC_CHECK_TRUST))->SetCheck(1);
-	}
-	if (GetDlgItem(IDC_CHECK_UNTRUST))
-	{
-		((CButton*)GetDlgItem(IDC_CHECK_UNTRUST))->SetCheck(0);
-		if ((m_URD.m_dwZone&UNTRUSTED_ZONE) == UNTRUSTED_ZONE)
-			((CButton*)GetDlgItem(IDC_CHECK_UNTRUST))->SetCheck(1);
-	}
-
 
 	int iMaxCnt=0;
 	BOOL bEnable=TRUE;
@@ -561,13 +519,6 @@ LRESULT CDlgRuleBase::Set_OK(WPARAM wParam, LPARAM lParam)
 	else
 		m_URDSave.m_bDisabled=FALSE;
 
-	if(GetDlgItem(IDC_CHECK_TOP_PAGE_ONLY))
-	{
-		if(((CButton*)GetDlgItem(IDC_CHECK_TOP_PAGE_ONLY))->GetCheck())
-			m_URDSave.m_bTopPageOnly=TRUE;
-		else
-			m_URDSave.m_bTopPageOnly=FALSE;
-	}
 	int iID=0;
 	if(m_Combo.m_hWnd)
 	{
@@ -586,28 +537,6 @@ LRESULT CDlgRuleBase::Set_OK(WPARAM wParam, LPARAM lParam)
 		else
 			m_URDSave.m_dwCloseTimeout=3;
 	}
-	int iZone=0;
-	if (GetDlgItem(IDC_CHECK_INTERNET))
-	{
-		if (((CButton*)GetDlgItem(IDC_CHECK_INTERNET))->GetCheck())
-			iZone = INTERNET_ZONE;
-	}
-	if (GetDlgItem(IDC_CHECK_INTRANET))
-	{
-		if (((CButton*)GetDlgItem(IDC_CHECK_INTRANET))->GetCheck())
-			iZone |= INTRANET_ZONE;
-	}
-	if (GetDlgItem(IDC_CHECK_TRUST))
-	{
-		if (((CButton*)GetDlgItem(IDC_CHECK_TRUST))->GetCheck())
-			iZone |= TRUSTED_ZONE;
-	}
-	if (GetDlgItem(IDC_CHECK_UNTRUST))
-	{
-		if (((CButton*)GetDlgItem(IDC_CHECK_UNTRUST))->GetCheck())
-			iZone |= UNTRUSTED_ZONE;
-	}
-	m_URDSave.m_dwZone=iZone;
 
 	CString strData;
 	CString strURL;
@@ -800,16 +729,6 @@ BOOL CDlgCHR::OnInitDialog()
 	}
 	BOOL bRet =CDlgRuleBase::OnInitDialog();
 
-	//Office365に場合
-	if (theApp.m_bOffice365)
-	{
-		//TOPページのみは、非表示GLOVAL設定に移動（個別設定をやめ全体で設定する）
-		if (GetDlgItem(IDC_CHECK_TOP_PAGE_ONLY))
-		{
-			((CButton*)GetDlgItem(IDC_CHECK_TOP_PAGE_ONLY))->SetCheck(0);
-			((CButton*)GetDlgItem(IDC_CHECK_TOP_PAGE_ONLY))->ShowWindow(SW_HIDE);
-		}
-	}
 	if(bRet)
 	{
 		CIconHelper ICoHelper;
@@ -2213,55 +2132,231 @@ void CDlgCU20::OnBnClickedButtonFdlg()
 }
 //Office365
 IMPLEMENT_DYNCREATE(CDlgO365, CDlgRuleBase)
+void CDlgO365::DoDataExchange(CDataExchange* pDX)
+{
+	CDlgRuleBase::DoDataExchange(pDX);
+	DDX_Control(pDX, IDC_COMBO2, m_Combo2);
+}
+static LPCTSTR gActionList[] = {
+	_T("Microsoft RDP"),
+	_T("VMware Horizon"),
+	_T("Citrix Virtual Apps"),
+	_T("Mozilla Firefox"), 
+	_T("Google Chrome"), 
+	_T("Microsoft Edge"), 
+};
+
 BEGIN_MESSAGE_MAP(CDlgO365, CDlgRuleBase)
+	ON_NOTIFY(NM_DBLCLK, IDC_LIST1, OnDblclkList1)
+	ON_NOTIFY(NM_DBLCLK, IDC_LIST2, OnDblclkList2)
 	ON_MESSAGE(ID_SETTING_OK, Set_OK)
 	ON_BN_CLICKED(IDC_CHECK_DISABLE, OnEnableCtrl)
 	ON_BN_CLICKED(IDC_BUTTON_FDLG, OnBnClickedButtonFdlg)
 	ON_BN_CLICKED(IDC_BUTTON_O365, OnBnClickedButtonOffice365)
 	ON_BN_CLICKED(IDC_BUTTON_O365_RELOAD, OnBnClickedButtonReload)
+	ON_BN_CLICKED(IDC_BUTTON1, OnBnClickedCopy1)
+	ON_BN_CLICKED(IDC_BUTTON2, OnBnClickedCopy2)
+
 END_MESSAGE_MAP()
+
+void CDlgO365::OnDblclkList1(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	*pResult = 0;
+}
+void CDlgO365::OnDblclkList2(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	*pResult = 0;
+}
+
 BOOL CDlgO365::OnInitDialog()
 {
 	if (theApp.m_RedirectList.m_pCustom20)
 	{
 		m_URD.Copy(theApp.m_RedirectList.m_pCustom20);
 	}
-	BOOL bRet = CDlgRuleBase::OnInitDialog();
+	CPropertyPage::OnInitDialog();
 
-	//TOPページのみは、非表示GLOVAL設定に移動（個別設定をやめ全体で設定する）
-	if (GetDlgItem(IDC_CHECK_TOP_PAGE_ONLY))
+	m_List.InsertColumn(URL, _T("ターゲットURL ルール"), LVCFMT_LEFT, 800);
+	ListView_SetExtendedListViewStyle(m_List.m_hWnd, LVS_EX_FULLROWSELECT);
+
+	m_List2.InsertColumn(URL, _T("除外URL ルール"), LVCFMT_LEFT, 800);
+	ListView_SetExtendedListViewStyle(m_List2.m_hWnd, LVS_EX_FULLROWSELECT);
+
+	if (m_URD.m_bDisabled)
+		((CButton*)GetDlgItem(IDC_CHECK_DISABLE))->SetCheck(1);
+	else
+		((CButton*)GetDlgItem(IDC_CHECK_DISABLE))->SetCheck(0);
+
+	if (m_Combo.m_hWnd)
 	{
-		((CButton*)GetDlgItem(IDC_CHECK_TOP_PAGE_ONLY))->SetCheck(0);
-		((CButton*)GetDlgItem(IDC_CHECK_TOP_PAGE_ONLY))->ShowWindow(SW_HIDE);
-	}
-	if (m_URD.m_strExecExeFullPath.IsEmpty())
-		m_URD.m_strExecExeFullPath = _T("TBChromeSwitcher.exe");
+		for (int i = 0; i < 3; i++)
+		{
+			m_Combo.AddString(gRedirectPageActionList[i]);
+		}
 
-	SetDlgItemText(IDC_EDIT_LCB, m_URD.m_strExecExeFullPath);
+		if (0 <= m_URD.m_dRedirectPageAction && m_URD.m_dRedirectPageAction <= 2)
+			m_Combo.SetCurSel(m_URD.m_dRedirectPageAction);
+		else
+			m_Combo.SetCurSel(0);
+	}
+
+	if (GetDlgItem(IDC_EDIT1))
+	{
+		if (1 <= m_URD.m_dwCloseTimeout && m_URD.m_dwCloseTimeout <= 60)
+			SetDlgItemInt(IDC_EDIT1, m_URD.m_dwCloseTimeout);
+		else
+			SetDlgItemInt(IDC_EDIT1, 3);
+	}
+
+	int iMaxCnt = 0;
+	CString strLineData;
+
+	//対象List
+	iMaxCnt = m_URD.m_arr_URL.GetCount();
+	for (int i = 0; i < iMaxCnt; i++)
+	{
+		strLineData = m_URD.m_arr_URL.GetAt(i);
+		int index = this->m_List.GetItemCount();
+		int iItem = this->m_List.InsertItem(index, _T(""));
+
+		if (strLineData.Find(_T("#")) == 0)
+		{
+			continue;
+		}
+		else if (strLineData.Find(_T(";")) == 0)
+		{
+			continue;
+		}
+		this->m_List.SetItemText(iItem, URL, strLineData);
+	}
+
+	//除外対象List
+	iMaxCnt = m_URD.m_arr_URL_EX.GetCount();
+	for (int i = 0; i < iMaxCnt; i++)
+	{
+		strLineData = m_URD.m_arr_URL_EX.GetAt(i);
+		int index = this->m_List2.GetItemCount();
+		int iItem = this->m_List2.InsertItem(index, _T(""));
+
+		if (strLineData.Find(_T("#")) == 0)
+		{
+			continue;
+		}
+		else if (strLineData.Find(_T(";")) == 0)
+		{
+			continue;
+		}
+		this->m_List2.SetItemText(iItem, URL, strLineData);
+	}
+
+	UpdateListCounter(&this->m_List);
+	UpdateListCounter(&this->m_List2);
+
+
+	//Citrix特殊環境フラグ
+	if (theApp.m_bCitrixCustomEnv)
+	{
+		CString strTBChromeSwitcher;
+		strTBChromeSwitcher= _T("TBChromeSwitcher.exe");
+		m_Combo2.AddString(strTBChromeSwitcher);
+		if (m_URD.m_strExecExeFullPath.IsEmpty())
+			m_URD.m_strExecExeFullPath = _T("TBChromeSwitcher.exe");
+		m_Combo2.SetWindowText( m_URD.m_strExecExeFullPath);
+	}
+	else
+	{
+		if (m_Combo2.m_hWnd)
+		{
+			for (int i = 0; i < 6; i++)
+			{
+				m_Combo2.AddString(gActionList[i]);
+			}
+
+			if (m_URD.m_strExecExeFullPath.CompareNoCase(_T("RDP")) == 0)
+			{
+				m_Combo2.SetCurSel(0);
+				m_Combo2.SetWindowText(gActionList[0]);
+			}
+			else if (m_URD.m_strExecExeFullPath.CompareNoCase(_T("VMWARE")) == 0)
+			{
+				m_Combo2.SetCurSel(1);
+				m_Combo2.SetWindowText(gActionList[1]);
+			}
+			else if (m_URD.m_strExecExeFullPath.CompareNoCase(_T("CITRIX")) == 0)
+			{
+				m_Combo2.SetCurSel(2);
+				m_Combo2.SetWindowText(gActionList[2]);
+			}
+			else if (m_URD.m_strExecExeFullPath.CompareNoCase(_T("Firefox")) == 0)
+			{
+				m_Combo2.SetCurSel(3);
+				m_Combo2.SetWindowText(gActionList[3]);
+			}
+			else if (m_URD.m_strExecExeFullPath.CompareNoCase(_T("Chrome")) == 0)
+			{
+				m_Combo2.SetCurSel(4);
+				m_Combo2.SetWindowText(gActionList[4]);
+			}
+			else if (m_URD.m_strExecExeFullPath.CompareNoCase(_T("Edge")) == 0)
+			{
+				m_Combo2.SetCurSel(5);
+				m_Combo2.SetWindowText(gActionList[5]);
+			}
+			else
+			{
+				m_Combo2.SetWindowText(m_URD.m_strExecExeFullPath);
+			}
+		}
+	}
+
 	OnEnableCtrl();
-	if (bRet)
-	{
-		CIconHelper ICoHelper;
+	CIconHelper ICoHelper;
+	if(theApp.m_bCitrixCustomEnv)
 		ICoHelper = theApp.LoadIcon(IDI_ICON_Chrome);
-		m_Image.SetIcon(ICoHelper);
-	}
-	return bRet;
+	else
+		ICoHelper = theApp.LoadIcon(IDI_ICON_o365);
+	m_Image.SetIcon(ICoHelper);
+	return TRUE;
 }
 LRESULT CDlgO365::Set_OK(WPARAM wParam, LPARAM lParam)
 {
 	if (CDlgRuleBase::Set_OK(wParam, lParam) == 0)
 	{
 		CString strExePath;
-		GetDlgItemText(IDC_EDIT_LCB, strExePath);
+		m_Combo2.GetWindowText(strExePath);
 		strExePath.TrimLeft();
 		strExePath.TrimRight();
 		if (strExePath.IsEmpty())
 		{
 			if (!m_URDSave.m_bDisabled)
 			{
-				::MessageBox(this->m_hWnd, _T("[Office365 WebApps]\n指定ブラウザーのパスを設定して下さい。"), theApp.m_strThisAppName, MB_OK | MB_ICONERROR);
+				::MessageBox(this->m_hWnd, _T("[Office365 WebApps]\nブラウザー種別を設定して下さい。"), theApp.m_strThisAppName, MB_OK | MB_ICONERROR);
 				return 1;
 			}
+		}
+		if (strExePath.CompareNoCase(gActionList[0]) == 0)
+		{
+			strExePath=_T("RDP");
+		}
+		else if (strExePath.CompareNoCase(gActionList[1]) == 0)
+		{
+			strExePath = _T("VMWARE");
+		}
+		else if (strExePath.CompareNoCase(gActionList[2]) == 0)
+		{
+			strExePath = _T("CITRIX");
+		}
+		else if (strExePath.CompareNoCase(gActionList[3]) == 0)
+		{
+			strExePath = _T("Firefox");
+		}
+		else if (strExePath.CompareNoCase(gActionList[4]) == 0)
+		{
+			strExePath = _T("Chrome");
+		}
+		else if (strExePath.CompareNoCase(gActionList[5]) == 0)
+		{
+			strExePath = _T("Edge");
 		}
 		m_URDSave.m_strExecExeFullPath = strExePath;
 		theApp.m_RedirectListSaveData.m_pCustom20->Copy(&m_URDSave);
@@ -2273,9 +2368,53 @@ void CDlgO365::OnEnableCtrl()
 	CDlgRuleBase::OnEnableCtrl();
 	BOOL bChk = FALSE;
 	bChk = ((CButton*)GetDlgItem(IDC_CHECK_DISABLE))->GetCheck() ? FALSE : TRUE;
-	GetDlgItem(IDC_EDIT_LCB)->EnableWindow(bChk);
 	GetDlgItem(IDC_BUTTON_FDLG)->EnableWindow(bChk);
+	GetDlgItem(IDC_COMBO2)->EnableWindow(bChk);
 }
+void CDlgO365::CopyList(CListCtrl* ptrList)
+{
+	CWaitCursor wc;
+	CString strData;
+
+	CString strURL;
+	int iSelCount = -1;
+	while ((iSelCount = ptrList->GetNextItem(iSelCount, LVNI_ALL)) != -1)
+	{
+		strURL.Empty();
+		strURL = ptrList->GetItemText(iSelCount, URL);
+		strData += strURL;
+		strData += _T("\r\n");
+	}
+	if (!::OpenClipboard(NULL))
+		return;
+
+	int	nByte = (strData.GetLength() + 1) * sizeof(TCHAR);
+	HGLOBAL hText = ::GlobalAlloc(GMEM_MOVEABLE | GMEM_ZEROINIT, nByte);
+
+	if (hText == NULL)
+		return;
+
+	BYTE *	pText = (BYTE *) ::GlobalLock(hText);
+
+	if (pText == NULL)
+		return;
+
+	::memcpy(pText, (LPCTSTR)strData, nByte);
+	::GlobalUnlock(hText);
+	::OpenClipboard(NULL);
+	::EmptyClipboard();
+	::SetClipboardData(CF_UNICODETEXT, hText);
+	::CloseClipboard();
+}
+void CDlgO365::OnBnClickedCopy1()
+{
+	CopyList(&m_List);
+}
+void CDlgO365::OnBnClickedCopy2()
+{
+	CopyList(&m_List2);
+}
+
 void CDlgO365::OnBnClickedButtonFdlg()
 {
 	CString szFilter;
@@ -2286,7 +2425,7 @@ void CDlgO365::OnBnClickedButtonFdlg()
 	fileDlg.m_ofn.lpstrTitle = strTitle.GetBuffer(0);
 	if (fileDlg.DoModal() == IDOK)
 	{
-		SetDlgItemText(IDC_EDIT_LCB, fileDlg.GetPathName());
+		m_Combo2.SetWindowText( fileDlg.GetPathName());
 	}
 }
 void CDlgO365::OnBnClickedButtonOffice365()
@@ -2346,7 +2485,6 @@ void CDlgO365::OnBnClickedButtonOffice365()
 void CDlgO365::OnBnClickedButtonReload()
 {
 	int iMaxCnt = 0;
-	BOOL bEnable = TRUE;
 	CString strLineData;
 
 	CURLRedirectList RedirectList;
@@ -2358,23 +2496,19 @@ void CDlgO365::OnBnClickedButtonReload()
 	iMaxCnt = m_URD.m_arr_URL.GetCount();
 	for (int i = 0; i < iMaxCnt; i++)
 	{
-		bEnable = TRUE;
 		strLineData = m_URD.m_arr_URL.GetAt(i);
 		int index = this->m_List.GetItemCount();
 		int iItem = this->m_List.InsertItem(index, _T(""));
 
 		if (strLineData.Find(_T("#")) == 0)
 		{
-			bEnable = FALSE;
-			strLineData = strLineData.Mid(1);
+			continue;
 		}
 		else if (strLineData.Find(_T(";")) == 0)
 		{
-			bEnable = FALSE;
-			strLineData = strLineData.Mid(1);
+			continue;
 		}
 		this->m_List.SetItemText(iItem, URL, strLineData);
-		this->m_List.SetItemText(iItem, ENABLE, bEnable ? _T("○") : _T("－"));
 	}
 
 	//除外対象List
@@ -2382,23 +2516,19 @@ void CDlgO365::OnBnClickedButtonReload()
 	iMaxCnt = m_URD.m_arr_URL_EX.GetCount();
 	for (int i = 0; i < iMaxCnt; i++)
 	{
-		bEnable = TRUE;
 		strLineData = m_URD.m_arr_URL_EX.GetAt(i);
 		int index = this->m_List2.GetItemCount();
 		int iItem = this->m_List2.InsertItem(index, _T(""));
 
 		if (strLineData.Find(_T("#")) == 0)
 		{
-			bEnable = FALSE;
-			strLineData = strLineData.Mid(1);
+			continue;
 		}
 		else if (strLineData.Find(_T(";")) == 0)
 		{
-			bEnable = FALSE;
-			strLineData = strLineData.Mid(1);
+			continue;
 		}
 		this->m_List2.SetItemText(iItem, URL, strLineData);
-		this->m_List2.SetItemText(iItem, ENABLE, bEnable ? _T("○") : _T("－"));
 	}
 	UpdateListCounter(&this->m_List);
 	UpdateListCounter(&this->m_List2);
@@ -2419,13 +2549,6 @@ BOOL CDlgChromeSwitcher::OnInitDialog()
 		m_URD.Copy(theApp.m_RedirectList.m_pCustom19);
 	}
 	BOOL bRet = CDlgRuleBase::OnInitDialog();
-	//TOPページのみは、非表示GLOVAL設定に移動（個別設定をやめ全体で設定する）
-	if (GetDlgItem(IDC_CHECK_TOP_PAGE_ONLY))
-	{
-		((CButton*)GetDlgItem(IDC_CHECK_TOP_PAGE_ONLY))->SetCheck(0);
-		((CButton*)GetDlgItem(IDC_CHECK_TOP_PAGE_ONLY))->ShowWindow(SW_HIDE);
-	}
-
 	if(m_URD.m_strExecExeFullPath.IsEmpty())
 		m_URD.m_strExecExeFullPath=_T("TBChromeSwitcher.exe");
 
@@ -2619,7 +2742,11 @@ BOOL CDlgDMZ::OnInitDialog()
 	UpdateListCounter(&this->m_List);
 	m_URD.m_strExecExeFullPath = _T("");
 	CIconHelper ICoHelper;
-	ICoHelper = theApp.LoadIcon(IDR_MAINFRAME);
+	if (theApp.m_bCitrixCustomEnv)
+		ICoHelper = theApp.LoadIcon(IDR_MAINFRAME);
+	else
+		ICoHelper = theApp.LoadIcon(IDI_ICON_DMZ);
+
 	m_Image.SetIcon(ICoHelper);
 	return TRUE;
 }

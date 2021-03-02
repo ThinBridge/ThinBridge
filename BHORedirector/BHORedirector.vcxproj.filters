@@ -57,9 +57,6 @@
     <ClInclude Include="SBUtil.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="ScriptHost.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="AtlStdioFile.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>

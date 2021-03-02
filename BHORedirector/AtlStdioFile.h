@@ -11,7 +11,6 @@
 #include <activscp.h>
 #include "TBGlobal.h"
 #include "SBUtil.h"
-#include "ScriptHost.h"
 #include <atlfile.h>
 #include <string>
 

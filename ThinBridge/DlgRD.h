@@ -475,14 +475,21 @@ public:
 	CDlgO365() {};
 	virtual ~CDlgO365() {};
 	void OnEnableCtrl();
+	CComboBox	m_Combo2;
 protected:
+	virtual void DoDataExchange(CDataExchange* pDX);
 	virtual BOOL OnInitDialog();
 	LRESULT Set_OK(WPARAM wParam, LPARAM lParam);
+	afx_msg void OnDblclkList1(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnDblclkList2(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnBnClickedButtonFdlg();
 	afx_msg void OnBnClickedButtonOffice365();
 	afx_msg void OnBnClickedButtonReload();
+	afx_msg void OnBnClickedCopy1();
+	afx_msg void OnBnClickedCopy2();
 	DECLARE_MESSAGE_MAP()
 public:
+	void CopyList(CListCtrl* ptrList);
 };
 //IDD_DLG_RD_CH_SWITCH
 class CDlgChromeSwitcher : public CDlgRuleBase

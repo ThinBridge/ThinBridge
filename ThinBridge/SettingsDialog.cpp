@@ -541,17 +541,9 @@ void CSettingsDialog::OnOK()
 			}
 		}
 	}
-	//Office365モードの場合以外
-	if(!theApp.m_bOffice365)
+	//Citrix特殊環境以外
+	if(!theApp.m_bCitrixCustomEnv)
 	{
-		//ThinBridge Scriptが優先されている場合は、警告を表示する。
-		if(theApp.m_RedirectListSaveData.m_bUseScript)
-		{
-			CString strWarmMsg;
-			strWarmMsg=_T("※※※※注意※※※※\n\n「ThinBridgeスクリプトを利用する」設定になっています。\n\nブラウザー毎に個別設定した、\n「ターゲットURLルール」/「除外URLルール」は、判定されません(※無視されます)\n\n[全般設定]-[URLリダイレクト全般設定]から「ThinBridgeスクリプトを利用する」設定は、変更可能です。");
-			::MessageBox(this->m_hWnd,strWarmMsg,theApp.m_strThisAppName,MB_OK|MB_ICONWARNING );
-		}
-
 		//情報を保存
 		CStdioFile out;
 		if(out.Open(theApp.m_strSetting_FileFullPath,CFile::modeCreate|CFile::modeWrite|CFile::shareDenyNone))
@@ -581,10 +573,6 @@ void CSettingsDialog::OnOK()
 				strSolType=_T("Custom");
 			strWriteData.Format(_T("Solution_Type=%s\n"),strSolType);
 			out.WriteString(strWriteData);
-			//LOG
-			strWriteData.Format(_T("Enable_Log=%d\n"),theApp.SettingConfMod.m_bEnableDebugLog?1:0);
-			out.WriteString(strWriteData);
-
 
 			strWriteData.Format(_T("CustomBrowserPath=%s\n"),theApp.SettingConfMod.m_strCustomBrowserPath);
 			out.WriteString(strWriteData);
@@ -632,68 +620,6 @@ void CSettingsDialog::OnOK()
 			strWriteData.Format(_T("Redirect_Drive=%d\n"),theApp.SettingConfMod.m_bRedirect_Drive?1:0);
 			out.WriteString(strWriteData);
 
-			//表示制限キーコンビネーション
-			strWriteData.Format(_T("KeyCombination=%d\n"),theApp.SettingConfMod.m_iKeyCombination);
-			out.WriteString(strWriteData);
-
-			out.Close();
-		}
-
-		////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		if(out.Open(theApp.m_strResourceCAPFullPath,CFile::modeCreate|CFile::modeWrite|CFile::shareDenyNone))
-		{
-			CString strWriteData;
-			CString strCrLfConv;
-			strWriteData.Format(_T("EnableIETabLimit=%d\n"),theApp.ResourceCAPConfMod.m_bTabCntCAP?1:0);
-			out.WriteString(strWriteData);
-			strWriteData.Format(_T("IETabLimit_WARNING=%d\n"),theApp.ResourceCAPConfMod.m_uiTabCntWARM);
-			out.WriteString(strWriteData);
-			strWriteData.Format(_T("IETabLimit_MAX=%d\n"),theApp.ResourceCAPConfMod.m_uiTabCntMAX);
-			out.WriteString(strWriteData);
-
-			strCrLfConv = theApp.ResourceCAPConfMod.m_strTab_WARM_Msg;
-			strCrLfConv.Replace(_T("\n"),_T("\\n"));
-			strWriteData.Format(_T("IETabLimit_WARNING_MSG=%s\n"),strCrLfConv);
-			out.WriteString(strWriteData);
-
-			strCrLfConv = theApp.ResourceCAPConfMod.m_strTab_MAX_Msg;
-			strCrLfConv.Replace(_T("\n"),_T("\\n"));
-			strWriteData.Format(_T("IETabLimit_MAX_MSG=%s\n"),strCrLfConv);
-			out.WriteString(strWriteData);
-
-			strWriteData.Format(_T("IETabLimit_WARNING_MSG_TIME=%d\n"),theApp.ResourceCAPConfMod.m_uiTab_WARM_ShowTime);
-			out.WriteString(strWriteData);
-			strWriteData.Format(_T("IETabLimit_MAX_MSG_TIME=%d\n"),theApp.ResourceCAPConfMod.m_uiTab_MAX_ShowTime);
-			out.WriteString(strWriteData);
-			/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-			strWriteData.Format(_T("EnableIEMemLimit=%d\n"),theApp.ResourceCAPConfMod.m_bMemUsageCAP?1:0);
-			out.WriteString(strWriteData);
-			strWriteData.Format(_T("IEMemLimit_WARNING=%d\n"),theApp.ResourceCAPConfMod.m_uiMemWARM);
-			out.WriteString(strWriteData);
-			strWriteData.Format(_T("IEMemLimit_MAX=%d\n"),theApp.ResourceCAPConfMod.m_uiMemMAX);
-			out.WriteString(strWriteData);
-
-			strCrLfConv = theApp.ResourceCAPConfMod.m_strMem_WARM_Msg;
-			strCrLfConv.Replace(_T("\n"),_T("\\n"));
-			strWriteData.Format(_T("IEMemLimit_WARNING_MSG=%s\n"),strCrLfConv);
-			out.WriteString(strWriteData);
-
-			strCrLfConv = theApp.ResourceCAPConfMod.m_strMem_MAX_Msg;
-			strCrLfConv.Replace(_T("\n"),_T("\\n"));
-			strWriteData.Format(_T("IEMemLimit_MAX_MSG=%s\n"),strCrLfConv);
-			out.WriteString(strWriteData);
-
-			strWriteData.Format(_T("IEMemLimit_WARNING_MSG_TIME=%d\n"),theApp.ResourceCAPConfMod.m_uiMem_WARM_ShowTime);
-			out.WriteString(strWriteData);
-			strWriteData.Format(_T("IEMemLimit_MAX_MSG_TIME=%d\n"),theApp.ResourceCAPConfMod.m_uiMem_MAX_ShowTime);
-			out.WriteString(strWriteData);
-
-
-			strWriteData.Format(_T("EnableIEPriority=%d\n"),theApp.ResourceCAPConfMod.m_bCPUPriorityCAP?1:0);
-			out.WriteString(strWriteData);
-			strWriteData.Format(_T("IEPriority=%d\n"),theApp.ResourceCAPConfMod.m_uiCPUPriority);
-			out.WriteString(strWriteData);
 			out.Close();
 		}
 	}
@@ -758,23 +684,11 @@ void CSettingsDialog::OnOK()
 	{
 		strSaveMsg.Format(_T("設定ファイルの保存に失敗しました。\n\n別のプログラムがファイルを開いているか、書込権限が不足しています。操作を完了できません。ファイルを閉じてから再実行してください。\n\n%s"),theApp.m_strRedirectFilePath);
 		::MessageBox(this->m_hWnd,strSaveMsg,theApp.m_strThisAppName,MB_OK|MB_ICONERROR );
-		//strOutPutDataString.Replace(_T("\n"),_T("\r\n"));
-		//strSaveMsg.Format(_T("【エラー】\r\n設定ファイルの保存に失敗しました。\r\n\r\n%s\r\n"
-		//"%s"),theApp.m_strRedirectFilePath,strOutPutDataString);
-
-		////::MessageBox(this->m_hWnd,strSaveMsg,theApp.m_strThisAppName,MB_OK|MB_ICONINFORMATION );
-		//CDlgMsgBox MsgBox;
-		//MsgBox.m_strMsg=strSaveMsg;
-		//MsgBox.m_strTitle=_T("設定ファイル保存 失敗");
-		//MsgBox.DoModal();
-
 	}
 	else
 	{
 		strOutPutDataString.Replace(_T("\n"),_T("\r\n"));
 		strSaveMsg.Format(_T("【成功】\r\n設定ファイルの保存に成功しました。\r\n\r\n%s\r\n%s"),theApp.m_strRedirectFilePath,strOutPutDataString);
-
-		//::MessageBox(this->m_hWnd,strSaveMsg,theApp.m_strThisAppName,MB_OK|MB_ICONINFORMATION );
 		CDlgMsgBox MsgBox;
 		MsgBox.m_strMsg=strSaveMsg;
 		MsgBox.m_strTitle=_T("設定ファイル保存 成功");
@@ -903,144 +817,3 @@ void CSettingsDialog::OnBnClickedOk()
 	CSettingsDialog::OnOK();
 }
 
-BEGIN_MESSAGE_MAP(CSettingsDialogCAP, CSettingsDialog)
-	ON_BN_CLICKED(IDOK, &CSettingsDialogCAP::OnBnClickedOk)
-END_MESSAGE_MAP()
-void CSettingsDialogCAP::OnBnClickedOk()
-{
-	CSettingsDialogCAP::OnOK();
-}
-
-void CSettingsDialogCAP::OnOK() 
-{
-	int iRet=0;
-	iRet = ::MessageBox(this->m_hWnd,_T("設定を保存しますか？"),theApp.m_strThisAppName,MB_ICONQUESTION | MB_OKCANCEL);
-	if(iRet == IDCANCEL)
-		return;
-
-	RefreshData();
-	for (int i=0; i<m_pInfo.GetSize(); i++)
-	{
-		PAGE_INFO *pInfo = (PAGE_INFO *)m_pInfo.GetAt(i);
-		if (pInfo && pInfo->pWnd)
-		{
-			if(theApp.IsWnd(pInfo->pWnd))
-			{
-				if(pInfo->pWnd->SendMessage(ID_SETTING_OK,0,0)!=0)
-				{
-					ShowPage(pInfo,SW_SHOW);
-					return;
-				}
-			}
-		}
-	}
-
-	SetLastError(NO_ERROR);
-	BOOL bWriteFlg=FALSE;
-
-	//情報を保存
-	CStdioFile out;
-	if(out.Open(theApp.m_strSetting_FileFullPath,CFile::modeCreate|CFile::modeWrite|CFile::shareDenyNone))
-	{
-		CString strWriteData;
-		//一般-----------------------------------------------------------------------↓
-		//Solution_Type
-		CString strSolType;
-		strSolType=_T("IE");
-		if(theApp.SettingConfMod.m_iSolutionType==PROC_LDefaultBrowser)
-			strSolType=_T("DefaultBrowser");
-		else if(theApp.SettingConfMod.m_iSolutionType==PROC_LIE)
-			strSolType=_T("IE");
-		else if(theApp.SettingConfMod.m_iSolutionType==PROC_LFirefox)
-			strSolType=_T("Firefox");
-		else if(theApp.SettingConfMod.m_iSolutionType==PROC_LChrome)
-			strSolType=_T("Chrome");
-		else if(theApp.SettingConfMod.m_iSolutionType==PROC_LEdge)
-			strSolType=_T("Edge");
-		else if(theApp.SettingConfMod.m_iSolutionType==PROC_LCustom)
-			strSolType=_T("Custom");
-		strWriteData.Format(_T("Solution_Type=%s\n"),strSolType);
-		out.WriteString(strWriteData);
-
-		strWriteData.Format(_T("CustomBrowserPath=%s\n"),theApp.SettingConfMod.m_strCustomBrowserPath);
-		out.WriteString(strWriteData);
-
-		//表示制限キーコンビネーション
-		strWriteData.Format(_T("KeyCombination=%d\n"),theApp.SettingConfMod.m_iKeyCombination);
-		out.WriteString(strWriteData);
-
-		out.Close();
-		bWriteFlg=TRUE;
-	}
-	else
-		bWriteFlg=FALSE;
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	if(out.Open(theApp.m_strResourceCAPFullPath,CFile::modeCreate|CFile::modeWrite|CFile::shareDenyNone))
-	{
-		CString strWriteData;
-		CString strCrLfConv;
-		strWriteData.Format(_T("EnableIETabLimit=%d\n"),theApp.ResourceCAPConfMod.m_bTabCntCAP?1:0);
-		out.WriteString(strWriteData);
-		strWriteData.Format(_T("IETabLimit_WARNING=%d\n"),theApp.ResourceCAPConfMod.m_uiTabCntWARM);
-		out.WriteString(strWriteData);
-		strWriteData.Format(_T("IETabLimit_MAX=%d\n"),theApp.ResourceCAPConfMod.m_uiTabCntMAX);
-		out.WriteString(strWriteData);
-
-		strCrLfConv = theApp.ResourceCAPConfMod.m_strTab_WARM_Msg;
-		strCrLfConv.Replace(_T("\n"),_T("\\n"));
-		strWriteData.Format(_T("IETabLimit_WARNING_MSG=%s\n"),strCrLfConv);
-		out.WriteString(strWriteData);
-
-		strCrLfConv = theApp.ResourceCAPConfMod.m_strTab_MAX_Msg;
-		strCrLfConv.Replace(_T("\n"),_T("\\n"));
-		strWriteData.Format(_T("IETabLimit_MAX_MSG=%s\n"),strCrLfConv);
-		out.WriteString(strWriteData);
-
-		strWriteData.Format(_T("IETabLimit_WARNING_MSG_TIME=%d\n"),theApp.ResourceCAPConfMod.m_uiTab_WARM_ShowTime);
-		out.WriteString(strWriteData);
-		strWriteData.Format(_T("IETabLimit_MAX_MSG_TIME=%d\n"),theApp.ResourceCAPConfMod.m_uiTab_MAX_ShowTime);
-		out.WriteString(strWriteData);
-		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-		strWriteData.Format(_T("EnableIEMemLimit=%d\n"),theApp.ResourceCAPConfMod.m_bMemUsageCAP?1:0);
-		out.WriteString(strWriteData);
-		strWriteData.Format(_T("IEMemLimit_WARNING=%d\n"),theApp.ResourceCAPConfMod.m_uiMemWARM);
-		out.WriteString(strWriteData);
-		strWriteData.Format(_T("IEMemLimit_MAX=%d\n"),theApp.ResourceCAPConfMod.m_uiMemMAX);
-		out.WriteString(strWriteData);
-
-		strCrLfConv = theApp.ResourceCAPConfMod.m_strMem_WARM_Msg;
-		strCrLfConv.Replace(_T("\n"),_T("\\n"));
-		strWriteData.Format(_T("IEMemLimit_WARNING_MSG=%s\n"),strCrLfConv);
-		out.WriteString(strWriteData);
-
-		strCrLfConv = theApp.ResourceCAPConfMod.m_strMem_MAX_Msg;
-		strCrLfConv.Replace(_T("\n"),_T("\\n"));
-		strWriteData.Format(_T("IEMemLimit_MAX_MSG=%s\n"),strCrLfConv);
-		out.WriteString(strWriteData);
-
-		strWriteData.Format(_T("IEMemLimit_WARNING_MSG_TIME=%d\n"),theApp.ResourceCAPConfMod.m_uiMem_WARM_ShowTime);
-		out.WriteString(strWriteData);
-		strWriteData.Format(_T("IEMemLimit_MAX_MSG_TIME=%d\n"),theApp.ResourceCAPConfMod.m_uiMem_MAX_ShowTime);
-		out.WriteString(strWriteData);
-
-
-		strWriteData.Format(_T("EnableIEPriority=%d\n"),theApp.ResourceCAPConfMod.m_bCPUPriorityCAP?1:0);
-		out.WriteString(strWriteData);
-		strWriteData.Format(_T("IEPriority=%d\n"),theApp.ResourceCAPConfMod.m_uiCPUPriority);
-		out.WriteString(strWriteData);
-		out.Close();
-		bWriteFlg=TRUE;
-	}
-	else
-		bWriteFlg=FALSE;
-
-	CString strSaveMsg;
-	CString strOutPutDataString;	
-	if(!bWriteFlg)
-	{
-		strSaveMsg.Format(_T("設定ファイルの保存に失敗しました。\n\n別のプログラムがファイルを開いているか、書込権限が不足しています。操作を完了できません。ファイルを閉じてから再実行してください。\n\n%s"),theApp.m_strSetting_FileFullPath);
-		::MessageBox(this->m_hWnd,strSaveMsg,theApp.m_strThisAppName,MB_OK|MB_ICONERROR );
-	}
-}

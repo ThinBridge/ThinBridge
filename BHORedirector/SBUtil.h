@@ -161,26 +161,26 @@ namespace SBUtil
 		Trim_URLOnly(str,strRet);
 		return strRet;
 	}
-	inline BOOL InThinApp()
+	//2021-02-26 MS-EdgeのIEMode判定用
+	inline BOOL InEdgeIEMode()
 	{
-		BOOL bRet=FALSE;
-		TCHAR szTargetPath[512]={0};
-		if(GetEnvironmentVariable(_T("TS_ORIGIN"),szTargetPath,512))
+		CString strCommandLine;
+		strCommandLine = GetCommandLine();
+		if(strCommandLine.IsEmpty())
+			return FALSE;
+
+		//参考：
+		//MS-Edge IEMode
+		//"C:\Program Files (x86)\Internet Explorer\IEXPLORE.EXE" SCODEF:15064 CREDAT:75010 APPID:MSEdge.UserData.Default /prefetch:2
+		//IE
+		//"C:\Program Files (x86)\Internet Explorer\IEXPLORE.EXE" SCODEF:30748 CREDAT:9500 /prefetch:2
+
+		//コマンドラインにAPPID:MSEdge.がある場合はMS-Edge IEMode
+		if(strCommandLine.Find(_T("APPID:MSEdge.")) >= 0)
 		{
-			if(lstrlen(szTargetPath)>0)
-			{
-				//レジストリもチェックする。
-				HKEY  hKey={0};
-				LONG lResult=0L;
-				lResult=RegOpenKeyEx(HKEY_LOCAL_MACHINE,_T("FS"),0,KEY_READ,&hKey);
-				if(lResult == ERROR_SUCCESS)
-				{
-					RegCloseKey(hKey);
-					bRet=TRUE;
-				}
-			}
+			return TRUE;
 		}
-		return bRet;
+		return FALSE;
 	}
 	inline int GetTridentVersion()
 	{

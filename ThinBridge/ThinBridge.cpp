@@ -9,8 +9,6 @@
 #include "DlgSetCX.h"
 #include "DlgRD.h"
 #include "DlgETC.h"
-#include "DlgEco.h"
-#include "DlgEtcCAP.h"
 #include <DDEML.H>
 
 #ifdef _DEBUG
@@ -28,14 +26,10 @@ CRedirectApp::CRedirectApp()
 	m_pReExecThread=NULL;
 	m_pDlgMsg=NULL;
 
-//	m_iAdvancedLogLevel=DEBUG_LOG_LEVEL_OUTPUT_ALL;
-	m_iAdvancedLogLevel=DEBUG_LOG_LEVEL_OUTPUT_URL;
-
 	m_strThisAppName=_T("ThinBridge");
 	SetAppID(m_strThisAppName);
 	m_iFeatureType = FE_PLUS;
-	//Office365対応
-	m_bOffice365 = FALSE;
+	m_bCitrixCustomEnv = FALSE;
 }
 
 
@@ -61,26 +55,18 @@ BOOL CRedirectApp::InitBaseFunction()
 
 	m_strO365ToolFullPath = szDrive;
 	m_strO365ToolFullPath += szDir;
+	CString strCitrixCustomEnvFlgEXE;
+	strCitrixCustomEnvFlgEXE = m_strO365ToolFullPath;
+	strCitrixCustomEnvFlgEXE += _T("TBo365URLSync.exe");
+	//
+	m_bCitrixCustomEnv = PathFileExists(strCitrixCustomEnvFlgEXE);
+
 	m_strO365ToolFullPath += _T("TBo365URLSyncSetting.exe");
-	m_bOffice365 = PathFileExists(m_strO365ToolFullPath);
 
 
 	m_strChromeSwitcherFullPath = szDrive;
 	m_strChromeSwitcherFullPath += szDir;
 	m_strChromeSwitcherFullPath += _T("TBChromeSwitcher.exe");
-
-
-	m_strLogFileFullPath = szDrive;
-	m_strLogFileFullPath += szDir;
-
-	CTime time = CTime::GetCurrentTime();
-	CString strLogFileNow;
-	strLogFileNow.Format(_T("%s%s.log"),theApp.m_strThisAppName,time.Format(_T("%Y-%m")));
-	m_strLogFileFullPath += strLogFileNow;
-
-	m_strLogFileDir = szDrive;
-	m_strLogFileDir += szDir;
-	this->LogRotate(m_strLogFileDir);
 
 
 	TCHAR szTemp[MAX_PATH+1]={0};
@@ -98,11 +84,6 @@ BOOL CRedirectApp::InitBaseFunction()
 	m_strSetting_FileFullPath += szDir;
 	m_strSetting_FileFullPath += _T("setting.conf");
 	this->ReadSetting();
-
-	m_strResourceCAPFullPath = szDrive;
-	m_strResourceCAPFullPath += szDir;
-	m_strResourceCAPFullPath += _T("ResourceCap.ini");
-
 
 	//templateの読込
 	m_strTemplate_FileFullPath = szDrive;
@@ -182,9 +163,6 @@ BOOL CRedirectApp::InitBaseFunction()
 	m_strRedirectFilePath += szDir;
 	m_strRedirectFilePath +=_T("ThinBridgeBHO.ini");
 
-	m_strRedirect_Script_FilePath = szDrive;
-	m_strRedirect_Script_FilePath += szDir;
-	m_strRedirect_Script_FilePath += _T("ThinBridgeBHO.tbs");
 
 	return bRet;
 }
@@ -362,9 +340,6 @@ void CRedirectApp::InitCommandParamOptionParam()
 			}
 		}
 	}
-	CString logmsg;
-	logmsg.Format(_T("GetCommand\t%s\tOptionParam=%s"),m_CommandParam,m_OptionParam);
-	theApp.WriteDebugTraceDateTime(logmsg,DEBUG_LOG_TYPE_GE);
 }
 void CRedirectApp::InitExecCommandParam()
 {
@@ -404,7 +379,7 @@ void CRedirectApp::InitExecCommandParam()
 		//citrix clientがインストールされていない。
 		if(!IsCitrixInstalled())
 		{
-			strMsg=_T("Citrix Receiverがインストールされていないか、設定されていないため起動できません。");
+			strMsg=_T("Citrixがインストールされていないか、設定されていないため起動できません。");
 			ShowTimeoutMessageBox(strMsg,m_strThisAppName,MB_OK|MB_ICONERROR,6000);
 			return;
 		}
@@ -428,9 +403,6 @@ void CRedirectApp::InitExecCommandParam()
 	else if(this->SettingConf.m_iSolutionType==PROC_LIE)
 	{
 		SetIE_FullPath();
-		//Resource CAP
-		if(IsResourceCAP_IE())
-			return;
 		Exec_LocalBrowser(m_CommandParam);
 	}
 	else if(this->SettingConf.m_iSolutionType==PROC_LFirefox)
@@ -483,43 +455,9 @@ void CRedirectApp::InitShowSettingDlg()
 
 	if(m_iFeatureType == FE_PLUS)
 	{
-		//表示制限されている場合
-		if(SettingConf.m_iKeyCombination)
-		{
-			strMsg.Format(_T("%s\n%s"),_T("この機能へのアクセスは、システム管理者により制限されています。 "),_T("This Feature has been disabled by your administrator."));
-			::MessageBox(NULL,strMsg,theApp.m_strThisAppName,MB_ICONERROR);
-			//Keyキーコンビネーションが一致した場合は、設定画面を表示する。
-			if(theApp.bValidKeyCombi())
-			{
-				ShowPlusSettingDlgEx();
-			}
-		}
-		else
-		{
-			ShowPlusSettingDlgEx();
-		}
+		ShowPlusSettingDlgEx();
 		return;
 	}
-	else if(m_iFeatureType == CAP_PLUS)
-	{
-		//表示制限されている場合
-		if(SettingConf.m_iKeyCombination)
-		{
-			strMsg.Format(_T("%s\n%s"),_T("この機能へのアクセスは、システム管理者により制限されています。 "),_T("This Feature has been disabled by your administrator."));
-			::MessageBox(NULL,strMsg,theApp.m_strThisAppName,MB_ICONERROR);
-			//Keyキーコンビネーションが一致した場合は、設定画面を表示する。
-			if(theApp.bValidKeyCombi())
-			{
-				ShowPlusSettingDlgCAP();
-			}
-		}
-		else
-		{
-			ShowPlusSettingDlgCAP();
-		}
-		return;
-	}
-
 }
 
 BOOL CRedirectApp::InitInstance()
@@ -544,14 +482,6 @@ BOOL CRedirectApp::InitInstance()
 
 	//ThinBridgeの動作モードを決定。設定ファイルから。
 	InitFeatureSetting();
-
-//	DWORD pidResult=0;
-//	CString strParentExePath;
-//	if(GetParentPID(pidResult))
-//	{
-//		strParentExePath=GetExeFilePath2PID(pidResult);
-//	}
-//	AfxMessageBox(strParentExePath);
 
 	//コマンドラインのセット
 	this->InitCommandParamOptionParam();
@@ -644,14 +574,11 @@ BOOL CRedirectApp::InitInstance()
 		CString strCmd;
 		strCmd.Format(_T("%s %s"), m_CommandParam,m_OptionParam);
 		UINT uRet=0;
-		CString strLogMsg;
 		uRet = m_LoopBlock.CheckLoop(strCmd);
 		if(uRet == LB_OK)
 			this->InitExecCommandParam();
 		else if(uRet == LB_NG)
 		{
-			strLogMsg.Format(_T("%s\t%s\tLoopBlock"), m_OptionParam, m_CommandParam);
-			theApp.WriteDebugTraceDateTime(strLogMsg, DEBUG_LOG_LEVEL_OUTPUT_URL);
 			CString strSafeGuardMsg;
 			strSafeGuardMsg.Format(_T("%s\n%s"), _T("短時間に連続したブラウザー リダイレクトを検出しました。\n\nブラウザー リダイレクト処理を中断します。\n少し時間をおいてから再試行してください。"), m_CommandParam);
 			ShowTimeoutMessageBox(strSafeGuardMsg, m_strThisAppName, MB_OK | MB_ICONWARNING| MB_SYSTEMMODAL,10000);
@@ -659,14 +586,10 @@ BOOL CRedirectApp::InitInstance()
 		}
 		else if (uRet == LB_NG_NO_MSG)
 		{
-			strLogMsg.Format(_T("%s\t%s\tLoopBlock"), m_OptionParam, m_CommandParam);
-			theApp.WriteDebugTraceDateTime(strLogMsg, DEBUG_LOG_LEVEL_OUTPUT_URL);
 			return FALSE;
 		}
 		else
 		{
-			strLogMsg.Format(_T("%s\t%s\UnExpected"), m_OptionParam, m_CommandParam);
-			theApp.WriteDebugTraceDateTime(strLogMsg, DEBUG_LOG_LEVEL_OUTPUT_URL);
 			return FALSE;
 		}
 	}
@@ -709,9 +632,6 @@ void CRedirectApp::InitExecLocalBrowser()
 	if(this->SettingConf.m_iSolutionType==PROC_LIE)
 	{
 		SetIE_FullPath();
-		//Resource CAP
-		if(IsResourceCAP_IE())
-			return;
 		//IEを設定した場合は、必ず新しいIE Windowを表示する。
 		if(::ShellExecute(NULL,_T("open"),_T("iexplore.exe"),NULL,NULL, SW_SHOW) <= HINSTANCE(32))
 		{
@@ -770,55 +690,6 @@ void CRedirectApp::InitExecLocalBrowser()
 	Exec_LocalBrowser(m_CommandParam);
 }
 
-BOOL CRedirectApp::IsResourceCAP_IE()
-{
-	BOOL bRet=FALSE;
-	//////////////////////Resource CAPの確認////////////////////////
-	theApp.ReadResourceCAPSetting();
-	CString strMsg;
-	CIEStatusHelper IEStatus;
-	CString strCaption;
-	strCaption.Format(_T("ThinBridge Launcher %s"),ResourceCAPConf.m_strReadSettingType);
-	//tab CAP
-	if(ResourceCAPConf.m_bTabCntCAP)
-	{
-		DWORD dwTabCnt=0;
-		dwTabCnt = IEStatus.GetTabCnt();
-		//Tab Limit
-		if(dwTabCnt >= ResourceCAPConf.m_uiTabCntMAX-1)//-1は、これからTabを追加するので。-1の余裕が無いとそもそもNG
-		{
-			if(ResourceCAPConf.m_uiTab_MAX_ShowTime>0)
-			{
-				strMsg=ResourceCAPConf.m_strTab_MAX_Msg;
-				ShowTimeoutMessageBox(strMsg,strCaption,MB_OK|MB_ICONWARNING|MB_SYSTEMMODAL,ResourceCAPConf.m_uiTab_MAX_ShowTime*1000);
-			}
-			return TRUE;
-		}
-	}
-	if(ResourceCAPConf.m_bMemUsageCAP)
-	{
-		size_t iMem=0;
-		iMem = IEStatus.GetMemoryUsageSize();
-		TCHAR memorysize[24] = _T("");
-		TCHAR WarmMemorysize[24] = _T("");
-		TCHAR LimitMemorysize[24] = _T("");
-		::StrFormatByteSize(iMem, memorysize, 24);
-		::StrFormatByteSize(ResourceCAPConf.m_uiMemWARM*1024*1024,WarmMemorysize,24);
-		::StrFormatByteSize(ResourceCAPConf.m_uiMemMAX*1024*1024,LimitMemorysize,24);
-
-		//Mem Limit
-		if(iMem >= ResourceCAPConf.m_uiMemMAX*1024*1024)
-		{
-			if(ResourceCAPConf.m_uiMem_MAX_ShowTime>0)
-			{
-				strMsg=ResourceCAPConf.m_strMem_MAX_Msg;
-				ShowTimeoutMessageBox(strMsg,strCaption,MB_OK|MB_ICONWARNING|MB_SYSTEMMODAL,ResourceCAPConf.m_uiMem_MAX_ShowTime*1000);
-			}
-			return TRUE;
-		}
-	}
-	return bRet;
-}
 
 void CRedirectApp::ShowPlusSettingDlgEx()
 {
@@ -841,12 +712,8 @@ void CRedirectApp::ShowPlusSettingDlgEx()
 	theApp.SettingConfMod.Copy(&theApp.SettingConf);
 
 
-	//Resource
-	theApp.ReadResourceCAPSetting();
-	theApp.ResourceCAPConfMod.Copy(&theApp.ResourceCAPConf);
-
-	m_RedirectList.SetArrayData(m_strRedirectFilePath, theApp.m_bOffice365);
-	m_RedirectListSaveData.InitSaveDataAll(theApp.m_bOffice365);
+	m_RedirectList.SetArrayData(m_strRedirectFilePath, theApp.m_bCitrixCustomEnv);
+	m_RedirectListSaveData.InitSaveDataAll(theApp.m_bCitrixCustomEnv);
 	CSettingsDialog SettingDlg;
 	CString strTitle;
 	SettingDlg.SetLogoText(theApp.m_strThisAppName);
@@ -854,8 +721,8 @@ void CRedirectApp::ShowPlusSettingDlgEx()
 	strTitle.Replace(_T("\\"),_T("/"));
 	SettingDlg.SetTitle(strTitle);
 
-	//Office365対応
-	if(theApp.m_bOffice365)
+	//Citrix特殊環境フラグ
+	if(theApp.m_bCitrixCustomEnv)
 	{
 		SettingDlg.AddPage(RUNTIME_CLASS(CDlgETC), _T("URLリダイレクト全般設定"), IDD_DLG_ETC, _T(""));
 		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCHR), _T("Google Chrome (ローカル専用)"), IDD_DLG_RD_RDP, _T(""));
@@ -865,82 +732,44 @@ void CRedirectApp::ShowPlusSettingDlgEx()
 	}
 	else
 	{
-		SettingDlg.AddPage(RUNTIME_CLASS(CDlgRemoteSettingGEN), _T("全般設定"), IDD_DLG_REMOTE, _T("全般設定"));
-		SettingDlg.AddPage(RUNTIME_CLASS(CDlgETC), _T("URLリダイレクト全般設定"), IDD_DLG_ETC, _T("全般設定"));
-		SettingDlg.AddPage(RUNTIME_CLASS(CDlgEco), _T("リソース設定"), IDD_DLG_ECO, _T("全般設定"));
+		SettingDlg.AddPage(RUNTIME_CLASS(CDlgETC), _T("URLリダイレクト全般設定"), IDD_DLG_ETC, _T(""));
 		SettingDlg.AddPage(RUNTIME_CLASS(CDlgRemoteSetting), _T("リモートブラウザー設定"), IDD_DLG_REMOTE, _T("リモートブラウザー設定"));
 		SettingDlg.AddPage(RUNTIME_CLASS(CDlgSetRDP), _T("Microsoft RDP 設定"), IDD_DLG_RDP, _T("リモートブラウザー設定"));
 		SettingDlg.AddPage(RUNTIME_CLASS(CDlgSetVMW), _T("VMware Horizon 設定"), IDD_DLG_VMW, _T("リモートブラウザー設定"));
-		SettingDlg.AddPage(RUNTIME_CLASS(CDlgSetCX), _T("Citrix XenApp 設定"), IDD_DLG_CX, _T("リモートブラウザー設定"));
+		SettingDlg.AddPage(RUNTIME_CLASS(CDlgSetCX), _T("Citrix Virtual Apps/XenApp 設定"), IDD_DLG_CX, _T("リモートブラウザー設定"));
 		SettingDlg.AddPage(RUNTIME_CLASS(CDlgRemoteSettingRD), _T("URLリダイレクト設定"), IDD_DLG_REMOTE, _T("URLリダイレクト設定"));
 		SettingDlg.AddPage(RUNTIME_CLASS(CDlgRD), _T("Microsoft RDP (リモート)"), IDD_DLG_RD_RDP, _T("URLリダイレクト設定"));
 		SettingDlg.AddPage(RUNTIME_CLASS(CDlgVM), _T("VMware Horizon (リモート)"), IDD_DLG_RD_RDP, _T("URLリダイレクト設定"));
-		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCTX), _T("Citrix XenApp (リモート)"), IDD_DLG_RD_RDP, _T("URLリダイレクト設定"));
+		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCTX), _T("Citrix Virtual Apps (リモート)"), IDD_DLG_RD_RDP, _T("URLリダイレクト設定"));
 		SettingDlg.AddPage(RUNTIME_CLASS(CDlgFF), _T("Mozilla Firefox (ローカル)"), IDD_DLG_RD_RDP, _T("URLリダイレクト設定"));
 		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCHR), _T("Google Chrome (ローカル)"), IDD_DLG_RD_RDP, _T("URLリダイレクト設定"));
 		SettingDlg.AddPage(RUNTIME_CLASS(CDlgEDG), _T("Microsoft Edge (ローカル)"), IDD_DLG_RD_RDP, _T("URLリダイレクト設定"));
+		SettingDlg.AddPage(RUNTIME_CLASS(CDlgO365), _T("Office365 WebApps"), IDD_DLG_RD_O365, _T("URLリダイレクト設定"));
+		SettingDlg.AddPage(RUNTIME_CLASS(CDlgDMZ), _T("共用URL(SSO/SAML対応サイト)"), IDD_DLG_RD_DMZ, _T(""));
+
 		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU01), _T("指定ブラウザー01 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
 		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU02), _T("指定ブラウザー02 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
 		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU03), _T("指定ブラウザー03 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
 		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU04), _T("指定ブラウザー04 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
 		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU05), _T("指定ブラウザー05 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
-		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU06), _T("指定ブラウザー06 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
-		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU07), _T("指定ブラウザー07 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
-		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU08), _T("指定ブラウザー08 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
-		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU09), _T("指定ブラウザー09 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
-		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU10), _T("指定ブラウザー10 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
-		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU11), _T("指定ブラウザー11 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
-		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU12), _T("指定ブラウザー12 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
-		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU13), _T("指定ブラウザー13 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
-		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU14), _T("指定ブラウザー14 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
-		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU15), _T("指定ブラウザー15 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
-		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU16), _T("指定ブラウザー16 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
-		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU17), _T("指定ブラウザー17 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
-		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU18), _T("指定ブラウザー18 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
-		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU19), _T("指定ブラウザー19 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
-		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU20), _T("指定ブラウザー20 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
+
+//		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU06), _T("指定ブラウザー06 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
+//		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU07), _T("指定ブラウザー07 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
+//		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU08), _T("指定ブラウザー08 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
+//		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU09), _T("指定ブラウザー09 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
+//		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU10), _T("指定ブラウザー10 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
+//		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU11), _T("指定ブラウザー11 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
+//		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU12), _T("指定ブラウザー12 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
+//		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU13), _T("指定ブラウザー13 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
+//		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU14), _T("指定ブラウザー14 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
+//		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU15), _T("指定ブラウザー15 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
+//		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU16), _T("指定ブラウザー16 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
+//		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU17), _T("指定ブラウザー17 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
+//		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU18), _T("指定ブラウザー18 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
+//		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU19), _T("指定ブラウザー19 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
+//		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU20), _T("指定ブラウザー20 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
 	}
 
-	m_pMainWnd = &SettingDlg;
-
-	SettingDlg.DoModal();
-//	if(SettingDlg.DoModal() == IDOK)
-//	{
-//	}
-}
-
-void CRedirectApp::ShowPlusSettingDlgCAP()
-{
-	////////////////////////////////////////////////////
-	if(m_pDlgMsg)
-	{
-		delete m_pDlgMsg;
-		m_pDlgMsg=NULL;
-	}
-	m_pDlgMsg = new ProgressDlg;
-	m_pDlgMsg->m_iSolutionType=PROC_LCustom;
-	m_pDlgMsg->Create(MAKEINTRESOURCE(IDD_DIALOG1));
-	m_pDlgMsg->ShowWindow(SW_SHOW);
-	m_pDlgMsg->m_Prg.SetRange( 0, 2 );
-	m_pDlgMsg->m_Prg.SetStep( 1 );
-	m_pDlgMsg->m_Prg.StepIt();
-	m_pDlgMsg->SetMsg(_T("設定画面 起動中...."));
-	//////////////////////////////////////////////////////
-
-	theApp.SettingConfMod.Copy(&theApp.SettingConf);
-
-	//Resource
-	theApp.ReadResourceCAPSetting();
-	theApp.ResourceCAPConfMod.Copy(&theApp.ResourceCAPConf);
-
-	CSettingsDialogCAP SettingDlg;
-	CString strTitle;
-	SettingDlg.SetLogoText(theApp.m_strThisAppName);
-	strTitle.Format(_T("%s Settings"),theApp.m_strThisAppName);
-	SettingDlg.SetTitle(strTitle);
-
-	SettingDlg.AddPage(RUNTIME_CLASS(CDlgEco),_T("リソース設定"), IDD_DLG_ECO,_T("リソース設定"));
-	SettingDlg.AddPage(RUNTIME_CLASS(CDlgEtcCAP),_T("転送先ブラウザー設定(ローカル)"), IDD_DLG_ETC_CAP,_T("転送先ブラウザー設定(ローカル)"));
 	m_pMainWnd = &SettingDlg;
 
 	SettingDlg.DoModal();
@@ -965,8 +794,6 @@ void CRedirectApp::ReadTemplate()
 		}
 		in.Close();
 	}
-	//theApp.WriteDebugTraceDateTime(_T("ReadTemplate"),DEBUG_LOG_TYPE_GE);
-	//theApp.WriteDebugTraceDateTime(m_strRdp_Template_File_Data,DEBUG_LOG_TYPE_GE);
 }
 void CRedirectApp::ReadRDP_ReadOnceFile()
 {
@@ -986,9 +813,6 @@ void CRedirectApp::ReadRDP_ReadOnceFile()
 	}
 	::DeleteFile(m_strRdp_ReadOnce_FileFullPath);
 	SetLastError(NO_ERROR);
-
-	//theApp.WriteDebugTraceDateTime(_T("ReadRDP_ReadOnceFile"),DEBUG_LOG_TYPE_GE);
-	//theApp.WriteDebugTraceDateTime(m_strRdp_ReadOnce_File_Data,DEBUG_LOG_TYPE_GE);
 }
 
 void CRedirectApp::ReadSetting()
@@ -1074,14 +898,6 @@ void CRedirectApp::ReadSetting()
 						else
 							SettingConf.m_bRedirect_Drive=FALSE;
 					}
-					else if(strTemp2.CompareNoCase(_T("Enable_Log"))==0)
-					{
-						if(strTemp3==_T("1"))
-							SettingConf.m_bEnableDebugLog=TRUE;
-						else
-							SettingConf.m_bEnableDebugLog=FALSE;
-
-					}
 					else if(strTemp2.CompareNoCase(_T("Solution_Type"))==0)
 					{
 						if(strTemp3.CompareNoCase(_T("RDP"))==0)
@@ -1120,474 +936,17 @@ void CRedirectApp::ReadSetting()
 					{
 						SettingConf.m_strCitrix_AppName=strTemp3;
 					}
-					else if(strTemp2.CompareNoCase(_T("KeyCombination"))==0)
-					{
-						if(!strTemp3.IsEmpty())
-							SettingConf.m_iKeyCombination=_ttoi(strTemp3);
-						else
-							SettingConf.m_iKeyCombination=0;
-					}
 
 				}
 			}
 		}
 		in.Close();
 	}
-	//theApp.WriteDebugTraceDateTime(_T("=================="),DEBUG_LOG_TYPE_GE);
-	//theApp.WriteDebugTraceDateTime(_T("ReadSetting--START--"),DEBUG_LOG_TYPE_GE);
-	//theApp.WriteDebugTraceDateTime(strLogMsgLine,DEBUG_LOG_TYPE_GE);
-	//theApp.WriteDebugTraceDateTime(_T("ReadSetting--END=="),DEBUG_LOG_TYPE_GE);
 }
 
-BOOL CRedirectApp::ReadResourceCAPSettingFromReg()
-{
-//	TCHAR REG_SETTING_KEY[]=_T("SOFTWARE\\ThinBridge");
-	TCHAR REG_SETTING_KEY[]=_T("SOFTWARE\\Policies\\ThinBridge\\RCAP");
-	BOOL bRet=FALSE;
-	DWORD Val=0;
-	HKEY  hKey={0};
-	LONG lResult=0L;
-	DWORD dwType=0;
-	DWORD dwSize=0;
-	DWORD iSize=0;
-	CString strVal;
-	TCHAR* pVal=NULL;
 
-	lResult=RegOpenKeyEx(HKEY_CURRENT_USER,REG_SETTING_KEY,0,KEY_READ,&hKey);
-	if(lResult == ERROR_SUCCESS)
-	{
-		bRet=TRUE;
-		Val=0;
-		lResult=RegQueryValueEx(hKey,_T("EnableIETabLimit"),NULL,&dwType,NULL,&dwSize);
-		if(lResult == ERROR_SUCCESS)
-		{
-			RegQueryValueEx(hKey,_T("EnableIETabLimit"),NULL,&dwType,(LPBYTE)&Val, &dwSize);
-			if(Val!=0)
-				ResourceCAPConf.m_bTabCntCAP=TRUE;
-			else
-				ResourceCAPConf.m_bTabCntCAP=FALSE;
-		}
-
-		Val=0;
-		lResult=RegQueryValueEx(hKey,_T("IETabLimit_WARNING"),NULL,&dwType,NULL,&dwSize);
-		if(lResult == ERROR_SUCCESS)
-		{
-			RegQueryValueEx(hKey,_T("IETabLimit_WARNING"),NULL,&dwType,(LPBYTE)&Val, &dwSize);
-			int iW=Val;
-			if(2<=iW && iW <=99)
-				ResourceCAPConf.m_uiTabCntWARM=iW;
-			else
-				ResourceCAPConf.m_uiTabCntWARM=10;
-		}
-
-		Val=0;
-		lResult=RegQueryValueEx(hKey,_T("IETabLimit_MAX"),NULL,&dwType,NULL,&dwSize);
-		if(lResult == ERROR_SUCCESS)
-		{
-			RegQueryValueEx(hKey,_T("IETabLimit_MAX"),NULL,&dwType,(LPBYTE)&Val, &dwSize);
-			int iW=Val;
-			if(3<=iW && iW <=100)
-				ResourceCAPConf.m_uiTabCntMAX=iW;
-			else
-				ResourceCAPConf.m_uiTabCntMAX=15;
-		}
-
-		iSize=0;
-		strVal.Empty();
-		pVal=NULL;
-		RegQueryValueEx(hKey,_T("IETabLimit_WARNING_MSG"),NULL,&dwType,NULL,&iSize);
-		if(iSize>0)
-		{
-			iSize+=1;//+1=null
-			pVal = new TCHAR[iSize];
-			memset(pVal,0x00,sizeof(TCHAR)*iSize);
-			RegQueryValueEx(hKey,_T("IETabLimit_WARNING_MSG"),NULL,&dwType,(LPBYTE)pVal, &iSize);
-			strVal = pVal;
-			delete [] pVal;
-			if(!strVal.IsEmpty())
-			{
-				strVal.Replace(_T("\r\n"),_T("\n"));
-				strVal.Replace(_T("\\n"),_T("\n"));
-				ResourceCAPConf.m_strTab_WARM_Msg=strVal;
-			}
-		}
-
-		iSize=0;
-		strVal.Empty();
-		pVal=NULL;
-		RegQueryValueEx(hKey,_T("IETabLimit_MAX_MSG"),NULL,&dwType,NULL,&iSize);
-		if(iSize>0)
-		{
-			iSize+=1;//+1=null
-			pVal = new TCHAR[iSize];
-			memset(pVal,0x00,sizeof(TCHAR)*iSize);
-			RegQueryValueEx(hKey,_T("IETabLimit_MAX_MSG"),NULL,&dwType,(LPBYTE)pVal, &iSize);
-			strVal = pVal;
-			delete [] pVal;
-			if(!strVal.IsEmpty())
-			{
-				strVal.Replace(_T("\r\n"),_T("\n"));
-				strVal.Replace(_T("\\n"),_T("\n"));
-				ResourceCAPConf.m_strTab_MAX_Msg=strVal;
-			}
-		}
-
-		Val=0;
-		lResult=RegQueryValueEx(hKey,_T("IETabLimit_WARNING_MSG_TIME"),NULL,&dwType,NULL,&dwSize);
-		if(lResult == ERROR_SUCCESS)
-		{
-			RegQueryValueEx(hKey,_T("IETabLimit_WARNING_MSG_TIME"),NULL,&dwType,(LPBYTE)&Val, &dwSize);
-			int iW=Val;
-			if(0<=iW && iW <=60)
-				ResourceCAPConf.m_uiTab_WARM_ShowTime=iW;
-			else
-				ResourceCAPConf.m_uiTab_WARM_ShowTime=5;
-		}
-
-		Val=0;
-		lResult=RegQueryValueEx(hKey,_T("IETabLimit_MAX_MSG_TIME"),NULL,&dwType,NULL,&dwSize);
-		if(lResult == ERROR_SUCCESS)
-		{
-			RegQueryValueEx(hKey,_T("IETabLimit_MAX_MSG_TIME"),NULL,&dwType,(LPBYTE)&Val, &dwSize);
-			int iW=Val;
-			if(0<=iW && iW <=60)
-				ResourceCAPConf.m_uiTab_MAX_ShowTime=iW;
-			else
-				ResourceCAPConf.m_uiTab_MAX_ShowTime=5;
-		}
-
-		///////////////////////////////////////////////////////////////////////////////////////////////////////////
-		Val=0;
-		lResult=RegQueryValueEx(hKey,_T("EnableIEMemLimit"),NULL,&dwType,NULL,&dwSize);
-		if(lResult == ERROR_SUCCESS)
-		{
-			RegQueryValueEx(hKey,_T("EnableIEMemLimit"),NULL,&dwType,(LPBYTE)&Val, &dwSize);
-			if(Val!=0)
-				ResourceCAPConf.m_bMemUsageCAP=TRUE;
-			else
-				ResourceCAPConf.m_bMemUsageCAP=FALSE;
-		}
-
-		Val=0;
-		lResult=RegQueryValueEx(hKey,_T("IEMemLimit_WARNING"),NULL,&dwType,NULL,&dwSize);
-		if(lResult == ERROR_SUCCESS)
-		{
-			RegQueryValueEx(hKey,_T("IEMemLimit_WARNING"),NULL,&dwType,(LPBYTE)&Val, &dwSize);
-			int iW=Val;
-			if(100<=iW && iW <=1000)
-				ResourceCAPConf.m_uiMemWARM=iW;
-			else
-				ResourceCAPConf.m_uiMemWARM=600;
-		}
-
-		Val=0;
-		lResult=RegQueryValueEx(hKey,_T("IEMemLimit_MAX"),NULL,&dwType,NULL,&dwSize);
-		if(lResult == ERROR_SUCCESS)
-		{
-			RegQueryValueEx(hKey,_T("IEMemLimit_MAX"),NULL,&dwType,(LPBYTE)&Val, &dwSize);
-			int iW=Val;
-			if(200<=iW && iW <=2000)
-				ResourceCAPConf.m_uiMemMAX=iW;
-			else
-				ResourceCAPConf.m_uiMemMAX=1024;
-		}
-
-		iSize=0;
-		strVal.Empty();
-		pVal=NULL;
-		RegQueryValueEx(hKey,_T("IEMemLimit_WARNING_MSG"),NULL,&dwType,NULL,&iSize);
-		if(iSize>0)
-		{
-			iSize+=1;//+1=null
-			pVal = new TCHAR[iSize];
-			memset(pVal,0x00,sizeof(TCHAR)*iSize);
-			RegQueryValueEx(hKey,_T("IEMemLimit_WARNING_MSG"),NULL,&dwType,(LPBYTE)pVal, &iSize);
-			strVal = pVal;
-			delete [] pVal;
-			if(!strVal.IsEmpty())
-			{
-				strVal.Replace(_T("\r\n"),_T("\n"));
-				strVal.Replace(_T("\\n"),_T("\n"));
-				ResourceCAPConf.m_strMem_WARM_Msg=strVal;
-			}
-		}
-
-		iSize=0;
-		strVal.Empty();
-		pVal=NULL;
-		RegQueryValueEx(hKey,_T("IEMemLimit_MAX_MSG"),NULL,&dwType,NULL,&iSize);
-		if(iSize>0)
-		{
-			iSize+=1;//+1=null
-			pVal = new TCHAR[iSize];
-			memset(pVal,0x00,sizeof(TCHAR)*iSize);
-			RegQueryValueEx(hKey,_T("IEMemLimit_MAX_MSG"),NULL,&dwType,(LPBYTE)pVal, &iSize);
-			strVal = pVal;
-			delete [] pVal;
-			if(!strVal.IsEmpty())
-			{
-				strVal.Replace(_T("\r\n"),_T("\n"));
-				strVal.Replace(_T("\\n"),_T("\n"));
-				ResourceCAPConf.m_strMem_MAX_Msg=strVal;
-			}
-		}
-
-		Val=0;
-		lResult=RegQueryValueEx(hKey,_T("IEMemLimit_WARNING_MSG_TIME"),NULL,&dwType,NULL,&dwSize);
-		if(lResult == ERROR_SUCCESS)
-		{
-			RegQueryValueEx(hKey,_T("IEMemLimit_WARNING_MSG_TIME"),NULL,&dwType,(LPBYTE)&Val, &dwSize);
-			int iW=Val;
-			if(0<=iW && iW <=60)
-				ResourceCAPConf.m_uiMem_WARM_ShowTime=iW;
-			else
-				ResourceCAPConf.m_uiMem_WARM_ShowTime=5;
-		}
-
-		Val=0;
-		lResult=RegQueryValueEx(hKey,_T("IEMemLimit_MAX_MSG_TIME"),NULL,&dwType,NULL,&dwSize);
-		if(lResult == ERROR_SUCCESS)
-		{
-			RegQueryValueEx(hKey,_T("IEMemLimit_MAX_MSG_TIME"),NULL,&dwType,(LPBYTE)&Val, &dwSize);
-			int iW=Val;
-			if(0<=iW && iW <=60)
-				ResourceCAPConf.m_uiMem_MAX_ShowTime=iW;
-			else
-				ResourceCAPConf.m_uiMem_MAX_ShowTime=5;
-		}
-		///////////////////////////////////////////////////////////////////////////////////////////////////////
-		Val=0;
-		lResult=RegQueryValueEx(hKey,_T("EnableIEPriority"),NULL,&dwType,NULL,&dwSize);
-		if(lResult == ERROR_SUCCESS)
-		{
-			RegQueryValueEx(hKey,_T("EnableIEPriority"),NULL,&dwType,(LPBYTE)&Val, &dwSize);
-			if(Val!=0)
-				ResourceCAPConf.m_bCPUPriorityCAP=TRUE;
-			else
-				ResourceCAPConf.m_bCPUPriorityCAP=FALSE;
-		}
-
-		Val=0;
-		lResult=RegQueryValueEx(hKey,_T("IEPriority"),NULL,&dwType,NULL,&dwSize);
-		if(lResult == ERROR_SUCCESS)
-		{
-			RegQueryValueEx(hKey,_T("IEPriority"),NULL,&dwType,(LPBYTE)&Val, &dwSize);
-			int iW=Val;
-			if(0<=iW && iW <=4)
-				ResourceCAPConf.m_uiCPUPriority=iW;
-			else
-				ResourceCAPConf.m_uiCPUPriority=2;
-		}
-		RegCloseKey(hKey);
-	}
-	return bRet;
-}
-void CRedirectApp::ReadResourceCAPSetting()
-{
-	//HKEY_CUの設定を最優先させる。
-	//2016-09-30
-	if(ReadResourceCAPSettingFromReg())
-	{
-		ResourceCAPConf.m_strReadSettingType=_T("(GPO)");
-		return;
-	}
-
-	CStdioFile in;
-	CString strTemp;
-	CString strLogMsgLine;
-	if(in.Open(m_strResourceCAPFullPath,CFile::modeRead|CFile::shareDenyWrite))
-	{
-		CString strTemp2;
-		CString strTemp3;
-		CStringArray strArray;
-		while(in.ReadString(strTemp))
-		{
-			strTemp.TrimLeft();
-			strTemp.TrimRight();
-			strArray.RemoveAll();
-			SBUtil::Split(strArray,strTemp,_T("="));
-			strLogMsgLine += strTemp;
-			strLogMsgLine += "\n";
-
-			if(strArray.GetSize() >= 2)
-			{
-				strTemp2=strArray.GetAt(0);
-				strTemp2.TrimLeft();
-				strTemp2.TrimRight();
-
-				strTemp3=strArray.GetAt(1);
-				strTemp3.TrimLeft();
-				strTemp3.TrimRight();
-
-				if(strTemp2.Find(_T(";"))==0)
-				{
-					;
-				}
-				else if(strTemp2.Find(_T("#"))==0)
-				{
-					;
-				}
-				else
-				{
-					if(strTemp2.CompareNoCase(_T("EnableIETabLimit"))==0)
-					{
-						ResourceCAPConf.m_strReadSettingType=_T("(INI)");
-						if(strTemp3==_T("1"))
-							ResourceCAPConf.m_bTabCntCAP=TRUE;
-						else
-							ResourceCAPConf.m_bTabCntCAP=FALSE;
-					}
-					else if(strTemp2.CompareNoCase(_T("IETabLimit_WARNING"))==0)
-					{
-						int iW=0;
-						iW = _ttoi(strTemp3);
-						if(2<=iW && iW <=99)
-							ResourceCAPConf.m_uiTabCntWARM=iW;
-						else
-							ResourceCAPConf.m_uiTabCntWARM=10;
-					}
-					else if(strTemp2.CompareNoCase(_T("IETabLimit_MAX"))==0)
-					{
-						int iW=0;
-						iW = _ttoi(strTemp3);
-						if(3<=iW && iW <=100)
-							ResourceCAPConf.m_uiTabCntMAX=iW;
-						else
-							ResourceCAPConf.m_uiTabCntMAX=15;
-					}
-					else if(strTemp2.CompareNoCase(_T("IETabLimit_WARNING_MSG"))==0)
-					{
-						if(!strTemp3.IsEmpty())
-						{
-							strTemp3.Replace(_T("\\n"),_T("\n"));
-							ResourceCAPConf.m_strTab_WARM_Msg=strTemp3;
-						}
-					}
-					else if(strTemp2.CompareNoCase(_T("IETabLimit_MAX_MSG"))==0)
-					{
-						if(!strTemp3.IsEmpty())
-						{
-							strTemp3.Replace(_T("\\n"),_T("\n"));
-							ResourceCAPConf.m_strTab_MAX_Msg=strTemp3;
-						}
-					}
-					else if(strTemp2.CompareNoCase(_T("IETabLimit_WARNING_MSG_TIME"))==0)
-					{
-						if(!strTemp3.IsEmpty())
-						{
-							int iW=0;
-							iW = _ttoi(strTemp3);
-							if(0<=iW && iW <=60)
-								ResourceCAPConf.m_uiTab_WARM_ShowTime=iW;
-							else
-								ResourceCAPConf.m_uiTab_WARM_ShowTime=5;
-						}
-					}
-					else if(strTemp2.CompareNoCase(_T("IETabLimit_MAX_MSG_TIME"))==0)
-					{
-						if(!strTemp3.IsEmpty())
-						{
-							int iW=0;
-							iW = _ttoi(strTemp3);
-							if(0<=iW && iW <=60)
-								ResourceCAPConf.m_uiTab_MAX_ShowTime=iW;
-							else
-								ResourceCAPConf.m_uiTab_MAX_ShowTime=5;
-						}
-					}
-					//////////////////////////////////////////////////////////////////////
-					else if(strTemp2.CompareNoCase(_T("EnableIEMemLimit"))==0)
-					{
-						if(strTemp3==_T("1"))
-							ResourceCAPConf.m_bMemUsageCAP=TRUE;
-						else
-							ResourceCAPConf.m_bMemUsageCAP=FALSE;
-					}
-					else if(strTemp2.CompareNoCase(_T("IEMemLimit_WARNING"))==0)
-					{
-						int iW=0;
-						iW = _ttoi(strTemp3);
-						if(100<=iW && iW <=1000)
-							ResourceCAPConf.m_uiMemWARM=iW;
-						else
-							ResourceCAPConf.m_uiMemWARM=600;
-					}
-					else if(strTemp2.CompareNoCase(_T("IEMemLimit_MAX"))==0)
-					{
-						int iW=0;
-						iW = _ttoi(strTemp3);
-						if(200<=iW && iW <=2000)
-							ResourceCAPConf.m_uiMemMAX=iW;
-						else
-							ResourceCAPConf.m_uiMemMAX=1024;
-					}
-					else if(strTemp2.CompareNoCase(_T("IEMemLimit_WARNING_MSG"))==0)
-					{
-						if(!strTemp3.IsEmpty())
-						{
-							strTemp3.Replace(_T("\\n"),_T("\n"));
-							ResourceCAPConf.m_strMem_WARM_Msg=strTemp3;
-						}
-					}
-					else if(strTemp2.CompareNoCase(_T("IEMemLimit_MAX_MSG"))==0)
-					{
-						if(!strTemp3.IsEmpty())
-						{
-							strTemp3.Replace(_T("\\n"),_T("\n"));
-							ResourceCAPConf.m_strMem_MAX_Msg=strTemp3;
-						}
-					}
-					else if(strTemp2.CompareNoCase(_T("IEMemLimit_WARNING_MSG_TIME"))==0)
-					{
-						if(!strTemp3.IsEmpty())
-						{
-							int iW=0;
-							iW = _ttoi(strTemp3);
-							if(0<=iW && iW <=60)
-								ResourceCAPConf.m_uiMem_WARM_ShowTime=iW;
-							else
-								ResourceCAPConf.m_uiMem_WARM_ShowTime=5;
-						}
-					}
-					else if(strTemp2.CompareNoCase(_T("IEMemLimit_MAX_MSG_TIME"))==0)
-					{
-						if(!strTemp3.IsEmpty())
-						{
-							int iW=0;
-							iW = _ttoi(strTemp3);
-							if(0<=iW && iW <=60)
-								ResourceCAPConf.m_uiMem_MAX_ShowTime=iW;
-							else
-								ResourceCAPConf.m_uiMem_MAX_ShowTime=5;
-						}
-					}
-					/////////////////////////////////////////////////////////////////////////////////
-					else if(strTemp2.CompareNoCase(_T("EnableIEPriority"))==0)
-					{
-						if(strTemp3==_T("1"))
-							ResourceCAPConf.m_bCPUPriorityCAP=TRUE;
-						else
-							ResourceCAPConf.m_bCPUPriorityCAP=FALSE;
-					}
-					else if(strTemp2.CompareNoCase(_T("IEPriority"))==0)
-					{
-						int iW=0;
-						iW = _ttoi(strTemp3);
-						if(0<=iW && iW <=4)
-							ResourceCAPConf.m_uiCPUPriority=iW;
-						else
-							ResourceCAPConf.m_uiCPUPriority=2;
-					}
-				}
-			}
-		}
-		in.Close();
-	}
-}
 void CRedirectApp::CreateRDPFile(CString& strCommand)
 {
-	//theApp.WriteDebugTraceDateTime(_T("CreateRDPFile--START--"),DEBUG_LOG_TYPE_GE);
-	//theApp.WriteDebugTraceDateTime(strCommand,DEBUG_LOG_TYPE_GE);
 	CStdioFile out;
 	if(out.Open(m_strRDP_FileFullPath,CFile::modeCreate|CFile::modeWrite|CFile::shareDenyNone))
 	{
@@ -1621,13 +980,6 @@ void CRedirectApp::CreateRDPFile(CString& strCommand)
 				strWriteData.Format(_T("alternate shell:s:%s\n"),SettingConf.m_strRemoteAppPath);
 				out.WriteString(strWriteData);
 			}
-
-			//CommandLine
-			//if(!m_strRemoteAppCommandLine.IsEmpty())
-			//{
-			//	strWriteData.Format(_T("remoteapplicationcmdline:s:%s\n"),m_strRemoteAppCommandLine);
-			//	out.WriteString(strWriteData);
-			//}
 
 			//引数が空。
 			if(strCommand.IsEmpty())
@@ -1675,7 +1027,6 @@ void CRedirectApp::CreateRDPFile(CString& strCommand)
 		out.Close();
 	}
 	theApp.Exec_MSTSC(m_strRDP_FileFullPath);
-	//theApp.WriteDebugTraceDateTime(_T("CreateRDPFile-Thread_Running_Watch--START"),DEBUG_LOG_TYPE_GE);
 
 	if(m_pReExecThread)
 	{
@@ -1696,17 +1047,9 @@ void CRedirectApp::CreateRDPFile(CString& strCommand)
 			}
 		}
 	}
-	CString strLogMsg;
-	strLogMsg.Format(_T("MS-RDP\t%s"),strCommand);
-	theApp.WriteDebugTraceDateTime(strLogMsg,DEBUG_LOG_LEVEL_OUTPUT_URL);
-
-	//theApp.WriteDebugTraceDateTime(_T("CreateRDPFile-Thread_Running_Watch--END"),DEBUG_LOG_TYPE_GE);
-	//theApp.WriteDebugTraceDateTime(_T("CreateRDPFile--END=="),DEBUG_LOG_TYPE_GE);
-
 }
 void CRedirectApp::Exec_MSTSC(CString& strRDPFile)
 {
-	//theApp.WriteDebugTraceDateTime(_T("Exec_MSTSC--START"),DEBUG_LOG_TYPE_GE);
 	if(m_pDlgMsg)
 	{
 		delete m_pDlgMsg;
@@ -1742,11 +1085,8 @@ void CRedirectApp::Exec_MSTSC(CString& strRDPFile)
 	::Sleep(100);
 	m_pDlgMsg->m_Prg.StepIt();
 	m_pDlgMsg->m_Prg.StepIt();
-	//theApp.WriteDebugTraceDateTime(_T("Exec_MSTSC-Thread_EXEC--START"),DEBUG_LOG_TYPE_GE);
 	m_pReExecThread->Exec();
-	//theApp.WriteDebugTraceDateTime(_T("Exec_MSTSC-Thread_EXEC--END"),DEBUG_LOG_TYPE_GE);
 	::Sleep(100);
-	//theApp.WriteDebugTraceDateTime(_T("Exec_MSTSC--END"),DEBUG_LOG_TYPE_GE);
 
 	//2秒後にRDPファイルを削除する。
 	::Sleep(1000*3);
@@ -1783,10 +1123,7 @@ void CRedirectApp::Exec_MSTSC(CString& strRDPFile)
 
 void CRedirectApp::Exec_VMwareHorizon_Start(CString& CommandParam)
 {
-	//theApp.WriteDebugTraceDateTime(_T("Exec_VMwareHorizon_Start--START"),DEBUG_LOG_TYPE_GE);
 	Exec_VMware_Horizon(SettingConf.m_strHorizon_ConnectionServerName,SettingConf.m_strHorizon_AppName,CommandParam);
-	//theApp.WriteDebugTraceDateTime(_T("Exec_VMwareHorizon_Start-Thread_Running_Watch--START"),DEBUG_LOG_TYPE_GE);
-
 	if(m_pReExecThread)
 	{
 		for(int j=0;j<8800;j++)
@@ -1811,17 +1148,9 @@ void CRedirectApp::Exec_VMwareHorizon_Start(CString& CommandParam)
 		delete m_pDlgMsg;
 		m_pDlgMsg=NULL;
 	}
-	//::Sleep(2*1000);
-	CString strLogMsg;
-	strLogMsg.Format(_T("VMware-Horizon\t%s"),CommandParam);
-	theApp.WriteDebugTraceDateTime(strLogMsg,DEBUG_LOG_LEVEL_OUTPUT_URL);
-
-	//theApp.WriteDebugTraceDateTime(_T("Exec_VMwareHorizon_Start-Thread_Running_Watch--END"),DEBUG_LOG_TYPE_GE);
-	//theApp.WriteDebugTraceDateTime(_T("Exec_VMwareHorizon_Start--END=="),DEBUG_LOG_TYPE_GE);
 }
 void CRedirectApp::Exec_VMware_Horizon(CString& strServerHostName,CString& strAppName,CString& strURL)
 {
-	//theApp.WriteDebugTraceDateTime(_T("Exec_VMware-Horizon--START"),DEBUG_LOG_TYPE_GE);
 	if(m_pDlgMsg)
 	{
 		delete m_pDlgMsg;
@@ -1855,18 +1184,13 @@ void CRedirectApp::Exec_VMware_Horizon(CString& strServerHostName,CString& strAp
 	m_pDlgMsg->m_Prg.StepIt();
 	m_pDlgMsg->SetMsg(_T("VMware Horizon Client 起動中...."));
 	m_pDlgMsg->m_Prg.StepIt();
-	//theApp.WriteDebugTraceDateTime(_T("Exec_VMware-Horizon-Thread_EXEC--START"),DEBUG_LOG_TYPE_GE);
 	m_pReExecThread->Exec();
-	//theApp.WriteDebugTraceDateTime(_T("Exec_VMware-Horizon-Thread_EXEC--END"),DEBUG_LOG_TYPE_GE);
-	//theApp.WriteDebugTraceDateTime(_T("Exec_VMware-Horizon--END"),DEBUG_LOG_TYPE_GE);
 }
 
 
 void CRedirectApp::Exec_CitixXenApp_Start(CString& CommandParam)
 {
-	//theApp.WriteDebugTraceDateTime(_T("Exec_CitixXenApp_Start--START"),DEBUG_LOG_TYPE_GE);
 	Exec_Citrix_XenApp(SettingConf.m_strCitrix_AppName,CommandParam);
-	//theApp.WriteDebugTraceDateTime(_T("Exec_CitixXenApp_Start-Thread_Running_Watch--START"),DEBUG_LOG_TYPE_GE);
 
 	if(m_pReExecThread)
 	{
@@ -1892,18 +1216,10 @@ void CRedirectApp::Exec_CitixXenApp_Start(CString& CommandParam)
 		delete m_pDlgMsg;
 		m_pDlgMsg=NULL;
 	}
-	//::Sleep(2*1000);
-	CString strLogMsg;
-	strLogMsg.Format(_T("Citrix-XenApp\t%s"),CommandParam);
-	theApp.WriteDebugTraceDateTime(strLogMsg,DEBUG_LOG_LEVEL_OUTPUT_URL);
-
-	//theApp.WriteDebugTraceDateTime(_T("Exec_CitixXenApp_Start-Thread_Running_Watch--END"),DEBUG_LOG_TYPE_GE);
-	//theApp.WriteDebugTraceDateTime(_T("Exec_CitixXenApp_Start--END=="),DEBUG_LOG_TYPE_GE);
 }
 
 void CRedirectApp::Exec_Citrix_XenApp(CString& strAppName,CString& strURL)
 {
-	//theApp.WriteDebugTraceDateTime(_T("Exec_Citrix_XenApp--START"),DEBUG_LOG_TYPE_GE);
 	if(m_pDlgMsg)
 	{
 		delete m_pDlgMsg;
@@ -1918,7 +1234,7 @@ void CRedirectApp::Exec_Citrix_XenApp(CString& strAppName,CString& strURL)
 	m_pDlgMsg->m_Prg.SetStep( 1 );
 	m_pDlgMsg->SetMsg(_T("起動準備中...."));
 	m_pDlgMsg->m_Prg.StepIt();
-	m_pDlgMsg->SetMsg(_T("Citrix XenApp"));
+	m_pDlgMsg->SetMsg(_T("Citrix"));
 	::Sleep(100);
 	if(m_pReExecThread)
 	{
@@ -1934,21 +1250,16 @@ void CRedirectApp::Exec_Citrix_XenApp(CString& strAppName,CString& strURL)
 	m_pReExecThread->m_strCitrix_AppName=strAppName;
 	m_pReExecThread->m_strURL=strURL;
 	m_pDlgMsg->m_Prg.StepIt();
-	m_pDlgMsg->SetMsg(_T("Citrix XenApp 接続中...."));
+	m_pDlgMsg->SetMsg(_T("Citrix 接続中...."));
 	m_pDlgMsg->m_Prg.StepIt();
-	//theApp.WriteDebugTraceDateTime(_T("Exec_Citrix_XenApp-Thread_EXEC--START"),DEBUG_LOG_TYPE_GE);
 	m_pReExecThread->Exec();
-	//theApp.WriteDebugTraceDateTime(_T("Exec_Citrix_XenApp-Thread_EXEC--END"),DEBUG_LOG_TYPE_GE);
-	//theApp.WriteDebugTraceDateTime(_T("Exec_Citrix_XenApp--END"),DEBUG_LOG_TYPE_GE);
 }
 
 
 
 void CRedirectApp::Exec_LocalBrowser(CString& strURL)
 {
-	//theApp.WriteDebugTraceDateTime(_T("Exec_LocalBrowser--START"),DEBUG_LOG_TYPE_GE);
 	Exec_Local_Browser(SettingConf.m_iSolutionType,SettingConf.m_strCustomBrowserPath,strURL);
-	//theApp.WriteDebugTraceDateTime(_T("Exec_LocalBrowser-Thread_Running_Watch--START"),DEBUG_LOG_TYPE_GE);
 
 	if(m_pReExecThread)
 	{
@@ -1969,13 +1280,10 @@ void CRedirectApp::Exec_LocalBrowser(CString& strURL)
 			}
 		}
 	}
-	//theApp.WriteDebugTraceDateTime(_T("Exec_LocalBrowser-Thread_Running_Watch--END"),DEBUG_LOG_TYPE_GE);
-	//theApp.WriteDebugTraceDateTime(_T("Exec_LocalBrowser--END=="),DEBUG_LOG_TYPE_GE);
 }
 
 void CRedirectApp::Exec_Local_Browser(UINT iSolutionType,CString& strCustomBrowserPath,CString& strURL)
 {
-	//theApp.WriteDebugTraceDateTime(_T("Exec_Local_Browser--START"),DEBUG_LOG_TYPE_GE);
 	if(m_pDlgMsg)
 	{
 		delete m_pDlgMsg;
@@ -2045,13 +1353,8 @@ void CRedirectApp::Exec_Local_Browser(UINT iSolutionType,CString& strCustomBrows
 	::Sleep(100);
 	m_pDlgMsg->m_Prg.StepIt();
 	m_pDlgMsg->m_Prg.StepIt();
-	//theApp.WriteDebugTraceDateTime(_T("Exec_Local_Browser-Thread_EXEC--START"),DEBUG_LOG_TYPE_GE);
 	m_pReExecThread->Exec();
-	//theApp.WriteDebugTraceDateTime(_T("Exec_Local_Browser-Thread_EXEC--END"),DEBUG_LOG_TYPE_GE);
 	::Sleep(100);
-	//theApp.WriteDebugTraceDateTime(_T("Exec_Local_Browser--END"),DEBUG_LOG_TYPE_GE);
-	theApp.WriteDebugTraceDateTime(strLogMsg,DEBUG_LOG_LEVEL_OUTPUT_URL);
-
 }
 
 void CRedirectApp::SetIE_FullPath()
@@ -2297,8 +1600,6 @@ int CRedirectApp::ExitInstance()
 		delete m_pReExecThread;
 		m_pReExecThread = NULL;
 	}
-	//theApp.WriteDebugTraceDateTime(_T("ExitInstance"),DEBUG_LOG_TYPE_GE);
-	//theApp.WriteDebugTraceDateTime(_T("------------------"),DEBUG_LOG_TYPE_GE);
 	return CWinApp::ExitInstance();
 }
 struct LANGANDCODEPAGE
@@ -2429,7 +1730,6 @@ void CCRre::IEStart(CString& strURL)
 				hDDEData = DdeClientTransaction((LPBYTE)cmd.GetBuffer(0),static_cast<DWORD>((cmd.GetLength()+1)*2),hConv,0,0,XTYP_EXECUTE,30000,&result);
 				DdeDisconnect(hConv);
 				DdeUninitialize(m_dwDDEID);
-				theApp.WriteDebugTraceDateTime(_T("IEStart---DDE-Success."),DEBUG_LOG_TYPE_GE);
 				return;
 			}
 		}
@@ -2437,116 +1737,75 @@ void CCRre::IEStart(CString& strURL)
 
 	if(::ShellExecute(NULL,_T("open"),_T("iexplore.exe"),strURL,NULL, SW_SHOW) <= HINSTANCE(32))
 	{
-		theApp.WriteDebugTraceDateTime(_T("IEStart Stage1 Failed."),DEBUG_LOG_TYPE_GE);
 		CString IEcmd;
 		IEcmd.Format(_T("iexplorer.exe %s"),strURL);
 		if(::ShellExecute(NULL,NULL,IEcmd,NULL,NULL, SW_SHOW) <= HINSTANCE(32))
 		{
-			theApp.WriteDebugTraceDateTime(_T("IEStart Stage2 Failed."),DEBUG_LOG_TYPE_GE);
 			IEcmd=_T("");
 			IEcmd.Format(_T("\"%s\" %s"),theApp.m_strIE_FullPath,strURL);
 			if(::ShellExecute(NULL,NULL,IEcmd,NULL,NULL, SW_SHOW) <= HINSTANCE(32))
 			{
-				theApp.WriteDebugTraceDateTime(_T("IEStart Stage3 Failed."),DEBUG_LOG_TYPE_GE);
 				IEcmd=_T("");
 				IEcmd.Format(_T("\"C:\\Program Files (x86)\\Internet Explorer\\iexplore.exe\" %s"),strURL);
 				if(::ShellExecute(NULL,NULL,IEcmd,NULL,NULL, SW_SHOW) <= HINSTANCE(32))
 				{
-					theApp.WriteDebugTraceDateTime(_T("IEStart Stage4 Failed."),DEBUG_LOG_TYPE_GE);
 					IEcmd=_T("");
 					IEcmd.Format(_T("\"C:\\Program Files\\Internet Explorer\\iexplore.exe\" %s"),strURL);
 					::ShellExecute(NULL,NULL,IEcmd,NULL,NULL, SW_SHOW);
-					theApp.WriteDebugTraceDateTime(_T("IEStart Stage5 Success."),DEBUG_LOG_TYPE_GE);
 				}
-				else
-					theApp.WriteDebugTraceDateTime(_T("IEStart Stage4 Success."),DEBUG_LOG_TYPE_GE);
 			}
-			else
-				theApp.WriteDebugTraceDateTime(_T("IEStart Stage3 Success."),DEBUG_LOG_TYPE_GE);
 		}
-		else
-			theApp.WriteDebugTraceDateTime(_T("IEStart Stage2 Success."),DEBUG_LOG_TYPE_GE);
-
 	}
-	else
-		theApp.WriteDebugTraceDateTime(_T("IEStart Stage1 Success."),DEBUG_LOG_TYPE_GE);
-
 }
 
 void CCRre::FirefoxStart(CString& strURL)
 {
 	if(::ShellExecute(NULL,_T("open"),_T("firefox.exe"),strURL,NULL, SW_SHOW) <= HINSTANCE(32))
 	{
-		theApp.WriteDebugTraceDateTime(_T("FirefoxStart Stage1 Failed."),DEBUG_LOG_TYPE_GE);
 		CString IEcmd;
 		IEcmd.Format(_T("firefox.exe %s"),m_strURL);
 		if(::ShellExecute(NULL,NULL,IEcmd,NULL,NULL, SW_SHOW) <= HINSTANCE(32))
 		{
-			theApp.WriteDebugTraceDateTime(_T("FirefoxStart Stage2 Failed."),DEBUG_LOG_TYPE_GE);
 			IEcmd=_T("");
 			IEcmd.Format(_T("\"%s\" %s"),theApp.m_strFirefox_FullPath,strURL);
 			if(::ShellExecute(NULL,NULL,IEcmd,NULL,NULL, SW_SHOW) <= HINSTANCE(32))
 			{
-				theApp.WriteDebugTraceDateTime(_T("FirefoxStart Stage3 Failed."),DEBUG_LOG_TYPE_GE);
 				IEcmd=_T("");
 				IEcmd.Format(_T("\"C:\\Program Files (x86)\\Mozilla Firefox\\firefox.exe\" %s"),strURL);
 				if(::ShellExecute(NULL,NULL,IEcmd,NULL,NULL, SW_SHOW) <= HINSTANCE(32))
 				{
-					theApp.WriteDebugTraceDateTime(_T("FirefoxStart Stage4 Failed."),DEBUG_LOG_TYPE_GE);
 					IEcmd=_T("");
 					IEcmd.Format(_T("\"C:\\Program Files\\Mozilla Firefox\\firefox.exe\" %s"),strURL);
 					::ShellExecute(NULL,NULL,IEcmd,NULL,NULL, SW_SHOW);
-					theApp.WriteDebugTraceDateTime(_T("FirefoxStart Stage5 Success."),DEBUG_LOG_TYPE_GE);
 				}
-				else
-					theApp.WriteDebugTraceDateTime(_T("FirefoxStart Stage4 Success."),DEBUG_LOG_TYPE_GE);
 			}
-			else
-				theApp.WriteDebugTraceDateTime(_T("FirefoxStart Stage3 Success."),DEBUG_LOG_TYPE_GE);
 		}
-		else
-			theApp.WriteDebugTraceDateTime(_T("FirefoxStart Stage2 Success."),DEBUG_LOG_TYPE_GE);
 	}
-	else
-		theApp.WriteDebugTraceDateTime(_T("FirefoxStart Stage1 Success."),DEBUG_LOG_TYPE_GE);
 }
 
 void CCRre::ChromeStart(CString& strURL)
 {
 	if(::ShellExecute(NULL,_T("open"),_T("chrome.exe"),strURL,NULL, SW_SHOW) <= HINSTANCE(32))
 	{
-		theApp.WriteDebugTraceDateTime(_T("ChromeStart Stage1 Failed."),DEBUG_LOG_TYPE_GE);
 		CString IEcmd;
 		IEcmd.Format(_T("chrome.exe %s"),strURL);
 		if(::ShellExecute(NULL,NULL,IEcmd,NULL,NULL, SW_SHOW) <= HINSTANCE(32))
 		{
-			theApp.WriteDebugTraceDateTime(_T("ChromeStart Stage2 Failed."),DEBUG_LOG_TYPE_GE);
 			IEcmd=_T("");
 			IEcmd.Format(_T("\"%s\" %s"),theApp.m_strChrome_FullPath,strURL);
 			if(::ShellExecute(NULL,NULL,IEcmd,NULL,NULL, SW_SHOW) <= HINSTANCE(32))
 			{
-				theApp.WriteDebugTraceDateTime(_T("ChromeStart Stage3 Failed."),DEBUG_LOG_TYPE_GE);
 				IEcmd=_T("");
 				IEcmd.Format(_T("\"C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe\" %s"),strURL);
 				if(::ShellExecute(NULL,NULL,IEcmd,NULL,NULL, SW_SHOW) <= HINSTANCE(32))
 				{
-					theApp.WriteDebugTraceDateTime(_T("ChromeStart Stage4 Failed."),DEBUG_LOG_TYPE_GE);
 					IEcmd=_T("");
 					IEcmd.Format(_T("\"C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe\" %s"),strURL);
 					::ShellExecute(NULL,NULL,IEcmd,NULL,NULL, SW_SHOW);
-					theApp.WriteDebugTraceDateTime(_T("ChromeStart Stage5 Success."),DEBUG_LOG_TYPE_GE);
 				}
-				else
-					theApp.WriteDebugTraceDateTime(_T("ChromeStart Stage4 Success."),DEBUG_LOG_TYPE_GE);
 			}
-			else
-				theApp.WriteDebugTraceDateTime(_T("ChromeStart Stage3 Success."),DEBUG_LOG_TYPE_GE);
 		}
-		else
-			theApp.WriteDebugTraceDateTime(_T("ChromeStart Stage2 Success."),DEBUG_LOG_TYPE_GE);
 	}
-	else
-		theApp.WriteDebugTraceDateTime(_T("ChromeStart Stage1 Success."),DEBUG_LOG_TYPE_GE);
 }
 
 void CCRre::EdgeStart(CString& strURL)
@@ -2554,31 +1813,20 @@ void CCRre::EdgeStart(CString& strURL)
 	CString IEcmd;
 	IEcmd.Format(_T("microsoft-edge:%s"),strURL);
 	::ShellExecute(NULL,NULL,IEcmd,NULL,NULL, SW_SHOW);
-	theApp.WriteDebugTraceDateTime(_T("EdgeStart Stage1 Success."),DEBUG_LOG_TYPE_GE);
 }
 
 void CCRre::DefaultBrowserStart(CString& strURL)
 {
 	if(::ShellExecute(NULL,NULL,strURL,NULL,NULL, SW_SHOW) <= HINSTANCE(32))
 	{
-		theApp.WriteDebugTraceDateTime(_T("DefaultBrowserStart Stage1 Failed."),DEBUG_LOG_TYPE_GE);
 		if(::ShellExecute(NULL,_T("open"),strURL,NULL,NULL, SW_SHOW) <= HINSTANCE(32))
 		{
-			theApp.WriteDebugTraceDateTime(_T("DefaultBrowserStart Stage2 Failed."),DEBUG_LOG_TYPE_GE);
 			if(::ShellExecute(NULL,NULL,_T("explorer.exe"),strURL,NULL, SW_SHOW) <= HINSTANCE(32))
 			{
-				theApp.WriteDebugTraceDateTime(_T("DefaultBrowserStart Stage3 Failed."),DEBUG_LOG_TYPE_GE);
 				::ShellExecute(NULL,_T("open"),_T("iexplore.exe"),strURL,NULL, SW_SHOW);
-				theApp.WriteDebugTraceDateTime(_T("DefaultBrowserStart Stage4 Success."),DEBUG_LOG_TYPE_GE);
 			}
-			else
-				theApp.WriteDebugTraceDateTime(_T("DefaultBrowserStart Stage3 Success."),DEBUG_LOG_TYPE_GE);
 		}
-		else
-			theApp.WriteDebugTraceDateTime(_T("DefaultBrowserStart Stage2 Success."),DEBUG_LOG_TYPE_GE);
 	}
-	else
-		theApp.WriteDebugTraceDateTime(_T("DefaultBrowserStart Stage1 Success."),DEBUG_LOG_TYPE_GE);
 }
 
 void CCRre::CustomBrowserStart(CString& strPath,CString& strURL)
@@ -2593,7 +1841,6 @@ void CCRre::CustomBrowserStart(CString& strPath,CString& strURL)
 	si.cb = sizeof( si );
 	if(!CreateProcess( NULL,(LPTSTR)(LPCTSTR)IEcmd,NULL, NULL, FALSE, 0, NULL,NULL, &si, &pi ))
 	{
-		theApp.WriteDebugTraceDateTime(_T("CustomBrowserStart Stage1 Failed."),DEBUG_LOG_TYPE_GE);
 		SetLastError(NO_ERROR);
 		//Retry
 		STARTUPINFO si2={0};
@@ -2601,21 +1848,15 @@ void CCRre::CustomBrowserStart(CString& strPath,CString& strURL)
 		si2.cb = sizeof( si2 );
 		if(!CreateProcess( strPathQ,(LPTSTR)(LPCTSTR)strURL,NULL, NULL, FALSE, 0, NULL,NULL, &si2, &pi2 ))
 		{
-			theApp.WriteDebugTraceDateTime(_T("CustomBrowserStart Stage2 Failed."),DEBUG_LOG_TYPE_GE);
 			SetLastError(NO_ERROR);
 			if(::ShellExecute(NULL,_T("open"),strPathQ,strURL,NULL, SW_SHOW) <= HINSTANCE(32))
 			{
-				theApp.WriteDebugTraceDateTime(_T("CustomBrowserStart Stage3 Failed."),DEBUG_LOG_TYPE_GE);
 				SetLastError(NO_ERROR);
 				::ShellExecute(NULL,NULL,IEcmd,NULL,NULL, SW_SHOW);
-				theApp.WriteDebugTraceDateTime(_T("CustomBrowserStart Stage4 Success."),DEBUG_LOG_TYPE_GE);
 			}
-			else
-				theApp.WriteDebugTraceDateTime(_T("CustomBrowserStart Stage3 Success."),DEBUG_LOG_TYPE_GE);
 		}
 		else
 		{
-			theApp.WriteDebugTraceDateTime(_T("CustomBrowserStart Stage2 Success."),DEBUG_LOG_TYPE_GE);
 			if(pi2.hThread)
 			{
 				CloseHandle( pi2.hThread );  // スレッドのハンドルは使わないのですぐ破棄
@@ -2630,7 +1871,6 @@ void CCRre::CustomBrowserStart(CString& strPath,CString& strURL)
 	}
 	else
 	{
-		theApp.WriteDebugTraceDateTime(_T("CustomBrowserStart Stage1 Success."),DEBUG_LOG_TYPE_GE);
 		if(pi.hThread)
 		{
 			CloseHandle( pi.hThread );  // スレッドのハンドルは使わないのですぐ破棄
@@ -2656,12 +1896,10 @@ void CCRre::VMwareViewStart(CString& strCommand)
 			strViewProc.Replace(_T("%1"),strCommand);
 			if(::ShellExecute(NULL,_T("open"),strCommand,NULL,NULL, SW_SHOW) <= HINSTANCE(32))
 			{
-				theApp.WriteDebugTraceDateTime(_T("VMwareViewStart Stage1 Failed."),DEBUG_LOG_TYPE_GE);
 				bExecFlg=FALSE;
 			}
 			else
 			{
-				theApp.WriteDebugTraceDateTime(_T("VMwareViewStart Stage1 Success."),DEBUG_LOG_TYPE_GE);
 				bExecFlg=TRUE;
 			}
 		}
@@ -2669,10 +1907,7 @@ void CCRre::VMwareViewStart(CString& strCommand)
 
 	if(!bExecFlg)
 	{
-		if(::ShellExecute(NULL,NULL,strCommand,NULL,NULL, SW_SHOW) <= HINSTANCE(32))
-			theApp.WriteDebugTraceDateTime(_T("VMwareViewStart Stage2 Failed."),DEBUG_LOG_TYPE_GE);
-		else
-			theApp.WriteDebugTraceDateTime(_T("VMwareViewStart Stage2 Success."),DEBUG_LOG_TYPE_GE);
+		::ShellExecute(NULL,NULL,strCommand,NULL,NULL, SW_SHOW);
 	}
 }
 
@@ -2695,7 +1930,6 @@ void CCRre::CitrixXenAppStart(CString& strCommand)
 	si.cb = sizeof( si );
 	if(!CreateProcess( NULL,(LPTSTR)(LPCTSTR)IEcmd,NULL, NULL, FALSE, 0, NULL,NULL, &si, &pi ))
 	{
-		theApp.WriteDebugTraceDateTime(_T("CitrixXenAppStart Stage1 Failed."),DEBUG_LOG_TYPE_GE);
 		SetLastError(NO_ERROR);
 		//Retry
 		STARTUPINFO si2={0};
@@ -2703,21 +1937,15 @@ void CCRre::CitrixXenAppStart(CString& strCommand)
 		si2.cb = sizeof( si2 );
 		if(!CreateProcess( strPathQ,(LPTSTR)(LPCTSTR)strCommand,NULL, NULL, FALSE, 0, NULL,NULL, &si2, &pi2 ))
 		{
-			theApp.WriteDebugTraceDateTime(_T("CitrixXenAppStart Stage2 Failed."),DEBUG_LOG_TYPE_GE);
 			SetLastError(NO_ERROR);
 			if(::ShellExecute(NULL,_T("open"),strPathQ,strCommand,NULL, SW_SHOW) <= HINSTANCE(32))
 			{
-				theApp.WriteDebugTraceDateTime(_T("CitrixXenAppStart Stage3 Failed."),DEBUG_LOG_TYPE_GE);
 				SetLastError(NO_ERROR);
 				::ShellExecute(NULL,NULL,IEcmd,NULL,NULL, SW_SHOW);
-				theApp.WriteDebugTraceDateTime(_T("CitrixXenAppStart Stage4 Success."),DEBUG_LOG_TYPE_GE);
 			}
-			else
-				theApp.WriteDebugTraceDateTime(_T("CitrixXenAppStart Stage3 Success."),DEBUG_LOG_TYPE_GE);
 		}
 		else
 		{
-			theApp.WriteDebugTraceDateTime(_T("CitrixXenAppStart Stage2 Success."),DEBUG_LOG_TYPE_GE);
 			if(pi2.hThread)
 			{
 				CloseHandle( pi2.hThread );  // スレッドのハンドルは使わないのですぐ破棄
@@ -2732,7 +1960,6 @@ void CCRre::CitrixXenAppStart(CString& strCommand)
 	}
 	else
 	{
-		theApp.WriteDebugTraceDateTime(_T("CitrixXenAppStart Stage1 Success."),DEBUG_LOG_TYPE_GE);
 		if(pi.hThread)
 		{
 			CloseHandle( pi.hThread );  // スレッドのハンドルは使わないのですぐ破棄
@@ -2837,13 +2064,7 @@ CCRre::~CCRre()
 	if(!m_bAutoDelete )
 	{
 		PostThreadMessage( WM_QUIT, 0, 0 );
-//		::WaitForSingleObject( m_hThread, INFINITE );
 		DWORD waitResult = ::WaitForSingleObject(m_hThread, 15000 );
-		if (waitResult == WAIT_TIMEOUT)
-		{
-			theApp.WriteDebugTraceDateTime(_T("CCRre::~CCRre(WAIT_TIMEOUT)"),DEBUG_LOG_TYPE_EX);
-		}
-		//bRun=FALSE;
 	}
 }
 
@@ -2870,7 +2091,6 @@ END_MESSAGE_MAP()
 // CCRre メッセージ ハンドラ
 void CCRre::Exec()
 {
-	//theApp.WriteDebugTraceDateTime(_T("Exec--START"),DEBUG_LOG_TYPE_GE);
 	MSG msgDummy={0};
 	PeekMessage(&msgDummy, NULL, 0, 0, PM_NOREMOVE);
 	PostThreadMessage( MSG_THREAD_START, 0, 0 );
@@ -2900,29 +2120,19 @@ void CCRre::Exec()
 			if(m_pDlgMsg)m_pDlgMsg->m_Prg.StepIt();
 			if(!CreateProcess( NULL,(LPTSTR)(LPCTSTR)strCommand,NULL, NULL, FALSE, 0, NULL,NULL, &si, &pi ))
 			{
-				theApp.WriteDebugTraceDateTime(_T("MSTSCStart Stage1 Failed."),DEBUG_LOG_TYPE_GE);
 				SetLastError(NO_ERROR);
 				//Retry
 				if(!CreateProcess( _T("mstsc.exe"),(LPTSTR)(LPCTSTR)m_strFilePath,NULL, NULL, FALSE, 0, NULL,NULL, &si, &pi ))
 				{
-					theApp.WriteDebugTraceDateTime(_T("MSTSCStart Stage2 Failed."),DEBUG_LOG_TYPE_GE);
 					SetLastError(NO_ERROR);
 					if(::ShellExecute(NULL,_T("open"),_T("mstsc.exe"),m_strFilePath,NULL, SW_SHOW) <= HINSTANCE(32))
 					{
-						theApp.WriteDebugTraceDateTime(_T("MSTSCStart Stage3 Failed."),DEBUG_LOG_TYPE_GE);
 						SetLastError(NO_ERROR);
 						::ShellExecute(NULL,NULL,m_strFilePath,NULL,NULL, SW_SHOW);
-						theApp.WriteDebugTraceDateTime(_T("MSTSCStart Stage4 Success."),DEBUG_LOG_TYPE_GE);
 					}
-					else
-						theApp.WriteDebugTraceDateTime(_T("MSTSCStart Stage3 Success."),DEBUG_LOG_TYPE_GE);
 				}
-				else
-					theApp.WriteDebugTraceDateTime(_T("MSTSCStart Stage2 Success."),DEBUG_LOG_TYPE_GE);
 
 			}
-			else
-				theApp.WriteDebugTraceDateTime(_T("MSTSCStart Stage1 Success."),DEBUG_LOG_TYPE_GE);
 			if(pi.hThread)
 			{
 				CloseHandle( pi.hThread );  // スレッドのハンドルは使わないのですぐ破棄
@@ -2949,9 +2159,7 @@ void CCRre::Exec()
 				strURLEncode = theApp.ConvertUTF8_URLEncode(m_strURL);
 				strCommand.Format(_T("vmware-view://%s/%s?url=%s"),m_strHorizon_ConnectionServerName,strAppNameEncode,strURLEncode);
 			}
-			//theApp.WriteDebugTraceDateTime(_T("OnExec--START--VMwareViewStart(strCommand)"),DEBUG_LOG_TYPE_GE);
 			this->VMwareViewStart(strCommand);
-			//theApp.WriteDebugTraceDateTime(strCommand,DEBUG_LOG_TYPE_GE);
 			break;
 		}
 		else if(PROC_CITRIX==m_iSolutionType)
@@ -2964,46 +2172,38 @@ void CCRre::Exec()
 			{
 				strCommand.Format(_T("-qlaunch \"%s\" %s"),m_strCitrix_AppName,m_strURL);
 			}
-			//theApp.WriteDebugTraceDateTime(_T("OnExec--START--CitrixXenAppStart(strCommand)"),DEBUG_LOG_TYPE_GE);
 			this->CitrixXenAppStart(strCommand);
-			//theApp.WriteDebugTraceDateTime(strCommand,DEBUG_LOG_TYPE_GE);
 			break;
 		}
 
 		else if(PROC_LDefaultBrowser==m_iSolutionType)
 		{
 			this->DefaultBrowserStart(m_strURL);
-			//theApp.WriteDebugTraceDateTime(m_strURL,DEBUG_LOG_TYPE_GE);
 			break;
 		}
 		else if(PROC_LIE==m_iSolutionType)
 		{
 			this->IEStart(m_strURL);
-			//theApp.WriteDebugTraceDateTime(m_strURL,DEBUG_LOG_TYPE_GE);
 			break;
 		}
 		else if(PROC_LFirefox==m_iSolutionType)
 		{
 			this->FirefoxStart(m_strURL);
-			//theApp.WriteDebugTraceDateTime(m_strURL,DEBUG_LOG_TYPE_GE);
 			break;
 		}
 		else if(PROC_LChrome==m_iSolutionType)
 		{
 			this->ChromeStart(m_strURL);
-			//theApp.WriteDebugTraceDateTime(m_strURL,DEBUG_LOG_TYPE_GE);
 			break;
 		}
 		else if(PROC_LEdge==m_iSolutionType)
 		{
 			this->EdgeStart(m_strURL);
-			//theApp.WriteDebugTraceDateTime(m_strURL,DEBUG_LOG_TYPE_GE);
 			break;
 		}
 		else if(PROC_LCustom==m_iSolutionType)
 		{
 			this->CustomBrowserStart(m_strCustomBrowserPath,m_strURL);
-			//theApp.WriteDebugTraceDateTime(m_strURL,DEBUG_LOG_TYPE_GE);
 			break;
 		}
 		break;
@@ -3016,13 +2216,11 @@ void CCRre::Exec()
 		m_pDlgMsg->m_Prg.StepIt();
 		m_pDlgMsg->m_Prg.StepIt();
 	}
-	//theApp.WriteDebugTraceDateTime(_T("Exec--END"),DEBUG_LOG_TYPE_GE);
 	return;
 }
 
 void CCRre::OnExec(WPARAM wParam, LPARAM lParam)
 {
-	//theApp.WriteDebugTraceDateTime(_T("OnExec--START"),DEBUG_LOG_TYPE_GE);
 	bRun=TRUE;
 	if(m_pDlgMsg)
 	{
@@ -3054,7 +2252,6 @@ void CCRre::OnExec(WPARAM wParam, LPARAM lParam)
 		m_pDlgMsg->ShowWindow(SW_HIDE);
 	}
 	bRun=FALSE;
-	//theApp.WriteDebugTraceDateTime(_T("OnExec--END"),DEBUG_LOG_TYPE_GE);
 	return;
 }
 
