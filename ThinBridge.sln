@@ -19,6 +19,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CustomLauncher", "CustomLau
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HorizonLauncher", "HorizonLauncher\HorizonLauncher.vcxproj", "{0CEDF884-4B3D-496F-B819-965EF37BD935}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ThinBridgeTalk", "ThinBridgeTalk\ThinBridgeTalk.vcxproj", "{F42DF96A-DCD0-457E-B12C-5B1ECD69E6AD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -53,8 +55,19 @@ Global
 		{0CEDF884-4B3D-496F-B819-965EF37BD935}.Release|Win32.ActiveCfg = Release|Win32
 		{0CEDF884-4B3D-496F-B819-965EF37BD935}.Release|Win32.Build.0 = Release|Win32
 		{0CEDF884-4B3D-496F-B819-965EF37BD935}.Release|x64.ActiveCfg = Release|Win32
+		{F42DF96A-DCD0-457E-B12C-5B1ECD69E6AD}.Debug|Win32.ActiveCfg = Debug|Win32
+		{F42DF96A-DCD0-457E-B12C-5B1ECD69E6AD}.Debug|Win32.Build.0 = Debug|Win32
+		{F42DF96A-DCD0-457E-B12C-5B1ECD69E6AD}.Debug|x64.ActiveCfg = Debug|x64
+		{F42DF96A-DCD0-457E-B12C-5B1ECD69E6AD}.Debug|x64.Build.0 = Debug|x64
+		{F42DF96A-DCD0-457E-B12C-5B1ECD69E6AD}.Release|Win32.ActiveCfg = Release|Win32
+		{F42DF96A-DCD0-457E-B12C-5B1ECD69E6AD}.Release|Win32.Build.0 = Release|Win32
+		{F42DF96A-DCD0-457E-B12C-5B1ECD69E6AD}.Release|x64.ActiveCfg = Release|x64
+		{F42DF96A-DCD0-457E-B12C-5B1ECD69E6AD}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {96FBAEF6-67A9-431B-AFF5-BF88C7213B5C}
 	EndGlobalSection
 EndGlobal
