@@ -501,12 +501,6 @@ BOOL CDlgRuleBase::OnInitDialog()
 	OnEnableCtrl();
 	UpdateListCounter(&this->m_List);
 	UpdateListCounter(&this->m_List2);
-
-
-	//CIconHelper ICoHelper;
-	//ICoHelper=theApp.LoadIcon(IDR_MAINFRAME);
-	//m_Image.SetIcon(ICoHelper);
-
 	return TRUE;
 }
 
@@ -769,6 +763,66 @@ LRESULT CDlgEDG::Set_OK(WPARAM wParam, LPARAM lParam)
 {
 	if(CDlgRuleBase::Set_OK(wParam,lParam)==0)
 		theApp.m_RedirectListSaveData.m_pEdge->Copy(&m_URDSave);
+	return 0;
+}
+
+//IE
+IMPLEMENT_DYNCREATE(CDlgIE, CDlgRuleBase)
+BEGIN_MESSAGE_MAP(CDlgIE, CDlgRuleBase)
+	ON_MESSAGE(ID_SETTING_OK, Set_OK)
+END_MESSAGE_MAP()
+BOOL CDlgIE::OnInitDialog()
+{
+	if (theApp.m_RedirectList.m_pIE)
+	{
+		m_URD.Copy(theApp.m_RedirectList.m_pIE);
+	}
+	BOOL bRet = CDlgRuleBase::OnInitDialog();
+
+	//IEとして不要な設定を非表示にする。
+	if (GetDlgItem(IDC_STATIC_IEG))
+	{
+		GetDlgItem(IDC_STATIC_IEG)->EnableWindow(FALSE);
+		GetDlgItem(IDC_STATIC_IEG)->ShowWindow(SW_HIDE);
+	}
+	if (GetDlgItem(IDC_STATIC_TY))
+	{
+		GetDlgItem(IDC_STATIC_TY)->EnableWindow(FALSE);
+		GetDlgItem(IDC_STATIC_TY)->ShowWindow(SW_HIDE);
+	}
+	if (GetDlgItem(IDC_COMBO1))
+	{
+		GetDlgItem(IDC_COMBO1)->EnableWindow(FALSE);
+		GetDlgItem(IDC_COMBO1)->ShowWindow(SW_HIDE);
+	}
+	if (GetDlgItem(IDC_STATIC_SEC))
+	{
+		GetDlgItem(IDC_STATIC_SEC)->EnableWindow(FALSE);
+		GetDlgItem(IDC_STATIC_SEC)->ShowWindow(SW_HIDE);
+	}
+	if (GetDlgItem(IDC_EDIT1))
+	{
+		GetDlgItem(IDC_EDIT1)->EnableWindow(FALSE);
+		GetDlgItem(IDC_EDIT1)->ShowWindow(SW_HIDE);
+	}
+	if (GetDlgItem(IDC_STATIC_SEC2))
+	{
+		GetDlgItem(IDC_STATIC_SEC2)->EnableWindow(FALSE);
+		GetDlgItem(IDC_STATIC_SEC2)->ShowWindow(SW_HIDE);
+	}
+
+	if (bRet)
+	{
+		CIconHelper ICoHelper;
+		ICoHelper = theApp.LoadIcon(IDI_ICON_IE);
+		m_Image.SetIcon(ICoHelper);
+	}
+	return bRet;
+}
+LRESULT CDlgIE::Set_OK(WPARAM wParam, LPARAM lParam)
+{
+	if (CDlgRuleBase::Set_OK(wParam, lParam) == 0)
+		theApp.m_RedirectListSaveData.m_pIE->Copy(&m_URDSave);
 	return 0;
 }
 
@@ -2130,6 +2184,14 @@ void CDlgCU20::OnBnClickedButtonFdlg()
 		SetDlgItemText(IDC_EDIT_LCB,fileDlg.GetPathName());
 	}
 }
+static LPCTSTR gO365ActionList[] = {
+	_T("Microsoft RDP"),
+	_T("VMware Horizon"),
+	_T("Citrix Virtual Apps"),
+	_T("Mozilla Firefox"),
+	_T("Google Chrome"),
+	_T("Microsoft Edge"),
+};
 //Office365
 IMPLEMENT_DYNCREATE(CDlgO365, CDlgRuleBase)
 void CDlgO365::DoDataExchange(CDataExchange* pDX)
@@ -2137,14 +2199,6 @@ void CDlgO365::DoDataExchange(CDataExchange* pDX)
 	CDlgRuleBase::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_COMBO2, m_Combo2);
 }
-static LPCTSTR gActionList[] = {
-	_T("Microsoft RDP"),
-	_T("VMware Horizon"),
-	_T("Citrix Virtual Apps"),
-	_T("Mozilla Firefox"), 
-	_T("Google Chrome"), 
-	_T("Microsoft Edge"), 
-};
 
 BEGIN_MESSAGE_MAP(CDlgO365, CDlgRuleBase)
 	ON_NOTIFY(NM_DBLCLK, IDC_LIST1, OnDblclkList1)
@@ -2269,38 +2323,38 @@ BOOL CDlgO365::OnInitDialog()
 		{
 			for (int i = 0; i < 6; i++)
 			{
-				m_Combo2.AddString(gActionList[i]);
+				m_Combo2.AddString(gO365ActionList[i]);
 			}
 
 			if (m_URD.m_strExecExeFullPath.CompareNoCase(_T("RDP")) == 0)
 			{
 				m_Combo2.SetCurSel(0);
-				m_Combo2.SetWindowText(gActionList[0]);
+				m_Combo2.SetWindowText(gO365ActionList[0]);
 			}
 			else if (m_URD.m_strExecExeFullPath.CompareNoCase(_T("VMWARE")) == 0)
 			{
 				m_Combo2.SetCurSel(1);
-				m_Combo2.SetWindowText(gActionList[1]);
+				m_Combo2.SetWindowText(gO365ActionList[1]);
 			}
 			else if (m_URD.m_strExecExeFullPath.CompareNoCase(_T("CITRIX")) == 0)
 			{
 				m_Combo2.SetCurSel(2);
-				m_Combo2.SetWindowText(gActionList[2]);
+				m_Combo2.SetWindowText(gO365ActionList[2]);
 			}
 			else if (m_URD.m_strExecExeFullPath.CompareNoCase(_T("Firefox")) == 0)
 			{
 				m_Combo2.SetCurSel(3);
-				m_Combo2.SetWindowText(gActionList[3]);
+				m_Combo2.SetWindowText(gO365ActionList[3]);
 			}
 			else if (m_URD.m_strExecExeFullPath.CompareNoCase(_T("Chrome")) == 0)
 			{
 				m_Combo2.SetCurSel(4);
-				m_Combo2.SetWindowText(gActionList[4]);
+				m_Combo2.SetWindowText(gO365ActionList[4]);
 			}
 			else if (m_URD.m_strExecExeFullPath.CompareNoCase(_T("Edge")) == 0)
 			{
 				m_Combo2.SetCurSel(5);
-				m_Combo2.SetWindowText(gActionList[5]);
+				m_Combo2.SetWindowText(gO365ActionList[5]);
 			}
 			else
 			{
@@ -2334,27 +2388,27 @@ LRESULT CDlgO365::Set_OK(WPARAM wParam, LPARAM lParam)
 				return 1;
 			}
 		}
-		if (strExePath.CompareNoCase(gActionList[0]) == 0)
+		if (strExePath.CompareNoCase(gO365ActionList[0]) == 0)
 		{
 			strExePath=_T("RDP");
 		}
-		else if (strExePath.CompareNoCase(gActionList[1]) == 0)
+		else if (strExePath.CompareNoCase(gO365ActionList[1]) == 0)
 		{
 			strExePath = _T("VMWARE");
 		}
-		else if (strExePath.CompareNoCase(gActionList[2]) == 0)
+		else if (strExePath.CompareNoCase(gO365ActionList[2]) == 0)
 		{
 			strExePath = _T("CITRIX");
 		}
-		else if (strExePath.CompareNoCase(gActionList[3]) == 0)
+		else if (strExePath.CompareNoCase(gO365ActionList[3]) == 0)
 		{
 			strExePath = _T("Firefox");
 		}
-		else if (strExePath.CompareNoCase(gActionList[4]) == 0)
+		else if (strExePath.CompareNoCase(gO365ActionList[4]) == 0)
 		{
 			strExePath = _T("Chrome");
 		}
-		else if (strExePath.CompareNoCase(gActionList[5]) == 0)
+		else if (strExePath.CompareNoCase(gO365ActionList[5]) == 0)
 		{
 			strExePath = _T("Edge");
 		}
@@ -3078,4 +3132,164 @@ void CDlgDMZ::OnBnClickedButtonUpdate()
 void CDlgDMZ::OnBnClickedButtonEditall()
 {
 	PopEditAll(&m_List);
+}
+
+//Default
+static LPCTSTR gDefaultActionList[] = {
+	_T("Microsoft RDP"),
+	_T("VMware Horizon"),
+	_T("Citrix Virtual Apps"),
+	_T("Mozilla Firefox"),
+	_T("Google Chrome"),
+	_T("Microsoft Edge"),
+	_T("Internet Explorer"), 
+};
+
+IMPLEMENT_DYNCREATE(CDlgDefault, CPropertyPage)
+CDlgDefault::CDlgDefault()
+	: CPropertyPage(CDlgDefault::IDD)
+{
+}
+
+void CDlgDefault::DoDataExchange(CDataExchange* pDX)
+{
+	CPropertyPage::DoDataExchange(pDX);
+	DDX_Control(pDX, IDC_COMBO2, m_Combo2);
+}
+
+BEGIN_MESSAGE_MAP(CDlgDefault, CPropertyPage)
+	//{{AFX_MSG_MAP(CDlgDefault)
+	ON_WM_DESTROY()
+	ON_BN_CLICKED(IDC_BUTTON_FDLG, OnBnClickedButtonFdlg)
+	//}}AFX_MSG_MAP
+	ON_MESSAGE(ID_SETTING_OK, Set_OK)
+END_MESSAGE_MAP()
+
+BOOL CDlgDefault::OnInitDialog()
+{
+	if (theApp.m_RedirectList.m_pDefault)
+	{
+		m_URD.Copy(theApp.m_RedirectList.m_pDefault);
+	}
+	CPropertyPage::OnInitDialog();
+
+	m_URD.m_bDisabled=FALSE;
+	if (m_Combo2.m_hWnd)
+	{
+		for (int i = 0; i < 7; i++)
+		{
+			m_Combo2.AddString(gDefaultActionList[i]);
+		}
+
+		if (m_URD.m_strExecExeFullPath.CompareNoCase(_T("RDP")) == 0)
+		{
+			m_Combo2.SetCurSel(0);
+			m_Combo2.SetWindowText(gDefaultActionList[0]);
+		}
+		else if (m_URD.m_strExecExeFullPath.CompareNoCase(_T("VMWARE")) == 0)
+		{
+			m_Combo2.SetCurSel(1);
+			m_Combo2.SetWindowText(gDefaultActionList[1]);
+		}
+		else if (m_URD.m_strExecExeFullPath.CompareNoCase(_T("CITRIX")) == 0)
+		{
+			m_Combo2.SetCurSel(2);
+			m_Combo2.SetWindowText(gDefaultActionList[2]);
+		}
+		else if (m_URD.m_strExecExeFullPath.CompareNoCase(_T("Firefox")) == 0)
+		{
+			m_Combo2.SetCurSel(3);
+			m_Combo2.SetWindowText(gDefaultActionList[3]);
+		}
+		else if (m_URD.m_strExecExeFullPath.CompareNoCase(_T("Chrome")) == 0)
+		{
+			m_Combo2.SetCurSel(4);
+			m_Combo2.SetWindowText(gDefaultActionList[4]);
+		}
+		else if (m_URD.m_strExecExeFullPath.CompareNoCase(_T("Edge")) == 0)
+		{
+			m_Combo2.SetCurSel(5);
+			m_Combo2.SetWindowText(gDefaultActionList[5]);
+		}
+		else if (m_URD.m_strExecExeFullPath.CompareNoCase(_T("IE")) == 0)
+		{
+			m_Combo2.SetCurSel(6);
+			m_Combo2.SetWindowText(gDefaultActionList[6]);
+		}
+		else
+		{
+			if (m_URD.m_strExecExeFullPath.IsEmpty())
+			{
+				m_Combo2.SetCurSel(6);
+				m_Combo2.SetWindowText(gDefaultActionList[6]);
+			}
+			else
+				m_Combo2.SetWindowText(m_URD.m_strExecExeFullPath);
+		}
+	}
+	return TRUE;
+}
+LRESULT CDlgDefault::Set_OK(WPARAM wParam, LPARAM lParam)
+{
+	m_URDSave.m_strExecType = m_URD.m_strExecType;
+	m_URDSave.m_bDisabled = FALSE;
+	m_URDSave.m_arr_URL.RemoveAll();
+	m_URDSave.m_arr_URL_EX.RemoveAll();
+
+	CString strExePath;
+	m_Combo2.GetWindowText(strExePath);
+	strExePath.TrimLeft();
+	strExePath.TrimRight();
+	if (strExePath.IsEmpty())
+	{
+		if (!m_URDSave.m_bDisabled)
+		{
+			::MessageBox(this->m_hWnd, _T("[その他(未定義URL)]\nブラウザー種別を設定して下さい。"), theApp.m_strThisAppName, MB_OK | MB_ICONERROR);
+			return 1;
+		}
+	}
+	if (strExePath.CompareNoCase(gDefaultActionList[0]) == 0)
+	{
+		strExePath = _T("RDP");
+	}
+	else if (strExePath.CompareNoCase(gDefaultActionList[1]) == 0)
+	{
+		strExePath = _T("VMWARE");
+	}
+	else if (strExePath.CompareNoCase(gDefaultActionList[2]) == 0)
+	{
+		strExePath = _T("CITRIX");
+	}
+	else if (strExePath.CompareNoCase(gDefaultActionList[3]) == 0)
+	{
+		strExePath = _T("Firefox");
+	}
+	else if (strExePath.CompareNoCase(gDefaultActionList[4]) == 0)
+	{
+		strExePath = _T("Chrome");
+	}
+	else if (strExePath.CompareNoCase(gDefaultActionList[5]) == 0)
+	{
+		strExePath = _T("Edge");
+	}
+	else if (strExePath.CompareNoCase(gDefaultActionList[6]) == 0)
+	{
+		strExePath = _T("IE");
+	}
+	m_URDSave.m_strExecExeFullPath = strExePath;
+	theApp.m_RedirectListSaveData.m_pDefault->Copy(&m_URDSave);
+	return 0;
+}
+void CDlgDefault::OnBnClickedButtonFdlg()
+{
+	CString szFilter;
+	szFilter = _T("実行ファイル(*.exe)|*.exe|全てのファイル(*.*)|*.*||");
+	CFileDialog fileDlg(TRUE, NULL, NULL, OFN_HIDEREADONLY, szFilter, this);
+	CString strTitle;
+	strTitle = _T("開く");
+	fileDlg.m_ofn.lpstrTitle = strTitle.GetBuffer(0);
+	if (fileDlg.DoModal() == IDOK)
+	{
+		m_Combo2.SetWindowText(fileDlg.GetPathName());
+	}
 }

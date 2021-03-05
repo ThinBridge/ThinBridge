@@ -34,7 +34,7 @@ END_MESSAGE_MAP()
 BOOL CDlgSetCX::OnInitDialog() 
 {
 	CPropertyPage::OnInitDialog();
-	m_strCitrix_AppName=theApp.SettingConf.m_strCitrix_AppName;
+	m_strCitrix_AppName = theApp.m_RedirectList.m_strCitrix_AppName;
 	//Citrix_XenApp-----------------------------------------------------------------Å´
 	SetDlgItemText(IDC_EDIT_CXAPP,m_strCitrix_AppName);
 	//Citrix_XenApp-----------------------------------------------------------------Å™
@@ -49,7 +49,7 @@ LRESULT CDlgSetCX::Set_OK(WPARAM wParam, LPARAM lParam)
 {
 	//Citrix-----------------------------------------------------------------Å´
 	GetDlgItemText(IDC_EDIT_CXAPP,m_strCitrix_AppName);
-	theApp.SettingConfMod.m_strCitrix_AppName=m_strCitrix_AppName;
+	theApp.m_RedirectListSaveData.m_strCitrix_AppName=m_strCitrix_AppName;
 	return 0;
 }
 

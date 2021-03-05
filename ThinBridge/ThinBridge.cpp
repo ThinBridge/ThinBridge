@@ -28,7 +28,6 @@ CRedirectApp::CRedirectApp()
 
 	m_strThisAppName=_T("ThinBridge");
 	SetAppID(m_strThisAppName);
-	m_iFeatureType = FE_PLUS;
 	m_bCitrixCustomEnv = FALSE;
 }
 
@@ -77,13 +76,6 @@ BOOL CRedirectApp::InitBaseFunction()
 	strTempPath += theApp.m_strThisAppName;
 	::CreateDirectory(strTempPath, NULL);
 	SetLastError(NO_ERROR);
-
-
-	//設定データのロード
-	m_strSetting_FileFullPath = szDrive;
-	m_strSetting_FileFullPath += szDir;
-	m_strSetting_FileFullPath += _T("setting.conf");
-	this->ReadSetting();
 
 	//templateの読込
 	m_strTemplate_FileFullPath = szDrive;
@@ -150,13 +142,6 @@ BOOL CRedirectApp::InitBaseFunction()
 			}
 		}
 	}
-
-	//機能設定ファイルのフルパス格納
-	m_strProfileFullPath = szDrive;
-	m_strProfileFullPath += szDir;
-	m_strProfileFullPath += theApp.m_strThisAppName;
-	m_strProfileFullPath += _T(".ini");
-	m_pszProfileName = _tcsdup(m_strProfileFullPath);
 
 	//ThinBridgePlus ini
 	m_strRedirectFilePath = szDrive;
@@ -346,6 +331,7 @@ void CRedirectApp::InitExecCommandParam()
 	CString strMsg;
 	if(this->SettingConf.m_iSolutionType==PROC_RDP)
 	{
+		m_RedirectList.SetGlobalData(m_strRedirectFilePath);
 		SetLastError(NO_ERROR);
 		this->ReadTemplate();
 		this->ReadRDP_ReadOnceFile();	
@@ -354,6 +340,7 @@ void CRedirectApp::InitExecCommandParam()
 	}
 	else if(this->SettingConf.m_iSolutionType==PROC_VMWARE)
 	{
+		m_RedirectList.SetGlobalData(m_strRedirectFilePath);
 		//horizon clientがインストールされていない。
 		if(!IsHorizonInstalled())
 		{
@@ -376,6 +363,7 @@ void CRedirectApp::InitExecCommandParam()
 	}
 	else if(this->SettingConf.m_iSolutionType==PROC_CITRIX)
 	{
+		m_RedirectList.SetGlobalData(m_strRedirectFilePath);
 		//citrix clientがインストールされていない。
 		if(!IsCitrixInstalled())
 		{
@@ -402,6 +390,7 @@ void CRedirectApp::InitExecCommandParam()
 	//Local IE
 	else if(this->SettingConf.m_iSolutionType==PROC_LIE)
 	{
+		m_RedirectList.SetGlobalData(m_strRedirectFilePath);
 		SetIE_FullPath();
 		Exec_LocalBrowser(m_CommandParam);
 	}
@@ -453,11 +442,8 @@ void CRedirectApp::InitShowSettingDlg()
 	this->SetFirefox_FullPath();
 	this->SetChrome_FullPath();
 
-	if(m_iFeatureType == FE_PLUS)
-	{
-		ShowPlusSettingDlgEx();
-		return;
-	}
+	ShowPlusSettingDlgEx();
+	return;
 }
 
 BOOL CRedirectApp::InitInstance()
@@ -479,9 +465,6 @@ BOOL CRedirectApp::InitInstance()
 	//各種ファイル等を読込
 	if(!this->InitBaseFunction())
 		return FALSE;
-
-	//ThinBridgeの動作モードを決定。設定ファイルから。
-	InitFeatureSetting();
 
 	//コマンドラインのセット
 	this->InitCommandParamOptionParam();
@@ -572,7 +555,11 @@ BOOL CRedirectApp::InitInstance()
 	if(!m_CommandParam.IsEmpty())
 	{
 		CString strCmd;
-		strCmd.Format(_T("%s %s"), m_CommandParam,m_OptionParam);
+		if(SBUtil::InThinApp())
+			strCmd.Format(_T("[VOS] %s %s"), m_CommandParam,m_OptionParam);
+		else
+			strCmd.Format(_T("%s %s"), m_CommandParam, m_OptionParam);
+		WriteDebugTraceDateTime(strCmd);
 		UINT uRet=0;
 		uRet = m_LoopBlock.CheckLoop(strCmd);
 		if(uRet == LB_OK)
@@ -709,9 +696,6 @@ void CRedirectApp::ShowPlusSettingDlgEx()
 	m_pDlgMsg->SetMsg(_T("設定画面 起動中...."));
 	//////////////////////////////////////////////////////
 
-	theApp.SettingConfMod.Copy(&theApp.SettingConf);
-
-
 	m_RedirectList.SetArrayData(m_strRedirectFilePath, theApp.m_bCitrixCustomEnv);
 	m_RedirectListSaveData.InitSaveDataAll(theApp.m_bCitrixCustomEnv);
 	CSettingsDialog SettingDlg;
@@ -744,14 +728,15 @@ void CRedirectApp::ShowPlusSettingDlgEx()
 		SettingDlg.AddPage(RUNTIME_CLASS(CDlgFF), _T("Mozilla Firefox (ローカル)"), IDD_DLG_RD_RDP, _T("URLリダイレクト設定"));
 		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCHR), _T("Google Chrome (ローカル)"), IDD_DLG_RD_RDP, _T("URLリダイレクト設定"));
 		SettingDlg.AddPage(RUNTIME_CLASS(CDlgEDG), _T("Microsoft Edge (ローカル)"), IDD_DLG_RD_RDP, _T("URLリダイレクト設定"));
+		SettingDlg.AddPage(RUNTIME_CLASS(CDlgIE), _T("Internet Explorer (ローカル)"), IDD_DLG_RD_RDP, _T("URLリダイレクト設定"));
 		SettingDlg.AddPage(RUNTIME_CLASS(CDlgO365), _T("Office365 WebApps"), IDD_DLG_RD_O365, _T("URLリダイレクト設定"));
-		SettingDlg.AddPage(RUNTIME_CLASS(CDlgDMZ), _T("共用URL(SSO/SAML対応サイト)"), IDD_DLG_RD_DMZ, _T(""));
-
 		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU01), _T("指定ブラウザー01 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
 		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU02), _T("指定ブラウザー02 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
 		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU03), _T("指定ブラウザー03 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
 		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU04), _T("指定ブラウザー04 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
 		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU05), _T("指定ブラウザー05 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
+		SettingDlg.AddPage(RUNTIME_CLASS(CDlgDMZ), _T("共用URL(SSO/SAML対応サイト)"), IDD_DLG_RD_DMZ, _T("URLリダイレクト設定"));
+		SettingDlg.AddPage(RUNTIME_CLASS(CDlgDefault), _T("その他(未定義URL)"), IDD_DLG_RD_Default, _T("URLリダイレクト設定"));
 
 //		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU06), _T("指定ブラウザー06 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
 //		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU07), _T("指定ブラウザー07 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
@@ -765,6 +750,8 @@ void CRedirectApp::ShowPlusSettingDlgEx()
 //		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU15), _T("指定ブラウザー15 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
 //		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU16), _T("指定ブラウザー16 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
 //		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU17), _T("指定ブラウザー17 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
+
+//		以下は利用不可 他で既に使っているため
 //		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU18), _T("指定ブラウザー18 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
 //		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU19), _T("指定ブラウザー19 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
 //		SettingDlg.AddPage(RUNTIME_CLASS(CDlgCU20), _T("指定ブラウザー20 (ローカル)"), IDD_DLG_RD_CUSTOM, _T("URLリダイレクト設定"));
@@ -815,134 +802,134 @@ void CRedirectApp::ReadRDP_ReadOnceFile()
 	SetLastError(NO_ERROR);
 }
 
-void CRedirectApp::ReadSetting()
-{
-	CStdioFile in;
-	CString strTemp;
-	CString strLogMsgLine;
-	if(in.Open(m_strSetting_FileFullPath,CFile::modeRead|CFile::shareDenyWrite))
-	{
-		CString strTemp2;
-		CString strTemp3;
-		CStringArray strArray;
-		while(in.ReadString(strTemp))
-		{
-			strTemp.TrimLeft();
-			strTemp.TrimRight();
-			strArray.RemoveAll();
-			SBUtil::Split(strArray,strTemp,_T("="));
-			strLogMsgLine += strTemp;
-			strLogMsgLine += "\n";
-
-			if(strArray.GetSize() >= 2)
-			{
-				strTemp2=strArray.GetAt(0);
-				strTemp2.TrimLeft();
-				strTemp2.TrimRight();
-
-				strTemp3=strArray.GetAt(1);
-				strTemp3.TrimLeft();
-				strTemp3.TrimRight();
-
-				if(strTemp2.Find(_T(";"))==0)
-				{
-					;
-				}
-				else if(strTemp2.Find(_T("#"))==0)
-				{
-					;
-				}
-				else
-				{
-					if(strTemp2.CompareNoCase(_T("ServerName"))==0)
-					{
-						SettingConf.m_strServerName=strTemp3;
-					}
-					else if(strTemp2.CompareNoCase(_T("RemoteAppName"))==0)
-					{
-						SettingConf.m_strRemoteAppName=strTemp3;
-					}
-					else if(strTemp2.CompareNoCase(_T("RemoteAppPath"))==0)
-					{
-						SettingConf.m_strRemoteAppPath=strTemp3;
-					}
-					else if(strTemp2.CompareNoCase(_T("RemoteAppCommandLine"))==0)
-					{
-						SettingConf.m_strRemoteAppCommandLine=strTemp3;
-					}
-					else if(strTemp2.CompareNoCase(_T("RemoteAppMode"))==0)
-					{
-						if(strTemp3==_T("1"))
-							SettingConf.m_bRemoteAppMode=TRUE;
-						else
-							SettingConf.m_bRemoteAppMode=FALSE;
-					}
-					else if(strTemp2.CompareNoCase(_T("Redirect_Clipboard"))==0)
-					{
-						if(strTemp3==_T("1"))
-							SettingConf.m_bRedirect_Clipboard=TRUE;
-						else
-							SettingConf.m_bRedirect_Clipboard=FALSE;
-					}
-					else if(strTemp2.CompareNoCase(_T("Redirect_Printer"))==0)
-					{
-						if(strTemp3==_T("1"))
-							SettingConf.m_bRedirect_Printer=TRUE;
-						else
-							SettingConf.m_bRedirect_Printer=FALSE;
-					}
-					else if(strTemp2.CompareNoCase(_T("Redirect_Drive"))==0)
-					{
-						if(strTemp3==_T("1"))
-							SettingConf.m_bRedirect_Drive=TRUE;
-						else
-							SettingConf.m_bRedirect_Drive=FALSE;
-					}
-					else if(strTemp2.CompareNoCase(_T("Solution_Type"))==0)
-					{
-						if(strTemp3.CompareNoCase(_T("RDP"))==0)
-							SettingConf.m_iSolutionType=PROC_RDP;
-						else if(strTemp3.CompareNoCase(_T("VMWARE"))==0)
-							SettingConf.m_iSolutionType=PROC_VMWARE;
-						else if(strTemp3.CompareNoCase(_T("CITRIX"))==0)
-							SettingConf.m_iSolutionType=PROC_CITRIX;
-						else if(strTemp3.CompareNoCase(_T("DefaultBrowser"))==0)
-							SettingConf.m_iSolutionType=PROC_LDefaultBrowser;
-						else if(strTemp3.CompareNoCase(_T("IE"))==0)
-							SettingConf.m_iSolutionType=PROC_LIE;
-						else if(strTemp3.CompareNoCase(_T("Firefox"))==0)
-							SettingConf.m_iSolutionType=PROC_LFirefox;
-						else if(strTemp3.CompareNoCase(_T("Chrome"))==0)
-							SettingConf.m_iSolutionType=PROC_LChrome;
-						else if(strTemp3.CompareNoCase(_T("Edge"))==0)
-							SettingConf.m_iSolutionType=PROC_LEdge;
-						else if(strTemp3.CompareNoCase(_T("Custom"))==0)
-							SettingConf.m_iSolutionType=PROC_LCustom;
-
-					}
-					else if(strTemp2.CompareNoCase(_T("v_ConnectionServerName"))==0)
-					{
-						SettingConf.m_strHorizon_ConnectionServerName=strTemp3;
-					}
-					else if(strTemp2.CompareNoCase(_T("v_AppName"))==0)
-					{
-						SettingConf.m_strHorizon_AppName=strTemp3;
-					}
-					else if(strTemp2.CompareNoCase(_T("CustomBrowserPath"))==0)
-					{
-						SettingConf.m_strCustomBrowserPath=strTemp3;
-					}
-					else if(strTemp2.CompareNoCase(_T("CX_AppName"))==0)
-					{
-						SettingConf.m_strCitrix_AppName=strTemp3;
-					}
-
-				}
-			}
-		}
-		in.Close();
-	}
-}
+//void CRedirectApp::ReadSetting()
+//{
+//	CStdioFile in;
+//	CString strTemp;
+//	CString strLogMsgLine;
+//	if(in.Open(m_strSetting_FileFullPath,CFile::modeRead|CFile::shareDenyWrite))
+//	{
+//		CString strTemp2;
+//		CString strTemp3;
+//		CStringArray strArray;
+//		while(in.ReadString(strTemp))
+//		{
+//			strTemp.TrimLeft();
+//			strTemp.TrimRight();
+//			strArray.RemoveAll();
+//			SBUtil::Split(strArray,strTemp,_T("="));
+//			strLogMsgLine += strTemp;
+//			strLogMsgLine += "\n";
+//
+//			if(strArray.GetSize() >= 2)
+//			{
+//				strTemp2=strArray.GetAt(0);
+//				strTemp2.TrimLeft();
+//				strTemp2.TrimRight();
+//
+//				strTemp3=strArray.GetAt(1);
+//				strTemp3.TrimLeft();
+//				strTemp3.TrimRight();
+//
+//				if(strTemp2.Find(_T(";"))==0)
+//				{
+//					;
+//				}
+//				else if(strTemp2.Find(_T("#"))==0)
+//				{
+//					;
+//				}
+//				else
+//				{
+//					if(strTemp2.CompareNoCase(_T("ServerName"))==0)
+//					{
+//						SettingConf.m_strServerName=strTemp3;
+//					}
+//					else if(strTemp2.CompareNoCase(_T("RemoteAppName"))==0)
+//					{
+//						SettingConf.m_strRemoteAppName=strTemp3;
+//					}
+//					else if(strTemp2.CompareNoCase(_T("RemoteAppPath"))==0)
+//					{
+//						SettingConf.m_strRemoteAppPath=strTemp3;
+//					}
+//					else if(strTemp2.CompareNoCase(_T("RemoteAppCommandLine"))==0)
+//					{
+//						SettingConf.m_strRemoteAppCommandLine=strTemp3;
+//					}
+//					else if(strTemp2.CompareNoCase(_T("RemoteAppMode"))==0)
+//					{
+//						if(strTemp3==_T("1"))
+//							SettingConf.m_bRemoteAppMode=TRUE;
+//						else
+//							SettingConf.m_bRemoteAppMode=FALSE;
+//					}
+//					else if(strTemp2.CompareNoCase(_T("Redirect_Clipboard"))==0)
+//					{
+//						if(strTemp3==_T("1"))
+//							SettingConf.m_bRedirect_Clipboard=TRUE;
+//						else
+//							SettingConf.m_bRedirect_Clipboard=FALSE;
+//					}
+//					else if(strTemp2.CompareNoCase(_T("Redirect_Printer"))==0)
+//					{
+//						if(strTemp3==_T("1"))
+//							SettingConf.m_bRedirect_Printer=TRUE;
+//						else
+//							SettingConf.m_bRedirect_Printer=FALSE;
+//					}
+//					else if(strTemp2.CompareNoCase(_T("Redirect_Drive"))==0)
+//					{
+//						if(strTemp3==_T("1"))
+//							SettingConf.m_bRedirect_Drive=TRUE;
+//						else
+//							SettingConf.m_bRedirect_Drive=FALSE;
+//					}
+//					else if(strTemp2.CompareNoCase(_T("Solution_Type"))==0)
+//					{
+//						if(strTemp3.CompareNoCase(_T("RDP"))==0)
+//							SettingConf.m_iSolutionType=PROC_RDP;
+//						else if(strTemp3.CompareNoCase(_T("VMWARE"))==0)
+//							SettingConf.m_iSolutionType=PROC_VMWARE;
+//						else if(strTemp3.CompareNoCase(_T("CITRIX"))==0)
+//							SettingConf.m_iSolutionType=PROC_CITRIX;
+//						else if(strTemp3.CompareNoCase(_T("DefaultBrowser"))==0)
+//							SettingConf.m_iSolutionType=PROC_LDefaultBrowser;
+//						else if(strTemp3.CompareNoCase(_T("IE"))==0)
+//							SettingConf.m_iSolutionType=PROC_LIE;
+//						else if(strTemp3.CompareNoCase(_T("Firefox"))==0)
+//							SettingConf.m_iSolutionType=PROC_LFirefox;
+//						else if(strTemp3.CompareNoCase(_T("Chrome"))==0)
+//							SettingConf.m_iSolutionType=PROC_LChrome;
+//						else if(strTemp3.CompareNoCase(_T("Edge"))==0)
+//							SettingConf.m_iSolutionType=PROC_LEdge;
+//						else if(strTemp3.CompareNoCase(_T("Custom"))==0)
+//							SettingConf.m_iSolutionType=PROC_LCustom;
+//
+//					}
+//					else if(strTemp2.CompareNoCase(_T("v_ConnectionServerName"))==0)
+//					{
+//						SettingConf.m_strHorizon_ConnectionServerName=strTemp3;
+//					}
+//					else if(strTemp2.CompareNoCase(_T("v_AppName"))==0)
+//					{
+//						SettingConf.m_strHorizon_AppName=strTemp3;
+//					}
+//					else if(strTemp2.CompareNoCase(_T("CustomBrowserPath"))==0)
+//					{
+//						SettingConf.m_strCustomBrowserPath=strTemp3;
+//					}
+//					else if(strTemp2.CompareNoCase(_T("CX_AppName"))==0)
+//					{
+//						SettingConf.m_strCitrix_AppName=strTemp3;
+//					}
+//
+//				}
+//			}
+//		}
+//		in.Close();
+//	}
+//}
 
 
 void CRedirectApp::CreateRDPFile(CString& strCommand)
@@ -952,32 +939,32 @@ void CRedirectApp::CreateRDPFile(CString& strCommand)
 	{
 		CString strWriteData;
 		//接続先のコンピューター名（or IPアドレス）
-		if(!SettingConf.m_strServerName.IsEmpty())
+		if(!m_RedirectList.m_strRDP_ServerName.IsEmpty())
 		{
-			strWriteData.Format(_T("full address:s:%s\n"),SettingConf.m_strServerName);
+			strWriteData.Format(_T("full address:s:%s\n"), m_RedirectList.m_strRDP_ServerName);
 			out.WriteString(strWriteData);
 		}
 
 		//RemoteAppモードを有効
-		strWriteData.Format(_T("remoteapplicationmode:i:%d\n"),SettingConf.m_bRemoteAppMode?1:0);
+		strWriteData.Format(_T("remoteapplicationmode:i:%d\n"), m_RedirectList.m_bRemoteAppMode?1:0);
 		out.WriteString(strWriteData);
 
 		//RemoteAppの場合だけ。
-		if(SettingConf.m_bRemoteAppMode)
+		if(m_RedirectList.m_bRemoteAppMode)
 		{
 			//RemoteAppのアプリ名
-			if(!SettingConf.m_strRemoteAppName.IsEmpty())
+			if(!m_RedirectList.m_strRemoteAppName.IsEmpty())
 			{
-				strWriteData.Format(_T("remoteapplicationname:s:%s\n"),SettingConf.m_strRemoteAppName);
+				strWriteData.Format(_T("remoteapplicationname:s:%s\n"), m_RedirectList.m_strRemoteAppName);
 				out.WriteString(strWriteData);
 			}
 
 			//RemoteAppで実行するEXEのフルパス
-			if(!SettingConf.m_strRemoteAppPath.IsEmpty())
+			if(!m_RedirectList.m_strRemoteAppPath.IsEmpty())
 			{
-				strWriteData.Format(_T("remoteapplicationprogram:s:%s\n"),SettingConf.m_strRemoteAppPath);
+				strWriteData.Format(_T("remoteapplicationprogram:s:%s\n"), m_RedirectList.m_strRemoteAppPath);
 				out.WriteString(strWriteData);
-				strWriteData.Format(_T("alternate shell:s:%s\n"),SettingConf.m_strRemoteAppPath);
+				strWriteData.Format(_T("alternate shell:s:%s\n"), m_RedirectList.m_strRemoteAppPath);
 				out.WriteString(strWriteData);
 			}
 
@@ -985,18 +972,18 @@ void CRedirectApp::CreateRDPFile(CString& strCommand)
 			if(strCommand.IsEmpty())
 			{
 				//GUIで設定したコマンドラインあり。
-				if(!SettingConf.m_strRemoteAppCommandLine.IsEmpty())
+				if(!m_RedirectList.m_strRemoteAppCommandLine.IsEmpty())
 				{
-					strWriteData.Format(_T("remoteapplicationcmdline:s:%s\n"),SettingConf.m_strRemoteAppCommandLine);
+					strWriteData.Format(_T("remoteapplicationcmdline:s:%s\n"), m_RedirectList.m_strRemoteAppCommandLine);
 					out.WriteString(strWriteData);
 				}
 			}
 			else
 			{
 				//GUIで設定したコマンドラインあり。
-				if(!SettingConf.m_strRemoteAppCommandLine.IsEmpty())
+				if(!m_RedirectList.m_strRemoteAppCommandLine.IsEmpty())
 				{
-					strWriteData.Format(_T("remoteapplicationcmdline:s:%s %s\n"),SettingConf.m_strRemoteAppCommandLine,strCommand);
+					strWriteData.Format(_T("remoteapplicationcmdline:s:%s %s\n"), m_RedirectList.m_strRemoteAppCommandLine,strCommand);
 					out.WriteString(strWriteData);
 				}
 				else
@@ -1008,15 +995,15 @@ void CRedirectApp::CreateRDPFile(CString& strCommand)
 		}
 
 		//クリップボードのリダイレクト
-		strWriteData.Format(_T("redirectclipboard:i:%d\n"),SettingConf.m_bRedirect_Clipboard?1:0);
+		strWriteData.Format(_T("redirectclipboard:i:%d\n"), m_RedirectList.m_bRedirect_Clipboard?1:0);
 		out.WriteString(strWriteData);
 
 		//Printerのリダイレクト
-		strWriteData.Format(_T("redirectprinters:i:%d\n"),SettingConf.m_bRedirect_Printer?1:0);
+		strWriteData.Format(_T("redirectprinters:i:%d\n"), m_RedirectList.m_bRedirect_Printer?1:0);
 		out.WriteString(strWriteData);
 
 		//ローカルのディスクドライブをリモートに接続する
-		strWriteData.Format(_T("RedirectDrives:i:%d\n"),SettingConf.m_bRedirect_Drive?1:0);
+		strWriteData.Format(_T("RedirectDrives:i:%d\n"), m_RedirectList.m_bRedirect_Drive?1:0);
 		out.WriteString(strWriteData);
 
 		//templateファイルの内容を追加
@@ -1123,7 +1110,7 @@ void CRedirectApp::Exec_MSTSC(CString& strRDPFile)
 
 void CRedirectApp::Exec_VMwareHorizon_Start(CString& CommandParam)
 {
-	Exec_VMware_Horizon(SettingConf.m_strHorizon_ConnectionServerName,SettingConf.m_strHorizon_AppName,CommandParam);
+	Exec_VMware_Horizon(m_RedirectList.m_strHorizon_ConnectionServerName, m_RedirectList.m_strHorizon_AppName,CommandParam);
 	if(m_pReExecThread)
 	{
 		for(int j=0;j<8800;j++)
@@ -1190,7 +1177,7 @@ void CRedirectApp::Exec_VMware_Horizon(CString& strServerHostName,CString& strAp
 
 void CRedirectApp::Exec_CitixXenApp_Start(CString& CommandParam)
 {
-	Exec_Citrix_XenApp(SettingConf.m_strCitrix_AppName,CommandParam);
+	Exec_Citrix_XenApp(m_RedirectList.m_strCitrix_AppName,CommandParam);
 
 	if(m_pReExecThread)
 	{
@@ -1712,29 +1699,35 @@ void CCRre::IEStart(CString& strURL)
 	HDDEDATA hDDEData={0};
 	DWORD m_dwDDEID = 0;
 
-
-	if(!DdeInitialize(&m_dwDDEID,(PFNCALLBACK)MakeProcInstance((FARPROC)DDECallback, ghInstance),
-		CBF_SKIP_ALLNOTIFICATIONS | APPCMD_CLIENTONLY, 0L) != DMLERR_NO_ERROR)
+	//DDE呼び出しが有効な場合 Default有効
+	if(!theApp.m_RedirectList.m_bDisableIE_DDE)
 	{
-		hszService = DdeCreateStringHandle(m_dwDDEID, _T("IEXPLORE"), CP_WINNEUTRAL);
-		hszTopic = DdeCreateStringHandle(m_dwDDEID, _T("WWW_OpenURL"), CP_WINNEUTRAL);
+		if(!DdeInitialize(&m_dwDDEID,(PFNCALLBACK)MakeProcInstance((FARPROC)DDECallback, ghInstance),
+			CBF_SKIP_ALLNOTIFICATIONS | APPCMD_CLIENTONLY, 0L) != DMLERR_NO_ERROR)
 		{
-			hConv = DdeConnect(m_dwDDEID, hszService, hszTopic, NULL);
-			DdeFreeStringHandle(m_dwDDEID, hszService);
- 			DdeFreeStringHandle(m_dwDDEID, hszTopic);
-			if(hConv)
+			hszService = DdeCreateStringHandle(m_dwDDEID, _T("IEXPLORE"), CP_WINNEUTRAL);
+			hszTopic = DdeCreateStringHandle(m_dwDDEID, _T("WWW_OpenURL"), CP_WINNEUTRAL);
 			{
-				CString cmd;
-				cmd = strURL;
-				DWORD result=0;
-				hDDEData = DdeClientTransaction((LPBYTE)cmd.GetBuffer(0),static_cast<DWORD>((cmd.GetLength()+1)*2),hConv,0,0,XTYP_EXECUTE,30000,&result);
-				DdeDisconnect(hConv);
-				DdeUninitialize(m_dwDDEID);
-				return;
+				hConv = DdeConnect(m_dwDDEID, hszService, hszTopic, NULL);
+				DdeFreeStringHandle(m_dwDDEID, hszService);
+ 				DdeFreeStringHandle(m_dwDDEID, hszTopic);
+				if(hConv)
+				{
+					CString cmd;
+					cmd = strURL;
+					DWORD result=0;
+					hDDEData = DdeClientTransaction((LPBYTE)cmd.GetBuffer(0),static_cast<DWORD>((cmd.GetLength()+1)*2),hConv,0,0,XTYP_EXECUTE,30000,&result);
+					DdeDisconnect(hConv);
+					DdeUninitialize(m_dwDDEID);
+					if (SBUtil::InThinApp())
+						theApp.WriteDebugTraceDateTime(_T("[VOS] IE DDE Start"));
+					else
+						theApp.WriteDebugTraceDateTime(_T("IE DDE Start"));
+					return;
+				}
 			}
 		}
 	}
-
 	if(::ShellExecute(NULL,_T("open"),_T("iexplore.exe"),strURL,NULL, SW_SHOW) <= HINSTANCE(32))
 	{
 		CString IEcmd;
@@ -1754,7 +1747,21 @@ void CCRre::IEStart(CString& strURL)
 					::ShellExecute(NULL,NULL,IEcmd,NULL,NULL, SW_SHOW);
 				}
 			}
+			else
+			{
+				if (SBUtil::InThinApp())
+					theApp.WriteDebugTraceDateTime(_T("[VOS] IE ShellExecute2 Start"));
+				else
+					theApp.WriteDebugTraceDateTime(_T("IE ShellExecute2 Start"));
+			}
 		}
+	}
+	else
+	{
+		if (SBUtil::InThinApp())
+			theApp.WriteDebugTraceDateTime(_T("[VOS] IE ShellExecute Start"));
+		else
+			theApp.WriteDebugTraceDateTime(_T("IE ShellExecute Start"));
 	}
 }
 
@@ -2131,7 +2138,6 @@ void CCRre::Exec()
 						::ShellExecute(NULL,NULL,m_strFilePath,NULL,NULL, SW_SHOW);
 					}
 				}
-
 			}
 			if(pi.hThread)
 			{

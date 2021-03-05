@@ -62,20 +62,6 @@ BOOL DetailEdit::OnInitDialog()
 #pragma warning(disable:4244)
 void DetailEdit::ReadText()
 {
-	//CFile file;
-	//CString strText;
-	//if(file.Open(m_strFilePath,CFile::modeRead|CFile::shareDenyNone))
-	//{
-	//	UINT iFileSize=file.GetLength();
-	//	byte* pBuffer=new byte[iFileSize+2];
-	//	memset(pBuffer,0x00,iFileSize+2);
-	//	file.Read(pBuffer,iFileSize);
-	//	strText = pBuffer;
-	//	delete [] pBuffer;
-	//	file.Close();
-	//}
-	//m_Edit.SetWindowText(strText);
-
 	CStdioFile in;
 	CString strTemp;
 	CString strText;
@@ -99,16 +85,6 @@ void DetailEdit::ReadText()
 
 void DetailEdit::WriteText()
 {
-	//CFile file;
-	//CString strText;
-	//m_Edit.GetWindowText(strText);
-
-	//if(file.Open(m_strFilePath,CFile::modeCreate|CFile::modeWrite|CFile::shareDenyWrite))
-	//{
-	//	file.Write((LPCTSTR)strText,strText.GetLength());
-	//	file.Close();
-	//}
-
 	CString strText;
 	m_Edit.GetWindowText(strText);
 	CStdioFile out;
@@ -122,7 +98,7 @@ void DetailEdit::WriteText()
 	else
 	{
 		CString strSaveMsg;
-		strSaveMsg.Format(_T("RDP詳細設定パラメータファイルンの保存に失敗しました。\n\n別のプログラムがファイルを開いているか、書込権限が不足しています。操作を完了できません。ファイルを閉じてから再実行してください。\n\n%s"),m_strFilePath);
+		strSaveMsg.Format(_T("RDP詳細設定パラメータファイルの保存に失敗しました。\n\n別のプログラムがファイルを開いているか、書込権限が不足しています。操作を完了できません。ファイルを閉じてから再実行してください。\n\n%s"),m_strFilePath);
 		::MessageBox(this->m_hWnd,strSaveMsg,theApp.m_strThisAppName,MB_OK|MB_ICONERROR );
 	}
 }

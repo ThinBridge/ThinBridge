@@ -147,6 +147,21 @@ protected:
 public:
 };
 
+//IE
+class CDlgIE : public CDlgRuleBase
+{
+	DECLARE_DYNCREATE(CDlgIE)
+public:
+	CDlgIE() {};
+	virtual ~CDlgIE() {};
+protected:
+	virtual BOOL OnInitDialog();
+	LRESULT Set_OK(WPARAM wParam, LPARAM lParam);
+	DECLARE_MESSAGE_MAP()
+public:
+};
+
+
 //Custom01
 class CDlgCU01 : public CDlgRuleBase
 {
@@ -554,4 +569,26 @@ protected:
 	LRESULT Set_OK(WPARAM wParam, LPARAM lParam);
 	DECLARE_MESSAGE_MAP()
 public:
+};
+
+//Default
+class CDlgDefault : public CPropertyPage
+{
+	DECLARE_DYNCREATE(CDlgDefault)
+public:
+	CDlgDefault();
+	virtual ~CDlgDefault() {};
+	CComboBox	m_Combo2;
+protected:
+	virtual void DoDataExchange(CDataExchange* pDX);
+	virtual BOOL OnInitDialog();
+	LRESULT Set_OK(WPARAM wParam, LPARAM lParam);
+	afx_msg void OnDestroy() { CPropertyPage::OnDestroy(); }
+	afx_msg void OnBnClickedButtonFdlg();
+	DECLARE_MESSAGE_MAP()
+public:
+public:
+	CURLRedirectDataClass m_URD;
+	CURLRedirectDataClass m_URDSave;
+	enum { IDD = IDD_DLG_RD_Default	};
 };

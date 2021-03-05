@@ -49,6 +49,16 @@ BOOL CDlgETC::OnInitDialog()
 	BOOL bQuickRedirect = theApp.m_RedirectList.m_bQuickRedirect;
 	((CButton*)GetDlgItem(IDC_CHK_GLOVAL_QUICK))->SetCheck(bQuickRedirect ? 1 : 0);
 
+	if (theApp.m_bCitrixCustomEnv)
+	{
+		((CButton*)GetDlgItem(IDC_CHK_GLOVAL_DISABLE_DDE))->SetCheck(0);
+		((CButton*)GetDlgItem(IDC_CHK_GLOVAL_DISABLE_DDE))->ShowWindow(SW_HIDE);
+	}
+	else
+	{
+		BOOL bDisableIE_DDE = theApp.m_RedirectList.m_bDisableIE_DDE;
+		((CButton*)GetDlgItem(IDC_CHK_GLOVAL_DISABLE_DDE))->SetCheck(bDisableIE_DDE ? 1 : 0);
+	}
 
 	CString strVersion;
 	strVersion = theApp.GetVersionStr();
@@ -71,6 +81,15 @@ LRESULT CDlgETC::Set_OK(WPARAM wParam, LPARAM lParam)
 	BOOL bTopURLOnly = ((CButton*)GetDlgItem(IDC_CHK_GLOVAL_TOP_PAGE_ONLY))->GetCheck() == 1 ? TRUE : FALSE;
 	theApp.m_RedirectListSaveData.m_bTopURLOnly= bTopURLOnly;
 
+	if (theApp.m_bCitrixCustomEnv)
+	{
+		theApp.m_RedirectListSaveData.m_bDisableIE_DDE=FALSE;
+	}
+	else
+	{
+		BOOL bDisableIE_DDE = ((CButton*)GetDlgItem(IDC_CHK_GLOVAL_DISABLE_DDE))->GetCheck() == 1 ? TRUE : FALSE;
+		theApp.m_RedirectListSaveData.m_bDisableIE_DDE = bDisableIE_DDE;
+	}
 	return 0;
 }
 

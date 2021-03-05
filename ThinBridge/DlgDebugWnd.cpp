@@ -20,23 +20,6 @@ DWORD CWinDebugMonitor::Initialize()
 	bstat = SetSecurityDescriptorDacl(&m_SA, TRUE, (PACL)NULL, FALSE) ;
 	if (!bstat) return -2 ;
 
-//    // Mutex: DBWin
-//    // ---------------------------------------------------------
-//    char DBWinMutex[] = "DBWinMutex";
-//    m_hDBWinMutex = ::OpenMutexA(
-//        STANDARD_RIGHTS_READ,
-//        FALSE,
-//        DBWinMutex
-//        );
-//
-//    if (m_hDBWinMutex == NULL) {
-//        errorCode = GetLastError();
-//CString strMsg;
-//strMsg.Format(_T("1\nCode 0x%04x:%04d"),errorCode,errorCode);
-//::MessageBox(NULL,strMsg,theApp.m_strThisAppName,MB_OK|MB_ICONERROR );
-//        return errorCode;
-//    }
-
     // Event: buffer ready
     // ---------------------------------------------------------
     char DBWIN_BUFFER_READY[] = "DBWIN_BUFFER_READY";
@@ -56,9 +39,6 @@ DWORD CWinDebugMonitor::Initialize()
 
         if (m_hEventBufferReady == NULL) {
             errorCode = GetLastError();
-CString strMsg;
-strMsg.Format(_T("2\nCode 0x%04x:%04d"),errorCode,errorCode);
-::MessageBox(NULL,strMsg,theApp.m_strThisAppName,MB_OK|MB_ICONERROR );
             return errorCode;
         }
     }
@@ -82,9 +62,6 @@ strMsg.Format(_T("2\nCode 0x%04x:%04d"),errorCode,errorCode);
 
         if (m_hEventDataReady == NULL) {
             errorCode = GetLastError();
-CString strMsg;
-strMsg.Format(_T("3\nCode 0x%04x:%04d"),errorCode,errorCode);
-::MessageBox(NULL,strMsg,theApp.m_strThisAppName,MB_OK|MB_ICONERROR );
             return errorCode;
         }
     }
@@ -111,9 +88,6 @@ strMsg.Format(_T("3\nCode 0x%04x:%04d"),errorCode,errorCode);
         if (m_hDBMonBuffer == NULL)
 		{
             errorCode = GetLastError();
-CString strMsg;
-strMsg.Format(_T("4\nCode 0x%04x:%04d"),errorCode,errorCode);
-::MessageBox(NULL,strMsg,theApp.m_strThisAppName,MB_OK|MB_ICONERROR );
             return errorCode;
         }
     }
@@ -128,9 +102,6 @@ strMsg.Format(_T("4\nCode 0x%04x:%04d"),errorCode,errorCode);
 
     if (m_pDBBuffer == NULL) {
         errorCode = GetLastError();
-CString strMsg;
-strMsg.Format(_T("5\nCode 0x%04x:%04d"),errorCode,errorCode);
-::MessageBox(NULL,strMsg,theApp.m_strThisAppName,MB_OK|MB_ICONERROR );
         return errorCode;
     }
 
@@ -150,9 +121,6 @@ strMsg.Format(_T("5\nCode 0x%04x:%04d"),errorCode,errorCode);
     if (m_hWinDebugMonitorThread == NULL) {
         m_bWinDebugMonStopped = TRUE;
         errorCode = GetLastError();
-CString strMsg;
-strMsg.Format(_T("6\nCode 0x%04x:%04d"),errorCode,errorCode);
-::MessageBox(NULL,strMsg,theApp.m_strThisAppName,MB_OK|MB_ICONERROR );
         return errorCode;
     }
 
@@ -176,11 +144,6 @@ void CWinDebugMonitor::Unintialize()
         m_bWinDebugMonStopped = TRUE;
         ::WaitForSingleObject(m_hWinDebugMonitorThread, INFINITE);
     }
-
-    //if (m_hDBWinMutex != NULL) {
-    //    CloseHandle(m_hDBWinMutex);
-    //    m_hDBWinMutex = NULL;
-    //}
 
     if (m_hDBMonBuffer != NULL) {
         ::UnmapViewOfFile(m_pDBBuffer);
@@ -221,17 +184,6 @@ DWORD CWinDebugMonitor::WinDebugMonitorProcess()
 			{
 				strLine=strLine.Mid(11);
 				bRet=TRUE;
-				//if(m_pEdit)
-				//{
-				//	//m_strOutPut += strLine;
-				//	//m_strOutPut += _T("\r\n");
-				//	//m_pEdit->SetWindowText(m_strOutPut);
-				//	//m_pEdit->PostMessage(EM_SETSEL, (WPARAM)0, (LPARAM)-1);
-				//	strSingleLine.Format(_T("%s\r\n"),strLine);
-				//	int ndx = m_pEdit->GetWindowTextLength();
-				//	m_pEdit->SendMessage(EM_SETSEL, (WPARAM)ndx, (LPARAM)ndx);
-				//	m_pEdit->SendMessage(EM_REPLACESEL, 0, (LPARAM)((LPCTSTR) strSingleLine));
-				//}
 			}
 			else
 				bRet=FALSE;
@@ -239,7 +191,6 @@ DWORD CWinDebugMonitor::WinDebugMonitorProcess()
 		else
 			bRet=FALSE;
         //OutputWinDebugString(m_pDBBuffer->data);
-        // signal buffer ready
         SetEvent(m_hEventBufferReady);
 		if(bRet)
 		{
@@ -303,41 +254,6 @@ BOOL CDlgDebugWnd::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
 	m_autoResize.AddSnapToRightBottom(GetDlgItem(IDC_EDIT1));
-//	m_autoResize.AddSnapToRightBottom(GetDlgItem(IDC_STATIC));
-//	m_autoResize.AddSnapToRightBottom(GetDlgItem(IDC_BUTTON1));
-//	m_autoResize.AddSnapToRightBottom(GetDlgItem(IDOK));
-//	m_autoResize.AddSnapToRightBottom(GetDlgItem(IDCANCEL));
-//	m_autoResize.AddSnapToRightBottom(GetDlgItem(IDC_STATIC_LINE));
-
-	//CFont* pFont = m_Edit.GetFont();
-	//TEXTMETRIC tm={0};
-
-	//// get the control's DC, too
-	//CDC* pDC = m_Edit.GetDC();
-
-	//// Select the font that the control uses by default into the DC.
-	//// We must do this because the control may or may not be using
-	//// that font at this exact moment
-	//CFont* pOldFont = pDC->SelectObject(pFont);
-
-	//// Retrieve text metrics for that font and return the previously
-	//// selected font.
-	//pDC->GetTextMetrics(&tm);
-	//pDC->SelectObject(pOldFont);
-
-	//// Get an identity rectangle and map it to dialog units
-	//CRect rect(0, 0, 100, 1);
-	//::MapDialogRect((HWND)this, rect);
-
-	//// We now know that 100 dialog units are rect.Width() screen units,
-	//// so we can multiply screen units by 100 and divide by rect.Width()
-	//// to find dialog units from screen units. tm.tmAveCharWidth is
-	//// the width of _one_ character, so setting the tabs at every
-	//// four characters means we also multiply by four.
-	//int iTab=(4 * tm.tmAveCharWidth * 100) / rect.Width();
-	//iTab=iTab/2;
-	//m_Edit.SetTabStops(iTab);
-
 
 	bFirstFlg = TRUE;
 	m_SelPosS=0;
@@ -356,18 +272,12 @@ BOOL CDlgDebugWnd::OnInitDialog()
 		m_WDMon.Unintialize();
 		CDialogEx::OnCancel();
 	}
-//	GetOututDebugString();
 	return FALSE;  // return TRUE unless you set the focus to a control
-	// 例外 : OCX プロパティ ページは必ず FALSE を返します。
 }
 
 void CDlgDebugWnd::OnBnClickedOk()
 {
-	//m_WDMon.m_strOutPut.Empty();
 	m_Edit.SetWindowText(_T(""));
-
-	//m_WDMon.Unintialize();
-	//CDialogEx::OnOK();
 }
 
 

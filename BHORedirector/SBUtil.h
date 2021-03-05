@@ -182,9 +182,110 @@ namespace SBUtil
 		}
 		return FALSE;
 	}
+	inline BOOL InThinApp()
+	{
+		BOOL bRet = FALSE;
+		TCHAR szTargetPath[512] = { 0 };
+		if (GetEnvironmentVariable(_T("TS_ORIGIN"), szTargetPath, 512))
+		{
+			if (lstrlen(szTargetPath) > 0)
+			{
+				//レジストリもチェックする。
+				HKEY  hKey = { 0 };
+				LONG lResult = 0L;
+				lResult = RegOpenKeyEx(HKEY_LOCAL_MACHINE, _T("FS"), 0, KEY_READ, &hKey);
+				if (lResult == ERROR_SUCCESS)
+				{
+					RegCloseKey(hKey);
+					bRet = TRUE;
+				}
+			}
+		}
+		return bRet;
+	}
+	inline CString GetVirtIELabelStr()
+	{
+		TCHAR lpKey[] = _T("SOFTWARE\\ThinBridge");
+		TCHAR lpRegSub[] = _T("VirtIELabel");
+		CString strVal;
+		HKEY  hKey = { 0 };
+		LONG lResult = 0L;
+		DWORD dwType = 0;
+		DWORD dwOption = 0;
+		dwOption = KEY_READ;
+		lResult = RegOpenKeyEx(HKEY_LOCAL_MACHINE, lpKey,
+			0, dwOption, &hKey);
+		if (lResult == ERROR_SUCCESS)
+		{
+			DWORD iSize = 0;
+			TCHAR* pVal = NULL;
+
+			RegQueryValueEx(hKey, lpRegSub, NULL, &dwType, NULL, &iSize);
+			if (iSize > 0)
+			{
+				iSize += 1;//+1=null
+				pVal = new TCHAR[iSize];
+				memset(pVal, 0x00, sizeof(TCHAR)*iSize);
+				RegQueryValueEx(hKey, lpRegSub, NULL, &dwType, (LPBYTE)pVal, &iSize);
+				strVal = pVal;
+				delete[] pVal;
+			}
+			RegCloseKey(hKey);
+		}
+		//wow6432node
+		if (strVal.IsEmpty())
+		{
+			TCHAR lpKeyWow6432[] = _T("SOFTWARE\\WOW6432Node\\ThinBridge");
+			lResult = RegOpenKeyEx(HKEY_LOCAL_MACHINE, lpKeyWow6432,
+				0, dwOption, &hKey);
+			if (lResult == ERROR_SUCCESS)
+			{
+				DWORD iSize = 0;
+				TCHAR* pVal = NULL;
+
+				RegQueryValueEx(hKey, lpRegSub, NULL, &dwType, NULL, &iSize);
+				if (iSize > 0)
+				{
+					iSize += 1;//+1=null
+					pVal = new TCHAR[iSize];
+					memset(pVal, 0x00, sizeof(TCHAR)*iSize);
+					RegQueryValueEx(hKey, lpRegSub, NULL, &dwType, (LPBYTE)pVal, &iSize);
+					strVal = pVal;
+					delete[] pVal;
+				}
+				RegCloseKey(hKey);
+			}
+		}
+		//x64OS
+		if (strVal.IsEmpty())
+		{
+			dwOption = dwOption | KEY_WOW64_64KEY;
+			lResult = RegOpenKeyEx(HKEY_LOCAL_MACHINE, lpKey,
+				0, dwOption, &hKey);
+			if (lResult == ERROR_SUCCESS)
+			{
+				DWORD iSize = 0;
+				TCHAR* pVal = NULL;
+
+				RegQueryValueEx(hKey, lpRegSub, NULL, &dwType, NULL, &iSize);
+				if (iSize > 0)
+				{
+					iSize += 1;//+1=null
+					pVal = new TCHAR[iSize];
+					memset(pVal, 0x00, sizeof(TCHAR)*iSize);
+					RegQueryValueEx(hKey, lpRegSub, NULL, &dwType, (LPBYTE)pVal, &iSize);
+					strVal = pVal;
+					delete[] pVal;
+				}
+				RegCloseKey(hKey);
+			}
+		}
+		return strVal;
+	}
+
 	inline int GetTridentVersion()
 	{
-		int iTridentVersion=8;
+		int iTridentVersion=10;
 		DWORD dwDummy=0;
 		DWORD dwSize=0;
 		DWORD dwMajar=0;

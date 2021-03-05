@@ -34,8 +34,8 @@ END_MESSAGE_MAP()
 BOOL CDlgSetVMW::OnInitDialog() 
 {
 	CPropertyPage::OnInitDialog();
-	m_strHorizon_ConnectionServerName=theApp.SettingConf.m_strHorizon_ConnectionServerName;
-	m_strHorizon_AppName=theApp.SettingConf.m_strHorizon_AppName;
+	m_strHorizon_ConnectionServerName=theApp.m_RedirectList.m_strHorizon_ConnectionServerName;
+	m_strHorizon_AppName=theApp.m_RedirectList.m_strHorizon_AppName;
 	//VM_Horizon-----------------------------------------------------------------Å´
 	SetDlgItemText(IDC_EDIT_VHOST,m_strHorizon_ConnectionServerName);
 	SetDlgItemText(IDC_EDIT_VAPP,m_strHorizon_AppName);
@@ -52,8 +52,8 @@ LRESULT CDlgSetVMW::Set_OK(WPARAM wParam, LPARAM lParam)
 	GetDlgItemText(IDC_EDIT_VHOST,m_strHorizon_ConnectionServerName);
 	GetDlgItemText(IDC_EDIT_VAPP,m_strHorizon_AppName);
 
-	theApp.SettingConfMod.m_strHorizon_ConnectionServerName = m_strHorizon_ConnectionServerName;
-	theApp.SettingConfMod.m_strHorizon_AppName = m_strHorizon_AppName;
+	theApp.m_RedirectListSaveData.m_strHorizon_ConnectionServerName = m_strHorizon_ConnectionServerName;
+	theApp.m_RedirectListSaveData.m_strHorizon_AppName = m_strHorizon_AppName;
 	return 0;
 }
 

@@ -62,6 +62,17 @@ STDMETHODIMP CBHORedirector::SetSite(IUnknown* pUnkSite)
     if (pUnkSite != NULL)
     {
 		m_IE_M_Ver=SBUtil::GetTridentVersion();
+		if (SBUtil::InThinApp())
+		{
+			m_bInVOS = TRUE;
+			m_strVirtIELabel= SBUtil::GetVirtIELabelStr();
+			logmsg.Format(_T("InThinAppVOS:[%s]"), m_strVirtIELabel);
+			this->WriteDebugTraceDateTime(logmsg, DEBUG_LOG_TYPE_GE, TRUE);
+		}
+		else
+		{
+			m_bInVOS = FALSE;
+		}
 
 		logmsg.Format(_T("SetSite [0x%08x] Start"),pUnkSite);
 		this->WriteDebugTraceDateTime(logmsg,DEBUG_LOG_TYPE_GE,TRUE);
@@ -186,22 +197,18 @@ void STDMETHODCALLTYPE CBHORedirector::BeforeNavigate(LPDISPATCH pDisp, VARIANT*
 		VARIANT* Flags, VARIANT* TargetFrameName,
 		VARIANT* PostData, VARIANT* Headers, BOOL* Cancel)
 {
-	CString logmsg;
+	if (!m_spWebBrowser)
+		return;
+
 	CString strURL = V_BSTR(URL);
-	CString strURL_FULL = strURL;
-	CString strTargetFrameName = V_BSTR(TargetFrameName);
-
-	if(!m_spWebBrowser)
+	if (!SBUtil::IsURL_HTTP(strURL))
 		return;
 
-	if(!SBUtil::IsURL_HTTP(strURL))
-		return;
-
+	CString logmsg;
 	CString strMsg;
 	DWORD dRet=0;
 
 	BOOL bTopPage=FALSE;
-
 	//TOPページ(Frameなし)
 	if(IsPageIWebBrowser(pDisp))
 	{
@@ -215,22 +222,33 @@ void STDMETHODCALLTYPE CBHORedirector::BeforeNavigate(LPDISPATCH pDisp, VARIANT*
 	if(::GetKeyState(VK_ESCAPE)<0)
 		return;
 
-	if(strTargetFrameName.IsEmpty())
-		strTargetFrameName=_T("N/A");
-	else
+	if (m_gbTraceLog)
 	{
-		//google adでものすごく長い(js)を入れてくる作法の悪いものがあるので、最大100文字で切る。
-		if(strTargetFrameName.GetLength()>100)
+		CString strTargetFrameName = V_BSTR(TargetFrameName);
+
+		if (strTargetFrameName.IsEmpty())
+			strTargetFrameName = _T("N/A");
+		else
 		{
-			strTargetFrameName = strTargetFrameName.Mid(0,100);
-			strTargetFrameName+=_T("..DIV..");
+			//google adでものすごく長い(js)を入れてくる作法の悪いものがあるので、最大100文字で切る。
+			if (strTargetFrameName.GetLength() > 100)
+			{
+				strTargetFrameName = strTargetFrameName.Mid(0, 100);
+				strTargetFrameName += _T("..DIV..");
+			}
 		}
+
+		logmsg.Format(_T("BeforeNavigate\t%s\tTopPage=%s\tFrameName=%s"), strURL, bTopPage ? _T("Yes") : _T("Frame/iFrame"), strTargetFrameName);
+		this->WriteDebugTraceDateTime(logmsg, DEBUG_LOG_TYPE_URL);
 	}
 
-	logmsg.Format(_T("BeforeNavigate\t%s\tTopPage=%s\tFrameName=%s"),strURL,bTopPage?_T("Yes"):_T("Frame/iFrame"),strTargetFrameName);
-	this->WriteDebugTraceDateTime(logmsg,DEBUG_LOG_TYPE_URL);
-
-	strURL = SBUtil::Trim_URLOnly(strURL);
+	//Topが有効の場合
+	if (m_RedirectList.m_bTopURLOnly)
+	{
+		//ページがTopではない場合は、リダイレクトの必要はない。
+		if(!bTopPage)
+			return;
+	}
 
 	//HitしたObjectコレクション格納
 	CAtlArray<intptr_t> arr_RedirectBrowserHit;
@@ -240,11 +258,22 @@ void STDMETHODCALLTYPE CBHORedirector::BeforeNavigate(LPDISPATCH pDisp, VARIANT*
 	//Edge IEModeの中の場合
 	if(m_bInEdgeIEMode)
 	{
-		bResultRedirectURL = m_RedirectList.IsRedirectIEMode(strURL_FULL, bTopPage, &arr_RedirectBrowserHit, TRUE);
+		bResultRedirectURL = m_RedirectList.IsRedirectIEMode(strURL, bTopPage, &arr_RedirectBrowserHit);
 	}
 	else
 	{
-		bResultRedirectURL = m_RedirectList.IsRedirect(strURL_FULL,bTopPage,&arr_RedirectBrowserHit,TRUE);
+		//ThinApp VirtIE用(ThinApp Virtual App)
+		if(m_bInVOS)
+		{
+			//ThinBridgeとして判断する種別[CUSTOM01-05]がない場合は、VOSからリダイレクトはしない。
+			if(m_strVirtIELabel.IsEmpty())
+				return;
+			bResultRedirectURL = m_RedirectList.IsRedirectVOS(strURL, bTopPage, &arr_RedirectBrowserHit, m_strVirtIELabel);
+		}
+		else//通常環境
+		{
+			bResultRedirectURL = m_RedirectList.IsRedirect(strURL,bTopPage,&arr_RedirectBrowserHit);
+		}
 	}
 
 	//判定結果 リダイレクトする。
@@ -262,7 +291,7 @@ void STDMETHODCALLTYPE CBHORedirector::BeforeNavigate(LPDISPATCH pDisp, VARIANT*
 			return;
 		}
 
-		if(!IsSafeGuard(strURL_FULL))
+		if(!IsSafeGuard(strURL))
 		{
 			BOOL bJP=TRUE;
 			try
@@ -333,7 +362,7 @@ void STDMETHODCALLTYPE CBHORedirector::BeforeNavigate(LPDISPATCH pDisp, VARIANT*
 					pRedirectData=(CURLRedirectDataClass*)arr_RedirectBrowserHit.GetAt(i);
 					if(pRedirectData)
 					{
-						this->OpenAnotherBrowser(pRedirectData,strURL_FULL);
+						this->OpenAnotherBrowser(pRedirectData, strURL);
 						::Sleep(100);
 					}
 				}
@@ -368,7 +397,7 @@ void STDMETHODCALLTYPE CBHORedirector::BeforeNavigate(LPDISPATCH pDisp, VARIANT*
 								pRedirectData=(CURLRedirectDataClass*)arr_RedirectBrowserHit.GetAt(i);
 								if(pRedirectData)
 								{
-									this->OpenAnotherBrowser(pRedirectData,strURL_FULL);
+									this->OpenAnotherBrowser(pRedirectData, strURL);
 									::Sleep(100);
 								}
 							}
@@ -386,18 +415,19 @@ void STDMETHODCALLTYPE CBHORedirector::BeforeNavigate(LPDISPATCH pDisp, VARIANT*
 
 void STDMETHODCALLTYPE CBHORedirector::NavigateComplete(LPDISPATCH pDisp, VARIANT* URL)
 {
-	CString logmsg;
+	if (!m_spWebBrowser)
+		return;
+
 	CString strURL = V_BSTR(URL);
-	CString strURL_FULL = strURL;
-
-	if(!m_spWebBrowser)
+	if (!SBUtil::IsURL_HTTP(strURL))
 		return;
 
-	if(!SBUtil::IsURL_HTTP(strURL))
-		return;
-
-	logmsg.Format(_T("NavigateComplete\t%s"),strURL);
-	this->WriteDebugTraceDateTime(logmsg,DEBUG_LOG_TYPE_URL);
+	CString logmsg;
+	if (m_gbTraceLog)
+	{
+		logmsg.Format(_T("NavigateComplete\t%s"),strURL);
+		this->WriteDebugTraceDateTime(logmsg,DEBUG_LOG_TYPE_URL);
+	}
 
 	CString strMsg;
 	DWORD dRet=0;
@@ -423,11 +453,17 @@ void STDMETHODCALLTYPE CBHORedirector::NavigateComplete(LPDISPATCH pDisp, VARIAN
 		}
 	}
 
+	//Topが有効の場合
+	if (m_RedirectList.m_bTopURLOnly)
+	{
+		//ページがTopではない場合は、リダイレクトの必要はない。
+		if (!bTopPage)
+			return;
+	}
+
 	//ESCが押されている場合は、リダイレクトをしない。
 	if(::GetKeyState(VK_ESCAPE)<0)
 		return;
-
-	strURL = SBUtil::Trim_URLOnly(strURL);
 
 	//HitしたObjectコレクション格納
 	CAtlArray<intptr_t> arr_RedirectBrowserHit;
@@ -438,12 +474,25 @@ void STDMETHODCALLTYPE CBHORedirector::NavigateComplete(LPDISPATCH pDisp, VARIAN
 	//Edge IEModeの中の場合
 	if (m_bInEdgeIEMode)
 	{
-		bResultRedirectURL = m_RedirectList.IsRedirectIEMode(strURL_FULL, bTopPage,&arr_RedirectBrowserHit, FALSE);
+		bResultRedirectURL = m_RedirectList.IsRedirectIEMode(strURL, bTopPage,&arr_RedirectBrowserHit);
 	}
 	else
 	{
-		bResultRedirectURL = m_RedirectList.IsRedirect(strURL_FULL,bTopPage,&arr_RedirectBrowserHit,FALSE);
+		//ThinApp VirtIE用(ThinApp Virtual App)
+		if (m_bInVOS)
+		{
+			//ThinBridgeとして判断する種別[CUSTOM01-05]がない場合は、VOSからリダイレクトはしない。
+			if (m_strVirtIELabel.IsEmpty())
+				return;
+			bResultRedirectURL = m_RedirectList.IsRedirectVOS(strURL, bTopPage, &arr_RedirectBrowserHit, m_strVirtIELabel);
+		}
+		else//通常環境
+		{
+			bResultRedirectURL = m_RedirectList.IsRedirect(strURL, bTopPage, &arr_RedirectBrowserHit);
+		}
 	}
+
+
 
 	//判定結果 リダイレクトする。
 	if(bResultRedirectURL)
@@ -459,7 +508,7 @@ void STDMETHODCALLTYPE CBHORedirector::NavigateComplete(LPDISPATCH pDisp, VARIAN
 			this->WriteDebugTraceDateTime(logmsg,DEBUG_LOG_TYPE_URL);
 			return;
 		}
-		if(!IsSafeGuard(strURL_FULL))
+		if(!IsSafeGuard(strURL))
 		{
 			m_strSafeGuardURL=m_strTopURL;
 			CString strSafeGuardMsg;
@@ -494,7 +543,7 @@ void STDMETHODCALLTYPE CBHORedirector::NavigateComplete(LPDISPATCH pDisp, VARIAN
 					pRedirectData=(CURLRedirectDataClass*)arr_RedirectBrowserHit.GetAt(i);
 					if(pRedirectData)
 					{
-						this->OpenAnotherBrowser(pRedirectData,strURL_FULL);
+						this->OpenAnotherBrowser(pRedirectData, strURL);
 						::Sleep(100);
 					}
 				}
@@ -524,7 +573,7 @@ void STDMETHODCALLTYPE CBHORedirector::NavigateComplete(LPDISPATCH pDisp, VARIAN
 								pRedirectData=(CURLRedirectDataClass*)arr_RedirectBrowserHit.GetAt(i);
 								if(pRedirectData)
 								{
-									this->OpenAnotherBrowser(pRedirectData,strURL_FULL);
+									this->OpenAnotherBrowser(pRedirectData, strURL);
 									::Sleep(100);
 								}
 							}
@@ -738,14 +787,33 @@ void CBHORedirector::OpenAnotherBrowser(CURLRedirectDataClass* pRedirectData,CSt
 		||strExecTypeUpper.CompareNoCase(_T("FIREFOX"))==0
 		||strExecTypeUpper.CompareNoCase(_T("CHROME"))==0
 		||strExecTypeUpper.CompareNoCase(_T("EDGE"))==0
-		||strExecTypeUpper.CompareNoCase(_T("IE"))==0
-		||strExecTypeUpper.CompareNoCase(_T("Default"))==0)
+		||strExecTypeUpper.CompareNoCase(_T("IE"))==0)
 		{
 			strCommand.Format(_T("\"%s\" \"%s\" \"%s\""),m_strThinBridge_EXE_FullPath,strURL,pRedirectData->m_strExecType);
 			strCommand2.Format(_T("%s \"%s\""),strURL,pRedirectData->m_strExecType);
 		}
+		//Default
+		else if (strExecTypeUpper.CompareNoCase(_T("Default")) == 0)
+		{
+			if (pRedirectData->m_strExecExeFullPath.CompareNoCase(_T("RDP")) == 0
+				|| pRedirectData->m_strExecExeFullPath.CompareNoCase(_T("VMWARE")) == 0
+				|| pRedirectData->m_strExecExeFullPath.CompareNoCase(_T("CITRIX")) == 0
+				|| pRedirectData->m_strExecExeFullPath.CompareNoCase(_T("FIREFOX")) == 0
+				|| pRedirectData->m_strExecExeFullPath.CompareNoCase(_T("CHROME")) == 0
+				|| pRedirectData->m_strExecExeFullPath.CompareNoCase(_T("IE")) == 0
+				|| pRedirectData->m_strExecExeFullPath.CompareNoCase(_T("EDGE")) == 0)
+			{
+				strCommand.Format(_T("\"%s\" \"%s\" \"%s\""), m_strThinBridge_EXE_FullPath, strURL, pRedirectData->m_strExecExeFullPath);
+				strCommand2.Format(_T("%s \"%s\""), strURL, pRedirectData->m_strExecExeFullPath);
+			}
+			else
+			{
+				strCommand.Format(_T("\"%s\" \"%s\" \"%s\""), m_strThinBridge_EXE_FullPath, strURL, pRedirectData->m_strExecExeFullPath);
+				strCommand2.Format(_T("%s \"%s\""), strURL, pRedirectData->m_strExecExeFullPath);
+			}
+		}
 		//Office365対応[CUSTOM20]
-		else if (strExecTypeUpper.Find(_T("CUSTOM20")) == 0)
+		else if (strExecTypeUpper.CompareNoCase(_T("CUSTOM20")) == 0)
 		{
 			if (pRedirectData->m_strExecExeFullPath.CompareNoCase(_T("RDP")) == 0
 				|| pRedirectData->m_strExecExeFullPath.CompareNoCase(_T("VMWARE")) == 0

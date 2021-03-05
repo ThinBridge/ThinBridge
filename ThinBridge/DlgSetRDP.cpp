@@ -44,14 +44,14 @@ BOOL CDlgSetRDP::OnInitDialog()
 {
 	CPropertyPage::OnInitDialog();
 
-	m_strServerName=theApp.SettingConf.m_strServerName;
-	m_bRemoteAppMode=theApp.SettingConf.m_bRemoteAppMode;
-	m_strRemoteAppName=theApp.SettingConf.m_strRemoteAppName;
-	m_strRemoteAppPath=theApp.SettingConf.m_strRemoteAppPath;
-	m_strRemoteAppCommandLine=theApp.SettingConf.m_strRemoteAppCommandLine;
-	m_bRedirect_Clipboard=theApp.SettingConf.m_bRedirect_Clipboard;
-	m_bRedirect_Printer=theApp.SettingConf.m_bRedirect_Printer;
-	m_bRedirect_Drive=theApp.SettingConf.m_bRedirect_Drive;
+	m_strServerName=theApp.m_RedirectList.m_strRDP_ServerName;
+	m_bRemoteAppMode=theApp.m_RedirectList.m_bRemoteAppMode;
+	m_strRemoteAppName=theApp.m_RedirectList.m_strRemoteAppName;
+	m_strRemoteAppPath=theApp.m_RedirectList.m_strRemoteAppPath;
+	m_strRemoteAppCommandLine=theApp.m_RedirectList.m_strRemoteAppCommandLine;
+	m_bRedirect_Clipboard=theApp.m_RedirectList.m_bRedirect_Clipboard;
+	m_bRedirect_Printer=theApp.m_RedirectList.m_bRedirect_Printer;
+	m_bRedirect_Drive=theApp.m_RedirectList.m_bRedirect_Drive;
 
 	//RDP-----------------------------------------------------------------«
 	SetDlgItemText(IDC_EDIT1,m_strServerName);
@@ -109,14 +109,14 @@ LRESULT CDlgSetRDP::Set_OK(WPARAM wParam, LPARAM lParam)
 	m_bRedirect_Drive = ((CButton*)GetDlgItem(IDC_CHECK3))->GetCheck() == 1?TRUE:FALSE;
 
 
-	theApp.SettingConfMod.m_strServerName = m_strServerName;
-	theApp.SettingConfMod.m_bRemoteAppMode = m_bRemoteAppMode;
-	theApp.SettingConfMod.m_strRemoteAppName = m_strRemoteAppName;
-	theApp.SettingConfMod.m_strRemoteAppPath = m_strRemoteAppPath;
-	theApp.SettingConfMod.m_strRemoteAppCommandLine = m_strRemoteAppCommandLine;
-	theApp.SettingConfMod.m_bRedirect_Clipboard = m_bRedirect_Clipboard;
-	theApp.SettingConfMod.m_bRedirect_Printer = m_bRedirect_Printer;
-	theApp.SettingConfMod.m_bRedirect_Drive = m_bRedirect_Drive;
+	theApp.m_RedirectListSaveData.m_strRDP_ServerName = m_strServerName;
+	theApp.m_RedirectListSaveData.m_bRemoteAppMode = m_bRemoteAppMode;
+	theApp.m_RedirectListSaveData.m_strRemoteAppName = m_strRemoteAppName;
+	theApp.m_RedirectListSaveData.m_strRemoteAppPath = m_strRemoteAppPath;
+	theApp.m_RedirectListSaveData.m_strRemoteAppCommandLine = m_strRemoteAppCommandLine;
+	theApp.m_RedirectListSaveData.m_bRedirect_Clipboard = m_bRedirect_Clipboard;
+	theApp.m_RedirectListSaveData.m_bRedirect_Printer = m_bRedirect_Printer;
+	theApp.m_RedirectListSaveData.m_bRedirect_Drive = m_bRedirect_Drive;
 
 	return 0;
 }

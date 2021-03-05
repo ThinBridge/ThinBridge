@@ -161,6 +161,10 @@ public:
 	//MS-Edge‚ÌIEMode”»’è—p 2021-02-26
 	BOOL m_bInEdgeIEMode;
 
+	//ThinApp VirtIE—p
+	BOOL m_bInVOS;
+	CString m_strVirtIELabel;
+
 	int m_IE_M_Ver;
 	CURLRedirectList m_RedirectList;
 	CString m_strRedirectFilePath;

@@ -51,16 +51,6 @@
 #define KEY_COMB_RIGHT		0x00100000
 #define KEY_COMB_DOWN		0x01000000
 
-
-//FEATURE
-//#define FE_RDP				0x00000001
-//#define FE_VMW				0x00000010
-//#define FE_CTX				0x00000100
-#define FE_PLUS				0x00001000
-//#define CAP_PLUS			0x00010000
-
-#define FE_ALL FE_RDP|FE_VMW|FE_CTX
-
 static TCHAR DEF_URLS[][12]=
 {
 	_T("http://"),
@@ -85,31 +75,6 @@ static TCHAR DEF_SCRIPT[][11]=
 	_T("script"),
 	_T("vbscript"),
 	_T("jscript"),
-};
-#define DEBUG_LOG_LEVEL_OUTPUT_ALL 0
-#define DEBUG_LOG_LEVEL_OUTPUT_NO_FILE 1
-#define DEBUG_LOG_LEVEL_OUTPUT_URL 2 //DEBUG_LOG_TYPE_GE | DEBUG_LOG_TYPE_URL
-
-#define DEBUG_LOG_TYPE_GE	 0 //一般情報
-#define DEBUG_LOG_TYPE_DE	 1 //詳細情報
-#define DEBUG_LOG_TYPE_URL	 2 //URL情報
-#define DEBUG_LOG_TYPE_TR	 3 //トライデント動作情報
-#define DEBUG_LOG_TYPE_CL	 4 //Close処理関連情報
-#define DEBUG_LOG_TYPE_JS	 5 //Javascript関連情報
-#define DEBUG_LOG_TYPE_EX	 6 //例外処理関連情報
-#define DEBUG_LOG_TYPE_AC	 7 //操作アクション情報
-#define DEBUG_LOG_TYPE_DDE	 8 //DDE情報
-static TCHAR sDEBUG_LOG_TYPE[][8]=
-{
-	_T("GE"),
-	_T("DE"),
-	_T("URL"),
-	_T("TR"),
-	_T("CL"),
-	_T("JS"),
-	_T("EX"),
-	_T("AC"),
-	_T("DDE"),
 };
 
 namespace SBUtil
@@ -257,6 +222,27 @@ namespace SBUtil
 		}
 		return strRet;
 	}
+	inline BOOL InThinApp()
+	{
+		BOOL bRet = FALSE;
+		TCHAR szTargetPath[512] = { 0 };
+		if (GetEnvironmentVariable(_T("TS_ORIGIN"), szTargetPath, 512))
+		{
+			if (lstrlen(szTargetPath) > 0)
+			{
+				//レジストリもチェックする。
+				HKEY  hKey = { 0 };
+				LONG lResult = 0L;
+				lResult = RegOpenKeyEx(HKEY_LOCAL_MACHINE, _T("FS"), 0, KEY_READ, &hKey);
+				if (lResult == ERROR_SUCCESS)
+				{
+					RegCloseKey(hKey);
+					bRet = TRUE;
+				}
+			}
+		}
+		return bRet;
+	}
 };
 class CIconHelper
 {
@@ -400,6 +386,7 @@ public:
 	CStringArray m_arr_URL_EX;
 
 };
+
 class CURLRedirectList
 {
 public:
@@ -407,8 +394,22 @@ public:
 	BOOL m_bURLOnly;
 	BOOL m_bTraceLog;
 	BOOL m_bQuickRedirect;
-	BOOL m_bCitrixCustomEnv;
 	BOOL m_bTopURLOnly;
+
+	CString m_strHorizon_ConnectionServerName;
+	CString m_strHorizon_AppName;
+	CString m_strCitrix_AppName;
+
+	CString m_strRDP_ServerName;
+	BOOL m_bRemoteAppMode;
+	CString m_strRemoteAppName;
+	CString m_strRemoteAppPath;
+	CString m_strRemoteAppCommandLine;
+	BOOL m_bRedirect_Clipboard;
+	BOOL m_bRedirect_Printer;
+	BOOL m_bRedirect_Drive;
+
+	BOOL m_bDisableIE_DDE;
 
 	CURLRedirectDataClass* m_pRDP;
 	CURLRedirectDataClass* m_pVMW;
@@ -474,8 +475,12 @@ public:
 		m_pCustom19=NULL;
 		m_pCustom20=NULL;
 		m_bQuickRedirect = FALSE;
-		m_bCitrixCustomEnv =FALSE;
 		m_bTopURLOnly=FALSE;
+		m_bRemoteAppMode = TRUE;
+		m_bRedirect_Clipboard = FALSE;
+		m_bRedirect_Printer = FALSE;
+		m_bRedirect_Drive = FALSE;
+		m_bDisableIE_DDE=FALSE;
 	}
 	virtual ~CURLRedirectList()
 	{
@@ -527,8 +532,20 @@ public:
 		m_pCustom19=NULL;
 		m_pCustom20=NULL;
 		m_bQuickRedirect = FALSE;
-		m_bCitrixCustomEnv =FALSE;
 		m_bTopURLOnly=FALSE;
+		m_strHorizon_ConnectionServerName.Empty();
+		m_strHorizon_AppName.Empty();
+		m_strCitrix_AppName.Empty();
+
+		m_strRDP_ServerName.Empty();
+		m_strRemoteAppName.Empty();
+		m_strRemoteAppPath.Empty();
+		m_strRemoteAppCommandLine.Empty();
+		m_bRemoteAppMode=TRUE;
+		m_bRedirect_Clipboard=FALSE;
+		m_bRedirect_Printer=FALSE;
+		m_bRedirect_Drive=FALSE;
+		m_bDisableIE_DDE=FALSE;
 	}
 	void InitSaveDataAll(BOOL bCitrixCustomEnv =FALSE)
 	{
@@ -540,7 +557,6 @@ public:
 		{
 			m_bURLOnly=TRUE;
 			m_bQuickRedirect=TRUE;
-			m_bCitrixCustomEnv =TRUE;
 			m_bTopURLOnly=TRUE;
 
 			pRedirectData = NULL;
@@ -583,7 +599,6 @@ public:
 		{
 			m_bURLOnly = TRUE;
 			m_bQuickRedirect = TRUE;
-			m_bCitrixCustomEnv = FALSE;
 			m_bTopURLOnly = TRUE;
 
 
@@ -639,6 +654,25 @@ public:
 			pRedirectData->m_strExecType=_T("Edge");
 			pRedirectData->m_dwCloseTimeout=3;
 			m_pEdge=pRedirectData;
+			m_arr_RedirectBrowser.Add(pRedirectData);
+
+			pRedirectData = NULL;
+			pRedirectData = new CURLRedirectDataClass;
+			pRedirectData->m_bDisabled = FALSE;
+			pRedirectData->m_bTopPageOnly = TRUE;
+			pRedirectData->m_strExecType = _T("IE");
+			pRedirectData->m_dwCloseTimeout = 3;
+			m_pIE = pRedirectData;
+			m_arr_RedirectBrowser.Add(pRedirectData);
+
+			pRedirectData = NULL;
+			pRedirectData = new CURLRedirectDataClass;
+			pRedirectData->m_bDisabled = FALSE;
+			pRedirectData->m_bTopPageOnly = TRUE;
+			pRedirectData->m_strExecType = _T("Default");
+			pRedirectData->m_dwCloseTimeout = 3;
+			pRedirectData->m_strExecExeFullPath= _T("IE");
+			m_pDefault = pRedirectData;
 			m_arr_RedirectBrowser.Add(pRedirectData);
 
 			pRedirectData = NULL;
@@ -712,23 +746,6 @@ public:
 			pRedirectData->m_dwCloseTimeout = 3;
 			m_pCustom20 = pRedirectData;
 			m_arr_RedirectBrowser.Add(pRedirectData);
-
-
-			//pRedirectData = NULL;
-			//pRedirectData = new CURLRedirectDataClass;
-			//pRedirectData->m_bDisabled=FALSE;
-			//pRedirectData->m_strExecType=_T("IE");
-			//pRedirectData->m_dwCloseTimeout=3;
-			//m_pIE=pRedirectData;
-			//m_arr_RedirectBrowser.Add(pRedirectData);
-
-			//pRedirectData = NULL;
-			//pRedirectData = new CURLRedirectDataClass;
-			//pRedirectData->m_bDisabled=FALSE;
-			//pRedirectData->m_strExecType=_T("Default");
-			//pRedirectData->m_dwCloseTimeout=3;
-			//m_pDefault=pRedirectData;
-			//m_arr_RedirectBrowser.Add(pRedirectData);
 
 			//pRedirectData = NULL;
 			//pRedirectData = new CURLRedirectDataClass;
@@ -826,30 +843,6 @@ public:
 			//pRedirectData->m_dwCloseTimeout=3;
 			//m_pCustom17=pRedirectData;
 			//m_arr_RedirectBrowser.Add(pRedirectData);
-
-			//pRedirectData = NULL;
-			//pRedirectData = new CURLRedirectDataClass;
-			//pRedirectData->m_bDisabled=TRUE;
-			//pRedirectData->m_strExecType=_T("CUSTOM18");
-			//pRedirectData->m_dwCloseTimeout=3;
-			//m_pCustom18=pRedirectData;
-			//m_arr_RedirectBrowser.Add(pRedirectData);
-
-			//pRedirectData = NULL;
-			//pRedirectData = new CURLRedirectDataClass;
-			//pRedirectData->m_bDisabled=TRUE;
-			//pRedirectData->m_strExecType=_T("CUSTOM19");
-			//pRedirectData->m_dwCloseTimeout=3;
-			//m_pCustom19=pRedirectData;
-			//m_arr_RedirectBrowser.Add(pRedirectData);
-
-			//pRedirectData = NULL;
-			//pRedirectData = new CURLRedirectDataClass;
-			//pRedirectData->m_bDisabled=TRUE;
-			//pRedirectData->m_strExecType=_T("CUSTOM20");
-			//pRedirectData->m_dwCloseTimeout=3;
-			//m_pCustom20=pRedirectData;
-			//m_arr_RedirectBrowser.Add(pRedirectData);
 		}
 	}
 
@@ -870,7 +863,7 @@ public:
 			out.WriteString(strWriteLine);
 			pstrOutPutData=strWriteLine;
 
-			strWriteLine=_T("## Configuration File for ThinBridge\n");
+			strWriteLine=_T("## Configuration File for ThinBridge (ver2.0)\n");
 			out.WriteString(strWriteLine);
 			pstrOutPutData+=strWriteLine;
 
@@ -921,6 +914,87 @@ public:
 				out.WriteString(strTempFormat);
 				pstrOutPutData += strTempFormat;
 			}
+
+			//VMware Horizon
+			if (!m_strHorizon_ConnectionServerName.IsEmpty())
+			{
+				strTempFormat.Format(_T("@VMW_SERVERNAME:%s\n"), m_strHorizon_ConnectionServerName);
+				out.WriteString(strTempFormat);
+				pstrOutPutData += strTempFormat;
+			}
+			if (!m_strHorizon_AppName.IsEmpty())
+			{
+				strTempFormat.Format(_T("@VMW_APPNAME:%s\n"), m_strHorizon_AppName);
+				out.WriteString(strTempFormat);
+				pstrOutPutData += strTempFormat;
+			}
+
+			//Citrix
+			if (!m_strCitrix_AppName.IsEmpty())
+			{
+				strTempFormat.Format(_T("@CTX_APPNAME:%s\n"), m_strCitrix_AppName);
+				out.WriteString(strTempFormat);
+				pstrOutPutData += strTempFormat;
+			}
+
+			//RDP-------------------------------↓
+			if (!m_strRDP_ServerName.IsEmpty())
+			{
+				strTempFormat.Format(_T("@RDP_SERVERNAME:%s\n"), m_strRDP_ServerName);
+				out.WriteString(strTempFormat);
+				pstrOutPutData += strTempFormat;
+			}
+			if (!m_strRemoteAppName.IsEmpty())
+			{
+				strTempFormat.Format(_T("@RDP_APPNAME:%s\n"), m_strRemoteAppName);
+				out.WriteString(strTempFormat);
+				pstrOutPutData += strTempFormat;
+			}
+			if (!m_strRemoteAppPath.IsEmpty())
+			{
+				strTempFormat.Format(_T("@RDP_APPPATH:%s\n"), m_strRemoteAppPath);
+				out.WriteString(strTempFormat);
+				pstrOutPutData += strTempFormat;
+			}
+			if (!m_strRemoteAppCommandLine.IsEmpty())
+			{
+				strTempFormat.Format(_T("@RDP_COMMANDLINE:%s\n"), m_strRemoteAppCommandLine);
+				out.WriteString(strTempFormat);
+				pstrOutPutData += strTempFormat;
+			}
+
+			if(m_bRemoteAppMode)
+			{
+				strTempFormat=_T("@RDP_APPMODE\n");
+				out.WriteString(strTempFormat);
+				pstrOutPutData += strTempFormat;
+			}
+			if(m_bRedirect_Clipboard)
+			{
+				strTempFormat=_T("@RDP_CLIPBOARD\n");
+				out.WriteString(strTempFormat);
+				pstrOutPutData += strTempFormat;
+			}
+			if(m_bRedirect_Printer)
+			{
+				strTempFormat=_T("@RDP_PRINTER\n");
+				out.WriteString(strTempFormat);
+				pstrOutPutData += strTempFormat;
+			}
+			if (m_bRedirect_Drive)
+			{
+				strTempFormat=_T("@RDP_DRIVE\n");
+				out.WriteString(strTempFormat);
+				pstrOutPutData += strTempFormat;
+			}
+			//RDP-------------------------------↑
+			if (m_bDisableIE_DDE)
+			{
+				strTempFormat = _T("@DISABLE_IE_DDE\n");
+				out.WriteString(strTempFormat);
+				pstrOutPutData += strTempFormat;
+			}
+
 
 			int imax = (int)m_arr_RedirectBrowser.GetCount();
 			for(int i=0;i<imax;i++)
@@ -1001,8 +1075,6 @@ public:
 		this->Clear();
 
 		InitSaveDataAll(bCitrixCustomEnv);
-		m_bCitrixCustomEnv = bCitrixCustomEnv;
-
 		CStdioFile in;
 		if(in.Open(lPath,CFile::modeRead|CFile::shareDenyNone))
 		{
@@ -1217,6 +1289,109 @@ public:
 						dwZone |= UNTRUSTED_ZONE;
 					}
 
+					//VMware Horizon
+					else if (strTempUpper.Find(_T("@VMW_SERVERNAME:")) == 0)
+					{
+						int iPosC = 0;
+						CString strPathDig;
+						strPathDig = _T("@VMW_SERVERNAME:");
+						iPosC = strPathDig.GetLength();
+						strPathDig = strTemp.Mid(iPosC);
+						strPathDig.TrimLeft();
+						strPathDig.TrimRight();
+						m_strHorizon_ConnectionServerName = strPathDig;
+					}
+					else if (strTempUpper.Find(_T("@VMW_APPNAME:")) == 0)
+					{
+						int iPosC = 0;
+						CString strPathDig;
+						strPathDig = _T("@VMW_APPNAME:");
+						iPosC = strPathDig.GetLength();
+						strPathDig = strTemp.Mid(iPosC);
+						strPathDig.TrimLeft();
+						strPathDig.TrimRight();
+						m_strHorizon_AppName = strPathDig;
+					}
+
+					//Citrix
+					else if (strTempUpper.Find(_T("@CTX_APPNAME:")) == 0)
+					{
+						int iPosC = 0;
+						CString strPathDig;
+						strPathDig = _T("@CTX_APPNAME:");
+						iPosC = strPathDig.GetLength();
+						strPathDig = strTemp.Mid(iPosC);
+						strPathDig.TrimLeft();
+						strPathDig.TrimRight();
+						m_strCitrix_AppName = strPathDig;
+					}
+
+					//RDP-------------------------------↓
+					else if (strTempUpper.Find(_T("@RDP_SERVERNAME:")) == 0)
+					{
+						int iPosC = 0;
+						CString strPathDig;
+						strPathDig = _T("@RDP_SERVERNAME:");
+						iPosC = strPathDig.GetLength();
+						strPathDig = strTemp.Mid(iPosC);
+						strPathDig.TrimLeft();
+						strPathDig.TrimRight();
+						m_strRDP_ServerName = strPathDig;
+					}
+					else if (strTempUpper.Find(_T("@RDP_APPNAME:")) == 0)
+					{
+						int iPosC = 0;
+						CString strPathDig;
+						strPathDig = _T("@RDP_APPNAME:");
+						iPosC = strPathDig.GetLength();
+						strPathDig = strTemp.Mid(iPosC);
+						strPathDig.TrimLeft();
+						strPathDig.TrimRight();
+						m_strRemoteAppName = strPathDig;
+					}
+					else if (strTempUpper.Find(_T("@RDP_APPPATH:")) == 0)
+					{
+						int iPosC = 0;
+						CString strPathDig;
+						strPathDig = _T("@RDP_APPPATH:");
+						iPosC = strPathDig.GetLength();
+						strPathDig = strTemp.Mid(iPosC);
+						strPathDig.TrimLeft();
+						strPathDig.TrimRight();
+						m_strRemoteAppPath = strPathDig;
+					}
+					else if (strTempUpper.Find(_T("@RDP_COMMANDLINE:")) == 0)
+					{
+						int iPosC = 0;
+						CString strPathDig;
+						strPathDig = _T("@RDP_COMMANDLINE:");
+						iPosC = strPathDig.GetLength();
+						strPathDig = strTemp.Mid(iPosC);
+						strPathDig.TrimLeft();
+						strPathDig.TrimRight();
+						m_strRemoteAppCommandLine = strPathDig;
+					}
+					else if (strTempUpper.Find(_T("@RDP_APPMODE")) == 0)
+					{
+						m_bRemoteAppMode = TRUE;
+					}
+					else if (strTempUpper.Find(_T("@RDP_CLIPBOARD")) == 0)
+					{
+						m_bRedirect_Clipboard = TRUE;
+					}
+					else if (strTempUpper.Find(_T("@RDP_PRINTER")) == 0)
+					{
+						m_bRedirect_Printer = TRUE;
+					}
+					else if (strTempUpper.Find(_T("@RDP_DRIVE")) == 0)
+					{
+						m_bRedirect_Drive = TRUE;
+					}
+					//RDP-------------------------------↑
+					else if (strTempUpper.Find(_T("@DISABLE_IE_DDE")) == 0)
+					{
+						m_bDisableIE_DDE = TRUE;
+					}
 				}
 				//;-はEx #-はEx
 				else if(strTemp.Find(_T(";-"))==0||strTemp.Find(_T("#-"))==0)
@@ -1332,6 +1507,152 @@ public:
 			}
 		}
 	}
+
+	void SetGlobalData(LPCTSTR lPath)
+	{
+		if (lPath == NULL)return;
+		this->Clear();
+
+		CStdioFile in;
+		if (in.Open(lPath, CFile::modeRead | CFile::shareDenyNone))
+		{
+			CString strTemp;
+			CString strTempUpper;
+			BOOL bGlobalFlg=FALSE;
+			while (in.ReadString(strTemp))
+			{
+				strTemp.TrimLeft();
+				strTemp.TrimRight();
+				strTempUpper = strTemp;
+				strTempUpper.MakeUpper();
+				//空白の場合は、次へ
+				if (strTemp.IsEmpty())continue;
+				//#コメントはスキップ
+				if (strTemp.Find(_T("#")) == 0)continue;
+
+				if(!bGlobalFlg)
+				{
+					if (strTempUpper.Find(_T("[GLOBAL]")) == 0)
+					{
+						bGlobalFlg = TRUE;
+						continue;
+					}
+				}
+				if(bGlobalFlg)
+				{
+					if (strTemp.Find(_T("[RDP]")) == 0)
+					{
+						bGlobalFlg = FALSE;
+						break;
+					}
+					//VMware Horizon
+					if (strTempUpper.Find(_T("@VMW_SERVERNAME:")) == 0)
+					{
+						int iPosC = 0;
+						CString strPathDig;
+						strPathDig = _T("@VMW_SERVERNAME:");
+						iPosC = strPathDig.GetLength();
+						strPathDig = strTemp.Mid(iPosC);
+						strPathDig.TrimLeft();
+						strPathDig.TrimRight();
+						m_strHorizon_ConnectionServerName = strPathDig;
+					}
+					else if (strTempUpper.Find(_T("@VMW_APPNAME:")) == 0)
+					{
+						int iPosC = 0;
+						CString strPathDig;
+						strPathDig = _T("@VMW_APPNAME:");
+						iPosC = strPathDig.GetLength();
+						strPathDig = strTemp.Mid(iPosC);
+						strPathDig.TrimLeft();
+						strPathDig.TrimRight();
+						m_strHorizon_AppName = strPathDig;
+					}
+
+					//Citrix
+					else if (strTempUpper.Find(_T("@CTX_APPNAME:")) == 0)
+					{
+						int iPosC = 0;
+						CString strPathDig;
+						strPathDig = _T("@CTX_APPNAME:");
+						iPosC = strPathDig.GetLength();
+						strPathDig = strTemp.Mid(iPosC);
+						strPathDig.TrimLeft();
+						strPathDig.TrimRight();
+						m_strCitrix_AppName = strPathDig;
+					}
+
+					//RDP-------------------------------↓
+					else if (strTempUpper.Find(_T("@RDP_SERVERNAME:")) == 0)
+					{
+						int iPosC = 0;
+						CString strPathDig;
+						strPathDig = _T("@RDP_SERVERNAME:");
+						iPosC = strPathDig.GetLength();
+						strPathDig = strTemp.Mid(iPosC);
+						strPathDig.TrimLeft();
+						strPathDig.TrimRight();
+						m_strRDP_ServerName = strPathDig;
+					}
+					else if (strTempUpper.Find(_T("@RDP_APPNAME:")) == 0)
+					{
+						int iPosC = 0;
+						CString strPathDig;
+						strPathDig = _T("@RDP_APPNAME:");
+						iPosC = strPathDig.GetLength();
+						strPathDig = strTemp.Mid(iPosC);
+						strPathDig.TrimLeft();
+						strPathDig.TrimRight();
+						m_strRemoteAppName = strPathDig;
+					}
+					else if (strTempUpper.Find(_T("@RDP_APPPATH:")) == 0)
+					{
+						int iPosC = 0;
+						CString strPathDig;
+						strPathDig = _T("@RDP_APPPATH:");
+						iPosC = strPathDig.GetLength();
+						strPathDig = strTemp.Mid(iPosC);
+						strPathDig.TrimLeft();
+						strPathDig.TrimRight();
+						m_strRemoteAppPath = strPathDig;
+					}
+					else if (strTempUpper.Find(_T("@RDP_COMMANDLINE:")) == 0)
+					{
+						int iPosC = 0;
+						CString strPathDig;
+						strPathDig = _T("@RDP_COMMANDLINE:");
+						iPosC = strPathDig.GetLength();
+						strPathDig = strTemp.Mid(iPosC);
+						strPathDig.TrimLeft();
+						strPathDig.TrimRight();
+						m_strRemoteAppCommandLine = strPathDig;
+					}
+					else if (strTempUpper.Find(_T("@RDP_APPMODE")) == 0)
+					{
+						m_bRemoteAppMode = TRUE;
+					}
+					else if (strTempUpper.Find(_T("@RDP_CLIPBOARD")) == 0)
+					{
+						m_bRedirect_Clipboard = TRUE;
+					}
+					else if (strTempUpper.Find(_T("@RDP_PRINTER")) == 0)
+					{
+						m_bRedirect_Printer = TRUE;
+					}
+					else if (strTempUpper.Find(_T("@RDP_DRIVE")) == 0)
+					{
+						m_bRedirect_Drive = TRUE;
+					}
+					//RDP-------------------------------↑
+					else if (strTempUpper.Find(_T("@DISABLE_IE_DDE")) == 0)
+					{
+						m_bDisableIE_DDE = TRUE;
+					}
+				}
+			}
+			in.Close();
+		}
+	}
 };
 class CConfData
 {
@@ -1339,49 +1660,12 @@ class CConfData
 	CConfData()
 	{
 		m_iSolutionType=0;
-		m_bRemoteAppMode=TRUE;
-		m_bRedirect_Clipboard=FALSE;
-		m_bRedirect_Printer=FALSE;
-		m_bRedirect_Drive=FALSE;
 	}
 	~CConfData(){}
-	void Copy(CConfData* ptr)
-	{
-		if(ptr==NULL)return;
-
-		m_iSolutionType = ptr->m_iSolutionType;
-
-		m_strCustomBrowserPath = ptr->m_strCustomBrowserPath;
-		m_strHorizon_ConnectionServerName = ptr->m_strHorizon_ConnectionServerName;
-		m_strHorizon_AppName = ptr->m_strHorizon_AppName;
-		m_strCitrix_AppName = ptr->m_strCitrix_AppName;
-		m_strServerName = ptr->m_strServerName;
-
-		m_bRemoteAppMode = ptr->m_bRemoteAppMode;
-
-		m_strRemoteAppName = ptr->m_strRemoteAppName;
-		m_strRemoteAppPath = ptr->m_strRemoteAppPath;
-		m_strRemoteAppCommandLine = ptr->m_strRemoteAppCommandLine;
-
-		m_bRedirect_Clipboard = ptr->m_bRedirect_Clipboard;
-		m_bRedirect_Printer = ptr->m_bRedirect_Printer;
-		m_bRedirect_Drive = ptr->m_bRedirect_Drive;
-	}
 
 	///////////////////////////////////////////////////
 	UINT m_iSolutionType;
 	CString m_strCustomBrowserPath;
-	CString m_strHorizon_ConnectionServerName;
-	CString m_strHorizon_AppName;
-	CString m_strCitrix_AppName;
-	CString m_strServerName;
-	BOOL m_bRemoteAppMode;
-	CString m_strRemoteAppName;
-	CString m_strRemoteAppPath;
-	CString m_strRemoteAppCommandLine;
-	BOOL m_bRedirect_Clipboard;
-	BOOL m_bRedirect_Printer;
-	BOOL m_bRedirect_Drive;
 	//////////////////////////////////////////////////
 
 };
@@ -1573,15 +1857,11 @@ class CRedirectApp : public CWinApp
 public:
 	CString m_strThisAppName;
 	CRedirectApp();
-
-	CString m_strProfileFullPath;
-	int m_iFeatureType;
 	BOOL m_bCitrixCustomEnv;//Citrix特殊環境フラグ
 
 	CString m_strExeFullPath;
 	CString m_strExeFileName;
 	CString m_strExeFolderPath;
-	CString m_strSetting_FileFullPath;
 	CString m_strTemplate_FileFullPath;
 	CString m_strTestConnect_FileFullPath;
 	CString m_strRDP_FileFullPath;
@@ -1617,12 +1897,9 @@ public:
 	CURLRedirectList m_RedirectListSaveData;
 	CString m_strRedirectFilePath;
 	CConfData SettingConf;
-	CConfData SettingConfMod;
-
 
 	void Exec_MSTSC(CString& strRDPFile);
 	void CreateRDPFile(CString& strCommand);
-	void ReadSetting();
 	void ReadTemplate();
 	void ReadRDP_ReadOnceFile();
 
@@ -1660,6 +1937,22 @@ public:
 		}
 	}
 
+	void WriteDebugTraceDateTime(LPCTSTR msg)
+	{
+		if (msg == NULL)return;
+		if (_tcslen(msg) == 0)return;
+		_wsetlocale(LC_ALL, _T("jpn"));
+
+		CString strWriteLine;
+		CTime time = CTime::GetCurrentTime();
+		strWriteLine.Format(_T("ThinBridge:EXE\t%s\t%s\n"), time.Format(_T("%Y-%m-%d %H:%M:%S")), msg);
+		if (strWriteLine.GetLength() > 4000)
+		{
+			strWriteLine = strWriteLine.Mid(0, 4000);
+			strWriteLine += _T("..DIV..");
+		}
+		OutputDebugString(strWriteLine);
+	}
 
 	//UTF16をUTF8に変換しURLEncodeした文字列を返却
 	CString ConvertUTF8_URLEncode(const CString& src)
@@ -1796,22 +2089,6 @@ public:
 
 	void ShowTimeoutMessageBox(LPCTSTR strMsg,LPCTSTR strCaption,int iType,int iTimeOut);
 
-	void InitFeatureSetting()
-	{
-		m_iFeatureType = FE_PLUS;
-		CString strFeatureType;
-
-		strFeatureType = GetProfileString(_T("Common"), _T("FeatureType"));
-		//ThinBridgePlus フル機能
-		if(strFeatureType.CompareNoCase(_T("FULL_PLUS"))==0)
-		{
-			m_iFeatureType = FE_PLUS;
-		}
-		else
-		{
-			m_iFeatureType = FE_PLUS;
-		}
-	}
 	void ShowPlusSettingDlgEx();
 	inline BOOL IsWnd(CWnd* wnd)
 	{

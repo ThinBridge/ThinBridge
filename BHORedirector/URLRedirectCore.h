@@ -582,7 +582,7 @@ public:
 		}
 	}
 
-	BOOL IsRedirect(LPCTSTR sURL,BOOL bTopPage,CAtlArray<intptr_t> *arr_RedirectBrowserHit,BOOL bEventBeforeNavigate)
+	BOOL IsRedirect(LPCTSTR sURL,BOOL bTopPage,CAtlArray<intptr_t> *arr_RedirectBrowserHit)
 	{
 		CString strURL;
 		strURL = sURL;
@@ -637,32 +637,54 @@ public:
 
 		BOOL bRet=FALSE;
 		CURLRedirectDataClass* pRedirectData=NULL;
+		CURLRedirectDataClass* pRedirectData_NeutralSite = NULL;
+		CURLRedirectDataClass* pRedirectData_IE = NULL;
+		CURLRedirectDataClass* pRedirectData_Default = NULL;
 		int imax = (int)m_arr_RedirectBrowser.GetCount();
 
-
-		BOOL bNoCache=FALSE;
+		for (int i = 0; i < imax; i++)
+		{
+			pRedirectData=NULL;
+			pRedirectData = (CURLRedirectDataClass*)m_arr_RedirectBrowser.GetAt(i);
+			if (pRedirectData)
+			{
+				//IEサイト
+				if (pRedirectData->m_strExecType == _T("IE"))
+				{
+					pRedirectData_IE = pRedirectData;
+				}
+				//Defaultサイト
+				else if (pRedirectData->m_strExecType == _T("Default"))
+				{
+					pRedirectData_Default = pRedirectData;
+				}
+				//ニュートラルサイト(Custom18)
+				else if (pRedirectData->m_strExecType == _T("CUSTOM18"))
+				{
+					pRedirectData_NeutralSite = pRedirectData;
+				}
+			}
+		}
 		//Office365対応、ニュートラルサイト(共用URL)を利用する
 		if (m_bUseNeutralSite)
 		{
 			//ニュートラルサイト(Custom18)を始めにチェック
 			//HITしたら、リダイレクトをしない。
 			//HITしない場合は、ニュートラルサイトを除くルールの判定を行う。
-			BOOL bDMZFlg=FALSE;
-			for (int i = 0; i < imax; i++)
+			pRedirectData = pRedirectData_NeutralSite;
+			if (pRedirectData)
 			{
-				pRedirectData = (CURLRedirectDataClass*)m_arr_RedirectBrowser.GetAt(i);
-				if (pRedirectData)
+				//[CUSTOM18]
+				if (pRedirectData->m_strExecType == _T("CUSTOM18"))
 				{
-					//[CUSTOM18]
-					if (pRedirectData->m_strExecType == _T("CUSTOM18"))
+					//frameの場合でオブジェクトの判定条件がTOPのみの場合は、次へ。
+					if (bTopPage == FALSE && pRedirectData->m_bTopPageOnly == TRUE)
+						;
+					else
 					{
-						//frameの場合でオブジェクトの判定条件がTOPのみの場合は、次へ。
-						if (bTopPage == FALSE && pRedirectData->m_bTopPageOnly == TRUE)
-							break;
 						//リダイレクトを無効にするリストにHITした。
 						if (pRedirectData->IsRedirect(strURL))
 						{
-							bDMZFlg=TRUE;
 							if (m_gbTraceLog)
 							{
 								if (!pRedirectData->m_strHitReason.IsEmpty())
@@ -672,18 +694,44 @@ public:
 									m_strHitReasonAll += strReasonLine;
 								}
 							}
+							//ニュートラルサイトルールにHITした場合は、リダイレクトしない。
+							return FALSE;
 						}
-						break;
 					}
 				}
 			}
-			//ニュートラルサイトルールにHITした場合は、リダイレクトしない。
-			if (bDMZFlg)
+			//IEサイトをチェック
+			//HITしたら、リダイレクトをしない。
+			pRedirectData = pRedirectData_IE;
+			if (pRedirectData)
 			{
-				//キャッシュしない。
-				//リダイレクトしない。
-				return FALSE;
+				//[IE]
+				if (pRedirectData->m_strExecType == _T("IE"))
+				{
+					//frameの場合でオブジェクトの判定条件がTOPのみの場合は、次へ。
+					if (bTopPage == FALSE && pRedirectData->m_bTopPageOnly == TRUE)
+						;
+					else
+					{
+						//リダイレクトを無効にするリストにHITした。
+						if (pRedirectData->IsRedirect(strURL))
+						{
+							if (m_gbTraceLog)
+							{
+								if (!pRedirectData->m_strHitReason.IsEmpty())
+								{
+									CString strReasonLine;
+									strReasonLine.Format(_T("HIT [%s] %s / "), pRedirectData->m_strExecType, pRedirectData->m_strHitReason);
+									m_strHitReasonAll += strReasonLine;
+								}
+							}
+							//IEサイトHITした場合は、リダイレクトしない。
+							return FALSE;
+						}
+					}
+				}
 			}
+
 			//ニュートラルサイトを除くルールを判定する。
 			for (int i = 0; i < imax; i++)
 			{
@@ -692,6 +740,20 @@ public:
 				{
 					//ニュートラルサイト [CUSTOM18]
 					if (pRedirectData->m_strExecType == _T("CUSTOM18"))
+					{
+						//スキップする。
+						continue;
+					}
+
+					//IEサイト [IE]
+					if (pRedirectData->m_strExecType == _T("IE"))
+					{
+						//スキップする。
+						continue;
+					}
+
+					//Defaultサイト [Default]
+					if (pRedirectData->m_strExecType == _T("Default"))
 					{
 						//スキップする。
 						continue;
@@ -722,7 +784,7 @@ public:
 				}
 			}
 		}
-		//通常の処理
+		//以前のバージョン（通常の処理）
 		else
 		{
 			for(int i=0;i<imax;i++)
@@ -733,6 +795,19 @@ public:
 					//frameの場合でオブジェクトの判定条件がTOPのみの場合は、次へ。
 					if(bTopPage == FALSE && pRedirectData->m_bTopPageOnly==TRUE)
 						continue;
+					//IEサイト [IE]
+					if (pRedirectData->m_strExecType == _T("IE"))
+					{
+						//スキップする。
+						continue;
+					}
+
+					//Defaultサイト [Default]
+					if (pRedirectData->m_strExecType == _T("Default"))
+					{
+						//スキップする。
+						continue;
+					}
 					BOOL bRe=pRedirectData->IsRedirect(strURL);
 					CString strReasonLine;
 					if(bRe)
@@ -758,42 +833,52 @@ public:
 		//HITしたものがない。
 		if(bRet==FALSE)
 		{
-			//キャッシュ有効
-			if(!bNoCache)
+			//Defaultブラウザーへリダイレクトする。
+			if (pRedirectData_Default)
 			{
-				//#define MAX_PassThroughURL 100
-				int iMaxCache=(int)m_MapPassThroughURLs.GetCount();
-				CStringA strURL_A(strURL);
-				if(iMaxCache < 256)
-					m_MapPassThroughURLs.SetAt(strURL,0);
-				//キャッシュ溢れの場合
-				else
+				//TopURLの場合だけ
+				if (bTopPage == TRUE)
 				{
-					POSITION pos={0};
-					pos = m_MapPassThroughURLs.GetStartPosition();
-					while (pos)
+					//何かしら設定されている。
+					if(!pRedirectData_Default->m_strExecExeFullPath.IsEmpty())
 					{
-						//単純に一番古い物を消す。
-						m_MapPassThroughURLs.RemoveAtPos(pos);
-						break;
+						//IE以外の場合（IEの場合は、何もしない。）
+						if(pRedirectData_Default->m_strExecExeFullPath.CompareNoCase(_T("IE")) != 0)
+						{
+							arr_RedirectBrowserHit->Add((intptr_t)pRedirectData_Default);
+							return TRUE;
+						}
 					}
+				}
+			}
+			//#define MAX_PassThroughURL 100
+			int iMaxCache=(int)m_MapPassThroughURLs.GetCount();
+			CStringA strURL_A(strURL);
+			if(iMaxCache < 256)
+				m_MapPassThroughURLs.SetAt(strURL,0);
+			//キャッシュ溢れの場合
+			else
+			{
+				POSITION pos={0};
+				pos = m_MapPassThroughURLs.GetStartPosition();
+				while (pos)
+				{
+					//単純に一番古い物を消す。
+					m_MapPassThroughURLs.RemoveAtPos(pos);
+					break;
 				}
 			}
 		}
 		//HIT キャッシュされていない、新規URL
 		else //bRet==TRUE
 		{
-			//キャッシュ有効
-			if(!bNoCache)
-			{
-				m_HitURLCache_Manager.AddData(strURL,m_strHitReasonAll,arr_RedirectBrowserHit);
-			}
+			m_HitURLCache_Manager.AddData(strURL,m_strHitReasonAll,arr_RedirectBrowserHit);
 		}
 		return bRet;
 	}
 
 	//MS-EdgeのIEMode用
-	BOOL IsRedirectIEMode(LPCTSTR sURL, BOOL bTopPage, CAtlArray<intptr_t> *arr_RedirectBrowserHit, BOOL bEventBeforeNavigate)
+	BOOL IsRedirectIEMode(LPCTSTR sURL, BOOL bTopPage, CAtlArray<intptr_t> *arr_RedirectBrowserHit)
 	{
 		CString strURL;
 		strURL = sURL;
@@ -836,28 +921,64 @@ public:
 
 		BOOL bRet = FALSE;
 		CURLRedirectDataClass* pRedirectData = NULL;
+		CURLRedirectDataClass* pRedirectData_NeutralSite = NULL;
+		//CURLRedirectDataClass* pRedirectData_IE = NULL;
+		CURLRedirectDataClass* pRedirectData_O365 = NULL;
+		CURLRedirectDataClass* pRedirectData_Default = NULL;
+		CURLRedirectDataClass* pRedirectData_Edge = NULL;
 		int imax = (int)m_arr_RedirectBrowser.GetCount();
 
+		for (int i = 0; i < imax; i++)
+		{
+			pRedirectData = NULL;
+			pRedirectData = (CURLRedirectDataClass*)m_arr_RedirectBrowser.GetAt(i);
+			if (pRedirectData)
+			{
+				//Edgeサイト
+				if (pRedirectData->m_strExecType == _T("Edge"))
+				{
+					pRedirectData_Edge = pRedirectData;
+				}
+				////IEサイト
+				//else if (pRedirectData->m_strExecType == _T("IE"))
+				//{
+				//	pRedirectData_IE = pRedirectData;
+				//}
+				//Defaultサイト
+				else if (pRedirectData->m_strExecType == _T("Default"))
+				{
+					pRedirectData_Default = pRedirectData;
+				}
+				//ニュートラルサイト(Custom18)
+				else if (pRedirectData->m_strExecType == _T("CUSTOM18"))
+				{
+					pRedirectData_NeutralSite = pRedirectData;
+				}
+				//Office365サイト(Custom20)
+				else if (pRedirectData->m_strExecType == _T("CUSTOM20"))
+				{
+					pRedirectData_O365 = pRedirectData;
+				}
+			}
+		}
 
 		//ニュートラルサイト(Custom18)を始めにチェック
 		//HITしたら、リダイレクトをしない。
 		//HITしない場合は、ニュートラルサイトを除くルールの判定を行う。
-		BOOL bDMZFlg = FALSE;
-		for (int i = 0; i < imax; i++)
+		pRedirectData = pRedirectData_NeutralSite;
+		if (pRedirectData)
 		{
-			pRedirectData = (CURLRedirectDataClass*)m_arr_RedirectBrowser.GetAt(i);
-			if (pRedirectData)
+			//[CUSTOM18]
+			if (pRedirectData->m_strExecType == _T("CUSTOM18"))
 			{
-				//[CUSTOM18]
-				if (pRedirectData->m_strExecType == _T("CUSTOM18"))
+				//frameの場合でオブジェクトの判定条件がTOPのみの場合は、次へ。
+				if (bTopPage == FALSE && pRedirectData->m_bTopPageOnly == TRUE)
+					;
+				else
 				{
-					//frameの場合でオブジェクトの判定条件がTOPのみの場合は、次へ。
-					if (bTopPage == FALSE && pRedirectData->m_bTopPageOnly == TRUE)
-						break;
 					//リダイレクトを無効にするリストにHITした。
 					if (pRedirectData->IsRedirect(strURL))
 					{
-						bDMZFlg = TRUE;
 						if (m_gbTraceLog)
 						{
 							if (!pRedirectData->m_strHitReason.IsEmpty())
@@ -867,36 +988,60 @@ public:
 								m_strHitReasonAll += strReasonLine;
 							}
 						}
+						//ニュートラルサイトルールにHITした場合は、リダイレクトしない。
+						return FALSE;
 					}
-					break;
 				}
 			}
 		}
-		//ニュートラルサイトルールにHITした場合は、リダイレクトしない。
-		if (bDMZFlg)
-		{
-			//キャッシュしない。
-			//リダイレクトしない。
-			return FALSE;
-		}
+
+		//IEサイトをチェック
+		//HITしたら、リダイレクトをしない。
+		//pRedirectData = pRedirectData_IE;
+		//if (pRedirectData)
+		//{
+		//	//[IE]
+		//	if (pRedirectData->m_strExecType == _T("IE"))
+		//	{
+		//		//frameの場合でオブジェクトの判定条件がTOPのみの場合は、次へ。
+		//		if (bTopPage == FALSE && pRedirectData->m_bTopPageOnly == TRUE)
+		//			;
+		//		else
+		//		{
+		//			//リダイレクトを無効にするリストにHITした。
+		//			if (pRedirectData->IsRedirect(strURL))
+		//			{
+		//				if (m_gbTraceLog)
+		//				{
+		//					if (!pRedirectData->m_strHitReason.IsEmpty())
+		//					{
+		//						CString strReasonLine;
+		//						strReasonLine.Format(_T("HIT [%s] %s / "), pRedirectData->m_strExecType, pRedirectData->m_strHitReason);
+		//						m_strHitReasonAll += strReasonLine;
+		//					}
+		//				}
+		//				//IEサイトHITした場合は、リダイレクトしない。
+		//				return FALSE;
+		//			}
+		//		}
+		//	}
+		//}
 
 		//Edge
-		BOOL bEdgeFlg = FALSE;
-		for (int i = 0; i < imax; i++)
+		pRedirectData = pRedirectData_Edge;
+		if (pRedirectData)
 		{
-			pRedirectData = (CURLRedirectDataClass*)m_arr_RedirectBrowser.GetAt(i);
-			if (pRedirectData)
+			//[Edge]
+			if (pRedirectData->m_strExecType == _T("Edge"))
 			{
-				//[Edge]
-				if (pRedirectData->m_strExecType == _T("Edge"))
+				//frameの場合でオブジェクトの判定条件がTOPのみの場合は、次へ。
+				if (bTopPage == FALSE && pRedirectData->m_bTopPageOnly == TRUE)
+					;
+				else
 				{
-					//frameの場合でオブジェクトの判定条件がTOPのみの場合は、次へ。
-					if (bTopPage == FALSE && pRedirectData->m_bTopPageOnly == TRUE)
-						break;
 					//EdgeリストにHITした。
 					if (pRedirectData->IsRedirect(strURL))
 					{
-						bEdgeFlg = TRUE;
 						if (m_gbTraceLog)
 						{
 							if (!pRedirectData->m_strHitReason.IsEmpty())
@@ -906,38 +1051,30 @@ public:
 								m_strHitReasonAll += strReasonLine;
 							}
 						}
+						//リダイレクトしない。
+						return FALSE;
 					}
-					break;
 				}
 			}
 		}
-		//EdgeルールにHITした場合は、リダイレクトしない。
-		if (bEdgeFlg)
-		{
-			//キャッシュしない。
-			//リダイレクトしない。
-			return FALSE;
-		}
 
 		//Edge O365
-		BOOL bEdgeO365Flg = FALSE;
-		for (int i = 0; i < imax; i++)
+		pRedirectData = pRedirectData_O365;
+		if (pRedirectData)
 		{
-			pRedirectData = (CURLRedirectDataClass*)m_arr_RedirectBrowser.GetAt(i);
-			if (pRedirectData)
+			//[Custm20]
+			if (pRedirectData->m_strExecType == _T("CUSTOM20"))
 			{
-				//[Custm20]
-				if (pRedirectData->m_strExecType == _T("CUSTOM20"))
+				if(pRedirectData->m_strExecExeFullPath.CompareNoCase(_T("Edge"))==0)
 				{
-					if(pRedirectData->m_strExecExeFullPath.CollateNoCase(_T("Edge"))==0)
+					//frameの場合でオブジェクトの判定条件がTOPのみの場合は、次へ。
+					if (bTopPage == FALSE && pRedirectData->m_bTopPageOnly == TRUE)
+						;
+					else
 					{
-						//frameの場合でオブジェクトの判定条件がTOPのみの場合は、次へ。
-						if (bTopPage == FALSE && pRedirectData->m_bTopPageOnly == TRUE)
-							break;
 						//EdgeリストにHITした。
 						if (pRedirectData->IsRedirect(strURL))
 						{
-							bEdgeO365Flg = TRUE;
 							if (m_gbTraceLog)
 							{
 								if (!pRedirectData->m_strHitReason.IsEmpty())
@@ -947,18 +1084,12 @@ public:
 									m_strHitReasonAll += strReasonLine;
 								}
 							}
+							//リダイレクトしない。
+							return FALSE;
 						}
-						break;
 					}
 				}
 			}
-		}
-		//EdgeO365ルールにHITした場合は、リダイレクトしない。
-		if (bEdgeO365Flg)
-		{
-			//キャッシュしない。
-			//リダイレクトしない。
-			return FALSE;
 		}
 
 		//ニュートラルサイトとEdgeを除くルールを判定する。
@@ -981,10 +1112,17 @@ public:
 					continue;
 				}
 
+				//Defaultサイト [Default]
+				if (pRedirectData->m_strExecType == _T("Default"))
+				{
+					//スキップする。
+					continue;
+				}
+
 				//Edge O365
 				if (pRedirectData->m_strExecType == _T("CUSTOM20"))
 				{
-					if (pRedirectData->m_strExecExeFullPath.CollateNoCase(_T("Edge")) == 0)
+					if (pRedirectData->m_strExecExeFullPath.CompareNoCase(_T("Edge")) == 0)
 					{
 						//スキップする。
 						continue;
@@ -1018,6 +1156,24 @@ public:
 		//HITしたものがない。
 		if (bRet == FALSE)
 		{
+			//Defaultブラウザーへリダイレクトする。
+			if (pRedirectData_Default)
+			{
+				//TopURLの場合だけ
+				if (bTopPage == TRUE)
+				{
+					//何かしら設定されている。
+					if (!pRedirectData_Default->m_strExecExeFullPath.IsEmpty())
+					{
+						//Edge以外の場合（Edgeの場合は、何もしない。）
+						if (pRedirectData_Default->m_strExecExeFullPath.CompareNoCase(_T("Edge")) != 0)
+						{
+							arr_RedirectBrowserHit->Add((intptr_t)pRedirectData_Default);
+							return TRUE;
+						}
+					}
+				}
+			}
 			//#define MAX_PassThroughURL 100
 			int iMaxCache = (int)m_MapPassThroughURLs.GetCount();
 			CStringA strURL_A(strURL);
@@ -1043,5 +1199,237 @@ public:
 		}
 		return bRet;
 	}
+
+	//VirtIE用(ThinApp Virtual App)
+	BOOL IsRedirectVOS(LPCTSTR sURL, BOOL bTopPage, CAtlArray<intptr_t> *arr_RedirectBrowserHit,LPCTSTR sLabel)
+	{
+		CString strURL;
+		strURL = sURL;
+		arr_RedirectBrowserHit->RemoveAll();
+		m_strHitReasonAll.Empty();
+
+		CStringA strURL_A(strURL);
+		if (m_bURLOnly)
+		{
+			SBUtil::Trim_URLOnly(sURL, strURL);
+		}
+
+		//Dataがキャッシュされていない場合は、ここでロード
+		if (!m_bDataCached)
+		{
+			SetArrayData(m_strSettingFilePath);
+			m_MapPassThroughURLs.RemoveAll();
+			m_HitURLCache_Manager.Clear();
+		}
+		//メモリにキャッシュしている情報の更新チェック
+		else
+		{
+			//File Size 更新日が異なるか?
+			if (IsChangeSettingFile())
+			{
+				//キャッシュを破棄してメモリに積み直す
+				m_bDataCached = FALSE;
+				SetArrayData(m_strSettingFilePath);
+				m_MapPassThroughURLs.RemoveAll();
+				m_HitURLCache_Manager.Clear();
+			}
+		}
+		//メモリに積んている内容のスルーURLリストをチェックする。
+		//Hitキャッシュを確認し、キャッシュしている場合は、それを返す。
+		if (IsPassThroughURL(strURL))
+			return FALSE;
+
+		if (m_HitURLCache_Manager.IsHItURLCached(strURL, m_strHitReasonAll, arr_RedirectBrowserHit))
+			return TRUE;
+
+		BOOL bRet = FALSE;
+		CURLRedirectDataClass* pRedirectData = NULL;
+		CURLRedirectDataClass* pRedirectData_NeutralSite = NULL;
+		CURLRedirectDataClass* pRedirectData_Default = NULL;
+		CURLRedirectDataClass* pRedirectData_Label = NULL;
+		int imax = (int)m_arr_RedirectBrowser.GetCount();
+
+		for (int i = 0; i < imax; i++)
+		{
+			pRedirectData = NULL;
+			pRedirectData = (CURLRedirectDataClass*)m_arr_RedirectBrowser.GetAt(i);
+			if (pRedirectData)
+			{
+				//指定サイト
+				if (pRedirectData->m_strExecType.CompareNoCase(sLabel)==0)
+				{
+					pRedirectData_Label = pRedirectData;
+				}
+				//Defaultサイト
+				else if (pRedirectData->m_strExecType == _T("Default"))
+				{
+					pRedirectData_Default = pRedirectData;
+				}
+				//ニュートラルサイト(Custom18)
+				else if (pRedirectData->m_strExecType == _T("CUSTOM18"))
+				{
+					pRedirectData_NeutralSite = pRedirectData;
+				}
+			}
+		}
+
+		//ニュートラルサイト(Custom18)を始めにチェック
+		//HITしたら、リダイレクトをしない。
+		//HITしない場合は、ニュートラルサイトを除くルールの判定を行う。
+		pRedirectData = pRedirectData_NeutralSite;
+		if (pRedirectData)
+		{
+			//[CUSTOM18]
+			if (pRedirectData->m_strExecType == _T("CUSTOM18"))
+			{
+				//frameの場合でオブジェクトの判定条件がTOPのみの場合は、次へ。
+				if (bTopPage == FALSE && pRedirectData->m_bTopPageOnly == TRUE)
+					;
+				else
+				{
+					//リダイレクトを無効にするリストにHITした。
+					if (pRedirectData->IsRedirect(strURL))
+					{
+						if (m_gbTraceLog)
+						{
+							if (!pRedirectData->m_strHitReason.IsEmpty())
+							{
+								CString strReasonLine;
+								strReasonLine.Format(_T("HIT [%s] %s / "), pRedirectData->m_strExecType, pRedirectData->m_strHitReason);
+								m_strHitReasonAll += strReasonLine;
+							}
+						}
+						//ニュートラルサイトルールにHITした場合は、リダイレクトしない。
+						return FALSE;
+					}
+				}
+			}
+		}
+
+		//Label
+		pRedirectData = pRedirectData_Label;
+		if (pRedirectData)
+		{
+			//[Edge]
+			if (pRedirectData->m_strExecType == sLabel)
+			{
+				//frameの場合でオブジェクトの判定条件がTOPのみの場合は、次へ。
+				if (bTopPage == FALSE && pRedirectData->m_bTopPageOnly == TRUE)
+					;
+				else
+				{
+					//リストにHITした。
+					if (pRedirectData->IsRedirect(strURL))
+					{
+						if (m_gbTraceLog)
+						{
+							if (!pRedirectData->m_strHitReason.IsEmpty())
+							{
+								CString strReasonLine;
+								strReasonLine.Format(_T("HIT [%s] %s / "), pRedirectData->m_strExecType, pRedirectData->m_strHitReason);
+								m_strHitReasonAll += strReasonLine;
+							}
+						}
+						//リダイレクトしない。
+						return FALSE;
+					}
+				}
+			}
+		}
+
+		//ニュートラルサイトとEdgeを除くルールを判定する。
+		for (int i = 0; i < imax; i++)
+		{
+			pRedirectData = (CURLRedirectDataClass*)m_arr_RedirectBrowser.GetAt(i);
+			if (pRedirectData)
+			{
+				//ニュートラルサイト [CUSTOM18]
+				if (pRedirectData->m_strExecType == _T("CUSTOM18"))
+				{
+					//スキップする。
+					continue;
+				}
+
+				//Edge[Edge]
+				if (pRedirectData->m_strExecType.CompareNoCase(sLabel)==0)
+				{
+					//スキップする。
+					continue;
+				}
+
+				//Defaultサイト [Default]
+				if (pRedirectData->m_strExecType == _T("Default"))
+				{
+					//スキップする。
+					continue;
+				}
+
+				//frameの場合でオブジェクトの判定条件がTOPのみの場合は、次へ。
+				if (bTopPage == FALSE && pRedirectData->m_bTopPageOnly == TRUE)
+					continue;
+				BOOL bRe = pRedirectData->IsRedirect(strURL);
+				CString strReasonLine;
+				if (bRe)
+				{
+					arr_RedirectBrowserHit->Add((intptr_t)pRedirectData);
+					bRet = TRUE;
+					//続行する。最後までチェック。
+				}
+				if (m_gbTraceLog)
+				{
+					if (!pRedirectData->m_strHitReason.IsEmpty())
+					{
+						if (bRe)
+							strReasonLine.Format(_T("HIT [%s] %s / "), pRedirectData->m_strExecType, pRedirectData->m_strHitReason);
+						else
+							strReasonLine.Format(_T("SKIP [%s] %s / "), pRedirectData->m_strExecType, pRedirectData->m_strHitReason);
+						m_strHitReasonAll += strReasonLine;
+					}
+				}
+			}
+		}
+		//HITしたものがない。
+		if (bRet == FALSE)
+		{
+			//Defaultブラウザーへリダイレクトする。
+			if (pRedirectData_Default)
+			{
+				//TopURLの場合だけ
+				if (bTopPage == TRUE)
+				{
+					//何かしら設定されている。
+					if (!pRedirectData_Default->m_strExecExeFullPath.IsEmpty())
+					{
+						arr_RedirectBrowserHit->Add((intptr_t)pRedirectData_Default);
+						return TRUE;
+					}
+				}
+			}
+			//#define MAX_PassThroughURL 100
+			int iMaxCache = (int)m_MapPassThroughURLs.GetCount();
+			CStringA strURL_A(strURL);
+			if (iMaxCache < 256)
+				m_MapPassThroughURLs.SetAt(strURL, 0);
+			//キャッシュ溢れの場合
+			else
+			{
+				POSITION pos = { 0 };
+				pos = m_MapPassThroughURLs.GetStartPosition();
+				while (pos)
+				{
+					//単純に一番古い物を消す。
+					m_MapPassThroughURLs.RemoveAtPos(pos);
+					break;
+				}
+			}
+		}
+		//HIT キャッシュされていない、新規URL
+		else //bRet==TRUE
+		{
+			m_HitURLCache_Manager.AddData(strURL, m_strHitReasonAll, arr_RedirectBrowserHit);
+		}
+		return bRet;
+	}
+
 };
 
