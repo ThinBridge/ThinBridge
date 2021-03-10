@@ -176,7 +176,7 @@ namespace SBUtil
 		//"C:\Program Files (x86)\Internet Explorer\IEXPLORE.EXE" SCODEF:30748 CREDAT:9500 /prefetch:2
 
 		//コマンドラインにAPPID:MSEdge.がある場合はMS-Edge IEMode
-		if(strCommandLine.Find(_T("APPID:MSEdge.")) >= 0)
+		if(strCommandLine.Find(_T("APPID:MSEdge")) >= 0)
 		{
 			return TRUE;
 		}

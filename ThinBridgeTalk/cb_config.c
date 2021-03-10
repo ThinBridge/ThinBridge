@@ -71,6 +71,8 @@ static void parse_conf(char *data, struct config *conf)
     int active = 0;
     int global = 0;
     int mark = -1;
+    int custom20 = 0;
+
 
     line = strtok(data, "\r\n");
     while (line) {
@@ -82,10 +84,22 @@ static void parse_conf(char *data, struct config *conf)
             active = 0;
             global = 0;
             mark = -1;
+            custom20 = 0;
+
             if (strcmp(line, "[Edge]") == 0) {
                 mark = conf->urls.count;
                 active = 1;
-            } else if (strcmp(line, "[GLOBAL]") == 0) {
+            }
+            else if (strcmp(line, "[CUSTOM18]") == 0) {
+                mark = conf->urls.count;
+                active = 1;
+            }
+            else if (strcmp(line, "[CUSTOM20]") == 0) {
+                mark = conf->urls.count;
+                active = 1;
+            	custom20 = 1;
+            }
+            else if (strcmp(line, "[GLOBAL]") == 0) {
                 global = 1;
             }
             break;
@@ -93,6 +107,16 @@ static void parse_conf(char *data, struct config *conf)
             if (active && strcmp(line, "@DISABLED") == 0) {
                 conf->urls.count = mark;
                 active = 0;
+            }
+            if(active && custom20){
+              if (strstr(line,"@BROWSER_PATH:")) {
+                 if(strcmp(line, "@BROWSER_PATH:Edge") == 0)
+                   active = 1;
+                 else{
+                   conf->urls.count = mark;
+                   active = 0;
+                 }
+               }
             }
             else if (global && strcmp(line, "@TOP_PAGE_ONLY") == 0) {
                 conf->ignore_query_string = 1;
@@ -116,6 +140,7 @@ static void parse_conf(char *data, struct config *conf)
     }
     strbuf_putchar(&conf->urls, '\0');
 }
+
 
 static char *dump_json(struct config *conf)
 {
