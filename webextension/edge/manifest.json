@@ -1,22 +1,22 @@
 {
-  "manifest_version": 2,
-  "name": "ThinBridge Talk Client",
-  "version": "1.0.0",
-  "description": "ThinBridge Talk Client for Edge",
-  "permissions": [
-    "nativeMessaging",
-    "alarms",
-    "tabs",
-    "webRequest",
-    "webRequestBlocking",
-    "<all_urls>"
-  ],
-  "background": {
-    "scripts": [
-      "background.js"
-    ]
-  },
-  "icons": {
-    "128": "misc/128x128.png"
-  }
+	"manifest_version": 2,
+	"name": "ThinBridge Talk Client",
+	"version": "1.0.0",
+	"description": "ThinBridge Talk Client for Edge",
+	"permissions": [
+		"nativeMessaging",
+		"alarms",
+		"tabs",
+		"webRequest",
+		"webRequestBlocking",
+		"<all_urls>"
+	],
+	"background": {
+		"scripts": [
+			"background.js"
+		]
+	},
+	"icons": {
+		"128": "misc/128x128.png"
+	}
 }

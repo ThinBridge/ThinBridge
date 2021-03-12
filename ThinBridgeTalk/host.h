@@ -2,9 +2,9 @@
 #define HOST_H
 
 struct strbuf {
-    int alloc;
-    int count;
-    char *buf;
+	int alloc;
+	int count;
+	char *buf;
 };
 
 #define alloc_nr(x) (((x) + 32) * 2)
