@@ -1,11 +1,25 @@
+"use strict";
+
 /*
- * This program is a browser module for ThinBridge that allows users
- * to redirect URLs to another browser (e.g. Edge -> IE).
+ * This is an addon to redirect URLs from Edge to ThinBridge.
+ *
+ * * Poll redirect rules every 1 minute via sendNativeMessage().
+ *
+ * * Keep watch on requests using webRequest.onBeforeRequest().
+ *
+ * * Redirection is done by sending the target URL with 'Q' prefix
+ *   to the native host program.
  */
-var BROWSER = 'edge'
+
+var BROWSER = 'edge';
+var CUSTOM18 = 'custom18';
 var SERVER_NAME = 'com.clear_code.thinbridge';
 var ALARM_MINUTES = 1;
 
+/*
+ * Edge does not support {cancel: 1} as part of BlockingResponse.
+ * This is a cludgy alternative that uses Data URL.
+ */
 var BROWSER_BACK = `data:text/html,${escape('<script type="application/javascript">history.back()</script>')}`;
 
 var ThinBridgeTalkClient = {
@@ -13,10 +27,6 @@ var ThinBridgeTalkClient = {
 	NAME: 'ThinBridgeTalkClient',
 
 	init: function() {
-		if (this.running) {
-				return;
-		}
-		this.running = true;
 		this.cached = null;
 		this.callback = this.onBeforeRequest.bind(this);
 		this.isNewTab = {};
@@ -31,7 +41,7 @@ var ThinBridgeTalkClient = {
 
 		chrome.runtime.sendNativeMessage(server, query, (resp) => {
 			this.cached = resp.config;
-			console.log('[Talk] configure', JSON.stringify(resp.config));
+			console.log('Configure', JSON.stringify(resp.config));
 		});
 	},
 
@@ -46,7 +56,7 @@ var ThinBridgeTalkClient = {
 		);
 
 		/* Refresh config for every N minute */
-		console.log('[Talk] poll config for every', ALARM_MINUTES , 'minutes');
+		console.log('Poll config for every', ALARM_MINUTES , 'minutes');
 		chrome.alarms.create(this.NAME, {'periodInMinutes': ALARM_MINUTES});
 
 		chrome.alarms.onAlarm.addListener((alarm) => {
@@ -67,10 +77,11 @@ var ThinBridgeTalkClient = {
 		});
 	},
 
-	/* ThinBridge-compatible match() function
-	 * See 'CURLRedirectDataClass.wildcmp()' for details.
+	/*
+	 * This is the JavaScript-ported `wildcmp()` function, coming
+	 * from CURLRedirectDataClass in URLRedirectCore.h.
 	 */
-	match: function(wild, string) {
+	wildcmp: function(wild, string) {
 		var i = 0;
 		var j = 0;
 		var mp, cp;
@@ -106,7 +117,7 @@ var ThinBridgeTalkClient = {
 		return i >= wild.length;
 	},
 
-	redirect: function(bs, details) {
+	redirect: function(config, details) {
 		var server = SERVER_NAME;
 		var query = new String('Q ' + BROWSER + ' ' + details.url);
 
@@ -125,7 +136,7 @@ var ThinBridgeTalkClient = {
 
 			/* Close the opening tab automatically (if required) */
 			if (details.type == 'main_frame') {
-				if (bs.CloseEmptyTab && this.isNewTab[details.tabId]) {
+				if (config.CloseEmptyTab && this.isNewTab[details.tabId]) {
 					chrome.tabs.remove(details.tabId);
 				}
 			}
@@ -133,55 +144,101 @@ var ThinBridgeTalkClient = {
 		return { redirectUrl: BROWSER_BACK }
 	},
 
-	onBeforeRequest: function(details) {
-		var bs = this.cached;
-		var url = details.url;
+	match: function(url, section) {
+		var i;
+		var pattern;
 
-		if (!bs) {
-			console.log('[Talk] config cache is empty. Fetching...');
+		for (i = 0; i < section.Excludes.length; i++) {
+			pattern = section.Excludes[i];
+
+			if (this.wildcmp(pattern, url)) {
+				console.log(`* Match Exclude ${section.Name} [${pattern}]`);
+				return false;
+			}
+		}
+
+		for (i = 0; i < section.Patterns.length; i++) {
+			pattern = section.Patterns[i];
+
+			if (this.wildcmp(pattern, url)) {
+				console.log(`* Match ${section.Name} [${pattern}]`);
+				return true;
+			}
+		}
+		return false;
+	},
+
+	getName: function(section) {
+		var name = section.Name.toLowerCase();
+
+		if (name == CUSTOM18)
+			return name;
+
+		/*
+		 * For custom sections, we need to guess the target browser
+		 * from the executable path.
+		 */
+		if (name.match(/^custom/i)) {
+			if (section.Path.match(RegExp(BROWSER, "i")))
+				return BROWSER;
+		}
+		return name;
+	},
+
+	onBeforeRequest: function(details) {
+		var config = this.cached;
+		var matches = [];
+		var section;
+		var url = details.url;
+		var i;
+
+		if (!config) {
+			console.log('Config cache is empty. Fetching...');
 			this.configure();
 			return;
 		}
 
-		if (bs.OnlyMainFrame && details.type != "main_frame") {
-			console.log(`[Talk] ignore subframe request ${url}`);
+		if (config.OnlyMainFrame && details.type != "main_frame") {
+			console.log(`Ignore subframe request ${url}`);
 			return;
 		}
 
-		if (bs.IgnoreQueryString) {
+		if (config.IgnoreQueryString) {
 			url = url.replace(/\?.*/, '');
 		}
 
-		/* URLExcludePatterns */
-		for (var i = 0; i < bs.URLExcludePatterns.length; i++) {
-			var pattern = bs.URLExcludePatterns[i][0];
-			var browser = bs.URLExcludePatterns[i][1].toLowerCase();
+		console.log(`Lookup sections for ${url}`);
 
-			if (browser != BROWSER)
-				continue;
+		for (i = 0; i < config.Sections.length; i++) {
+			section = config.Sections[i];
 
-			if (this.match(pattern, url)) {
-				console.log(`[Talk] Match Exclude ${pattern} ${url}`);
-				return this.redirect(bs, details);
+			if (this.match(url, section)) {
+				matches.push(this.getName(section))
 			}
 		}
+		console.log(`Result: ${matches.join(", ")}`);
 
-		/* URLPatterns */
-		for (var i = 0; i < bs.URLPatterns.length; i++) {
-			var pattern = bs.URLPatterns[i][0];
-			var browser = bs.URLPatterns[i][1].toLowerCase();
+		if (matches.length > 0) {
+			/*
+			 * CUSTOM18 contains a list of "common" URLs that we should
+			 * never perform redirection.
+			 */
+			if (matches.includes(CUSTOM18))
+				return;
 
-			if (this.match(pattern, url)) {
-				console.log(`[Talk] Match ${pattern} ${url}`);
-				if (browser == BROWSER)
-					return;
-				return this.redirect(bs, details);
-			}
+			if (matches.includes(BROWSER))
+				return;
+
+			return this.redirect(config, details);
 		}
 
 		/* No pattern matched */
-		console.log(`[Talk] No pattern matched ${url}`);
-		return this.redirect(bs, details);
+		console.log(`Use default browser ${config.DefaultBrowser}`);
+
+		if (config.DefaultBrowser.match(RegExp(BROWSER, 'i')))
+			return;
+
+		return this.redirect(config, details);
 	}
 };
 
