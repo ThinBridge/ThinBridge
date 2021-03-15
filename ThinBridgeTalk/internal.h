@@ -1,5 +1,5 @@
-#ifndef HOST_H
-#define HOST_H
+#ifndef INTERNAL_H
+#define INTERNAL_H
 
 struct strbuf {
 	int alloc;
@@ -8,6 +8,9 @@ struct strbuf {
 };
 
 #define alloc_nr(x) (((x) + 32) * 2)
+
+void *xmalloc(int size);
+void *xrealloc(char *ptr, int size);
 
 void strbuf_putchar(struct strbuf *sb, char chr);
 void strbuf_concat(struct strbuf *sb, char *str);

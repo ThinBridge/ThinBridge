@@ -1,7 +1,7 @@
 #include <Windows.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "host.h"
+#include "internal.h"
 
 static int get_ThinBridgeExtensionExecfile(char *buf, DWORD size)
 {

@@ -7,20 +7,25 @@
 #include <errno.h>
 #include <io.h>
 #include <fcntl.h>
-#include "host.h"
+#include "internal.h"
 
 /*
  * A simple string buffer implementation.
  */
-static void *xrealloc(char *ptr, int size)
+void *xmalloc(int size)
+{
+	void *buf = malloc(size);
+	if (buf == NULL) {
+	    fprintf(stderr, "malloc: out of memory (%i)", errno);
+	    exit(98);
+	}
+	return buf;
+}
+
+void *xrealloc(char *ptr, int size)
 {
 	void *buf = realloc(ptr, size);
 	if (buf == NULL) {
-	    /*
-	     * Exit immediately on OOM. This behavior is legitimate
-	     * considering how host programs are executed, and makes
-	     * the error handling much simpler.
-	     */
 	    fprintf(stderr, "realloc: out of memory (%i)", errno);
 	    exit(99);
 	}
@@ -29,11 +34,12 @@ static void *xrealloc(char *ptr, int size)
 
 void strbuf_putchar(struct strbuf *sb, char chr)
 {
-	if (sb->count == sb->alloc) {
+	if (sb->alloc - sb->count < 2) {
 	    sb->buf = xrealloc(sb->buf, alloc_nr(sb->alloc) * sizeof(char));
 	    sb->alloc = alloc_nr(sb->alloc);
 	}
 	sb->buf[sb->count++] = chr;
+	sb->buf[sb->count] = '\0';
 }
 
 void strbuf_concat(struct strbuf *sb, char *str)
