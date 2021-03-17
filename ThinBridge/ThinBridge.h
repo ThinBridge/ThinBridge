@@ -731,7 +731,7 @@ public:
 
 			pRedirectData = NULL;
 			pRedirectData = new CURLRedirectDataClass;
-			pRedirectData->m_bDisabled = FALSE;
+			pRedirectData->m_bDisabled = TRUE;
 			pRedirectData->m_bTopPageOnly = TRUE;
 			pRedirectData->m_strExecType = _T("CUSTOM19");
 			pRedirectData->m_dwCloseTimeout = 3;
@@ -740,7 +740,7 @@ public:
 
 			pRedirectData = NULL;
 			pRedirectData = new CURLRedirectDataClass;
-			pRedirectData->m_bDisabled = FALSE;
+			pRedirectData->m_bDisabled = TRUE;
 			pRedirectData->m_bTopPageOnly = TRUE;
 			pRedirectData->m_strExecType = _T("CUSTOM20");
 			pRedirectData->m_dwCloseTimeout = 3;
