@@ -19,12 +19,13 @@ static int get_ThinBridgeExtensionExecfile(char *buf, DWORD size)
 	return 0;
 }
 
-static int open_url(char *path, char *url)
+static int open_url(char *browser, char *path, char *url)
 {
 	int ret;
 	struct strbuf sb = {0};
 	PROCESS_INFORMATION pi;
 	STARTUPINFO si;
+	DWORD dwCreationFlags;
 
 	memset(&pi, 0, sizeof(pi));
 	memset(&si, 0, sizeof(si));
@@ -35,12 +36,25 @@ static int open_url(char *path, char *url)
 	strbuf_putchar(&sb, '"');
 	strbuf_putchar(&sb, '\0');
 
+	/*
+	 * We need this on Firefox to prevent the new process from
+	 * getting killed. This behaviour is documented on MDN:
+	 *
+	 * https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Native_messaging
+	 */
+	if (strcmp(browser, "firefox") == 0) {
+		dwCreationFlags = CREATE_BREAKAWAY_FROM_JOB;
+	}
+	else {
+		dwCreationFlags = CREATE_NEW_PROCESS_GROUP;
+	}
+
 	ret = CreateProcess(path,   /* lpApplicationName */
 	                    sb.buf, /* lpCommandLine */
 	                    NULL,   /* lpProcessAttributes  */
 	                    NULL,   /* lpThreadAttributes */
 	                    FALSE,  /* bInheritHandles */
-	                    CREATE_NEW_PROCESS_GROUP,
+	                    dwCreationFlags,
 	                    NULL,   /* lpEnvironment */
 	                    NULL,   /* lpCurrentDirectory */
 	                    &si,    /* lpStartupInfo */
@@ -55,25 +69,42 @@ static int open_url(char *path, char *url)
 	return 0;
 }
 
-#define PREFIX "Q edge "
-#define PREFIX_LEN 7
-
 int cb_query(char *cmd)
 {
 	char *url;
 	char path[MAX_PATH];
+	char *space;
+	char *browser;
 
-	if (strncmp(cmd, PREFIX, PREFIX_LEN) != 0) {
-	    fprintf(stderr, "invalid command: '%s'", cmd);
-	    return -1;
+	if (strlen(cmd) < 3) {
+		fprintf(stderr, "command too short '%s'", cmd);
+		return -1;
 	}
-	url = cmd + PREFIX_LEN;
 
+	/*
+	 *  Q edge https://example.com
+	 *    ----
+	 */
+	browser = cmd + 2;
+
+	space = strchr(browser, ' ');
+	if (space == NULL) {
+		fprintf(stderr, "invalid query request '%s'", cmd);
+		return -1;
+	}
+	*space = '\0';
+
+	/*
+	 *  Q edge https://example.com
+	 *         -------------------
+	 */
+	url = space + 1;
 
 	if (get_ThinBridgeExtensionExecfile(path, MAX_PATH) < 0)
-	    return -1;
-	if (open_url(path, url) < 0)
-	    return -1;
+		return -1;
+
+	if (open_url(browser, path, url) < 0)
+		return -1;
 
 	talk_response("{\"status\":\"OK\"}");
 	return 0;

@@ -1,0 +1,9 @@
+{
+  "name": "com.clear_code.thinbridge",
+  "description": "ThinBridge for Firefox",
+  "path": "ThinBridgeTalk.exe",
+  "type": "stdio",
+  "allowed_extensions": [
+    "thinbridge@clear-code.com"
+  ]
+}
