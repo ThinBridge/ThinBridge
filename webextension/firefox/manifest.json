@@ -1,7 +1,7 @@
 {
 	"manifest_version": 2,
 	"name": "ThinBridge",
-	"version": "1.1.0",
+	"version": "1.2.0",
 	"description": "ThinBridge for Firefox",
 	"permissions": [
 		"nativeMessaging",
