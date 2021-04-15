@@ -22,6 +22,7 @@ COPY Release\ThinBridgeTalk.exe    dist
 COPY Resources\THinBridge.ini      dist
 COPY Resources\THinBridgeBHO.ini   dist
 COPY Resources\edge.json           dist
+COPY Resources\chrome.json         dist
 COPY Resources\firefox.json        dist
 COPY Resources\setting.conf        dist
 COPY Resources\install.bat         dist

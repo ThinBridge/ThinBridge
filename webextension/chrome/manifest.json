@@ -1,0 +1,22 @@
+{
+	"manifest_version": 2,
+	"name": "ThinBridge",
+	"version": "1.2.0",
+	"description": "ThinBridge for Chrome",
+	"permissions": [
+		"nativeMessaging",
+		"alarms",
+		"tabs",
+		"webRequest",
+		"webRequestBlocking",
+		"<all_urls>"
+	],
+	"background": {
+		"scripts": [
+			"background.js"
+		]
+	},
+	"icons": {
+		"128": "misc/128x128.png"
+	}
+}
