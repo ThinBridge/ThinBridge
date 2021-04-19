@@ -2,9 +2,6 @@ version: v1-winbuild-{build}
 
 image: Visual Studio 2019
 
-platform:
-  - x64
-
 environment:
   vspath: 'C:\Program Files (x86)\Microsoft Visual Studio\2019\Community'
 
@@ -12,10 +9,10 @@ configuration:
   - Release
 
 before_build:
-  - call "%vspatH%\VC\Auxiliary\Build\vcvars64.bat"
+  - call "%vspatH%\VC\Auxiliary\Build\vcvars32.bat"
 
 build_script:
-  - msbuild /p:Configuration=Release /m
+  - msbuild /p:Configuration=Release /p:Platform=Win32 /m
   - cmd.exe /c archive.bat
 
 artifacts:
