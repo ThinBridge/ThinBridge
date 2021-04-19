@@ -1,6 +1,8 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31129.286
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ThinBridge", "ThinBridge\ThinBridge.vcxproj", "{AE183818-6698-439C-BB4E-FF4BD1891B67}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BHORedirector", "BHORedirector\BHORedirector.vcxproj", "{F304F0AD-201D-4D2A-8A18-4882DB056D80}"
@@ -15,11 +17,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Resources\GPO\ThinBridgeSetting.admx = Resources\GPO\ThinBridgeSetting.admx
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CustomLauncher", "CustomLauncher\CustomLauncher.vcxproj", "{050E1388-3222-4B73-A6C7-771E36822788}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HorizonLauncher", "HorizonLauncher\HorizonLauncher.vcxproj", "{0CEDF884-4B3D-496F-B819-965EF37BD935}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ThinBridgeTalk", "ThinBridgeTalk\ThinBridgeTalk.vcxproj", "{F42DF96A-DCD0-457E-B12C-5B1ECD69E6AD}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ThinBridgeTalk", "ThinBridgeTalk\ThinBridgeTalk.vcxproj", "{58C3AA81-47F2-43DB-BCD1-1D3B43AD4D7B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -43,26 +41,14 @@ Global
 		{F304F0AD-201D-4D2A-8A18-4882DB056D80}.Release|Win32.Build.0 = Release|Win32
 		{F304F0AD-201D-4D2A-8A18-4882DB056D80}.Release|x64.ActiveCfg = Release|x64
 		{F304F0AD-201D-4D2A-8A18-4882DB056D80}.Release|x64.Build.0 = Release|x64
-		{050E1388-3222-4B73-A6C7-771E36822788}.Debug|Win32.ActiveCfg = Debug|Win32
-		{050E1388-3222-4B73-A6C7-771E36822788}.Debug|Win32.Build.0 = Debug|Win32
-		{050E1388-3222-4B73-A6C7-771E36822788}.Debug|x64.ActiveCfg = Debug|Win32
-		{050E1388-3222-4B73-A6C7-771E36822788}.Release|Win32.ActiveCfg = Release|Win32
-		{050E1388-3222-4B73-A6C7-771E36822788}.Release|Win32.Build.0 = Release|Win32
-		{050E1388-3222-4B73-A6C7-771E36822788}.Release|x64.ActiveCfg = Release|Win32
-		{0CEDF884-4B3D-496F-B819-965EF37BD935}.Debug|Win32.ActiveCfg = Debug|Win32
-		{0CEDF884-4B3D-496F-B819-965EF37BD935}.Debug|Win32.Build.0 = Debug|Win32
-		{0CEDF884-4B3D-496F-B819-965EF37BD935}.Debug|x64.ActiveCfg = Debug|Win32
-		{0CEDF884-4B3D-496F-B819-965EF37BD935}.Release|Win32.ActiveCfg = Release|Win32
-		{0CEDF884-4B3D-496F-B819-965EF37BD935}.Release|Win32.Build.0 = Release|Win32
-		{0CEDF884-4B3D-496F-B819-965EF37BD935}.Release|x64.ActiveCfg = Release|Win32
-		{F42DF96A-DCD0-457E-B12C-5B1ECD69E6AD}.Debug|Win32.ActiveCfg = Debug|Win32
-		{F42DF96A-DCD0-457E-B12C-5B1ECD69E6AD}.Debug|Win32.Build.0 = Debug|Win32
-		{F42DF96A-DCD0-457E-B12C-5B1ECD69E6AD}.Debug|x64.ActiveCfg = Debug|x64
-		{F42DF96A-DCD0-457E-B12C-5B1ECD69E6AD}.Debug|x64.Build.0 = Debug|x64
-		{F42DF96A-DCD0-457E-B12C-5B1ECD69E6AD}.Release|Win32.ActiveCfg = Release|Win32
-		{F42DF96A-DCD0-457E-B12C-5B1ECD69E6AD}.Release|Win32.Build.0 = Release|Win32
-		{F42DF96A-DCD0-457E-B12C-5B1ECD69E6AD}.Release|x64.ActiveCfg = Release|x64
-		{F42DF96A-DCD0-457E-B12C-5B1ECD69E6AD}.Release|x64.Build.0 = Release|x64
+		{58C3AA81-47F2-43DB-BCD1-1D3B43AD4D7B}.Debug|Win32.ActiveCfg = Debug|Win32
+		{58C3AA81-47F2-43DB-BCD1-1D3B43AD4D7B}.Debug|Win32.Build.0 = Debug|Win32
+		{58C3AA81-47F2-43DB-BCD1-1D3B43AD4D7B}.Debug|x64.ActiveCfg = Debug|x64
+		{58C3AA81-47F2-43DB-BCD1-1D3B43AD4D7B}.Debug|x64.Build.0 = Debug|x64
+		{58C3AA81-47F2-43DB-BCD1-1D3B43AD4D7B}.Release|Win32.ActiveCfg = Release|Win32
+		{58C3AA81-47F2-43DB-BCD1-1D3B43AD4D7B}.Release|Win32.Build.0 = Release|Win32
+		{58C3AA81-47F2-43DB-BCD1-1D3B43AD4D7B}.Release|x64.ActiveCfg = Release|x64
+		{58C3AA81-47F2-43DB-BCD1-1D3B43AD4D7B}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
