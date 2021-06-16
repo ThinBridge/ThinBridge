@@ -1,30 +1,77 @@
 "use strict";
 
 /*
- * This is an addon to redirect URLs from Firefox to ThinBridge.
+ * Basic settings for modern browsers
  *
- * * Poll redirect rules every 1 minute via sendNativeMessage().
- *
- * * Keep watch on requests using webRequest.onBeforeRequest().
- *
- * * Redirection is done by sending the target URL with 'Q' prefix
- *   to the native host program.
+ * Programming Note: Just tweak these constants for each browser.
+ * It should work fine across Edge, Chrome and Firefox without any
+ * further modifications.
  */
-
 var BROWSER = 'firefox';
 var CUSTOM18 = 'custom18';
 var SERVER_NAME = 'com.clear_code.thinbridge';
 var ALARM_MINUTES = 1;
+var CANCEL_REQUEST = {cancel: 1}
 
 /*
- * Firefox supports {cancel: 1} as part of BlockingResponse, unlike
- * Chrome and Edge.
+ * ThinBridge's matching function (See BHORedirector/URLRedirectCore.h)
+ *
+ *  1. `?` represents a single character.
+ *  2. `*` represents an arbitrary substring.
+ *
+ * >>> wildcmp("http?://*.example.com/*", "https://www.example.com/")
+ * true
  */
-var CANCEL = {cancel: 1};
+function wildcmp(wild, string) {
+	var i = 0;
+	var j = 0;
+	var mp, cp;
 
+	while ((j < string.length) && (wild[i] != '*')) {
+		if ((wild[i] != string[j]) && (wild[i] != '?')) {
+			return 0;
+		}
+		i += 1;
+		j += 1;
+	}
+	while (j < string.length) {
+		if (wild[i] == '*') {
+			i += 1;
+
+			if (i == wild.length) {
+				return 1;
+			}
+			mp = i;
+			cp = j + 1
+		} else if ((wild[i] == string[j]) || (wild[i] == '?')) {
+			i += 1;
+			j += 1;
+		} else {
+			i = mp;
+			j = cp;
+			cp += 1;
+		}
+	}
+	while (wild[i] == '*' && i < wild.length) {
+		i += 1;
+	}
+	return i >= wild.length;
+};
+
+/*
+ * Observe WebRequests with config fetched from ThinBridge.
+ *
+ * A typical configuration looks like this:
+ *
+ * {
+ *   CloseEmptyTab:1, OnlyMainFrame:1, IgnoreQueryString:1, DefaultBrowser:"IE",
+ *   Sections: [
+ *     {Name:"ie", Path:"", Patterns:["*://example.com/*"], Excludes:[]},
+ *     ...
+ *   ]
+ * }
+ */
 var ThinBridgeTalkClient = {
-
-	NAME: 'ThinBridgeTalkClient',
 
 	init: function() {
 		this.cached = null;
@@ -36,12 +83,20 @@ var ThinBridgeTalkClient = {
 	},
 
 	configure: function() {
-		var server = SERVER_NAME;
 		var query = new String('C ' + BROWSER);
 
-		chrome.runtime.sendNativeMessage(server, query, (resp) => {
+		chrome.runtime.sendNativeMessage(SERVER_NAME, query, (resp) => {
+			if (chrome.runtime.lastError) {
+				console.log('Cannot fetch config', JSON.stringify(chrome.runtime.lastError));
+				return;
+			}
+			var isStartup = (this.cached == null);
 			this.cached = resp.config;
-			console.log('Configure', JSON.stringify(resp.config));
+			console.log('Fetch config', JSON.stringify(this.cached));
+
+			if (isStartup) {
+				this.handleStartup(this.cached);
+			}
 		});
 	},
 
@@ -57,10 +112,10 @@ var ThinBridgeTalkClient = {
 
 		/* Refresh config for every N minute */
 		console.log('Poll config for every', ALARM_MINUTES , 'minutes');
-		chrome.alarms.create(this.NAME, {'periodInMinutes': ALARM_MINUTES});
+		chrome.alarms.create("poll-config", {'periodInMinutes': ALARM_MINUTES});
 
 		chrome.alarms.onAlarm.addListener((alarm) => {
-			if (alarm.name === this.NAME) {
+			if (alarm.name === "poll-config") {
 				this.configure();
 			}
 		});
@@ -78,106 +133,59 @@ var ThinBridgeTalkClient = {
 	},
 
 	/*
-	 * This is the JavaScript-ported `wildcmp()` function, coming
-	 * from CURLRedirectDataClass in URLRedirectCore.h.
+	 * Request redirection to Native Messaging Hosts.
+	 *
+	 * * chrome.tabs.get() is to confirm that the URL is originated from
+	 *   an actual tab (= not an internal prefetch request).
+	 *
+	 * * Request Example: "Q edge https://example.com/".
 	 */
-	wildcmp: function(wild, string) {
-		var i = 0;
-		var j = 0;
-		var mp, cp;
-
-		while ((j < string.length) && (wild[i] != '*')) {
-			if ((wild[i] != string[j]) && (wild[i] != '?')) {
-				return 0;
-			}
-			i += 1;
-			j += 1;
-		}
-		while (j < string.length) {
-			if (wild[i] == '*') {
-				i += 1;
-
-				if (i == wild.length) {
-					return 1;
-				}
-				mp = i;
-				cp = j + 1
-			} else if ((wild[i] == string[j]) || (wild[i] == '?')) {
-				i += 1;
-				j += 1;
-			} else {
-				i = mp;
-				j = cp;
-				cp += 1;
-			}
-		}
-		while (wild[i] == '*' && i < wild.length) {
-			i += 1;
-		}
-		return i >= wild.length;
-	},
-
-	redirect: function(config, details) {
-		var server = SERVER_NAME;
-		var query = new String('Q ' + BROWSER + ' ' + details.url);
-
-		if (details.tabId < 0) {
+	redirect: function(url, tabId, closeTab) {
+		chrome.tabs.get(tabId, (tab) => {
+			if (chrome.runtime.lastError) {
+				console.log(`* Ignore prefetch request`);
 				return;
-		}
-
-		chrome.tabs.get(details.tabId, (tab) => {
-			if (chrome.runtime.lastError) return;
-
-			/* This is required to handle "preload" tabs */
-			if (!tab) return;
-
-			/* Open another browser via Query */
-			chrome.runtime.sendNativeMessage(server, query);
-
-			/* Close the opening tab automatically (if required) */
-			if (details.type == 'main_frame') {
-				if (config.CloseEmptyTab && this.isNewTab[details.tabId]) {
-					chrome.tabs.remove(details.tabId);
-				}
 			}
+			if (!tab) {
+				console.log(`* URL is not coming from an actual tab`);
+				return;
+			}
+
+			var query = new String('Q ' + BROWSER + ' ' + url);
+			chrome.runtime.sendNativeMessage(SERVER_NAME, query, (resp) => {
+				if (closeTab) {
+					chrome.tabs.remove(tabId);
+				}
+			});
 		});
-		return CANCEL;
 	},
 
-	match: function(url, section) {
+	match: function(section, url) {
 		var i;
-		var pattern;
-
 		for (i = 0; i < section.Excludes.length; i++) {
-			pattern = section.Excludes[i];
-
-			if (this.wildcmp(pattern, url)) {
-				console.log(`* Match Exclude ${section.Name} [${pattern}]`);
+			if (wildcmp(section.Excludes[i], url)) {
+				console.log(`* Match Exclude ${section.Name} [${section.Excludes[i]}]`);
 				return false;
 			}
 		}
 
 		for (i = 0; i < section.Patterns.length; i++) {
-			pattern = section.Patterns[i];
-
-			if (this.wildcmp(pattern, url)) {
-				console.log(`* Match ${section.Name} [${pattern}]`);
+			if (wildcmp(section.Patterns[i], url)) {
+				console.log(`* Match ${section.Name} [${section.Patterns[i]}]`);
 				return true;
 			}
 		}
 		return false;
 	},
 
-	getName: function(section) {
+	getBrowserName: function(section) {
 		var name = section.Name.toLowerCase();
 
+		/* CUSTOM18 means "common" URL */
 		if (name == CUSTOM18)
 			return name;
 
-		/*
-		 * For custom sections, we need to guess the target browser
-		 * from the executable path.
-		 */
+		/* Guess the browser name from the executable path */
 		if (name.match(/^custom/i)) {
 			if (section.Path.match(RegExp(BROWSER, "i")))
 				return BROWSER;
@@ -185,60 +193,84 @@ var ThinBridgeTalkClient = {
 		return name;
 	},
 
-	onBeforeRequest: function(details) {
-		var config = this.cached;
-		var matches = [];
+	isRedirectURL: function(config, url) {
 		var section;
-		var url = details.url;
-		var i;
+		var matches = [];
 
-		if (!config) {
-			console.log('Config cache is empty. Fetching...');
-			this.configure();
-			return;
-		}
-
-		if (config.OnlyMainFrame && details.type != "main_frame") {
-			console.log(`Ignore subframe request ${url}`);
-			return;
+		if (!url || /^edge:/.test(url) || /^chrome:/.test(url) || /^about:/.test(url)) {
+			console.log(`* Ignore internal URL ${url}`);
+			return false;
 		}
 
 		if (config.IgnoreQueryString) {
 			url = url.replace(/\?.*/, '');
 		}
 
-		console.log(`Lookup sections for ${url}`);
+		console.log(`* Lookup sections for ${url}`);
 
-		for (i = 0; i < config.Sections.length; i++) {
+		for (var i = 0; i < config.Sections.length; i++) {
 			section = config.Sections[i];
 
-			if (this.match(url, section)) {
-				matches.push(this.getName(section))
+			if (this.match(section, url)) {
+				matches.push(this.getBrowserName(section))
 			}
 		}
-		console.log(`Result: ${matches.join(", ")}`);
+		console.log(`* Result: [${matches.join(", ")}]`);
 
 		if (matches.length > 0) {
-			/*
-			 * CUSTOM18 contains a list of "common" URLs that we should
-			 * never perform redirection.
-			 */
-			if (matches.includes(CUSTOM18))
-				return;
+			return !(matches.includes(CUSTOM18) || matches.includes(BROWSER));
+		} else {
+			return !config.DefaultBrowser.match(RegExp(BROWSER, 'i'));
+		}
+	},
 
-			if (matches.includes(BROWSER))
-				return;
+	/* Handle startup tabs preceding to onBeforeRequest */
+	handleStartup: function(config) {
+		chrome.tabs.query({}, (tabs) => {
+			tabs.forEach((tab) => {
+				var url = tab.url || tab.pendingUrl;
+				console.log(`handleStartup ${url} (tab=${tab.id})`);
+				if (this.isRedirectURL(config, url)) {
+					console.log(`* Redirect to another browser`);
+					this.redirect(url, tab.id, config.CloseEmptyTab);
+				}
+			});
+		});
+	},
 
-			return this.redirect(config, details);
+	/* Callback for webRequest.onBeforeRequest */
+	onBeforeRequest: function(details) {
+		var config = this.cached;
+		var closeTab = false;
+		var isMainFrame = (details.type == 'main_frame');
+
+		console.log(`onBeforeRequest ${details.url} (tab=${details.tabId})`);
+
+		if (!config) {
+			console.log('* Config cache is empty. Fetching...');
+			this.configure();
+			return;
 		}
 
-		/* No pattern matched */
-		console.log(`Use default browser ${config.DefaultBrowser}`);
-
-		if (config.DefaultBrowser.match(RegExp(BROWSER, 'i')))
+		if (details.tabId < 0) {
+			console.log(`* Ignore internal request`);
 			return;
+		}
 
-		return this.redirect(config, details);
+		if (config.OnlyMainFrame && !isMainFrame) {
+			console.log(`* Ignore subframe request`);
+			return;
+		}
+
+		if (config.CloseEmptyTab && isMainFrame && this.isNewTab[details.tabId]) {
+			closeTab = true;
+		}
+
+		if (this.isRedirectURL(config, details.url)) {
+			console.log(`* Redirect to another browser`);
+			this.redirect(details.url, details.tabId, closeTab);
+			return CANCEL_REQUEST;
+		}
 	}
 };
 

@@ -197,7 +197,7 @@ var ThinBridgeTalkClient = {
 		var section;
 		var matches = [];
 
-		if (!url || /^edge:/.test(url) || /^about:/.test(url)) {
+		if (!url || /^edge:/.test(url) || /^chrome:/.test(url) || /^about:/.test(url)) {
 			console.log(`* Ignore internal URL ${url}`);
 			return false;
 		}
@@ -231,6 +231,7 @@ var ThinBridgeTalkClient = {
 				var url = tab.url || tab.pendingUrl;
 				console.log(`handleStartup ${url} (tab=${tab.id})`);
 				if (this.isRedirectURL(config, url)) {
+					console.log(`* Redirect to another browser`);
 					this.redirect(url, tab.id, config.CloseEmptyTab);
 				}
 			});
