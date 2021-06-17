@@ -224,8 +224,12 @@ var ThinBridgeTalkClient = {
 
 		if (matches.length > 0) {
 			return !(matches.includes(CUSTOM18) || matches.includes(BROWSER));
-		} else {
+		} else if (config.DefaultBrowser) {
+			console.log(`* Use DefaultBrowser: ${config.DefaultBrowser}`);
 			return !config.DefaultBrowser.match(RegExp(BROWSER, 'i'));
+		} else {
+			console.log(`* DefaultBrowser is blank`);
+			return false;
 		}
 	},
 
