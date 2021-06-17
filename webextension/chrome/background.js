@@ -197,8 +197,13 @@ var ThinBridgeTalkClient = {
 		var section;
 		var matches = [];
 
-		if (!url || /^edge:/.test(url) || /^chrome:/.test(url) || /^about:/.test(url)) {
-			console.log(`* Ignore internal URL ${url}`);
+		if (!url) {
+			console.log(`* Empty URL found`);
+			return false;
+		}
+
+		if (!/^https?:/.test(url)) {
+			console.log(`* Ignore non-HTTP/HTTPS URL`);
 			return false;
 		}
 
