@@ -3143,6 +3143,7 @@ static LPCTSTR gDefaultActionList[] = {
 	_T("Google Chrome"),
 	_T("Microsoft Edge"),
 	_T("Internet Explorer"), 
+	_T("操作中のブラウザーで開く(他のブラウザーにリダイレクトしない)"),
 };
 
 IMPLEMENT_DYNCREATE(CDlgDefault, CPropertyPage)
@@ -3176,7 +3177,7 @@ BOOL CDlgDefault::OnInitDialog()
 	m_URD.m_bDisabled=FALSE;
 	if (m_Combo2.m_hWnd)
 	{
-		for (int i = 0; i < 7; i++)
+		for (int i = 0; i < 8; i++)
 		{
 			m_Combo2.AddString(gDefaultActionList[i]);
 		}
@@ -3220,8 +3221,8 @@ BOOL CDlgDefault::OnInitDialog()
 		{
 			if (m_URD.m_strExecExeFullPath.IsEmpty())
 			{
-				m_Combo2.SetCurSel(6);
-				m_Combo2.SetWindowText(gDefaultActionList[6]);
+				m_Combo2.SetCurSel(7);
+				m_Combo2.SetWindowText(gDefaultActionList[7]);
 			}
 			else
 				m_Combo2.SetWindowText(m_URD.m_strExecExeFullPath);
@@ -3276,6 +3277,15 @@ LRESULT CDlgDefault::Set_OK(WPARAM wParam, LPARAM lParam)
 	{
 		strExePath = _T("IE");
 	}
+	else if (strExePath.CompareNoCase(gDefaultActionList[7]) == 0)
+	{
+		strExePath = _T("");
+	}
+	else
+	{
+		strExePath = _T("");
+	}
+
 	m_URDSave.m_strExecExeFullPath = strExePath;
 	theApp.m_RedirectListSaveData.m_pDefault->Copy(&m_URDSave);
 	return 0;

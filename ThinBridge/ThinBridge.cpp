@@ -612,7 +612,9 @@ void CRedirectApp::InitExecLocalBrowser()
 	||this->SettingConf.m_iSolutionType==PROC_CITRIX
 	)
 	{
-		this->SettingConf.m_iSolutionType=PROC_LIE;
+		//2021-06-18 IE‚ÌEOS‚É‘Î‰ž‚µ‚Ä‚¨‚­
+		//this->SettingConf.m_iSolutionType=PROC_LIE;
+		this->SettingConf.m_iSolutionType = PROC_LDefaultBrowser;
 	}
 
 	//Local IE
