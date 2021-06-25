@@ -3281,10 +3281,6 @@ LRESULT CDlgDefault::Set_OK(WPARAM wParam, LPARAM lParam)
 	{
 		strExePath = _T("");
 	}
-	else
-	{
-		strExePath = _T("");
-	}
 
 	m_URDSave.m_strExecExeFullPath = strExePath;
 	theApp.m_RedirectListSaveData.m_pDefault->Copy(&m_URDSave);
