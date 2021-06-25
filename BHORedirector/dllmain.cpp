@@ -6,7 +6,7 @@
 #include "dllmain.h"
 #include <atlstr.h>
 #include <atlcoll.h>
-#pragma comment(linker, "/base:\"0x13240000\"")
+//#pragma comment(linker, "/base:\"0x13240000\"")
 
 CBHORedirectorModule _AtlModule;
 // DLL エントリ ポイント

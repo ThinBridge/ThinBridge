@@ -1739,9 +1739,11 @@ public:
 			dwBase = dwNow;
 			DWORD iCounter = 0;
 			DWORD iCounter4sec = 0;
+			DWORD iCounter6sec = 0;
 			DWORD dwPrev = 0;
 			DWORD dwPrevVal = 0;
 			DWORD dwPrevVal4 = 0;
+			DWORD dwPrevVal6 = 0;
 
 			uRet = LB_OK;
 			strReason = _T("System checks are clear");
@@ -1801,6 +1803,13 @@ public:
 						iCounter4sec++;
 						dwPrevVal4 = dwPrev;
 					}
+					//6ïbà»ì‡
+					else if (dwPCon <= 6 * 1000)
+					{
+						dwBase = dwPrev;
+						iCounter6sec++;
+						dwPrevVal6 = dwPrev;
+					}
 					else
 						break;
 				}
@@ -1827,6 +1836,18 @@ public:
 				{
 					uRet = LB_NG;
 					strReason = _T("Due to 3 calls of 4 seconds or less in 12 seconds");
+				}
+			}
+			//6ïbà»ì‡ÇÃåƒÇ—èoÇµÇ™5âÒÇ†Ç¡ÇΩÇÁNG
+			else if (iCounter6sec >= 5)
+			{
+				//30ïbä‘Ç≈6ïbà»â∫ÇÃåƒÇ—èoÇµÇ™5âÒ
+				DWORD dwPCon = 0;
+				dwPCon = dwNow - dwPrevVal6;
+				if (dwPCon <= 30 * 1000)
+				{
+					uRet = LB_NG;
+					strReason = _T("Due to 5 calls of 6 seconds or less in 30 seconds");
 				}
 			}
 		}
