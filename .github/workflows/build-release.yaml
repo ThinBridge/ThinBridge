@@ -6,12 +6,25 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: microsoft/setup-msbuild@v1.0.2
-      - name: Run msbuild on ThinBridge.sln
-        run: msbuild /p:configuration=Release
-      - name: Archive artifacts
+      - name: Compile x86
+        run: msbuild /p:Platform=Win32
+      - name: Compile x64
+        run: |
+          msbuild /p:"Platform=x64;OutDir=$pwd\x64\"
+          copy x64\ThinBridgeBHO64.dll Debug
+      - name: Make Installer (x86)
+        run: iscc.exe ThinBridgeX86.iss
+      - name: Make Installer (x64)
+        run: iscc.exe ThinBridgeX64.iss
+      - name: Upload Bin
         uses: actions/upload-artifact@v2
         with:
-          name: ThinBridge
+          name: ThinBridge-Bin
           path: |
-            Release/*.exe
-            Release/*.dll
+            Debug/*.exe
+            Debug/*.dll
+      - name: Upload Installer
+        uses: actions/upload-artifact@v2
+        with:
+          name: ThinBridge-Installer
+          path: SetupOutput/*.exe
