@@ -130,6 +130,12 @@ var ThinBridgeTalkClient = {
 				delete this.isNewTab[tab.id];
 			}
 		});
+
+		/*
+		 * Edge won't call webRequest.onBeforeRequest() when navigating
+		 * from Edge-IE to Edge (GitLab#11).
+		 */
+		chrome.tabs.onUpdated.addListener(this.onTabUpdated.bind(this));
 	},
 
 	/*
@@ -245,6 +251,32 @@ var ThinBridgeTalkClient = {
 				}
 			});
 		});
+	},
+
+	onTabUpdated: function(tabId, info, tab) {
+		var config = this.cached;
+		var url = tab.pendingUrl || tab.url;
+
+		if (info.status !== "loading") {
+			return;
+		}
+		if (!config) {
+			return;
+		}
+
+		console.log(`onTabUpdated ${url} (tab=${tabId})`);
+
+		if (this.isRedirectURL(config, url)) {
+			console.log(`* Redirect to another browser`);
+			this.redirect(url, tabId, false);
+
+			/* Call executeScript() to stop the page loading immediately.
+			 * Then let the tab go back to the previous page.
+			 */
+			chrome.tabs.executeScript(tabId, {code: "window.stop()", runAt: "document_start"}, () => {
+				chrome.tabs.goBack(tabId);
+			});
+		}
 	},
 
 	/* Callback for webRequest.onBeforeRequest */
