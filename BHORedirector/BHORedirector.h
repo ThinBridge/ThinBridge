@@ -192,7 +192,7 @@ BEGIN_CATEGORY_MAP(CBHORedirector)
 END_CATEGORY_MAP()
 
 BEGIN_SINK_MAP(CBHORedirector)
-//    SINK_ENTRY_EX(1, DIID_DWebBrowserEvents2, DISPID_DOCUMENTCOMPLETE, OnDocumentComplete)
+//    SINK_ENTRY_EX(1, DIID_DWebBrowserEvents2, DISPID_DOCUMENTCOMPLETE,DocumentComplete)
 	SINK_ENTRY_EX(1, DIID_DWebBrowserEvents2, DISPID_BEFORENAVIGATE2, BeforeNavigate)
 	SINK_ENTRY_EX(1, DIID_DWebBrowserEvents2, DISPID_NAVIGATECOMPLETE2, NavigateComplete)
 
@@ -201,7 +201,7 @@ BEGIN_SINK_MAP(CBHORedirector)
 //	SINK_ENTRY_EX(1, DIID_DWebBrowserEvents2, DISPID_NEWWINDOW3, NewWindow3)
 END_SINK_MAP()
     // DWebBrowserEvents2
-//	void STDMETHODCALLTYPE OnDocumentComplete(IDispatch *pDisp, VARIANT *pvarURL);
+//	void STDMETHODCALLTYPE DocumentComplete(IDispatch *pDisp, VARIANT *pvarURL);
 	void STDMETHODCALLTYPE BeforeNavigate(LPDISPATCH pDisp, VARIANT* URL,
 		VARIANT* Flags, VARIANT* TargetFrameName, VARIANT* PostData,
 		VARIANT* Headers,   BOOL* Cancel);

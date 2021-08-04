@@ -352,6 +352,11 @@ void STDMETHODCALLTYPE CBHORedirector::BeforeNavigate(LPDISPATCH pDisp, VARIANT*
 					m_bQuickRedirectExecFlg = TRUE;
 					if (IsEmptyPage())
 					{
+						if (m_gbTraceLog)
+						{
+							logmsg.Format(_T("BeforeNavigate:CloseEmptyTabWindow"));
+							this->WriteDebugTraceDateTime(logmsg, DEBUG_LOG_TYPE_URL);
+						}
 						//m_spWebBrowser->Quit();
 						CloseTabWindow(pDisp);
 					}
@@ -588,6 +593,58 @@ void STDMETHODCALLTYPE CBHORedirector::NavigateComplete(LPDISPATCH pDisp, VARIAN
 	}
 	return;
 }
+
+//void STDMETHODCALLTYPE CBHORedirector::DocumentComplete(LPDISPATCH pDisp, VARIANT* URL)
+//{
+//	if (!m_spWebBrowser)
+//		return;
+//
+//	CString strURL = V_BSTR(URL);
+//	if (!SBUtil::IsURL_HTTP(strURL))
+//		return;
+//
+//	CString logmsg;
+//	if (m_gbTraceLog)
+//	{
+//		logmsg.Format(_T("DocumentComplete\t%s"), strURL);
+//		this->WriteDebugTraceDateTime(logmsg, DEBUG_LOG_TYPE_URL);
+//	}
+//
+//	CString strMsg;
+//	DWORD dRet = 0;
+//	BOOL bTopPage = FALSE;
+//
+//	//TOPページ(Frameなし)
+//	if (IsPageIWebBrowser(pDisp))
+//	{
+//		bTopPage = TRUE;
+//	}
+//	//Quickリダイレクトされている場合は、この後の処理は行わない。
+//	if (m_RedirectList.m_bQuickRedirect)
+//	{
+//		if (bTopPage)
+//		{
+//			//既にBeforeNavigateでリダイレクト済み
+//			if (m_bQuickRedirectExecFlg)
+//			{
+//				//ESCが押されている場合は、リダイレクトをしない。
+//				if (::GetKeyState(VK_ESCAPE) < 0)
+//					return;
+//				if(strURL.IsEmpty() && IsEmptyPage())
+//				{
+//					if (m_gbTraceLog)
+//					{
+//						logmsg.Format(_T("DocumentComplete:CloseEmptyTabWindow"));
+//						this->WriteDebugTraceDateTime(logmsg, DEBUG_LOG_TYPE_URL);
+//					}
+//					CloseTabWindow(pDisp);
+//				}
+//			}
+//		}
+//	}
+//	return;
+//}
+
 BOOL CBHORedirector::IsEmptyPage()
 {
 	if (!m_spWebBrowser)
@@ -606,11 +663,20 @@ BOOL CBHORedirector::IsEmptyPage()
 		{
 			strURL = bstrURL;
 		}
+		if(strURL.IsEmpty())
+		{
+			if (m_gbTraceLog)
+				this->WriteDebugTraceDateTime(_T("IsEmptyPage:URLEmpty"), DEBUG_LOG_TYPE_URL);
+			return TRUE;
+		}
+
 		//ナビゲーションキャンセル系は、閉じる候補
 		if (strURL.Find(_T("res://")) >= 0)
 		{
 			if (strURL.Find(_T("/navcancl")) >= 0)
 			{
+				if (m_gbTraceLog)
+					this->WriteDebugTraceDateTime(_T("IsEmptyPage:res:// /navcancel"), DEBUG_LOG_TYPE_URL);
 				return TRUE;
 			}
 		}
@@ -625,10 +691,19 @@ BOOL CBHORedirector::IsEmptyPage()
 				//10個以下は閉じる候補にする。Google検索からのJump先は6個
 				if (nCnt <= 10)
 				{
+					if (m_gbTraceLog)
+						this->WriteDebugTraceDateTime(_T("IsEmptyPage:HTMLElements<=10"), DEBUG_LOG_TYPE_URL);
 					return TRUE;
 				}
 			}
 		}
+	}
+	else
+	{
+		//HTML Documentが無い場合は、完全に空(about:blankですら無い)
+		if (m_gbTraceLog)
+			this->WriteDebugTraceDateTime(_T("IsEmptyPage:HTMLDocument2 NULL"), DEBUG_LOG_TYPE_URL);
+		return TRUE;
 	}
 	return FALSE;
 }
@@ -691,6 +766,10 @@ void CBHORedirector::CloseTabWindow()
 				m_spWebBrowser->ExecWB(OLECMDID_CLOSE, OLECMDEXECOPT_DONTPROMPTUSER, 0, 0);
 				//m_spWebBrowser->put_Visible(VARIANT_FALSE);
 				//m_spWebBrowser->Quit();
+				if (m_gbTraceLog)
+				{
+					this->WriteDebugTraceDateTime(_T("CloseTabWindow"), DEBUG_LOG_TYPE_URL);
+				}
 			}
 		}
 		else
