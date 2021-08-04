@@ -1,0 +1,17 @@
+on: [push]
+name: Build ThinBridge
+jobs:
+  build:
+    runs-on: [ windows-2019 ]
+    steps:
+      - uses: actions/checkout@v2
+      - uses: microsoft/setup-msbuild@v1.0.2
+      - name: Run msbuild on ThinBridge.sln
+        run: msbuild /p:configuration=Release
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: ThinBridge
+          path: |
+            Release/*.exe
+            Release/*.dll

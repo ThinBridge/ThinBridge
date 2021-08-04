@@ -182,11 +182,7 @@
       <Command>copy $(OutDir)$(TargetName)$(TargetExt) $(OutDir)$(TargetName)Setting$(TargetExt) /Y</Command>
     </PostBuildEvent>
     <CustomBuildStep>
-      <Command>copy "$(SolutionDir)$(Configuration)\$(ProjectName).exe" "$(SolutionDir)$(Configuration)\ThinBridgeSetting.exe"
-copy "$(SolutionDir)$(Configuration)\$(ProjectName).exe" "$(SolutionDir)$(Configuration)\Opera.exe"</Command>
-    </CustomBuildStep>
-    <CustomBuildStep>
-      <Outputs>$(SolutionDir)$(Configuration)\ThinBridgeSetting.exe;$(SolutionDir)$(Configuration)\Opera.exe;%(Outputs)</Outputs>
+      <Outputs>$(SolutionDir)$(Configuration)\ThinBridgeSetting.exe;%(Outputs)</Outputs>
     </CustomBuildStep>
     <CustomBuildStep>
       <Inputs>$(SolutionDir)$(Configuration)\$(ProjectName).exe</Inputs>
