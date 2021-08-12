@@ -7,11 +7,11 @@ jobs:
       - uses: actions/checkout@v2
       - uses: microsoft/setup-msbuild@v1.0.2
       - name: Compile x86
-        run: msbuild /p:Platform=Win32
+        run: msbuild /p:Platform=Win32 /p:Configuration=Release
       - name: Compile x64
         run: |
-          msbuild /p:"Platform=x64;OutDir=$pwd\x64\"
-          copy x64\ThinBridgeBHO64.dll Debug
+          msbuild /p:Configuration=Release /p:"Platform=x64;OutDir=$pwd\x64\"
+          copy x64\ThinBridgeBHO64.dll Release
       - name: Make Installer (x86)
         run: iscc.exe ThinBridgeX86.iss
       - name: Make Installer (x64)
@@ -21,8 +21,8 @@ jobs:
         with:
           name: ThinBridge-Bin
           path: |
-            Debug/*.exe
-            Debug/*.dll
+            Release/*.exe
+            Release/*.dll
       - name: Upload Installer
         uses: actions/upload-artifact@v2
         with:
