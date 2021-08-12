@@ -144,20 +144,20 @@ Name: jp; MessagesFile: "compiler:Languages\Japanese.isl"
 
 [Files]
 ;exe
-Source: "Debug\TBRedirector.exe"; DestDir: "{app}\";Flags: ignoreversion;permissions:users-readexec admins-full system-full
-Source: "Debug\ThinBridge.exe"; DestDir: "{app}\";Flags: ignoreversion;permissions:users-readexec admins-full system-full
-;Source: "Debug\ThinBridgeChecker.exe"; DestDir: "{app}\";Flags: ignoreversion;permissions:users-readexec admins-full system-full
-;Source: "Debug\ThinBridgeRuleUpdater.exe"; DestDir: "{app}\";Flags: ignoreversion;permissions:users-readexec admins-full system-full
-;Source: "Debug\ThinBridgeRuleUpdaterSetting.exe"; DestDir: "{app}\";Flags: ignoreversion;permissions:users-readexec admins-full system-full
-Source: "Debug\ThinBridgeSetting.exe"; DestDir: "{app}\";Flags: ignoreversion;permissions:users-readexec admins-full system-full
-;Source: "Debug\TBo365URLSyncSetting.exe"; DestDir: "{app}\";Flags: ignoreversion;permissions:users-readexec admins-full system-full
+Source: "Release\TBRedirector.exe"; DestDir: "{app}\";Flags: ignoreversion;permissions:users-readexec admins-full system-full
+Source: "Release\ThinBridge.exe"; DestDir: "{app}\";Flags: ignoreversion;permissions:users-readexec admins-full system-full
+;Source: "Release\ThinBridgeChecker.exe"; DestDir: "{app}\";Flags: ignoreversion;permissions:users-readexec admins-full system-full
+;Source: "Release\ThinBridgeRuleUpdater.exe"; DestDir: "{app}\";Flags: ignoreversion;permissions:users-readexec admins-full system-full
+;Source: "Release\ThinBridgeRuleUpdaterSetting.exe"; DestDir: "{app}\";Flags: ignoreversion;permissions:users-readexec admins-full system-full
+Source: "Release\ThinBridgeSetting.exe"; DestDir: "{app}\";Flags: ignoreversion;permissions:users-readexec admins-full system-full
+;Source: "Release\TBo365URLSyncSetting.exe"; DestDir: "{app}\";Flags: ignoreversion;permissions:users-readexec admins-full system-full
 
 ;dll
-Source: "Debug\ThinBridgeBHO.dll"; DestDir: "{app}\";Flags: ignoreversion regserver 32bit;permissions:users-readexec admins-full system-full
-Source: "Debug\ThinBridgeBHO64.dll"; DestDir: "{app}\";Flags: ignoreversion regserver 64bit; Check: IsWin64;permissions:users-readexec admins-full system-full
+Source: "Release\ThinBridgeBHO.dll"; DestDir: "{app}\";Flags: ignoreversion regserver 32bit;permissions:users-readexec admins-full system-full
+Source: "Release\ThinBridgeBHO64.dll"; DestDir: "{app}\";Flags: ignoreversion regserver 64bit; Check: IsWin64;permissions:users-readexec admins-full system-full
 
 ;host
-Source: "Debug\ThinBridgeTalk.exe"; DestDir: "{app}\ThinBridgeHost";Flags: ignoreversion;permissions:users-readexec admins-full system-full
+Source: "Release\ThinBridgeTalk.exe"; DestDir: "{app}\ThinBridgeHost";Flags: ignoreversion;permissions:users-readexec admins-full system-full
 
 ;edge
 Source: "Resources\edge.json"; DestDir: "{app}\ThinBridgeHost";Flags: ignoreversion;permissions:users-readexec admins-full system-full
