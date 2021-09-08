@@ -555,30 +555,59 @@ BOOL CRedirectApp::InitInstance()
 	if(!m_CommandParam.IsEmpty())
 	{
 		CString strCmd;
-		if(SBUtil::InThinApp())
-			strCmd.Format(_T("[VOS] %s %s"), m_CommandParam,m_OptionParam);
+		CString strMutexStringTemp;
+		CString strMutexString;
+		CString strCommandParam;
+		strCommandParam= m_CommandParam;
+		strCommandParam.Replace(_T("\\"),_T("/"));
+		strMutexStringTemp.Format(_T("Local\\TB-%s-%s"), m_OptionParam, strCommandParam);
+		SBUtil::GetDivChar(strMutexStringTemp,MAX_PATH, strMutexString,FALSE);
+		//Mutex確認
+		HANDLE hMutex = NULL;
+		hMutex = ::OpenMutex(MUTEX_ALL_ACCESS, FALSE, strMutexString);
+		if(hMutex)
+		{
+			//先に起動しているものがある。今回はリダイレクトしない。連続呼び出しの可能性が高い。
+			strCmd.Format(_T("[Duplicate Call]%s %s "), m_CommandParam, m_OptionParam);
+			WriteDebugTraceDateTime(strCmd);
+			return FALSE;
+		}
+		else
+		{
+			hMutex = ::CreateMutex(NULL, FALSE, strMutexString);
+		}
+
+		if (SBUtil::InThinApp())
+			strCmd.Format(_T("[VOS] %s %s"), m_CommandParam, m_OptionParam);
 		else
 			strCmd.Format(_T("%s %s"), m_CommandParam, m_OptionParam);
 		WriteDebugTraceDateTime(strCmd);
+
 		UINT uRet=0;
 		uRet = m_LoopBlock.CheckLoop(strCmd);
 		if(uRet == LB_OK)
+		{
 			this->InitExecCommandParam();
+		}
 		else if(uRet == LB_NG)
 		{
+			if (hMutex)
+			{
+				ReleaseMutex(hMutex);
+				CloseHandle(hMutex);
+				hMutex = NULL;
+			}
 			CString strSafeGuardMsg;
 			strSafeGuardMsg.Format(_T("%s\n%s"), _T("短時間に連続したブラウザー リダイレクトを検出しました。\n\nブラウザー リダイレクト処理を中断します。\n少し時間をおいてから再試行してください。"), m_CommandParam);
 			ShowTimeoutMessageBox(strSafeGuardMsg, m_strThisAppName, MB_OK | MB_ICONWARNING| MB_SYSTEMMODAL,10000);
-			return FALSE;
 		}
-		else if (uRet == LB_NG_NO_MSG)
+		if (hMutex)
 		{
-			return FALSE;
+			ReleaseMutex(hMutex);
+			CloseHandle(hMutex);
+			hMutex = NULL;
 		}
-		else
-		{
-			return FALSE;
-		}
+		return FALSE;
 	}
 	//Command Lineなし
 	else

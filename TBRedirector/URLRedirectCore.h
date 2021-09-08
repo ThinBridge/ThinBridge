@@ -487,6 +487,15 @@ public:
 							strReasonLine.Format(_T("SKIP [%s] %s / "), pRedirectData->m_strExecType, pRedirectData->m_strHitReason);
 						m_strHitReasonAll += strReasonLine;
 					}
+					//例外 [CUSTOM19]の場合は、[CUSTOM20]をチェックしない。CUSTOM19とCUSTOM20はセットとみなす。
+					if (bRet)
+					{
+						if (pRedirectData->m_strExecType == _T("CUSTOM19"))
+						{
+							//CUSTOM19でhitしているので、次のCUSTOM20はチェック不要
+							break;
+						}
+					}
 				}
 			}
 		}

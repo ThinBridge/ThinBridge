@@ -192,7 +192,7 @@ namespace SBUtil
 			if(bAppend)
 				strRet = str1.Mid(0,iTabStrLen) + szEllipsis;
 			else
-				strRet = str1.Mid(0,iTabStrLen) + szEllipsis;
+				strRet = str1.Mid(0,iTabStrLen);
 		}
 		return;
 	}
@@ -1672,6 +1672,43 @@ class CConfData
 #define LB_OK 0
 #define LB_NG 1
 #define LB_NG_NO_MSG 2
+class CEventHelper
+{
+public:
+	CEventHelper()
+	{
+		m_hEvent=NULL;
+	}
+	BOOL StartEvent(LPCTSTR lpName,DWORD timeout)
+	{
+		Clear();
+		m_hEvent = OpenEvent(EVENT_ALL_ACCESS, FALSE, lpName);
+		if(m_hEvent)
+		{
+			DWORD waitRes = WaitForSingleObject(m_hEvent, timeout);
+			if (waitRes == WAIT_TIMEOUT)
+			{
+				return FALSE;
+			}
+			return TRUE;
+		}
+		return FALSE;
+	}
+	virtual ~CEventHelper()
+	{
+		Clear();
+	}
+	void Clear()
+	{
+		if (m_hEvent)
+		{
+			SetEvent(m_hEvent);
+			CloseHandle(m_hEvent);
+			m_hEvent = NULL;
+		}
+	}
+	HANDLE m_hEvent;
+};
 class CLoopBlocker
 {
 public:
@@ -1695,7 +1732,20 @@ public:
 		CString strTemp;
 		CStringArray strArrayData;
 		int iLineCnt=0;
-		if (in.Open(m_strLogFilePath, CFile::modeRead | CFile::shareDenyWrite))
+
+
+		CEventHelper EventH;
+
+		if(EventH.StartEvent(_T("TB_STP"),1000))
+		{
+			//1秒待っても駄目な場合は、リダイレクトを続行する。
+			//タイムアウトが発生しても、リダイレクト自体は継続させる。
+			return LB_OK;
+		}
+
+		DWORD dwNow = ::GetTickCount();
+
+		if (in.Open(m_strLogFilePath, CFile::modeRead |CFile::shareDenyWrite))
 		{
 			while (in.ReadString(strTemp))
 			{
@@ -1711,7 +1761,7 @@ public:
 						DWORD dwPrev = _ttoi(strArray.GetAt(1));
 						DWORD dwPCon = 0;
 						//前回との差
-						dwPCon = ::GetTickCount() - dwPrev;
+						dwPCon = dwNow - dwPrev;
 						//15秒以上間隔が空いていたらOK
 						if (dwPCon >= 15 * 1000)
 						{
@@ -1733,21 +1783,15 @@ public:
 		if(uRet!= LB_OK)
 		{
 			//ループ発生?
-			DWORD dwNow = ::GetTickCount();
-			int iCntMax = strArrayData.GetSize() - 1;
-			DWORD dwBase = 0;
-			dwBase = dwNow;
+			int iCntMax = strArrayData.GetSize();
 			DWORD iCounter = 0;
-			DWORD iCounter4sec = 0;
-			DWORD iCounter6sec = 0;
 			DWORD dwPrev = 0;
-			DWORD dwPrevVal = 0;
-			DWORD dwPrevVal4 = 0;
-			DWORD dwPrevVal6 = 0;
 
+			//初期値 OKをセット
 			uRet = LB_OK;
 			strReason = _T("System checks are clear");
 
+			//最大50件
 			for (int i = 0;i<iCntMax;i++)
 			{
 				CString strLine;
@@ -1760,7 +1804,7 @@ public:
 					dwPrev = _ttoi(strArray.GetAt(1));
 					DWORD dwPCon = 0;
 					//前回との差
-					dwPCon = dwBase - dwPrev;
+					dwPCon = dwNow - dwPrev;
 					//直前の結果がBLOCKの場合で間隔が3.5秒以内はNG
 					if (i == 0)
 					{
@@ -1776,97 +1820,61 @@ public:
 							}
 						}
 					}
-
-					//2秒以内に同じパラメータはNG
-					if (dwPCon <= 2 * 1000)
+					//15秒以上間隔が空いていたらOK
+					if (dwPCon >= 15 * 1000)
+					{
+						uRet = LB_OK;
+						strReason = _T("There are more than 15 seconds");
+						break;
+					}
+					//15秒の間（現在の時間からレコードに記録された時間の間隔）
+					else
 					{
 						//前回の実行コマンドが同じ(同一URL、同一リダイレクト先ブラウザー)
 						if (strCommand == strArray.GetAt(0))
 						{
-							dwBase = dwPrev;
 							//2回目でNG
 							if (iCounter > 1)
 							{
 								uRet = LB_NG;
-								strReason = _T("Calling the same command within 2 seconds");
+								strReason = _T("Calling the same command within 15 seconds");
 								break;
 							}
+							//15秒以内の起動回数
+							iCounter++;
 						}
-						//2秒以内の起動回数
-						iCounter++;
-						dwPrevVal = dwPrev;
 					}
-					//4秒以内
-					else if (dwPCon <= 4 * 1000)
-					{
-						dwBase = dwPrev;
-						iCounter4sec++;
-						dwPrevVal4 = dwPrev;
-					}
-					//6秒以内
-					else if (dwPCon <= 6 * 1000)
-					{
-						dwBase = dwPrev;
-						iCounter6sec++;
-						dwPrevVal6 = dwPrev;
-					}
-					else
-						break;
-				}
-			}
-			//2秒以内の呼び出しが5回あったらNG
-			if (iCounter >= 5)
-			{
-				//12秒間で1秒以下の呼び出しが5回
-				DWORD dwPCon = 0;
-				dwPCon = dwNow - dwPrevVal;
-				if (dwPCon <= 12 * 1000)
-				{
-					uRet = LB_NG;
-					strReason = _T("Due to 5 calls of 2 seconds or less in 12 seconds");
-				}
-			}
-			//4秒以内の呼び出しが3回あったらNG
-			else if (iCounter4sec >= 3)
-			{
-				//12秒間で4秒以下の呼び出しが3回
-				DWORD dwPCon = 0;
-				dwPCon = dwNow - dwPrevVal4;
-				if (dwPCon <= 12 * 1000)
-				{
-					uRet = LB_NG;
-					strReason = _T("Due to 3 calls of 4 seconds or less in 12 seconds");
-				}
-			}
-			//6秒以内の呼び出しが5回あったらNG
-			else if (iCounter6sec >= 5)
-			{
-				//30秒間で6秒以下の呼び出しが5回
-				DWORD dwPCon = 0;
-				dwPCon = dwNow - dwPrevVal6;
-				if (dwPCon <= 30 * 1000)
-				{
-					uRet = LB_NG;
-					strReason = _T("Due to 5 calls of 6 seconds or less in 30 seconds");
 				}
 			}
 		}
 		//ログに追記
 		CString strLine;
-		strLine.Format(_T("%s\t%d\t%s\t%s\n"), lp, ::GetTickCount(), uRet == LB_OK ? _T("OK") : uRet == LB_NG ? _T("BLOCK") : _T("BLOCK_NO_MSG"), strReason);
+		strLine.Format(_T("%s\t%d\t%s\t%s\t%d\n"), lp, ::GetTickCount(), uRet == LB_OK ? _T("OK") : uRet == LB_NG ? _T("BLOCK") : _T("BLOCK_NO_MSG"), strReason, ::GetCurrentProcessId());
 		CStdioFile out;
-		if (out.Open(m_strLogFilePath, CFile::modeCreate | CFile::modeWrite | CFile::shareDenyNone))
+		//3回リトライしておく。
+		for (int i = 0; i < 3; i++)
 		{
-			//command1
-			CString strWriteData;
-			//先頭行書込み （直近の値）
-			out.WriteString(strLine);
-			for (int i = 0; i < strArrayData.GetSize(); i++)
+			TRY
 			{
-				strWriteData.Format(_T("%s\n"), strArrayData.GetAt(i));
-				out.WriteString(strWriteData);
+				if (out.Open(m_strLogFilePath, CFile::modeCreate | CFile::modeWrite | CFile::shareDenyWrite))
+				{
+					//command1
+					CString strWriteData;
+					//先頭行書込み （直近の値）
+					out.WriteString(strLine);
+					for (int i = 0; i < strArrayData.GetSize(); i++)
+					{
+						strWriteData.Format(_T("%s\n"), strArrayData.GetAt(i));
+						out.WriteString(strWriteData);
+					}
+					out.Flush();
+					out.Close();
+					break;
+				}
 			}
-			out.Close();
+			CATCH(CFileException, eP) {}
+			END_CATCH
+			::Sleep(100);
 		}
 		_wsetlocale(LC_ALL, _T(""));
 		return uRet;
