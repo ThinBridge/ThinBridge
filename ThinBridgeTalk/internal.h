@@ -21,6 +21,7 @@ void strbuf_concat_jsonstr(struct strbuf *sb, char *str, int len);
  */
 int cb_config(char *cmd);
 int cb_query(char *cmd);
+int cb_resource(char *cmd);
 
 void talk_response(const char *msg, ...);
 
