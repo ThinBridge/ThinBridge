@@ -144,10 +144,10 @@ int main(int argc, char *argv[])
 	 *    ... Open URL in another browser.
 	 */
 	switch (cmd[0]) {
-	case L'C':
+	case 'C':
 	    ret = cb_config(cmd);
 	    break;
-	case L'Q':
+	case 'Q':
 	    ret = cb_query(cmd);
 	    break;
 	default:
