@@ -8,7 +8,6 @@
 		"alarms",
 		"tabs",
 		"webNavigation",
-		"notifications",
 		"webRequest",
 		"webRequestBlocking",
 		"<all_urls>"

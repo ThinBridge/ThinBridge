@@ -1,13 +1,14 @@
 /*
- * Implements `Resource` command. Returns two information:
+ * Implements `Resource` command.
  *
- * (1) system limit defined in ResourceCap.ini
- * (2) memory amount used by the given browser (in MB)
+ * (1) Receive messages in the format of "R [BROWSER] [NTABS]"
+ * (2) Check the system limit in ResourceCap.ini. Return `closeTab: 1`
+ *　　 if the maximum limit has been exceeded.
  *
  * Example:
  *
- * >>> cb_resource("R edge")
- * {"status":"OK", "config": {"MemLimitMax":1024, ...}, "MemUsedMB": 282}
+ * >>> cb_resource("R edge 10")
+ * {"status":"OK", "closeTab": 1}
  */
 
 #include <Windows.h>
@@ -22,29 +23,29 @@
 
 #pragma warning(disable : 4996)
 #define startswith(s, t) (strstr((s), (t)) == (s))
-#define CONFIG_PATH "C:\\Program Files\\ThinBridge\\ResourceCap.ini"
 
 struct config {
 	int tab_enabled;
 	int tab_max;
 	int tab_warn;
+	char *tab_max_msg;
+	char *tab_warn_msg;
 	int mem_enabled;
 	int mem_max;
 	int mem_warn;
+	char *mem_max_msg;
+	char *mem_warn_msg;
 };
 
 static int get_config_path(char *buf, DWORD size)
 {
-	strncpy(buf, CONFIG_PATH, size);
-	/*
 	int ret;
-	ret = RegGetValueA(HKEY_LOCAL_MACHINE, "SOFTWARE\\ThinBridge", "RCAPFile", RRF_RT_REG_SZ,
+	ret = RegGetValueA(HKEY_LOCAL_MACHINE, "SOFTWARE\\ThinBridge", "RCAPfile", RRF_RT_REG_SZ,
 			   NULL, buf, &size);
 	if (ret != ERROR_SUCCESS) {
 		fprintf(stderr, "cannot read %s (%i)", "SOFTWARE\\ThinBridge", ret);
 		return -1;
 	}
-	*/
 	return 0;
 }
 
@@ -86,6 +87,36 @@ static char *read_file(const char *path)
 	return buf;
 }
 
+static char *decode_str(char *str)
+{
+	char c;
+	int isescape = 0;
+	int len = strlen(str);
+	int i = 0;
+	int j = 0;
+
+	for (i = 0; i < len; i++) {
+		c = str[i];
+		if (c == '\\') {
+			isescape = 1;
+		} else if (isescape && c == 'n') {
+			str[j++] = '\n';
+			isescape = 0;
+		} else if (isescape && c == 'r') {
+			// Ignore '\r' to convert '\\r\\n' to '\n'
+			isescape = 0;
+		} else {
+			str[j++] = c;
+			isescape = 0;
+		}
+	}
+	str[j] = '\0';
+	return str;
+}
+
+/*
+ * Parse ResourceCap.ini into "config"
+ */
 static void parse_conf(char *data, struct config *conf)
 {
 	char *line;
@@ -104,42 +135,32 @@ static void parse_conf(char *data, struct config *conf)
 			conf->mem_warn = atoi(line + strlen("IEMemLimit_WARNING="));
 		} else if (startswith(line, "IEMemLimit_MAX=")) {
 			conf->mem_max = atoi(line + strlen("IEMemLimit_MAX="));
+		} else if (startswith(line, "IETabLimit_WARNING_MSG=")) {
+			conf->tab_warn_msg = decode_str(line + strlen("IETabLimit_WARNING_MSG="));
+		} else if (startswith(line, "IETabLimit_MAX_MSG=")) {
+			conf->tab_max_msg = decode_str(line + strlen("IETabLimit_MAX_MSG="));
+		} else if (startswith(line, "IEMemLimit_WARNING_MSG=")) {
+			conf->mem_warn_msg = decode_str(line + strlen("IEMemLimit_WARNING_MSG="));
+		} else if (startswith(line, "IEMemLimit_MAX_MSG=")) {
+			conf->mem_max_msg = decode_str(line + strlen("IEMemLimit_MAX_MSG="));
 		}
 		line = strtok(NULL, "\r\n");
 	}
 }
 
-static char* dump_json(struct config *conf)
+/*
+ * Return the executable name for the browser.
+ */
+static char *get_process_name(const char *browser)
 {
-	struct strbuf sb = {0};
-	char buf[64];
-
-	/* TabLimitEnabled */
-	strbuf_concat(&sb, "{\"TabLimitEnabled\":");
-	strbuf_concat(&sb, _itoa(conf->tab_enabled, buf, 10));
-
-	/* TabLimitMax */
-	strbuf_concat(&sb, ",\"TabLimitMax\":");
-	strbuf_concat(&sb, _itoa(conf->tab_max, buf, 10));
-
-	/* TabLimitWarn */
-	strbuf_concat(&sb, ",\"TabLimitWarn\":");
-	strbuf_concat(&sb, _itoa(conf->tab_warn, buf, 10));
-
-	/* MemLimitEnabled */
-	strbuf_concat(&sb, ",\"MemLimitEnabled\":");
-	strbuf_concat(&sb, _itoa(conf->mem_enabled, buf, 10));
-
-	/* MemLimitEnabled */
-	strbuf_concat(&sb, ",\"MemLimitMax\":");
-	strbuf_concat(&sb, _itoa(conf->mem_max, buf, 10));
-
-	/* MemLimitEnabled */
-	strbuf_concat(&sb, ",\"MemLimitWarn\":");
-	strbuf_concat(&sb, _itoa(conf->mem_warn, buf, 10));
-	strbuf_concat(&sb, "}");
-
-	return sb.buf;
+	if (strcmp(browser, "edge") == 0) {
+		return "msedge.exe";
+	} else if (strcmp(browser, "chrome") == 0) {
+		return "chrome.exe";
+	} else if (strcmp(browser, "firefox") == 0) {
+		return "firefox.exe";
+	}
+	return NULL;
 }
 
 /*
@@ -148,17 +169,23 @@ static char* dump_json(struct config *conf)
  * >>> find_memory_usage("msedge.exe")
  * 10224  // mb
  */
-int find_memory_usage(char *procname)
+static int find_memory_usage(char *browser)
 {
 	long long bytes = 0;
 	HANDLE hs;
 	HANDLE hp;
 	PROCESS_MEMORY_COUNTERS_EX pmc = {0};
 	PROCESSENTRY32 entry = {0};
+	char *procname;
 	BOOL found;
 
 	pmc.cb = sizeof(pmc);
 	entry.dwSize = sizeof(entry);
+
+	procname = get_process_name(browser);
+	if (procname == NULL) {
+		return -1;
+	}
 
 	hs = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
 	if (hs == INVALID_HANDLE_VALUE) {
@@ -182,53 +209,81 @@ int find_memory_usage(char *procname)
 	return (int) (bytes / 1024 / 1024);
 }
 
-int cb_resource(char *cmd)
+static int show_warning(const char *msg)
 {
-	char *data;
-	char *json;
-	int mb;
+	return MessageBox(NULL, msg, "ThinBridge", MB_OK|MB_ICONWARNING|MB_SYSTEMMODAL);
+}
+
+/*
+ * Check if the current resource usage is within the limit.
+ */
+static int check_resource(char *browser, int ntabs, int *closeTab)
+{
 	struct config conf = {0};
 	char path[MAX_PATH] = {0};
-	char *browser;
+	char *data = NULL;
+	int memused;
 
-	/*
-	 * Load config from Resource.ini
-	 *
-	 * If the file being non-existent, it means that the resource cap
-         * feature is not enabled, so we just return an empty object.
-	 */
-	if (get_config_path(path, MAX_PATH)) {
-		talk_response("{\"status\": \"OK\"}");
-		return 0;
-	}
+	if (get_config_path(path, MAX_PATH))
+		return -1;
 
 	data = read_file(path);
-	if (data == NULL) {
-		talk_response("{\"status\": \"OK\"}");
-		return 0;
-	}
+	if (data == NULL)
+		return -1;
 
 	parse_conf(data, &conf);
-	json = dump_json(&conf);
 
-	/*
-	 * "R edge"
-	 *    ----
-	 */
-	browser = cmd + 2;
-	if (strcmp(browser, "edge") == 0) {
-		mb = find_memory_usage("msedge.exe");
-	} else if (strcmp(browser, "chrome") == 0) {
-		mb = find_memory_usage("chrome.exe");
-	} else if (strcmp(browser, "firefox") == 0) {
-		mb = find_memory_usage("firefox.exe");
-	} else {
-		return -1;
+	/* Continue on failure ... (memused = -1) */
+	memused = find_memory_usage(browser);
+
+	if (conf.tab_enabled && conf.tab_max <= ntabs) {
+		show_warning(conf.tab_max_msg);
+		*closeTab = 1;
+	}
+	else if (conf.mem_enabled && conf.mem_max <= memused) {
+		show_warning(conf.mem_max_msg);
+		*closeTab = 1;
+	}
+	else if (conf.tab_enabled && conf.tab_warn <= ntabs) {
+		show_warning(conf.tab_warn_msg);
+	}
+	else if (conf.mem_enabled && conf.mem_warn <= memused) {
+		show_warning(conf.tab_max_msg);
 	}
 
-	talk_response("{\"status\":\"OK\",\"config\":%s,\"MemUsed\":%i}", json, mb);
-
 	free(data);
-	free(json);
+	return 0;
+}
+
+int cb_resource(char *cmd)
+{
+	int ntabs;
+	char *space;
+	char *browser;
+	int closeTab = 0;
+
+	/*
+	 * R edge 12
+	 *   ----
+	 */
+	browser = cmd + 2;
+	space = strchr(browser, ' ');
+	if (space == NULL) {
+		fprintf(stderr, "invalid query request '%s'", cmd);
+		return -1;
+	}
+	*space = '\0';
+
+	/*
+	 *  R edge 12
+	 *         --
+	 */
+	ntabs = atoi(space + 1);
+
+	if (check_resource(browser, ntabs, &closeTab)) {
+		closeTab = 0;
+	}
+
+	talk_response("{\"status\":\"OK\",\"closeTab\":%i}", closeTab);
 	return 0;
 }

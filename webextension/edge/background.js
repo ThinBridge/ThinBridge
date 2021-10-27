@@ -10,7 +10,6 @@
 var BROWSER = 'edge';
 var CUSTOM18 = 'custom18';
 var SERVER_NAME = 'com.clear_code.thinbridge';
-var NOTIFICATION_ICON = 'misc/alert.png'
 var ALARM_MINUTES = 1;
 var CANCEL_REQUEST = {redirectUrl:`data:text/html,${escape('<script type="application/javascript">history.back()</script>')}`};
 
@@ -324,85 +323,47 @@ var ResourceCap = {
 	},
 
 	/*
-	 * On each navigation, we inquiry the host program about the latest
-	 * system limit and the current resource usage.
+	 * On each navigation, we ask the host program to check the
+	 * current resource usage.
 	 */
 	onNavigationCommitted: function(details) {
-		console.log(`Load completed: ${details.url}`);
+		console.log(`onNavigationCommitted: ${details.url}`);
 
-		/* frameId != 0 indicates iframe */
+		/* frameId != 0 indicates iframe requests */
 		if (details.frameId) {
 			console.log(`* Ignore subframe requests`);
 			return;
 		}
 
-		if (!/^https?:/.test(details.url)) {
-			console.log(`* Ignore non-HTTP/HTTPS pages`);
-			return;
-		}
+		chrome.tabs.query({}, (tabs) => {
+			var ntabs = ResourceCap.count(tabs);
+			console.log(`* Perform resource check (ntabs=${ntabs})`);
+			ResourceCap.check(details.tabId, ntabs);
+		});
+	},
 
-		var query = new String('R ' + BROWSER);
+	check: function(tabId, ntabs) {
+		var query = new String(`R ${BROWSER} ${ntabs}`);
 		chrome.runtime.sendNativeMessage(SERVER_NAME, query, (resp) => {
-			if (!resp || !resp.config) {
-				console.log(`* Config was empty`)
-				return;
+			if (resp.closeTab) {
+				chrome.tabs.remove(tabId, () => {
+					if (chrome.runtime.lastError) {
+						console.log(`* ${chrome.runtime.lastError}`);
+						return;
+					}
+					console.log(`* Close Tab#${tabId}`)
+				});
 			}
-			chrome.tabs.query({}, (tabs) => {
-				ResourceCap.check(details, resp, tabs);
-			});
 		});
 	},
 
-	warn: function(title) {
-		chrome.notifications.create({
-			type: 'basic',
-			requireInteraction: true,
-			iconUrl: NOTIFICATION_ICON,
-			title: title,
-			priority: 2,
-			message: "他の不要なタブ・ウインドウを閉じて下さい。コンピュータ資源の節約に、ご協力ください。"
-		});
-	},
-
-	/*
-	 * Count the number of active tabs (not including blank ones).
-	 */
 	count: function(tabs) {
+		/* Exclude the internal pages such as "edge://blank" */
 		tabs = tabs.filter((tab) => {
 			var url = tab.url || tab.pendingUrl;
 			return /^https?:/.test(url);
 		});
 		return tabs.length;
-	},
-
-	check: function(details, resp, tabs) {
-		var ntabs = ResourceCap.count(tabs);
-
-		console.log(`* Config: ${JSON.stringify(resp.config)}`)
-		console.log(`* Tab: ${ntabs} open`)
-		console.log(`* Memory: ${resp.MemUsed} MB used`)
-
-		if (resp.config.MemLimitEnabled && resp.MemUsed > resp.config.MemLimitMax) {
-			ResourceCap.warn("【警告】現在の使用メモリが上限値に達しました。");
-			chrome.tabs.remove(details.tabId);
-			return;
-		}
-
-		if (resp.config.TabLimitEnabled && ntabs > resp.config.TabLimitMax) {
-			ResourceCap.warn("【警告】現在開いているタブ・ウインドウ数が上限値に達しました。");
-			chrome.tabs.remove(details.tabId);
-			return;
-		}
-
-		if (resp.config.MemLimitEnabled && resp.MemUsed > resp.config.MemLimitWarn) {
-			ResourceCap.warn("【お願い】現在の使用メモリが警告値に達しました。");
-			return;
-		}
-
-		if (resp.config.TabLimitEnabled && ntabs > resp.config.TabLimitWarn) {
-			ResourceCap.warn("【お願い】現在開いているタブ・ウインドウ数が警告値に達しました。");
-			return;
-		}
 	}
 };
 

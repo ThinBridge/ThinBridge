@@ -25,6 +25,7 @@ Root: HKLM; Subkey: "Software\ThinBridge"; ValueType: string; ValueName: "Path";
 Root: HKLM; Subkey: "Software\ThinBridge"; ValueType: string; ValueName: "ClientType"; ValueData: ""
 Root: HKLM; Subkey: "Software\ThinBridge"; ValueType: string; ValueName: "Version"; ValueData: "4.0.2.3"
 Root: HKLM; Subkey: "Software\ThinBridge"; ValueType: string; ValueName: "Rulefile"; ValueData: "{app}\ThinBridgeBHO.ini"
+Root: HKLM; Subkey: "Software\ThinBridge"; ValueType: string; ValueName: "RCAPfile"; ValueData: "{app}\ResourceCap.ini"
 Root: HKLM; Subkey: "Software\ThinBridge"; ValueType: string; ValueName: "ExtensionExecfile"; ValueData: "{app}\TBRedirector.exe"
 
 ;Root: HKLM; Subkey: "Software\WOW6432Node\ThinBridge"; Flags: uninsdeletekey

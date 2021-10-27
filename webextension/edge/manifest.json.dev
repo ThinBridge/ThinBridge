@@ -7,7 +7,6 @@
 		"nativeMessaging",
 		"alarms",
 		"tabs",
-		"notification",
 		"webNavigation",
 		"webRequest",
 		"webRequestBlocking",
