@@ -112,7 +112,7 @@ Name: jp; MessagesFile: "compiler:Languages\Japanese.isl"
 ;exe
 Source: "Release\TBRedirector.exe"; DestDir: "{app}\";Flags: ignoreversion;permissions:users-readexec admins-full system-full
 Source: "Release\ThinBridge.exe"; DestDir: "{app}\";Flags: ignoreversion;permissions:users-readexec admins-full system-full
-;Source: "Release\ThinBridgeChecker.exe"; DestDir: "{app}\";Flags: ignoreversion;permissions:users-readexec admins-full system-full
+Source: "Release\ThinBridgeChecker.exe"; DestDir: "{app}\";Flags: ignoreversion;permissions:users-readexec admins-full system-full
 ;Source: "Release\ThinBridgeRuleUpdater.exe"; DestDir: "{app}\";Flags: ignoreversion;permissions:users-readexec admins-full system-full
 ;Source: "Release\ThinBridgeRuleUpdaterSetting.exe"; DestDir: "{app}\";Flags: ignoreversion;permissions:users-readexec admins-full system-full
 Source: "Release\ThinBridgeSetting.exe"; DestDir: "{app}\";Flags: ignoreversion;permissions:users-readexec admins-full system-full
@@ -134,7 +134,7 @@ Source: "Resources\chrome.json"; DestDir: "{app}\ThinBridgeHost";Flags: ignoreve
 
 [Icons]
 Name: "{group}\ThinBridgeSetting"; Filename: "{app}\ThinBridgeSetting.exe"; WorkingDir: "{app}"
-;Name: "{group}\環境チェッカー"; Filename: "{app}\ThinBridgeChecker.exe"; WorkingDir: "{app}"
+Name: "{group}\Checker"; Filename: "{app}\ThinBridgeChecker.exe"; WorkingDir: "{app}"
 ;Name: "{group}\リダイレクト定義自動更新設定"; Filename: "{app}\ThinBridgeRuleUpdaterSetting.exe"; WorkingDir: "{app}"
 ;Name: "{commonstartup}\ThinBridgeリダイレクト定義自動更新"; Filename: "{app}\ThinBridgeRuleUpdater.exe"; WorkingDir: "{app}"
 
@@ -144,13 +144,13 @@ Name: "{app}";Permissions: users-modify
 Name: "{app}\TBUpdateLog";Permissions: users-modify;Flags: uninsneveruninstall
 
 [Run] 
-;Filename: "{app}\ThinBridgeChecker.exe";Parameters: "/log"; Flags: runhidden 
+Filename: "{app}\ThinBridgeChecker.exe";Parameters: "/log"; Flags: runhidden 
 
 ;Filename: "{sys}\icacls.exe";Parameters: """{app}\TBo365URLSyncSetting.exe"" /inheritance:r"; Flags: runhidden shellexec
 Filename: "{sys}\icacls.exe";Parameters: """{app}\TBRedirector.exe"" /inheritance:r"; Flags: runhidden shellexec
 Filename: "{sys}\icacls.exe";Parameters: """{app}\ThinBridge.exe"" /inheritance:r"; Flags: runhidden shellexec
 Filename: "{sys}\icacls.exe";Parameters: """{app}\ThinBridgeSetting.exe"" /inheritance:r"; Flags: runhidden shellexec
-;Filename: "{sys}\icacls.exe";Parameters: """{app}\ThinBridgeChecker.exe"" /inheritance:r"; Flags: runhidden shellexec
+Filename: "{sys}\icacls.exe";Parameters: """{app}\ThinBridgeChecker.exe"" /inheritance:r"; Flags: runhidden shellexec
 ;Filename: "{sys}\icacls.exe";Parameters: """{app}\ThinBridgeRuleUpdater.exe"" /inheritance:r"; Flags: runhidden shellexec
 ;Filename: "{sys}\icacls.exe";Parameters: """{app}\ThinBridgeRuleUpdaterSetting.exe"" /inheritance:r"; Flags: runhidden shellexec
 Filename: "{sys}\icacls.exe";Parameters: """{app}\ThinBridgeBHO.dll"" /inheritance:r"; Flags: runhidden shellexec
