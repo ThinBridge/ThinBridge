@@ -9,17 +9,15 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BHORedirector", "BHORedirec
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{3907999E-7E5E-4317-9578-D33C746BE8BF}"
 	ProjectSection(SolutionItems) = preProject
-		Resources\Del_ThinBridgeBHO削除[管理者で実行].bat = Resources\Del_ThinBridgeBHO削除[管理者で実行].bat
 		Resources\rdp_template.conf = Resources\rdp_template.conf
-		Resources\Reg_ThinBridgeBHO登録[管理者で実行].bat = Resources\Reg_ThinBridgeBHO登録[管理者で実行].bat
 		Resources\ThinBridge.ini = Resources\ThinBridge.ini
-		Resources\GPO\ThinBridgeSetting.adml = Resources\GPO\ThinBridgeSetting.adml
-		Resources\GPO\ThinBridgeSetting.admx = Resources\GPO\ThinBridgeSetting.admx
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ThinBridgeTalk", "ThinBridgeTalk\ThinBridgeTalk.vcxproj", "{58C3AA81-47F2-43DB-BCD1-1D3B43AD4D7B}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TBRedirector", "TBRedirector\TBRedirector.vcxproj", "{50C8D9FB-08BA-4FD2-A32C-82DC5CC4DC49}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ThinBridgeChecker", "ThinBridgeChecker\ThinBridgeChecker.vcxproj", "{9ED6DAD9-8FB0-41A6-89C7-D3ECCC4B56ED}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -59,6 +57,12 @@ Global
 		{50C8D9FB-08BA-4FD2-A32C-82DC5CC4DC49}.Release|Win32.Build.0 = Release|Win32
 		{50C8D9FB-08BA-4FD2-A32C-82DC5CC4DC49}.Release|x64.ActiveCfg = Release|x64
 		{50C8D9FB-08BA-4FD2-A32C-82DC5CC4DC49}.Release|x64.Build.0 = Release|x64
+		{9ED6DAD9-8FB0-41A6-89C7-D3ECCC4B56ED}.Debug|Win32.ActiveCfg = Debug|Win32
+		{9ED6DAD9-8FB0-41A6-89C7-D3ECCC4B56ED}.Debug|Win32.Build.0 = Debug|Win32
+		{9ED6DAD9-8FB0-41A6-89C7-D3ECCC4B56ED}.Debug|x64.ActiveCfg = Debug|Win32
+		{9ED6DAD9-8FB0-41A6-89C7-D3ECCC4B56ED}.Release|Win32.ActiveCfg = Release|Win32
+		{9ED6DAD9-8FB0-41A6-89C7-D3ECCC4B56ED}.Release|Win32.Build.0 = Release|Win32
+		{9ED6DAD9-8FB0-41A6-89C7-D3ECCC4B56ED}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
