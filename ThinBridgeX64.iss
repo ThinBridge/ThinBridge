@@ -1,4 +1,5 @@
 ;ThinBridge Setup--
+#define CONST_STR1 "リダイレクト定義設定"
 [Setup]
 AppName=ThinBridge
 AppVerName=ThinBridge
@@ -169,7 +170,7 @@ Source: "Resources\firefox.json"; DestDir: "{app}\ThinBridgeHost";Flags: ignorev
 Source: "Resources\chrome.json"; DestDir: "{app}\ThinBridgeHost";Flags: ignoreversion;permissions:users-readexec admins-full system-full
 
 [Icons]
-Name: "{group}\リダイレクト定義設定"; Filename: "{app}\ThinBridgeSetting.exe"; WorkingDir: "{app}"
+Name: "{group}\{#CONST_STR1}"; Filename: "{app}\ThinBridgeSetting.exe"; WorkingDir: "{app}"
 ;Name: "{group}\環境チェッカー"; Filename: "{app}\ThinBridgeChecker.exe"; WorkingDir: "{app}"
 ;Name: "{group}\リダイレクト定義自動更新設定"; Filename: "{app}\ThinBridgeRuleUpdaterSetting.exe"; WorkingDir: "{app}"
 ;Name: "{commonstartup}\ThinBridgeリダイレクト定義自動更新"; Filename: "{app}\ThinBridgeRuleUpdater.exe"; WorkingDir: "{app}"
