@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<policyDefinitions revision="1.0" schemaVersion="1.0">
+  <policyNamespaces>
+    <target prefix="ThinBridge" namespace="Microsoft.Policies.ThinBridge" />
+    <using prefix="windows" namespace="Microsoft.Policies.Windows" />
+  </policyNamespaces>
+  <resources minRequiredRevision="3.0" />
+  <categories>
+    <category name="ThinBridge" displayName="$(string.TB)" />
+    <category name="ThinBridgeRCAP" displayName="$(string.TB_CAP)">
+      <parentCategory ref="ThinBridge" />
+    </category>
+  </categories>
+  <policies>
+    <policy name="DefineYourSettingfortheThinBridge" 
+    class="User" 
+    displayName="$(string.TB_CAP)" 
+    presentation="$(presentation.DefineYourSettingfortheThinBridge)" 
+    key="SOFTWARE\Policies\ThinBridge\RCAP">
+      <parentCategory ref="ThinBridgeRCAP" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+        <boolean id="EnableTabLimit" key="SOFTWARE\Policies\ThinBridge\RCAP" valueName="EnableTabLimit">
+            <trueValue> <decimal value="1" /> </trueValue>
+            <falseValue> <decimal value="0" /> </falseValue>
+        </boolean>
+        <decimal id="TabLimit_WARNING" valueName="TabLimit_WARNING" minValue="2" maxValue="99" />
+        <decimal id="TabLimit_MAX" valueName="TabLimit_MAX" minValue="3" maxValue="100" />
+        <text id="TabLimit_WARNING_MSG" valueName="TabLimit_WARNING_MSG" maxLength="1024" />
+        <text id="TabLimit_MAX_MSG" valueName="TabLimit_MAX_MSG" maxLength="1024" />
+        <decimal id="TabLimit_WARNING_MSG_TIME" valueName="TabLimit_WARNING_MSG_TIME" minValue="0" maxValue="60" />
+        <decimal id="TabLimit_MAX_MSG_TIME" valueName="TabLimit_MAX_MSG_TIME" minValue="0" maxValue="60" />
+      </elements>
+    </policy>
+  </policies>
+</policyDefinitions>

@@ -28,6 +28,8 @@ struct config {
 	int tab_enabled;
 	int tab_max;
 	int tab_warn;
+	int tab_max_time;
+	int tab_warn_time;
 	char *tab_max_msg;
 	char *tab_warn_msg;
 	int mem_enabled;
@@ -123,26 +125,30 @@ static void parse_conf(char *data, struct config *conf)
 
 	line = strtok(data, "\r\n");
 	while (line) {
-		if (startswith(line, "EnableIETabLimit=")) {
-			conf->tab_enabled = atoi(line + strlen("EnableIETabLimit="));
-		} else if (startswith(line, "IETabLimit_WARNING=")) {
-			conf->tab_warn = atoi(line + strlen("IETabLimit_WARNING="));
-		} else if (startswith(line, "IETabLimit_MAX=")) {
-			conf->tab_max = atoi(line + strlen("IETabLimit_MAX="));
-		} else if (startswith(line, "EnableIEMemLimit=")) {
-			conf->mem_enabled = atoi(line + strlen("EnableIEMemLimit="));
-		} else if (startswith(line, "IEMemLimit_WARNING=")) {
-			conf->mem_warn = atoi(line + strlen("IEMemLimit_WARNING="));
-		} else if (startswith(line, "IEMemLimit_MAX=")) {
-			conf->mem_max = atoi(line + strlen("IEMemLimit_MAX="));
-		} else if (startswith(line, "IETabLimit_WARNING_MSG=")) {
-			conf->tab_warn_msg = decode_str(line + strlen("IETabLimit_WARNING_MSG="));
-		} else if (startswith(line, "IETabLimit_MAX_MSG=")) {
-			conf->tab_max_msg = decode_str(line + strlen("IETabLimit_MAX_MSG="));
-		} else if (startswith(line, "IEMemLimit_WARNING_MSG=")) {
-			conf->mem_warn_msg = decode_str(line + strlen("IEMemLimit_WARNING_MSG="));
-		} else if (startswith(line, "IEMemLimit_MAX_MSG=")) {
-			conf->mem_max_msg = decode_str(line + strlen("IEMemLimit_MAX_MSG="));
+		if (startswith(line, "EnableTabLimit=")) {
+			conf->tab_enabled = atoi(line + strlen("EnableTabLimit="));
+		} else if (startswith(line, "TabLimit_WARNING=")) {
+			conf->tab_warn = atoi(line + strlen("TabLimit_WARNING="));
+		} else if (startswith(line, "TabLimit_MAX=")) {
+			conf->tab_max = atoi(line + strlen("TabLimit_MAX="));
+		} else if (startswith(line, "TabLimit_WARNING_MSG_TIME=")) {
+			conf->tab_warn_time = atoi(line + strlen("TabLimit_WARNING_MSG_TIME="));
+		} else if (startswith(line, "TabLimit_MAX_MSG_TIME=")) {
+			conf->tab_max_time = atoi(line + strlen("TabLimit_MAX_MSG_TIME="));
+		} else if (startswith(line, "EnableMemLimit=")) {
+			conf->mem_enabled = atoi(line + strlen("EnableMemLimit="));
+		} else if (startswith(line, "MemLimit_WARNING=")) {
+			conf->mem_warn = atoi(line + strlen("MemLimit_WARNING="));
+		} else if (startswith(line, "MemLimit_MAX=")) {
+			conf->mem_max = atoi(line + strlen("MemLimit_MAX="));
+		} else if (startswith(line, "TabLimit_WARNING_MSG=")) {
+			conf->tab_warn_msg = decode_str(line + strlen("TabLimit_WARNING_MSG="));
+		} else if (startswith(line, "TabLimit_MAX_MSG=")) {
+			conf->tab_max_msg = decode_str(line + strlen("TabLimit_MAX_MSG="));
+		} else if (startswith(line, "MemLimit_WARNING_MSG=")) {
+			conf->mem_warn_msg = decode_str(line + strlen("MemLimit_WARNING_MSG="));
+		} else if (startswith(line, "MemLimit_MAX_MSG=")) {
+			conf->mem_max_msg = decode_str(line + strlen("MemLimit_MAX_MSG="));
 		}
 		line = strtok(NULL, "\r\n");
 	}
@@ -209,10 +215,48 @@ static int find_memory_usage(char *browser)
 	return (int) (bytes / 1024 / 1024);
 }
 
-static int show_warning(const char *msg)
+typedef int(__stdcall* TMessageBoxTimeout)(HWND, LPCTSTR, LPCTSTR, UINT, WORD, DWORD);
+static void ShowTimeoutMessageBox(LPCTSTR strMsg, int iType, int iTimeoutSec)
 {
-	return MessageBox(NULL, msg, "ThinBridge", MB_OK|MB_ICONWARNING|MB_SYSTEMMODAL);
+	BOOL bFreeLibrary = FALSE;
+	HMODULE hModule = { 0 };
+	hModule = GetModuleHandle("user32.dll");
+	if (!hModule){
+		hModule = LoadLibrary("user32.dll");
+		if (hModule)
+			bFreeLibrary = TRUE;
+	}
+
+	MSG msg = { 0 };
+	PeekMessage(&msg, NULL, WM_USER, WM_USER, PM_NOREMOVE);
+
+	if (hModule){
+		TMessageBoxTimeout  MessageBoxTimeout;
+#ifdef _UNICODE
+		MessageBoxTimeout = (TMessageBoxTimeout)GetProcAddress(hModule, "MessageBoxTimeoutW");
+#else
+		MessageBoxTimeout = (TMessageBoxTimeout)GetProcAddress(hModule, "MessageBoxTimeoutA");
+#endif
+		if (MessageBoxTimeout){
+			MessageBoxTimeout(NULL, strMsg,
+				"ThinBridge", iType, LANG_NEUTRAL, iTimeoutSec *1000);
+		}
+		else{
+			MessageBox(NULL, strMsg, "ThinBridge", iType);
+		}
+		if (bFreeLibrary){
+			FreeLibrary(hModule);
+			bFreeLibrary = FALSE;
+			hModule = NULL;
+		}
+	}
 }
+static void show_warning(const char* msg, int iTimeoutSec)
+{
+	ShowTimeoutMessageBox(msg, MB_OK | MB_ICONWARNING | MB_SYSTEMMODAL, iTimeoutSec);
+	return;
+}
+
 
 /*
  * Check if the current resource usage is within the limit.
@@ -222,7 +266,7 @@ static int check_resource(char *browser, int ntabs, int *closeTab)
 	struct config conf = {0};
 	char path[MAX_PATH] = {0};
 	char *data = NULL;
-	int memused;
+	int memused = 0;
 
 	if (get_config_path(path, MAX_PATH))
 		return -1;
@@ -234,21 +278,22 @@ static int check_resource(char *browser, int ntabs, int *closeTab)
 	parse_conf(data, &conf);
 
 	/* Continue on failure ... (memused = -1) */
-	memused = find_memory_usage(browser);
+	if (conf.mem_enabled)
+		memused = find_memory_usage(browser);
 
-	if (conf.tab_enabled && conf.tab_max <= ntabs) {
-		show_warning(conf.tab_max_msg);
+	if (conf.tab_enabled && conf.tab_max < ntabs) {
+		show_warning(conf.tab_max_msg,conf.tab_max_time);
 		*closeTab = 1;
 	}
 	else if (conf.mem_enabled && conf.mem_max <= memused) {
-		show_warning(conf.mem_max_msg);
+		show_warning(conf.mem_max_msg,5);
 		*closeTab = 1;
 	}
 	else if (conf.tab_enabled && conf.tab_warn <= ntabs) {
-		show_warning(conf.tab_warn_msg);
+		show_warning(conf.tab_warn_msg,conf.tab_warn_time);
 	}
 	else if (conf.mem_enabled && conf.mem_warn <= memused) {
-		show_warning(conf.tab_max_msg);
+		show_warning(conf.tab_max_msg,5);
 	}
 
 	free(data);

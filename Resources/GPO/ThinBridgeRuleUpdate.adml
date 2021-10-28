@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<policyDefinitionResources xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+                           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+                           xmlns="http://schemas.microsoft.com/GroupPolicy/2006/07/PolicyDefinition" 
+                           revision="1.0" schemaVersion="1.0">
+  <displayName></displayName>
+  <description></description>
+  <resources>
+    <stringTable>
+      <string id="TB">ThinBridge</string>
+      <string id="TB_Rule">ThinBridge リダイレクト定義自動更新設定</string>
+      <string id="ThinBridgeRuleUpdate_HELP">ThinBridge リダイレクト定義自動更新設定を行います。
+ThinBridge リダイレクト定義ファイル取得先サーバーを設定します。
+レジストリ:HKEY_LOCAL_MACHINE\SOFTWARE\Policies\ThinBridge\Rule
+キー名:ConfigServerURL
+       ConfigServerURL2
+       ConfigServerURL3
+       ConfigServerURL4
+       ConfigServerURL5
+       ConfigServerURL6
+
+・サーバー接続ルール
+  キー名:ServerConnectionRule
+
+・ピークアウト間隔 (分)
+  キー名:Interval
+
+</string>
+
+      <string id="unknown_0">ThinBridge</string>
+    </stringTable>
+    <presentationTable>
+      <presentation id="Pre_ThinBridgeRuleUpdate">
+        <textBox refId="ConfigServerURL_MSG">
+          <label>ThinBridge リダイレクト定義ファイル取得先サーバー</label>
+          <defaultValue></defaultValue>
+        </textBox>
+        <textBox refId="ConfigServerURL2_MSG">
+          <label>ThinBridge リダイレクト定義ファイル取得先サーバー2</label>
+          <defaultValue></defaultValue>
+        </textBox>
+        <textBox refId="ConfigServerURL3_MSG">
+          <label>ThinBridge リダイレクト定義ファイル取得先サーバー3</label>
+          <defaultValue></defaultValue>
+        </textBox>
+        <textBox refId="ConfigServerURL4_MSG">
+          <label>ThinBridge リダイレクト定義ファイル取得先サーバー4</label>
+          <defaultValue></defaultValue>
+        </textBox>
+        <textBox refId="ConfigServerURL5_MSG">
+          <label>ThinBridge リダイレクト定義ファイル取得先サーバー5</label>
+          <defaultValue></defaultValue>
+        </textBox>
+        <textBox refId="ConfigServerURL6_MSG">
+          <label>ThinBridge リダイレクト定義ファイル取得先サーバー6</label>
+          <defaultValue></defaultValue>
+        </textBox>
+        <decimalTextBox refId="Interval_MSG" defaultValue="10">ピークアウト間隔 (分):</decimalTextBox>
+        <checkBox refId="ServerConnectionRule_MSG">サーバー接続ルールを設定順にする ※OFFの場合はランダム</checkBox>
+        
+      </presentation>
+      <presentation id="allows" />
+    </presentationTable>
+  </resources>
+</policyDefinitionResources>

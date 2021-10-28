@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<policyDefinitions xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://schemas.microsoft.com/GroupPolicy/2006/07/PolicyDefinitions"
+                   revision="1.1"
+                   schemaVersion="1.0" >
+  <policyNamespaces>
+    <target prefix="ThinBridgeRuleUpdate" namespace="ThinBridge.Policies.RuleUpdate" />
+    <using prefix="windows" namespace="Microsoft.Policies.Windows" />
+  </policyNamespaces>
+  <resources minRequiredRevision="1.0" />
+  <categories>
+<!--
+    <category name="ThinBridgeRuleUpdate" displayName="$(string.TB_Rule)">
+      <parentCategory ref="windows:WindowsComponents" />
+    </category>
+-->
+    <category name="ThinBridgeRuleUpdate" displayName="$(string.TB_Rule)">
+      <parentCategory ref="ThinBridge" />
+    </category>
+  </categories>
+  <policies>
+    <policy name="Policies_ThinBridgeRuleUpdate" 
+    class="Machine" 
+    displayName="$(string.TB_Rule)" 
+    presentation="$(presentation.Pre_ThinBridgeRuleUpdate)" 
+    key="SOFTWARE\Policies\ThinBridge\Rule"
+    explainText="$(string.ThinBridgeRuleUpdate_HELP)">
+      <parentCategory ref="ThinBridgeRuleUpdate" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+        <text id="ConfigServerURL_MSG" valueName="ConfigServerURL" maxLength="1024" required="true"/>
+        <text id="ConfigServerURL2_MSG" valueName="ConfigServerURL2" maxLength="1024" required="false"/>
+        <text id="ConfigServerURL3_MSG" valueName="ConfigServerURL3" maxLength="1024" required="false"/>
+        <text id="ConfigServerURL4_MSG" valueName="ConfigServerURL4" maxLength="1024" required="false"/>
+        <text id="ConfigServerURL5_MSG" valueName="ConfigServerURL5" maxLength="1024" required="false"/>
+        <text id="ConfigServerURL6_MSG" valueName="ConfigServerURL6" maxLength="1024" required="false"/>
+        <decimal id="Interval_MSG" valueName="Interval" minValue="0" maxValue="60"/>
+        <boolean id="ServerConnectionRule_MSG" valueName="ServerConnectionRule">
+            <trueValue> <decimal value="1" /> </trueValue>
+            <falseValue> <decimal value="0" /> </falseValue>
+        </boolean>
+      </elements>
+    </policy>
+  </policies>
+</policyDefinitions>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<policyDefinitionResources revision="3.0" schemaVersion="1.0">
+  <displayName></displayName>
+  <description></description>
+  <resources>
+    <stringTable>
+      <string id="TB">ThinBridge</string>
+      <string id="TB_CAP">リソース制限</string>
+      <string id="unknown_0">ThinBridge</string>
+    </stringTable>
+    <presentationTable>
+      <presentation id="DefineYourSettingfortheThinBridge">
+        <checkBox refId="EnableTabLimit">タブ数・ウインドウ数を制限する</checkBox>
+        <decimalTextBox refId="TabLimit_WARNING" defaultValue="4">タブ警告表示:</decimalTextBox>
+        <decimalTextBox refId="TabLimit_MAX" defaultValue="5">タブ最大値:</decimalTextBox>
+        <textBox refId="TabLimit_WARNING_MSG">
+          <label>タブ警告メッセージ:(改行は\nで指定)</label>
+          <defaultValue>【お願い】\n現在開いているタブ・ウインドウ数が警告値に達しました。\n\nお手数ですが他の不要なタブ・ウインドウを閉じて下さい。\n\nコンピュータ資源の節約に、ご協力ください。</defaultValue>
+        </textBox>
+        <textBox refId="TabLimit_MAX_MSG">
+          <label>タブ超過メッセージ:(改行は\nで指定)</label>
+          <defaultValue>【お知らせ】\n現在開いているタブ・ウインドウ数が上限値に達しました。\nこれ以上タブ・ウインドウを追加できません。\n\nお手数ですが他の不要なタブ・ウインドウを閉じてから再度実行して下さい。\n\nコンピュータ資源の節約に、ご協力ください。</defaultValue>
+        </textBox>
+        <decimalTextBox refId="TabLimit_WARNING_MSG_TIME" defaultValue="5">タブ警告メッセージ表示秒:</decimalTextBox>
+        <decimalTextBox refId="TabLimit_MAX_MSG_TIME" defaultValue="5">タブ超過メッセージ表示秒:</decimalTextBox>
+
+      </presentation>
+      <presentation id="allows" />
+    </presentationTable>
+  </resources>
+</policyDefinitionResources>
