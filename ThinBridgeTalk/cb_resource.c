@@ -135,13 +135,15 @@ static void init_config(struct config *conf)
 
 static void dump_config(struct config *conf)
 {
-	_tprintf(_T("EnableTabLimit           : %i\n") conf->tab_enabled);
-	_tprintf(_T("TabLimit_MAX             : %i\n") conf->tab_max);
-	_tprintf(_T("TabLimit_MAX_MSG         : %s\n") conf->tab_max_msg);
-	_tprintf(_T("TabLimit_MAX_MSG_TIME    : %i\n") conf->tab_max_msg_time);
-	_tprintf(_T("TabLimit_WARNING         : %i\n") conf->tab_warn);
-	_tprintf(_T("TabLimit_WARNING_MSG     : %s\n") conf->tab_warn_msg);
-	_tprintf(_T("TabLimit_WARNING_MSG_TIME: %i\n") conf->tab_warn_msg_time);
+	_tprintf(_T("===============================\n"));
+	_tprintf(_T("EnableTabLimit           : %i\n"), conf->tab_enabled);
+	_tprintf(_T("TabLimit_MAX             : %i\n"), conf->tab_max);
+	_tprintf(_T("TabLimit_MAX_MSG         : %s\n"), conf->tab_max_msg);
+	_tprintf(_T("TabLimit_MAX_MSG_TIME    : %i\n"), conf->tab_max_msg_time);
+	_tprintf(_T("TabLimit_WARNING         : %i\n"), conf->tab_warn);
+	_tprintf(_T("TabLimit_WARNING_MSG     : %s\n"), conf->tab_warn_msg);
+	_tprintf(_T("TabLimit_WARNING_MSG_TIME: %i\n"), conf->tab_warn_msg_time);
+	_tprintf(_T("===============================\n"));
 }
 
 static void destroy_config(struct config *conf)
@@ -188,6 +190,11 @@ int cb_resource(char *cmd)
 	 * Perform resource check
 	 */
 	init_config(&conf);
+
+	/* Easy debugging via "R debug 1" */
+	if (strcmp(browser, "debug") == 0) {
+		dump_config(&conf);
+	}
 
 	if (conf.tab_enabled) {
 		if (conf.tab_max < ntabs) {
