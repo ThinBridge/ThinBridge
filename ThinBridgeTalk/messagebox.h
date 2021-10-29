@@ -9,9 +9,9 @@
 #include <tchar.h>
 
 #ifdef _UNICODE
-#define MBT_NAME "MesageBoxTimeoutW"
+#define MBT_NAME "MessageBoxTimeoutW"
 #else
-#define MBT_NAME "MesageBoxTimeoutA"
+#define MBT_NAME "MessageBoxTimeoutA"
 #endif
 
 typedef int (__stdcall *TMessageBoxTimeout)(HWND, LPCTSTR, LPCTSTR, UINT, WORD, DWORD);
