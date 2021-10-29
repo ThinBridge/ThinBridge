@@ -12,292 +12,150 @@
  */
 
 #include <Windows.h>
-#include <Dbghelp.h>
-#include <tlhelp32.h>
-#include <psapi.h>
+#include <tchar.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include <sys/stat.h>
 #include "internal.h"
+#include "messagebox.h"
 
-#pragma warning(disable : 4996)
-#define startswith(s, t) (strstr((s), (t)) == (s))
+#define HKCU HKEY_CURRENT_USER
+#define TB_RCAP _T("SOFTWARE\\Policies\\ThinBridge\\RCAP")
 
 struct config {
-	int tab_enabled;
-	int tab_max;
-	int tab_warn;
-	int tab_max_time;
-	int tab_warn_time;
-	char *tab_max_msg;
-	char *tab_warn_msg;
-	int mem_enabled;
-	int mem_max;
-	int mem_warn;
-	char *mem_max_msg;
-	char *mem_warn_msg;
+	DWORD tab_enabled;
+	DWORD tab_max;
+	DWORD tab_warn;
+	LPTSTR tab_max_msg;
+	DWORD tab_max_msg_time;
+	LPTSTR tab_warn_msg;
+	DWORD tab_warn_msg_time;
 };
 
-static int get_config_path(char *buf, DWORD size)
+static LPTSTR decode_str(LPTSTR str)
 {
-	int ret;
-	ret = RegGetValueA(HKEY_LOCAL_MACHINE, "SOFTWARE\\ThinBridge", "RCAPfile", RRF_RT_REG_SZ,
-			   NULL, buf, &size);
-	if (ret != ERROR_SUCCESS) {
-		fprintf(stderr, "cannot read %s (%i)", "SOFTWARE\\ThinBridge", ret);
-		return -1;
-	}
-	return 0;
-}
+       TCHAR c;
+       int isescape = 0;
+       int len = _tcslen(str);
+       int i = 0;
+       int j = 0;
 
-static char *read_file(const char *path)
-{
-	int ret;
-	FILE *fp;
-	char *buf;
-	struct stat st;
-
-	fp = fopen(path, "rb");
-	if (fp == NULL)
-	    return NULL;
-
-	ret = fstat(_fileno(fp), &st);
-	if (ret == -1) {
-	    fclose(fp);
-	    return NULL;
-	}
-
-	if (!(st.st_mode & S_IFREG)) {
-	    fclose(fp);
-	    return NULL;
-	}
-
-	buf = calloc(st.st_size + 1, 1);
-	if (!buf) {
-	    fclose(fp);
-	    return NULL;
-	}
-
-	ret = fread(buf, st.st_size, 1, fp);
-	if (ret != 1) {
-	    free(buf);
-	    fclose(fp);
-	    return NULL;
-	}
-	fclose(fp);
-	return buf;
-}
-
-static char *decode_str(char *str)
-{
-	char c;
-	int isescape = 0;
-	int len = strlen(str);
-	int i = 0;
-	int j = 0;
-
-	for (i = 0; i < len; i++) {
-		c = str[i];
-		if (c == '\\') {
-			isescape = 1;
-		} else if (isescape && c == 'n') {
-			str[j++] = '\n';
-			isescape = 0;
-		} else if (isescape && c == 'r') {
-			// Ignore '\r' to convert '\\r\\n' to '\n'
-			isescape = 0;
-		} else {
-			str[j++] = c;
-			isescape = 0;
-		}
-	}
-	str[j] = '\0';
-	return str;
+       for (i = 0; i < len; i++) {
+               c = str[i];
+               if (c == _T('\\')) {
+                       isescape = 1;
+               } else if (isescape && c == _T('n')) {
+                       str[j++] =_T('\n');
+                       isescape = 0;
+               } else if (isescape && c == _T('r')) {
+                       // Ignore '\r' to convert '\\r\\n' to '\n'
+                       isescape = 0;
+               } else {
+                       str[j++] = c;
+                       isescape = 0;
+               }
+       }
+       str[j] = _T('\0');
+       return str;
 }
 
 /*
- * Parse ResourceCap.ini into "config"
- */
-static void parse_conf(char *data, struct config *conf)
-{
-	char *line;
-
-	line = strtok(data, "\r\n");
-	while (line) {
-		if (startswith(line, "EnableTabLimit=")) {
-			conf->tab_enabled = atoi(line + strlen("EnableTabLimit="));
-		} else if (startswith(line, "TabLimit_WARNING=")) {
-			conf->tab_warn = atoi(line + strlen("TabLimit_WARNING="));
-		} else if (startswith(line, "TabLimit_MAX=")) {
-			conf->tab_max = atoi(line + strlen("TabLimit_MAX="));
-		} else if (startswith(line, "TabLimit_WARNING_MSG_TIME=")) {
-			conf->tab_warn_time = atoi(line + strlen("TabLimit_WARNING_MSG_TIME="));
-		} else if (startswith(line, "TabLimit_MAX_MSG_TIME=")) {
-			conf->tab_max_time = atoi(line + strlen("TabLimit_MAX_MSG_TIME="));
-		} else if (startswith(line, "EnableMemLimit=")) {
-			conf->mem_enabled = atoi(line + strlen("EnableMemLimit="));
-		} else if (startswith(line, "MemLimit_WARNING=")) {
-			conf->mem_warn = atoi(line + strlen("MemLimit_WARNING="));
-		} else if (startswith(line, "MemLimit_MAX=")) {
-			conf->mem_max = atoi(line + strlen("MemLimit_MAX="));
-		} else if (startswith(line, "TabLimit_WARNING_MSG=")) {
-			conf->tab_warn_msg = decode_str(line + strlen("TabLimit_WARNING_MSG="));
-		} else if (startswith(line, "TabLimit_MAX_MSG=")) {
-			conf->tab_max_msg = decode_str(line + strlen("TabLimit_MAX_MSG="));
-		} else if (startswith(line, "MemLimit_WARNING_MSG=")) {
-			conf->mem_warn_msg = decode_str(line + strlen("MemLimit_WARNING_MSG="));
-		} else if (startswith(line, "MemLimit_MAX_MSG=")) {
-			conf->mem_max_msg = decode_str(line + strlen("MemLimit_MAX_MSG="));
-		}
-		line = strtok(NULL, "\r\n");
-	}
-}
-
-/*
- * Return the executable name for the browser.
- */
-static char *get_process_name(const char *browser)
-{
-	if (strcmp(browser, "edge") == 0) {
-		return "msedge.exe";
-	} else if (strcmp(browser, "chrome") == 0) {
-		return "chrome.exe";
-	} else if (strcmp(browser, "firefox") == 0) {
-		return "firefox.exe";
-	}
-	return NULL;
-}
-
-/*
- * Return the amount of memory used by the program (in MB).
+ * Read a string from Windows registry. This function allocates a
+ * new buffer (so you must free it later).
  *
- * >>> find_memory_usage("msedge.exe")
- * 10224  // mb
+ * Note: `out` gets modified if (and only if) on success.
  */
-static int find_memory_usage(char *browser)
+static int get_winreg_str(HKEY hkey, LPCTSTR key, LPCTSTR subkey, LPTSTR *out)
 {
-	long long bytes = 0;
-	HANDLE hs;
-	HANDLE hp;
-	PROCESS_MEMORY_COUNTERS_EX pmc = {0};
-	PROCESSENTRY32 entry = {0};
-	char *procname;
-	BOOL found;
+	LSTATUS ret;
+	LPTSTR str;
+	DWORD size;
 
-	pmc.cb = sizeof(pmc);
-	entry.dwSize = sizeof(entry);
-
-	procname = get_process_name(browser);
-	if (procname == NULL) {
+	ret = RegGetValue(hkey, key, subkey, RRF_RT_REG_SZ, NULL, NULL, &size);
+	if (ret != ERROR_SUCCESS) {
 		return -1;
 	}
 
-	hs = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
-	if (hs == INVALID_HANDLE_VALUE) {
+	str = malloc(sizeof(TCHAR) * (size + 1));
+	if (str == NULL) {
 		return -1;
 	}
 
-	found = Process32First(hs, &entry);
-	while (found) {
-		if (strcmp(procname, entry.szExeFile) == 0) {
-			hp = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, entry.th32ProcessID);
-			if (hp != INVALID_HANDLE_VALUE) {
-				if (GetProcessMemoryInfo(hp, (PROCESS_MEMORY_COUNTERS *) &pmc, sizeof(pmc))) {
-					bytes  += pmc.PrivateUsage;
-				}
-				CloseHandle(hp);
-			}
-		}
-		found = Process32Next(hs, &entry);
+	ret = RegGetValue(hkey, key, subkey, RRF_RT_REG_SZ, NULL, str, &size);
+	if (ret != ERROR_SUCCESS) {
+		free(str);
+		return -1;
 	}
-	CloseHandle(hs);
-	return (int) (bytes / 1024 / 1024);
+	str[size] = _T('\0');
+	*out = decode_str(str);
+	return 0;
 }
-
-typedef int(__stdcall* TMessageBoxTimeout)(HWND, LPCTSTR, LPCTSTR, UINT, WORD, DWORD);
-static void ShowTimeoutMessageBox(LPCTSTR strMsg, int iType, int iTimeoutSec)
-{
-	BOOL bFreeLibrary = FALSE;
-	HMODULE hModule = { 0 };
-	hModule = GetModuleHandle("user32.dll");
-	if (!hModule){
-		hModule = LoadLibrary("user32.dll");
-		if (hModule)
-			bFreeLibrary = TRUE;
-	}
-
-	MSG msg = { 0 };
-	PeekMessage(&msg, NULL, WM_USER, WM_USER, PM_NOREMOVE);
-
-	if (hModule){
-		TMessageBoxTimeout  MessageBoxTimeout;
-#ifdef _UNICODE
-		MessageBoxTimeout = (TMessageBoxTimeout)GetProcAddress(hModule, "MessageBoxTimeoutW");
-#else
-		MessageBoxTimeout = (TMessageBoxTimeout)GetProcAddress(hModule, "MessageBoxTimeoutA");
-#endif
-		if (MessageBoxTimeout){
-			MessageBoxTimeout(NULL, strMsg,
-				"ThinBridge", iType, LANG_NEUTRAL, iTimeoutSec *1000);
-		}
-		else{
-			MessageBox(NULL, strMsg, "ThinBridge", iType);
-		}
-		if (bFreeLibrary){
-			FreeLibrary(hModule);
-			bFreeLibrary = FALSE;
-			hModule = NULL;
-		}
-	}
-}
-static void show_warning(const char* msg, int iTimeoutSec)
-{
-	ShowTimeoutMessageBox(msg, MB_OK | MB_ICONWARNING | MB_SYSTEMMODAL, iTimeoutSec);
-	return;
-}
-
 
 /*
- * Check if the current resource usage is within the limit.
+ * Read a dword from Windows registry.
  */
-static int check_resource(char *browser, int ntabs, int *closeTab)
+static int get_winreg_dword(HKEY hkey, LPCSTR key, LPCSTR subkey, DWORD *out)
 {
-	struct config conf = {0};
-	char path[MAX_PATH] = {0};
-	char *data = NULL;
-	int memused = 0;
+	LSTATUS ret;
+	DWORD val;
+	DWORD size = sizeof(DWORD);
 
-	if (get_config_path(path, MAX_PATH))
+	ret = RegGetValue(hkey, key, subkey, RRF_RT_REG_DWORD, NULL, &val, &size);
+	if (ret != ERROR_SUCCESS) {
 		return -1;
-
-	data = read_file(path);
-	if (data == NULL)
-		return -1;
-
-	parse_conf(data, &conf);
-
-	/* Continue on failure ... (memused = -1) */
-	if (conf.mem_enabled)
-		memused = find_memory_usage(browser);
-
-	if (conf.tab_enabled && conf.tab_max < ntabs) {
-		show_warning(conf.tab_max_msg,conf.tab_max_time);
-		*closeTab = 1;
 	}
-	else if (conf.mem_enabled && conf.mem_max <= memused) {
-		show_warning(conf.mem_max_msg,5);
-		*closeTab = 1;
-	}
-	else if (conf.tab_enabled && conf.tab_warn <= ntabs) {
-		show_warning(conf.tab_warn_msg,conf.tab_warn_time);
-	}
-	else if (conf.mem_enabled && conf.mem_warn <= memused) {
-		show_warning(conf.tab_max_msg,5);
-	}
-
-	free(data);
+	*out = val;
 	return 0;
+}
+
+static void init_config(struct config *conf)
+{
+	memset(conf, 0, sizeof(struct config));
+
+	get_winreg_dword(HKCU, TB_RCAP,
+		_T("EnableTabLimit"), &conf->tab_enabled);
+
+	get_winreg_dword(HKCU, TB_RCAP,
+		_T("TabLimit_MAX"), &conf->tab_max);
+
+	get_winreg_str(HKCU, TB_RCAP,
+		_T("TabLimit_MAX_MSG"), &conf->tab_max_msg);
+
+	get_winreg_dword(HKCU, TB_RCAP,
+		_T("TabLimit_MAX_MSG_TIME"), &conf->tab_max_msg_time);
+
+	get_winreg_dword(HKCU, TB_RCAP,
+		_T("TabLimit_WARNING"), &conf->tab_warn);
+
+	get_winreg_str(HKCU, TB_RCAP,
+		_T("TabLimit_WARNING_MSG"), &conf->tab_warn_msg);
+
+	get_winreg_dword(HKCU, TB_RCAP,
+		_T("TabLimit_WARNING_MSG_TIME"), &conf->tab_warn_msg_time);
+}
+
+static void dump_config(struct config *conf)
+{
+	_tprintf(_T("EnableTabLimit           : %i\n") conf->tab_enabled);
+	_tprintf(_T("TabLimit_MAX             : %i\n") conf->tab_max);
+	_tprintf(_T("TabLimit_MAX_MSG         : %s\n") conf->tab_max_msg);
+	_tprintf(_T("TabLimit_MAX_MSG_TIME    : %i\n") conf->tab_max_msg_time);
+	_tprintf(_T("TabLimit_WARNING         : %i\n") conf->tab_warn);
+	_tprintf(_T("TabLimit_WARNING_MSG     : %s\n") conf->tab_warn_msg);
+	_tprintf(_T("TabLimit_WARNING_MSG_TIME: %i\n") conf->tab_warn_msg_time);
+}
+
+static void destroy_config(struct config *conf)
+{
+	free(conf->tab_warn_msg);
+	conf->tab_warn_msg = NULL;
+
+	free(conf->tab_max_msg);
+	conf->tab_max_msg = NULL;
+}
+
+static int show_warning(LPCTSTR message, int sec)
+{
+	return ShowMessageBoxTimeout(message, _T("ThinBridge"), MB_OK|MB_ICONWARNING|MB_SYSTEMMODAL, sec);
 }
 
 int cb_resource(char *cmd)
@@ -306,6 +164,7 @@ int cb_resource(char *cmd)
 	char *space;
 	char *browser;
 	int closeTab = 0;
+	struct config conf;
 
 	/*
 	 * R edge 12
@@ -325,10 +184,23 @@ int cb_resource(char *cmd)
 	 */
 	ntabs = atoi(space + 1);
 
-	if (check_resource(browser, ntabs, &closeTab)) {
-		closeTab = 0;
+	/*
+	 * Perform resource check
+	 */
+	init_config(&conf);
+
+	if (conf.tab_enabled) {
+		if (conf.tab_max < ntabs) {
+			show_warning(conf.tab_max_msg, conf.tab_max_msg_time);
+			closeTab = 1;
+		}
+		else if (conf.tab_warn <= ntabs) {
+			show_warning(conf.tab_warn_msg, conf.tab_warn_msg_time);
+		}
 	}
 
 	talk_response("{\"status\":\"OK\",\"closeTab\":%i}", closeTab);
+
+	destroy_config(&conf);
 	return 0;
 }
