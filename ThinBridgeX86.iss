@@ -1,4 +1,4 @@
-;ThinBridge Setup--
+﻿;ThinBridge Setup--
 
 [Setup]
 AppName=ThinBridge
@@ -38,7 +38,7 @@ Root: HKLM; Subkey: "Software\ThinBridge"; ValueType: string; ValueName: "Extens
 
 
 ;IE Addin
-;�A�h�I���̗L����
+;アドオンの有効化
 ;Root: HKLM; Subkey: "Software\Microsoft\Windows\CurrentVersion\Policies\Ext"; ValueType: dword; ValueName: "ListBox_Support_CLSID"; ValueData: "1"
 ;Root: HKLM; Subkey: "Software\Microsoft\Windows\CurrentVersion\Policies\Ext\CLSID"; ValueType: string; ValueName: "{{3A56619B-37AC-40DA-833E-410F3BEDCBDC}"; ValueData: "1";Flags: uninsdeletevalue
 
@@ -133,14 +133,14 @@ Source: "Resources\firefox.json"; DestDir: "{app}\ThinBridgeHost";Flags: ignorev
 Source: "Resources\chrome.json"; DestDir: "{app}\ThinBridgeHost";Flags: ignoreversion;permissions:users-readexec admins-full system-full
 
 [Icons]
-Name: "{group}\ThinBridgeSetting"; Filename: "{app}\ThinBridgeSetting.exe"; WorkingDir: "{app}"
-Name: "{group}\Checker"; Filename: "{app}\ThinBridgeChecker.exe"; WorkingDir: "{app}"
-Name: "{group}\ThinBridgeRuleUpdateSetting"; Filename: "{app}\ThinBridgeRuleUpdaterSetting.exe"; WorkingDir: "{app}"
+Name: "{group}\リダイレクト定義設定"; Filename: "{app}\ThinBridgeSetting.exe"; WorkingDir: "{app}"
+Name: "{group}\環境チェッカー"; Filename: "{app}\ThinBridgeChecker.exe"; WorkingDir: "{app}"
+Name: "{group}\リダイレクト定義自動更新設定"; Filename: "{app}\ThinBridgeRuleUpdaterSetting.exe"; WorkingDir: "{app}"
 Name: "{commonstartup}\ThinBridgeRuleUpdater"; Filename: "{app}\ThinBridgeRuleUpdater.exe"; WorkingDir: "{app}"
 
 [Dirs]
 Name: "{app}";Permissions: users-modify
-;log�֘A�̓A���C���X�g�[���ŏ����Ȃ�
+;log関連はアンインストールで消さない
 Name: "{app}\TBUpdateLog";Permissions: users-modify;Flags: uninsneveruninstall
 
 [Run] 
