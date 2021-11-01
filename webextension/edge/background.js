@@ -315,6 +315,9 @@ var ThinBridgeTalkClient = {
 	}
 };
 
+/*
+ * Support ThinBridge's resource cap feature
+ */
 var ResourceCap = {
 
 	init: function() {
