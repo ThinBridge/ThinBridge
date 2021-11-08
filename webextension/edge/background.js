@@ -348,6 +348,11 @@ var ResourceCap = {
 	check: function(tabId, ntabs) {
 		var query = new String(`R ${BROWSER} ${ntabs}`);
 		chrome.runtime.sendNativeMessage(SERVER_NAME, query, (resp) => {
+			// Need this to support ThinBridge v4.0.2.3 (or before)
+			if (chrome.runtime.lastError) {
+				return;
+			}
+
 			if (resp.closeTab) {
 				chrome.tabs.remove(tabId, () => {
 					if (chrome.runtime.lastError) {
