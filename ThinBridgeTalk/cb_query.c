@@ -49,7 +49,7 @@ static int open_url(char *browser, char *path, char *url)
 		dwCreationFlags = CREATE_NEW_PROCESS_GROUP;
 	}
 
-	ret = CreateProcess(path,   /* lpApplicationName */
+	ret = CreateProcessA(path,  /* lpApplicationName */
 	                    sb.buf, /* lpCommandLine */
 	                    NULL,   /* lpProcessAttributes  */
 	                    NULL,   /* lpThreadAttributes */
