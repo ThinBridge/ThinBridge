@@ -1,8 +1,8 @@
 {
 	"manifest_version": 2,
-	"name": "ThinBridge Talk Client",
+	"name": "__MSG_extName__",
 	"version": "99.99.99",
-	"description": "ThinBridge Talk Client for Edge",
+	"description": "__MSG_extDescription__",
 	"permissions": [
 		"nativeMessaging",
 		"alarms",
@@ -20,5 +20,6 @@
 	"icons": {
 		"128": "misc/128x128.png"
 	},
+	"default_locale": "ja",
 	"key": "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDcBHwzDvyBQ6bDppkIs9MP4ksKqCMyXQ/A52JivHZKh4YO/9vJsT3oaYhSpDCE9RPocOEQvwsHsFReW2nUEc6OLLyoCFFxIb7KkLGsmfakkut/fFdNJYh0xOTbSN8YvLWcqph09XAY2Y/f0AL7vfO1cuCqtkMt8hFrBGWxDdf9CQIDAQAB"
 }
