@@ -1745,7 +1745,7 @@ void CCRre::IEStart(CString& strURL)
 	//DDEåƒÇ—èoÇµÇ™óLå¯Ç»èÍçá DefaultóLå¯
 	if(!theApp.m_RedirectList.m_bDisableIE_DDE)
 	{
-		if(!DdeInitialize(&m_dwDDEID,(PFNCALLBACK)MakeProcInstance((FARPROC)DDECallback, ghInstance),
+		if(!DdeInitializeA(&m_dwDDEID,(PFNCALLBACK)MakeProcInstance((FARPROC)DDECallback, ghInstance),
 			CBF_SKIP_ALLNOTIFICATIONS | APPCMD_CLIENTONLY, 0L) != DMLERR_NO_ERROR)
 		{
 			hszService = DdeCreateStringHandle(m_dwDDEID, _T("IEXPLORE"), CP_WINNEUTRAL);
