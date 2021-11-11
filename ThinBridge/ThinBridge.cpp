@@ -1734,7 +1734,7 @@ void CCRre::IEStart(CString& strURL)
 
 	len = wcstombs(buf, (LPCTSTR)strURL, 4096);
 	if (len < 0) {
-		free(buf)
+		free(buf);
 		return;
 	}
 
