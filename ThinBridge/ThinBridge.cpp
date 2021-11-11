@@ -1726,7 +1726,7 @@ void CCRre::IEStart(CString& strURL)
 	HSZ hszService={0};
 	HSZ hszTopic={0};
 	TCHAR buf[1024];
-	_tcscpy_s(buf, 1024, (LPCSTR)(LPCTSTR)strURL);
+	_tcscpy_s(buf, 1024, (LPCTSTR)strURL);
 
 	HCONV hConv={0};
 	HDDEDATA hDDEData={0};
