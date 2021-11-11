@@ -1748,8 +1748,8 @@ void CCRre::IEStart(CString& strURL)
 		if(!DdeInitializeA(&m_dwDDEID,(PFNCALLBACK)MakeProcInstance((FARPROC)DDECallback, ghInstance),
 			CBF_SKIP_ALLNOTIFICATIONS | APPCMD_CLIENTONLY, 0L) != DMLERR_NO_ERROR)
 		{
-			hszService = DdeCreateStringHandle(m_dwDDEID, _T("IEXPLORE"), CP_WINNEUTRAL);
-			hszTopic = DdeCreateStringHandle(m_dwDDEID, _T("WWW_OpenURL"), CP_WINNEUTRAL);
+			hszService = DdeCreateStringHandle(m_dwDDEID, _T("IEXPLORE"), CP_WINANSI);
+			hszTopic = DdeCreateStringHandle(m_dwDDEID, _T("WWW_OpenURL"), CP_WINANSI);
 			{
 				hConv = DdeConnect(m_dwDDEID, hszService, hszTopic, NULL);
 				DdeFreeStringHandle(m_dwDDEID, hszService);
