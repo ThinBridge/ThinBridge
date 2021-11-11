@@ -1728,7 +1728,7 @@ void CCRre::IEStart(CString& strURL)
 	char *buf;
 	int len;
 
-	buf = calloc(1, 4096);
+	buf = (char *) calloc(1, 4096);
 	if (buf == NULL)
 		return;
 
