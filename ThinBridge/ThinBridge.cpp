@@ -1725,8 +1725,18 @@ void CCRre::IEStart(CString& strURL)
 {
 	HSZ hszService={0};
 	HSZ hszTopic={0};
-	TCHAR buf[1024];
-	_tcscpy_s(buf, 1024, (LPCTSTR)strURL);
+	char *buf;
+	int len;
+
+	buf = calloc(4096);
+	if (buf == NULL)
+		return;
+
+	len = wcstombs(buf, (LPCTSTR)strURL, 4096);
+	if (len < 0) {
+		free(buf)
+		return;
+	}
 
 	HCONV hConv={0};
 	HDDEDATA hDDEData={0};
@@ -1749,7 +1759,7 @@ void CCRre::IEStart(CString& strURL)
 					CString cmd;
 					cmd = strURL;
 					DWORD result=0;
-					hDDEData = DdeClientTransaction((LPBYTE)buf,1024*sizeof(TCHAR),hConv,0,0,XTYP_EXECUTE,30000,&result);
+					hDDEData = DdeClientTransaction((LPBYTE)buf,len + 1,hConv,0,0,XTYP_EXECUTE,30000,&result);
 					if (hDDEData)
 						DdeFreeDataHandle(hDDEData);
 					DdeDisconnect(hConv);
