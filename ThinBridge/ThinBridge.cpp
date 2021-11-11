@@ -1748,6 +1748,8 @@ void CCRre::IEStart(CString& strURL)
 					cmd = strURL;
 					DWORD result=0;
 					hDDEData = DdeClientTransaction((LPBYTE)cmd.GetBuffer(0),static_cast<DWORD>((cmd.GetLength()+1)*2),hConv,0,0,XTYP_EXECUTE,30000,&result);
+					if (hDDEData)
+						DdeFreeDataHandle(hDDEData);
 					DdeDisconnect(hConv);
 					DdeUninitialize(m_dwDDEID);
 					if (SBUtil::InThinApp())
