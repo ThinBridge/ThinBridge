@@ -28,7 +28,7 @@ jobs:
         with:
           name: Installers
           path: SetupOutput/*.exe
-  webextension:
+  assets:
     runs-on: [ ubuntu-latest ]
     steps:
       - uses: actions/checkout@v2
@@ -44,3 +44,8 @@ jobs:
         with:
           name: WebExtensions
           path: webextension/*/*.zip
+      - name: Upload GPO Templates
+        uses: actions/upload-artifact@v2
+        with:
+          name: Templates
+          path: Resources/GPO/*.adm*
