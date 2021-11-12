@@ -1745,7 +1745,9 @@ void CCRre::IEStart(CString& strURL)
 				if(hConv)
 				{
 					CString cmd;
-					cmd = strURL;
+					//2021-11-12 URLに,カンマが含まれているとDDE経由でURLが欠損する。
+					//回避するために、URLパラメータ全体をダブルクオートで括る。
+					cmd.Format(_T("\"%s\""),strURL);
 					DWORD result=0;
 					hDDEData = DdeClientTransaction((LPBYTE)cmd.GetBuffer(0),static_cast<DWORD>((cmd.GetLength()+1)*2),hConv,0,0,XTYP_EXECUTE,30000,&result);
 					DdeDisconnect(hConv);
