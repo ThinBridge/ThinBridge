@@ -155,9 +155,21 @@ static void destroy_config(struct config *conf)
 	conf->tab_max_msg = NULL;
 }
 
-static int show_warning(LPCTSTR message, int sec)
+static void show_warning(LPCTSTR message, int sec)
 {
-	return ShowMessageBoxTimeout(message, _T("ThinBridge"), MB_OK|MB_ICONWARNING|MB_SYSTEMMODAL, sec);
+	HANDLE hMutex;
+	DWORD ret;
+
+	/* Use mutex to show a single MessageBox at one time */
+	hMutex = CreateMutex(NULL, FALSE, _T("Local\\TB_RCAP_ALERT"));
+	if (hMutex) {
+		ret = WaitForSingleObject(hMutex, 300);   /* 300 msec */
+		if (ret != WAIT_TIMEOUT) {
+			ShowMessageBoxTimeout(message, _T("ThinBridge"),
+						MB_OK|MB_ICONWARNING|MB_SYSTEMMODAL, sec);
+		}
+		CloseHandle(hMutex);
+	}
 }
 
 int cb_resource(char *cmd)

@@ -1,32 +1,22 @@
 ThinBridge
 ==========
 
-ThinBridge is an enterprise browser launcher for Windows. It has the following features:
+ThinBridgeはエンタープライズ環境向けのブラウザ切替えソリューションです。
 
- * Switch between browsers based on a customizable URL list.
- * Support IE/Edge/Firefox/Chrome
- * Support Remote Desktop, VMWare Horizon and Citrix.
+ * IE・Edge・Firefox・Chromeをサポート。
+ * 仮想環境としてRDP・VMWare Horizon・Citrixをサポート。
+ * リダイレクト対象リストをGUIの専用ツールで管理可能。
+ * GPOを通じたリソース制限に対応。
 
-How to Install
---------------
+インストール方法
+----------------
 
-Download the latest release archive from the release page:
-
-https://gitlab.com/clear-code/thinbridge/-/releases
-
-Unzip the archive:
-
-    % powershell -Command "Expand-Archive ThinBridge.zip -Dest C:\ThinBridge"
-
-Exec `install.bat` for system registration:
-
-    % C:\ThinBridge\install.bat
-
-Development
------------
-
-1. Install Visual Studio 2010 (make sure to select MFC and ATL)
-
-2. Execute the following:
-
-   % msbuild /p:configuration=Release
+ 1. GitHubのリリースページからインストーラを取得する。
+    * https://github.com/thinbridge/thinbridge/releases
+    * `ThinBridgeSetup_x64.exe` (64ビットWindows向け)
+    * `ThinBridgeSetup_x86.exe` (32ビットWindows向け)
+ 2. インストーラをWindows上で実行する。
+ 3. ブラウザ向けのアドオンをインストールする（任意）
+    * [Microsfot Edge](https://microsoftedge.microsoft.com/addons/detail/famoofbkcpjdkihdngnhgbdfkfenhcnf)
+    * [Google Chrome](https://chrome.google.com/webstore/detail/iiajmhibpjkpmfmbhegccdfmfnfeffmh)
+    * [Mozilla Firefox](https://addons.mozilla.org/ja/firefox/addon/thinbridge/)

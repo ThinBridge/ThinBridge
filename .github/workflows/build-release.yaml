@@ -16,15 +16,36 @@ jobs:
         run: iscc.exe ThinBridgeX86.iss
       - name: Make Installer (x64)
         run: iscc.exe ThinBridgeX64.iss
-      - name: Upload Bin
+      - name: Upload Binaries
         uses: actions/upload-artifact@v2
         with:
-          name: ThinBridge-Bin
+          name: Binaries
           path: |
             Release/*.exe
             Release/*.dll
       - name: Upload Installer
         uses: actions/upload-artifact@v2
         with:
-          name: ThinBridge-Installer
+          name: Installers
           path: SetupOutput/*.exe
+  assets:
+    runs-on: [ ubuntu-latest ]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build Testing Extensions
+        run: |
+          cp webextension/edge/manifest.json.dev webextension/edge/manifest.json
+          make -C webextension/edge
+          cp webextension/chrome/manifest.json.dev webextension/chrome/manifest.json
+          make -C webextension/chrome
+          make -C webextension/firefox
+      - name: Upload Extensions
+        uses: actions/upload-artifact@v2
+        with:
+          name: WebExtensions
+          path: webextension/*/*.zip
+      - name: Upload GPO Templates
+        uses: actions/upload-artifact@v2
+        with:
+          name: Templates
+          path: Resources/GPO/*.adm*

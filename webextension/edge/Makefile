@@ -1,6 +1,6 @@
 FILES = manifest.json \
         misc/128x128.png \
-        misc/alert.png \
+	_locales/ja/messages.json \
         background.js
 
 all: ThinBridgeEdge.zip
