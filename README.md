@@ -20,3 +20,21 @@ ThinBridgeはエンタープライズ環境向けのブラウザ切替えソリ�
     * [Microsfot Edge](https://microsoftedge.microsoft.com/addons/detail/famoofbkcpjdkihdngnhgbdfkfenhcnf)
     * [Google Chrome](https://chrome.google.com/webstore/detail/iiajmhibpjkpmfmbhegccdfmfnfeffmh)
     * [Mozilla Firefox](https://addons.mozilla.org/ja/firefox/addon/thinbridge/)
+
+ThinBridgeのリリース手順
+------------------------
+
+ 1. 次のファイルのバージョンをインクリメントする
+    - ThinBridgeSetupX64.iss
+    - ThinBridgeSetupX86.iss
+ 2. 次のコマンドでタグを打ってプッシュする
+    ```sh
+    $ git tag -a v4.0.2.4 -m "ThinBridge v4.0.2.4"
+    $ git push origin master --tags
+    ```
+ 3. GitHubリリース上でリリースノートを作成する。
+    * 参考: [v4.0.2.4のリリースノート](https://github.com/ThinBridge/ThinBridge/releases/tag/v4.0.2.4)
+ 4. GitHub Actionsで生成されたEXEインストーラを添付する。
+    * `ThinBridgeSetup_x64.exe`
+    * `ThinBridgeSetup_x86.exe`
+    * `Template.zip`
