@@ -37,8 +37,27 @@ ThinBridgeのリリース手順
     $ git push origin master --tags
     ```
  3. GitHubリリース上でリリースノートを作成する。
-    * [リリースノートのテンプレート](https://github.com/ThinBridge/ThinBridge/wiki/%E3%83%AA%E3%83%AA%E3%83%BC%E3%82%B9%E6%89%8B%E9%A0%86#%E3%83%AA%E3%83%AA%E3%83%BC%E3%82%B9%E8%AA%AC%E6%98%8E%E6%96%87%E3%81%AE%E3%83%86%E3%83%B3%E3%83%97%E3%83%AC%E3%83%BC%E3%83%88)
-    * 参考: [現在の最終リリースのリリースノート](https://github.com/ThinBridge/ThinBridge/releases/latest)
+     * 参考: [現在の最終リリースのリリースノート](https://github.com/ThinBridge/ThinBridge/releases/latest)
+     * リリースノートのテンプレート：
+       ```
+       ## 前バージョンからの変更点
+       
+       * 変更点1
+       * 変更点2
+       * ...
+       
+       ## リリースについて
+       
+       ThinBridgeでは2種類のインストーラとGPOテンプレートを提供しています。
+       
+       * **ThinBridgeSetup_x64.exe**
+         *  64ビット版のインストーラです。
+         * 一般的な環境ではこちらのインストーラを利用ください。
+       * **ThinBridgeSetup_x86.exe**
+         * 32ビット版Windows環境を利用している場合はこちらを利用します。
+       * **Templates.zip**
+         * ThinBridge用のADMXテンプレートです。
+       ```
  4. GitHub Actionsで生成されたEXEインストーラを添付する。
     [Build ThinBridge](https://github.com/ThinBridge/ThinBridge/actions/workflows/build-release.yaml)のArtifactsから取得した以下のファイルを使用する。
     * `ThinBridgeSetup_x64.exe` （`Installers`から取り出す）
