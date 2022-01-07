@@ -29,11 +29,15 @@ ThinBridgeのリリース手順
     - ThinBridgeSetupX86.iss
  2. 次のコマンドでタグを打ってプッシュする
     ```sh
+    $ make release
+    ```
+    または
+    ```sh
     $ git tag -a v4.0.2.4 -m "ThinBridge v4.0.2.4"
     $ git push origin master --tags
     ```
  3. GitHubリリース上でリリースノートを作成する。
-    * 参考: [v4.0.2.4のリリースノート](https://github.com/ThinBridge/ThinBridge/releases/tag/v4.0.2.4)
+    * 参考: [現在の最終リリースのリリースノート](https://github.com/ThinBridge/ThinBridge/releases/latest)
  4. GitHub Actionsで生成されたEXEインストーラを添付する。
     * `ThinBridgeSetup_x64.exe`
     * `ThinBridgeSetup_x86.exe`
