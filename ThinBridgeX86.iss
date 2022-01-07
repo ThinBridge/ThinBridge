@@ -3,8 +3,8 @@
 [Setup]
 AppName=ThinBridge
 AppVerName=ThinBridge
-VersionInfoVersion=4.0.2.4
-AppVersion=4.0.2.4
+VersionInfoVersion=4.0.2.5
+AppVersion=4.0.2.5
 AppMutex=ThinBridgeSetup
 ;DefaultDirName=C:\ThinBridge
 DefaultDirName={code:GetProgramFiles}\ThinBridge
