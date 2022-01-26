@@ -785,12 +785,12 @@ public:
 						}
 					}
 
-					//例外 [CUSTOM19]の場合は、[CUSTOM20]をチェックしない。CUSTOM19とCUSTOM20はセットとみなす。
+					//例外（Google Chrome（自動切り替え）/Chrome Switcher）サイトの場合は、Office365サイトをチェックしない。この2つはセットとみなす。
 					if(bRet)
 					{
-						if (pRedirectData->m_strExecType == _T("CUSTOM19"))
+						if (pRedirectData->m_strExecType == _T(SECTION_CHROME_SWITCHER))
 						{
-							//CUSTOM19でhitしているので、次のCUSTOM20はチェック不要
+							//Google Chrome（自動切り替え）/Chrome Switcherでhitしているので、次のOffice365サイトはチェック不要
 							break;
 						}
 					}

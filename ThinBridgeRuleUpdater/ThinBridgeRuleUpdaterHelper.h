@@ -501,7 +501,7 @@ public:
 						iValidCnt++;
 					else if (strTemp == _T("[" SECTION_DMZ "]"))
 						iValidCnt++;
-					else if (strTemp == _T("[CUSTOM19]"))
+					else if (strTemp == _T("[" SECTION_CHROME_SWITCHER "]"))
 						iValidCnt++;
 					else if (strTemp == _T("[CUSTOM20]"))
 						iValidCnt++;

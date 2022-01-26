@@ -442,7 +442,7 @@ public:
 	CURLRedirectDataClass* m_pCustom16;
 	CURLRedirectDataClass* m_pCustom17;
 	CURLRedirectDataClass* m_pDMZ;
-	CURLRedirectDataClass* m_pCustom19;
+	CURLRedirectDataClass* m_pChromeSwitcher;
 	CURLRedirectDataClass* m_pCustom20;
 
 
@@ -476,7 +476,7 @@ public:
 		m_pCustom16=NULL;
 		m_pCustom17=NULL;
 		m_pDMZ=NULL;
-		m_pCustom19=NULL;
+		m_pChromeSwitcher=NULL;
 		m_pCustom20=NULL;
 		m_bQuickRedirect = FALSE;
 		m_bTopURLOnly=FALSE;
@@ -533,7 +533,7 @@ public:
 		m_pCustom16=NULL;
 		m_pCustom17=NULL;
 		m_pDMZ=NULL;
-		m_pCustom19=NULL;
+		m_pChromeSwitcher=NULL;
 		m_pCustom20=NULL;
 		m_bQuickRedirect = FALSE;
 		m_bTopURLOnly=FALSE;
@@ -585,9 +585,9 @@ public:
 			pRedirectData = new CURLRedirectDataClass;
 			pRedirectData->m_bDisabled = FALSE;
 			pRedirectData->m_bTopPageOnly = TRUE;
-			pRedirectData->m_strExecType = _T("CUSTOM19");
+			pRedirectData->m_strExecType = _T(SECTION_CHROME_SWITCHER);
 			pRedirectData->m_dwCloseTimeout = 3;
-			m_pCustom19 = pRedirectData;
+			m_pChromeSwitcher = pRedirectData;
 			m_arr_RedirectBrowser.Add(pRedirectData);
 
 			pRedirectData = NULL;
@@ -737,9 +737,9 @@ public:
 			pRedirectData = new CURLRedirectDataClass;
 			pRedirectData->m_bDisabled = TRUE;
 			pRedirectData->m_bTopPageOnly = TRUE;
-			pRedirectData->m_strExecType = _T("CUSTOM19");
+			pRedirectData->m_strExecType = _T(SECTION_CHROME_SWITCHER);
 			pRedirectData->m_dwCloseTimeout = 3;
-			m_pCustom19 = pRedirectData;
+			m_pChromeSwitcher = pRedirectData;
 			m_arr_RedirectBrowser.Add(pRedirectData);
 
 			pRedirectData = NULL;
@@ -1205,8 +1205,8 @@ public:
 							m_pCustom17->Copy(pRedirectData);
 						else if(strExecType.CompareNoCase(_T(SECTION_DMZ))==0 && m_pDMZ)
 							m_pDMZ->Copy(pRedirectData);
-						else if(strExecType.CompareNoCase(_T("CUSTOM19"))==0 && m_pCustom19)
-							m_pCustom19->Copy(pRedirectData);
+						else if(strExecType.CompareNoCase(_T(SECTION_CHROME_SWITCHER))==0 && m_pChromeSwitcher)
+							m_pChromeSwitcher->Copy(pRedirectData);
 						else if(strExecType.CompareNoCase(_T("CUSTOM20"))==0 && m_pCustom20)
 							m_pCustom20->Copy(pRedirectData);
 						else
@@ -1487,8 +1487,8 @@ public:
 						m_pCustom17->Copy(pRedirectData);
 					else if(strExecType.CompareNoCase(_T(SECTION_DMZ))==0)
 						m_pDMZ->Copy(pRedirectData);
-					else if(strExecType.CompareNoCase(_T("CUSTOM19"))==0)
-						m_pCustom19->Copy(pRedirectData);
+					else if(strExecType.CompareNoCase(_T(SECTION_CHROME_SWITCHER))==0)
+						m_pChromeSwitcher->Copy(pRedirectData);
 					else if(strExecType.CompareNoCase(_T("CUSTOM20"))==0)
 						m_pCustom20->Copy(pRedirectData);
 					else

@@ -2050,7 +2050,7 @@ void CDlgCU18::OnBnClickedButtonFdlg()
 	}
 }
 
-//Custom19
+//Custom19(Chrome Switcher)
 IMPLEMENT_DYNCREATE(CDlgCU19, CDlgRuleBase)
 BEGIN_MESSAGE_MAP(CDlgCU19,CDlgRuleBase)
 	ON_MESSAGE(ID_SETTING_OK,Set_OK)
@@ -2059,9 +2059,9 @@ BEGIN_MESSAGE_MAP(CDlgCU19,CDlgRuleBase)
 END_MESSAGE_MAP()
 BOOL CDlgCU19::OnInitDialog() 
 {
-	if(theApp.m_RedirectList.m_pCustom19)
+	if(theApp.m_RedirectList.m_pChromeSwitcher)
 	{
-		m_URD.Copy(theApp.m_RedirectList.m_pCustom19);
+		m_URD.Copy(theApp.m_RedirectList.m_pChromeSwitcher);
 	}
 	BOOL bRet =CDlgRuleBase::OnInitDialog();
 	SetDlgItemText(IDC_EDIT_LCB,m_URD.m_strExecExeFullPath);
@@ -2092,7 +2092,7 @@ LRESULT CDlgCU19::Set_OK(WPARAM wParam, LPARAM lParam)
 			}
 		}
 		m_URDSave.m_strExecExeFullPath=strExePath;
-		theApp.m_RedirectListSaveData.m_pCustom19->Copy(&m_URDSave);
+		theApp.m_RedirectListSaveData.m_pChromeSwitcher->Copy(&m_URDSave);
 	}
 	return 0;
 }
@@ -2598,9 +2598,9 @@ BEGIN_MESSAGE_MAP(CDlgChromeSwitcher, CDlgRuleBase)
 END_MESSAGE_MAP()
 BOOL CDlgChromeSwitcher::OnInitDialog()
 {
-	if (theApp.m_RedirectList.m_pCustom19)
+	if (theApp.m_RedirectList.m_pChromeSwitcher)
 	{
-		m_URD.Copy(theApp.m_RedirectList.m_pCustom19);
+		m_URD.Copy(theApp.m_RedirectList.m_pChromeSwitcher);
 	}
 	BOOL bRet = CDlgRuleBase::OnInitDialog();
 	if(m_URD.m_strExecExeFullPath.IsEmpty())
@@ -2633,7 +2633,7 @@ LRESULT CDlgChromeSwitcher::Set_OK(WPARAM wParam, LPARAM lParam)
 			}
 		}
 		m_URDSave.m_strExecExeFullPath = strExePath;
-		theApp.m_RedirectListSaveData.m_pCustom19->Copy(&m_URDSave);
+		theApp.m_RedirectListSaveData.m_pChromeSwitcher->Copy(&m_URDSave);
 	}
 	return 0;
 }
