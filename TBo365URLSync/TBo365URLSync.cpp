@@ -612,20 +612,20 @@ CString CTBo365URLSyncApp::WriteThinBridgeBHO(CConfData* pSettingConf,BOOL bWrit
 	}
 
 	CStringArray strArrayBHOData;
-	CStringArray strArrayBHODataOrgCustom20;
-	BOOL bCustom20Section=FALSE;
+	CStringArray strArrayBHODataOrgO365;
+	BOOL bO365Section=FALSE;
 	m_strArrayBHODataOrg.RemoveAll();
 	while (in.ReadString(strTemp))
 	{
 		m_strArrayBHODataOrg.Add(strTemp);
-		//[CUSTOM20]à»ç~ÇÕïsóv
-		if (strTemp == _T("[CUSTOM20]"))
+		//Office365ê›íËà»ç~ÇÕïsóv
+		if (strTemp == _T("[" SECTION_O365 "]"))
 		{
 			strArrayBHOData.Add(strTemp);
-			bCustom20Section=TRUE;
+			bO365Section=TRUE;
 			continue;
 		}
-		if(bCustom20Section)
+		if(bO365Section)
 		{
 			if(strTemp.Find(_T("@BROWSER_PATH:"))==0)
 			{
@@ -667,7 +667,7 @@ CString CTBo365URLSyncApp::WriteThinBridgeBHO(CConfData* pSettingConf,BOOL bWrit
 			}
 			else
 			{
-				strArrayBHODataOrgCustom20.Add(strTemp);
+				strArrayBHODataOrgO365.Add(strTemp);
 				continue;
 			}
 		}
@@ -733,9 +733,9 @@ CString CTBo365URLSyncApp::WriteThinBridgeBHO(CConfData* pSettingConf,BOOL bWrit
 		{
 			TRY
 			{
-				for (int j = 0; j < strArrayBHODataOrgCustom20.GetSize(); j++)
+				for (int j = 0; j < strArrayBHODataOrgO365.GetSize(); j++)
 				{
-					strTBRule = strArrayBHODataOrgCustom20.GetAt(j);
+					strTBRule = strArrayBHODataOrgO365.GetAt(j);
 					out.WriteString(strTBRule);
 					out.WriteString(_T("\n"));
 				}

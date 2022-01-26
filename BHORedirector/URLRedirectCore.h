@@ -967,8 +967,8 @@ public:
 				{
 					pRedirectData_NeutralSite = pRedirectData;
 				}
-				//Office365サイト(Custom20)
-				else if (pRedirectData->m_strExecType == _T("CUSTOM20"))
+				//Office365サイト
+				else if (pRedirectData->m_strExecType == _T(SECTION_O365))
 				{
 					pRedirectData_O365 = pRedirectData;
 				}
@@ -1074,8 +1074,7 @@ public:
 		pRedirectData = pRedirectData_O365;
 		if (pRedirectData)
 		{
-			//[Custm20]
-			if (pRedirectData->m_strExecType == _T("CUSTOM20"))
+			if (pRedirectData->m_strExecType == _T(SECTION_O365))
 			{
 				if(pRedirectData->m_strExecExeFullPath.CompareNoCase(_T("Edge"))==0)
 				{
@@ -1132,7 +1131,7 @@ public:
 				}
 
 				//Edge O365
-				if (pRedirectData->m_strExecType == _T("CUSTOM20"))
+				if (pRedirectData->m_strExecType == _T(SECTION_O365))
 				{
 					if (pRedirectData->m_strExecExeFullPath.CompareNoCase(_T("Edge")) == 0)
 					{

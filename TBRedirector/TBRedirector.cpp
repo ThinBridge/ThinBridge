@@ -395,8 +395,8 @@ void CTBRedirectorApp::OpenAnotherBrowser(CURLRedirectDataClass* pRedirectData, 
 				strCommand2.Format(_T("%s \"%s\""), strURL, pRedirectData->m_strExecExeFullPath);
 			}
 		}
-		//Office365対応[CUSTOM20]
-		else if (strExecTypeUpper.CompareNoCase(_T("CUSTOM20")) == 0)
+		//Office365対応
+		else if (strExecTypeUpper.CompareNoCase(_T(SECTION_O365)) == 0)
 		{
 			if (pRedirectData->m_strExecExeFullPath.CompareNoCase(_T("RDP")) == 0
 				|| pRedirectData->m_strExecExeFullPath.CompareNoCase(_T("VMWARE")) == 0

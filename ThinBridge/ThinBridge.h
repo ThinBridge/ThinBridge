@@ -443,7 +443,7 @@ public:
 	CURLRedirectDataClass* m_pCustom17;
 	CURLRedirectDataClass* m_pDMZ;
 	CURLRedirectDataClass* m_pChromeSwitcher;
-	CURLRedirectDataClass* m_pCustom20;
+	CURLRedirectDataClass* m_pO365;
 
 
 	CURLRedirectList()
@@ -477,7 +477,7 @@ public:
 		m_pCustom17=NULL;
 		m_pDMZ=NULL;
 		m_pChromeSwitcher=NULL;
-		m_pCustom20=NULL;
+		m_pO365=NULL;
 		m_bQuickRedirect = FALSE;
 		m_bTopURLOnly=FALSE;
 		m_bRemoteAppMode = TRUE;
@@ -534,7 +534,7 @@ public:
 		m_pCustom17=NULL;
 		m_pDMZ=NULL;
 		m_pChromeSwitcher=NULL;
-		m_pCustom20=NULL;
+		m_pO365=NULL;
 		m_bQuickRedirect = FALSE;
 		m_bTopURLOnly=FALSE;
 		m_strHorizon_ConnectionServerName.Empty();
@@ -594,9 +594,9 @@ public:
 			pRedirectData = new CURLRedirectDataClass;
 			pRedirectData->m_bDisabled = FALSE;
 			pRedirectData->m_bTopPageOnly = TRUE;
-			pRedirectData->m_strExecType = _T("CUSTOM20");
+			pRedirectData->m_strExecType = _T(SECTION_O365);
 			pRedirectData->m_dwCloseTimeout = 3;
-			m_pCustom20 = pRedirectData;
+			m_pO365 = pRedirectData;
 			m_arr_RedirectBrowser.Add(pRedirectData);
 		}
 		else
@@ -746,9 +746,9 @@ public:
 			pRedirectData = new CURLRedirectDataClass;
 			pRedirectData->m_bDisabled = TRUE;
 			pRedirectData->m_bTopPageOnly = TRUE;
-			pRedirectData->m_strExecType = _T("CUSTOM20");
+			pRedirectData->m_strExecType = _T(SECTION_O365);
 			pRedirectData->m_dwCloseTimeout = 3;
-			m_pCustom20 = pRedirectData;
+			m_pO365 = pRedirectData;
 			m_arr_RedirectBrowser.Add(pRedirectData);
 
 			//pRedirectData = NULL;
@@ -1207,8 +1207,8 @@ public:
 							m_pDMZ->Copy(pRedirectData);
 						else if(strExecType.CompareNoCase(_T(SECTION_CHROME_SWITCHER))==0 && m_pChromeSwitcher)
 							m_pChromeSwitcher->Copy(pRedirectData);
-						else if(strExecType.CompareNoCase(_T("CUSTOM20"))==0 && m_pCustom20)
-							m_pCustom20->Copy(pRedirectData);
+						else if(strExecType.CompareNoCase(_T(SECTION_O365))==0 && m_pO365)
+							m_pO365->Copy(pRedirectData);
 						else
 							;
 						delete pRedirectData;
@@ -1489,8 +1489,8 @@ public:
 						m_pDMZ->Copy(pRedirectData);
 					else if(strExecType.CompareNoCase(_T(SECTION_CHROME_SWITCHER))==0)
 						m_pChromeSwitcher->Copy(pRedirectData);
-					else if(strExecType.CompareNoCase(_T("CUSTOM20"))==0)
-						m_pCustom20->Copy(pRedirectData);
+					else if(strExecType.CompareNoCase(_T(SECTION_O365))==0)
+						m_pO365->Copy(pRedirectData);
 					else
 						;
 

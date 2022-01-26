@@ -503,7 +503,7 @@ public:
 						iValidCnt++;
 					else if (strTemp == _T("[" SECTION_CHROME_SWITCHER "]"))
 						iValidCnt++;
-					else if (strTemp == _T("[CUSTOM20]"))
+					else if (strTemp == _T("[" SECTION_O365 "]"))
 						iValidCnt++;
 				}
 			}

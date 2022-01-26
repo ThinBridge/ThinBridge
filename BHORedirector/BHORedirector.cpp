@@ -891,8 +891,8 @@ void CBHORedirector::OpenAnotherBrowser(CURLRedirectDataClass* pRedirectData,CSt
 				strCommand2.Format(_T("%s \"%s\""), strURL, pRedirectData->m_strExecExeFullPath);
 			}
 		}
-		//Office365‘Î‰ž[CUSTOM20]
-		else if (strExecTypeUpper.CompareNoCase(_T("CUSTOM20")) == 0)
+		//Office365‘Î‰ž
+		else if (strExecTypeUpper.CompareNoCase(_T(SECTION_O365)) == 0)
 		{
 			if (pRedirectData->m_strExecExeFullPath.CompareNoCase(_T("RDP")) == 0
 				|| pRedirectData->m_strExecExeFullPath.CompareNoCase(_T("VMWARE")) == 0

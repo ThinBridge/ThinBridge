@@ -2118,7 +2118,7 @@ void CDlgCU19::OnBnClickedButtonFdlg()
 	}
 }
 
-//Custom20
+//Custom20(Office365)
 IMPLEMENT_DYNCREATE(CDlgCU20, CDlgRuleBase)
 BEGIN_MESSAGE_MAP(CDlgCU20,CDlgRuleBase)
 	ON_MESSAGE(ID_SETTING_OK,Set_OK)
@@ -2127,9 +2127,9 @@ BEGIN_MESSAGE_MAP(CDlgCU20,CDlgRuleBase)
 END_MESSAGE_MAP()
 BOOL CDlgCU20::OnInitDialog() 
 {
-	if(theApp.m_RedirectList.m_pCustom20)
+	if(theApp.m_RedirectList.m_pO365)
 	{
-		m_URD.Copy(theApp.m_RedirectList.m_pCustom20);
+		m_URD.Copy(theApp.m_RedirectList.m_pO365);
 	}
 	BOOL bRet =CDlgRuleBase::OnInitDialog();
 	SetDlgItemText(IDC_EDIT_LCB,m_URD.m_strExecExeFullPath);
@@ -2159,7 +2159,7 @@ LRESULT CDlgCU20::Set_OK(WPARAM wParam, LPARAM lParam)
 			}
 		}
 		m_URDSave.m_strExecExeFullPath=strExePath;
-		theApp.m_RedirectListSaveData.m_pCustom20->Copy(&m_URDSave);
+		theApp.m_RedirectListSaveData.m_pO365->Copy(&m_URDSave);
 	}
 	return 0;
 }
@@ -2224,9 +2224,9 @@ void CDlgO365::OnDblclkList2(NMHDR* pNMHDR, LRESULT* pResult)
 
 BOOL CDlgO365::OnInitDialog()
 {
-	if (theApp.m_RedirectList.m_pCustom20)
+	if (theApp.m_RedirectList.m_pO365)
 	{
-		m_URD.Copy(theApp.m_RedirectList.m_pCustom20);
+		m_URD.Copy(theApp.m_RedirectList.m_pO365);
 	}
 	CPropertyPage::OnInitDialog();
 
@@ -2413,7 +2413,7 @@ LRESULT CDlgO365::Set_OK(WPARAM wParam, LPARAM lParam)
 			strExePath = _T("Edge");
 		}
 		m_URDSave.m_strExecExeFullPath = strExePath;
-		theApp.m_RedirectListSaveData.m_pCustom20->Copy(&m_URDSave);
+		theApp.m_RedirectListSaveData.m_pO365->Copy(&m_URDSave);
 	}
 	return 0;
 }
@@ -2543,7 +2543,7 @@ void CDlgO365::OnBnClickedButtonReload()
 
 	CURLRedirectList RedirectList;
 	RedirectList.SetArrayData(theApp.m_strRedirectFilePath);
-	m_URD.Copy(RedirectList.m_pCustom20);
+	m_URD.Copy(RedirectList.m_pO365);
 
 	this->m_List.DeleteAllItems();
 	//‘ÎÛList
