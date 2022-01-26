@@ -7,8 +7,8 @@
  * It should work fine across Edge, Chrome and Firefox without any
  * further modifications.
  */
-var BROWSER = 'edge';
-var CUSTOM18 = 'custom18';
+var THIS_BROWSER = 'edge';
+var SECTION_DMZ = 'custom18';
 var SERVER_NAME = 'com.clear_code.thinbridge';
 var ALARM_MINUTES = 1;
 var CANCEL_REQUEST = {redirectUrl:`data:text/html,${escape('<script type="application/javascript">history.back()</script>')}`};
@@ -83,7 +83,7 @@ var ThinBridgeTalkClient = {
 	},
 
 	configure: function() {
-		var query = new String('C ' + BROWSER);
+		var query = new String('C ' + THIS_BROWSER);
 
 		chrome.runtime.sendNativeMessage(SERVER_NAME, query, (resp) => {
 			if (chrome.runtime.lastError) {
@@ -157,7 +157,7 @@ var ThinBridgeTalkClient = {
 				return;
 			}
 
-			var query = new String('Q ' + BROWSER + ' ' + url);
+			var query = new String('Q ' + THIS_BROWSER + ' ' + url);
 			chrome.runtime.sendNativeMessage(SERVER_NAME, query, (resp) => {
 				if (closeTab) {
 					chrome.tabs.remove(tabId);
@@ -187,14 +187,13 @@ var ThinBridgeTalkClient = {
 	getBrowserName: function(section) {
 		var name = section.Name.toLowerCase();
 
-		/* CUSTOM18 means "common" URL */
-		if (name == CUSTOM18)
+		if (name == SECTION_DMZ)
 			return name;
 
 		/* Guess the browser name from the executable path */
 		if (name.match(/^custom/i)) {
-			if (section.Path.match(RegExp(BROWSER, "i")))
-				return BROWSER;
+			if (section.Path.match(RegExp(THIS_BROWSER, "i")))
+				return THIS_BROWSER;
 		}
 		return name;
 	},
@@ -229,10 +228,10 @@ var ThinBridgeTalkClient = {
 		console.log(`* Result: [${matches.join(", ")}]`);
 
 		if (matches.length > 0) {
-			return !(matches.includes(CUSTOM18) || matches.includes(BROWSER));
+			return !(matches.includes(SECTION_DMZ) || matches.includes(THIS_BROWSER));
 		} else if (config.DefaultBrowser) {
 			console.log(`* Use DefaultBrowser: ${config.DefaultBrowser}`);
-			return !config.DefaultBrowser.match(RegExp(BROWSER, 'i'));
+			return !config.DefaultBrowser.match(RegExp(THIS_BROWSER, 'i'));
 		} else {
 			console.log(`* DefaultBrowser is blank`);
 			return false;
@@ -346,7 +345,7 @@ var ResourceCap = {
 	},
 
 	check: function(tabId, ntabs) {
-		var query = new String(`R ${BROWSER} ${ntabs}`);
+		var query = new String(`R ${THIS_BROWSER} ${ntabs}`);
 		chrome.runtime.sendNativeMessage(SERVER_NAME, query, (resp) => {
 			// Need this to support ThinBridge v4.0.2.3 (or before)
 			if (chrome.runtime.lastError) {
