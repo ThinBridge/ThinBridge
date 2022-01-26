@@ -775,7 +775,7 @@ CString CThinBridgeRuleUpdaterApp::WriteThinBridgeBHO(CConfData* pSettingConf,BO
 	//			iValidCnt++;
 	//		else if(strTemp == _T("[Chrome]"))
 	//			iValidCnt++;
-	//		else if (strTemp == _T("[CUSTOM18]"))
+	//		else if (strTemp == _T("[" SECTION_DMZ "]"))
 	//			iValidCnt++;
 	//		else if (strTemp == _T("[CUSTOM19]"))
 	//			iValidCnt++;

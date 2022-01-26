@@ -434,7 +434,7 @@ protected:
 public:
 };
 
-//Custom18
+//Custom18(DMZ)
 class CDlgCU18 : public CDlgRuleBase
 {
 	DECLARE_DYNCREATE(CDlgCU18)

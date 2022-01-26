@@ -14,6 +14,10 @@
 #include "SBUtil.h"
 #include "AtlStdioFile.h"
 
+#define SECTION_DMZ	"CUSTOM18"
+#define SECTION_CHROME_SWITCHER	"CUSTOM19"
+#define SECTION_O365	"CUSTOM20"
+
 //////////////////////////////////////////////////////////////////////////////////////////////////
 class CURLRedirectDataClass
 {
@@ -419,7 +423,7 @@ public:
 		//Office365対応、ニュートラルサイト(共用URL)を利用する
 		if (m_bUseNeutralSite)
 		{
-			//ニュートラルサイト(Custom18)を始めにチェック
+			//ニュートラルサイトを始めにチェック
 			//HITしたら、リダイレクトをしない。
 			//HITしない場合は、ニュートラルサイトを除くルールの判定を行う。
 			BOOL bDMZFlg = FALSE;
@@ -428,8 +432,7 @@ public:
 				pRedirectData = (CURLRedirectDataClass*)m_arr_RedirectBrowser.GetAt(i);
 				if (pRedirectData)
 				{
-					//[CUSTOM18]
-					if (pRedirectData->m_strExecType == _T("CUSTOM18"))
+					if (pRedirectData->m_strExecType == _T(SECTION_DMZ))
 					{
 						//frameの場合でオブジェクトの判定条件がTOPのみの場合は、次へ。
 						if (bTopPage == FALSE && pRedirectData->m_bTopPageOnly == TRUE)
@@ -461,8 +464,8 @@ public:
 				pRedirectData = (CURLRedirectDataClass*)m_arr_RedirectBrowser.GetAt(i);
 				if (pRedirectData)
 				{
-					//ニュートラルサイト [CUSTOM18]
-					if (pRedirectData->m_strExecType == _T("CUSTOM18"))
+					//ニュートラルサイト
+					if (pRedirectData->m_strExecType == _T(SECTION_DMZ))
 					{
 						//スキップする。
 						continue;

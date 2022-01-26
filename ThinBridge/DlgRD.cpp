@@ -1982,7 +1982,7 @@ void CDlgCU17::OnBnClickedButtonFdlg()
 	}
 }
 
-//Custom18
+//Custom18 (DMZ)
 IMPLEMENT_DYNCREATE(CDlgCU18, CDlgRuleBase)
 BEGIN_MESSAGE_MAP(CDlgCU18,CDlgRuleBase)
 	ON_MESSAGE(ID_SETTING_OK,Set_OK)
@@ -1991,9 +1991,9 @@ BEGIN_MESSAGE_MAP(CDlgCU18,CDlgRuleBase)
 END_MESSAGE_MAP()
 BOOL CDlgCU18::OnInitDialog() 
 {
-	if(theApp.m_RedirectList.m_pCustom18)
+	if(theApp.m_RedirectList.m_pDMZ)
 	{
-		m_URD.Copy(theApp.m_RedirectList.m_pCustom18);
+		m_URD.Copy(theApp.m_RedirectList.m_pDMZ);
 	}
 	BOOL bRet =CDlgRuleBase::OnInitDialog();
 	SetDlgItemText(IDC_EDIT_LCB,m_URD.m_strExecExeFullPath);
@@ -2024,7 +2024,7 @@ LRESULT CDlgCU18::Set_OK(WPARAM wParam, LPARAM lParam)
 			}
 		}
 		m_URDSave.m_strExecExeFullPath=strExePath;
-		theApp.m_RedirectListSaveData.m_pCustom18->Copy(&m_URDSave);
+		theApp.m_RedirectListSaveData.m_pDMZ->Copy(&m_URDSave);
 	}
 	return 0;
 }
@@ -2751,9 +2751,9 @@ END_MESSAGE_MAP()
 BOOL CDlgDMZ::OnInitDialog()
 {
 	CPropertyPage::OnInitDialog();
-	if (theApp.m_RedirectList.m_pCustom18)
+	if (theApp.m_RedirectList.m_pDMZ)
 	{
-		m_URD.Copy(theApp.m_RedirectList.m_pCustom18);
+		m_URD.Copy(theApp.m_RedirectList.m_pDMZ);
 	}
 
 	m_List.InsertColumn(URL, _T("‹¤—pURL ƒ‹[ƒ‹"), LVCFMT_LEFT, 700);
@@ -2848,7 +2848,7 @@ LRESULT CDlgDMZ::Set_OK(WPARAM wParam, LPARAM lParam)
 	//œŠO‘ÎÛList
 	m_URDSave.m_arr_URL_EX.RemoveAll();
 	m_URDSave.m_strExecExeFullPath = _T("");
-	theApp.m_RedirectListSaveData.m_pCustom18->Copy(&m_URDSave);
+	theApp.m_RedirectListSaveData.m_pDMZ->Copy(&m_URDSave);
 	return 0;
 }
 void CDlgDMZ::OnEnableCtrl()

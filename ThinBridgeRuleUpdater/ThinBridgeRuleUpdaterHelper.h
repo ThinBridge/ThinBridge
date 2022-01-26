@@ -499,7 +499,7 @@ public:
 						iValidCnt++;
 					else if (strTemp == _T("[CUSTOM05]"))
 						iValidCnt++;
-					else if (strTemp == _T("[CUSTOM18]"))
+					else if (strTemp == _T("[" SECTION_DMZ "]"))
 						iValidCnt++;
 					else if (strTemp == _T("[CUSTOM19]"))
 						iValidCnt++;
