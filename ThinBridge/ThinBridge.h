@@ -361,6 +361,7 @@ public:
 		m_strExecExeFullPath.Empty();
 		m_arr_URL.RemoveAll();
 		m_arr_URL_EX.RemoveAll();
+		m_arr_ExcludeGroup.RemoveAll();
 	}
 	void Copy(CURLRedirectDataClass* ptr)
 	{
@@ -373,6 +374,7 @@ public:
 		m_strExecExeFullPath = ptr->m_strExecExeFullPath;
 		m_arr_URL.Copy(ptr->m_arr_URL);
 		m_arr_URL_EX.Copy(ptr->m_arr_URL_EX);
+		m_arr_ExcludeGroup.Copy(ptr->m_arr_ExcludeGroup);
 	}
 public:
 	BOOL m_bDisabled;
@@ -384,6 +386,7 @@ public:
 	CString m_strExecExeFullPath;
 	CStringArray m_arr_URL;
 	CStringArray m_arr_URL_EX;
+	CStringArray m_arr_ExcludeGroup;
 
 };
 
@@ -1044,6 +1047,15 @@ public:
 					pstrOutPutData+=strTempFormat;
 
 					int iMaxCnt=0;
+					iMaxCnt = ptr->m_arr_ExcludeGroup.GetCount();
+					for(int ii=0;ii<iMaxCnt;ii++)
+					{
+						strWriteLine.Empty();
+						strWriteLine = ptr->m_arr_ExcludeGroup.GetAt(ii);
+						strTempFormat.Format(_T("@EXCLUDE_GROUP:%s\n"),strWriteLine);
+						out.WriteString(strTempFormat);
+						pstrOutPutData+=strTempFormat;
+					}
 					iMaxCnt = ptr->m_arr_URL.GetCount();
 					for(int ii=0;ii<iMaxCnt;ii++)
 					{
@@ -1087,6 +1099,7 @@ public:
 			CString strExecType;
 			CStringArray arr_URL;
 			CStringArray arr_URL_EX;
+			CStringArray arr_ExcludeGroup;
 			BOOL bTopPageOnly=FALSE;
 			DWORD dRedirectPageAction=0;
 			DWORD dwCloseTimeout=3;
@@ -1138,6 +1151,7 @@ public:
 						pRedirectData->m_strExecExeFullPath=strExecExeFullPath;
 						pRedirectData->m_arr_URL.Copy(arr_URL);
 						pRedirectData->m_arr_URL_EX.Copy(arr_URL_EX);
+						pRedirectData->m_arr_ExcludeGroup.Copy(arr_ExcludeGroup);
 						pRedirectData->m_bTopPageOnly=bTopPageOnly;
 						pRedirectData->m_dRedirectPageAction=dRedirectPageAction;
 						pRedirectData->m_dwCloseTimeout=dwCloseTimeout;
@@ -1218,6 +1232,7 @@ public:
 						strExecType.Empty();
 						arr_URL.RemoveAll();
 						arr_URL_EX.RemoveAll();
+						arr_ExcludeGroup.RemoveAll();
 						pRedirectData = NULL;
 						bDisabled=FALSE;
 					}
@@ -1392,6 +1407,17 @@ public:
 					{
 						m_bDisableIE_DDE = TRUE;
 					}
+					else if (strTempUpper.Find(_T("@EXCLUDE_GROUP")) == 0)
+					{
+						int iPosC = 0;
+						CString strName;
+						strName = _T("@EXCLUDE_GROUP:");
+						iPosC = strName.GetLength();
+						strName = strTemp.Mid(iPosC);
+						strName.TrimLeft();
+						strName.TrimRight();
+						arr_ExcludeGroup.Add(strName);
+					}
 				}
 				//;-‚ÍEx #-‚ÍEx
 				else if(strTemp.Find(_T(";-"))==0||strTemp.Find(_T("#-"))==0)
@@ -1420,6 +1446,7 @@ public:
 					pRedirectData->m_strExecExeFullPath=strExecExeFullPath;
 					pRedirectData->m_arr_URL.Copy(arr_URL);
 					pRedirectData->m_arr_URL_EX.Copy(arr_URL_EX);
+					pRedirectData->m_arr_ExcludeGroup.Copy(arr_ExcludeGroup);
 					pRedirectData->m_bTopPageOnly=bTopPageOnly;
 					pRedirectData->m_dRedirectPageAction=dRedirectPageAction;
 					pRedirectData->m_dwCloseTimeout=dwCloseTimeout;
@@ -1501,6 +1528,7 @@ public:
 					strExecExeFullPath.Empty();
 					arr_URL.RemoveAll();
 					arr_URL_EX.RemoveAll();
+					arr_ExcludeGroup.RemoveAll();
 					pRedirectData = NULL;
 					bDisabled=FALSE;
 				}

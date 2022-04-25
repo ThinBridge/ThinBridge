@@ -476,6 +476,30 @@ BOOL CDlgRuleBase::OnInitDialog()
 	}
 
 	//œŠO‘ÎÛList
+	iMaxCnt = m_URD.m_arr_ExcludeGroup.GetCount();
+	CString strTempFormat;
+	for(int i=0;i<iMaxCnt;i++)
+	{
+		bEnable=TRUE;
+		strLineData = m_URD.m_arr_ExcludeGroup.GetAt(i);
+		int index = this->m_List2.GetItemCount();
+		int iItem = this->m_List2.InsertItem( index, _T(""));
+
+		if(strLineData.Find(_T("#"))==0)
+		{
+			bEnable=FALSE;
+			strLineData=strLineData.Mid(1);
+		}
+		else if(strLineData.Find(_T(";"))==0)
+		{
+			bEnable=FALSE;
+			strLineData=strLineData.Mid(1);
+		}
+		strTempFormat.Empty();
+		strLineData.Format(_T("@EXCLUDE_GROUP:%s\n"),strTempFormat);
+		this->m_List2.SetItemText(iItem,URL,strTempFormat);
+		this->m_List2.SetItemText(iItem,ENABLE,bEnable?_T("›"):_T("|"));
+	}
 	iMaxCnt = m_URD.m_arr_URL_EX.GetCount();
 	for(int i=0;i<iMaxCnt;i++)
 	{

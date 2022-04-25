@@ -41,6 +41,7 @@ public:
 		m_strExecExeFullPath.Empty();
 		m_arr_URL.RemoveAll();
 		m_arr_URL_EX.RemoveAll();
+		m_arr_ExcludeGroup.RemoveAll();
 	}
 	void Copy(CURLRedirectDataClass* ptr)
 	{
@@ -53,6 +54,7 @@ public:
 		m_strExecExeFullPath = ptr->m_strExecExeFullPath;
 		m_arr_URL.Copy(ptr->m_arr_URL);
 		m_arr_URL_EX.Copy(ptr->m_arr_URL_EX);
+		m_arr_ExcludeGroup.Copy(ptr->m_arr_ExcludeGroup);
 	}
 	int wildcmp(const char *wild, const char *string)
 	{
@@ -156,6 +158,7 @@ public:
 	CString m_strExecExeFullPath;
 	CAtlArray<CAtlString> m_arr_URL;
 	CAtlArray<CAtlString> m_arr_URL_EX;
+	CAtlArray<CAtlString> m_arr_ExcludeGroup;
 	CString m_strHitReason;
 };
 
@@ -396,6 +399,7 @@ public:
 			CString strExecType;
 			CAtlArray<CAtlString> arr_URL;
 			CAtlArray<CAtlString> arr_URL_EX;
+			CAtlArray<CAtlString> arr_ExcludeGroup;
 
 			BOOL bTopPageOnly=FALSE;
 			DWORD dRedirectPageAction=0;
@@ -437,6 +441,7 @@ public:
 
 							pRedirectData->m_arr_URL.Copy(arr_URL);
 							pRedirectData->m_arr_URL_EX.Copy(arr_URL_EX);
+							pRedirectData->m_arr_ExcludeGroup.Copy(arr_ExcludeGroup);
 							pRedirectData->m_bTopPageOnly=bTopPageOnly;
 							pRedirectData->m_dRedirectPageAction=dRedirectPageAction;
 							pRedirectData->m_dwCloseTimeout=dwCloseTimeout;
@@ -449,6 +454,7 @@ public:
 						strExecType.Empty();
 						arr_URL.RemoveAll();
 						arr_URL_EX.RemoveAll();
+						arr_ExcludeGroup.RemoveAll();
 						pRedirectData = NULL;
 						bDisabled=FALSE;
 					}
@@ -537,7 +543,17 @@ public:
 							m_bTopURLOnly = TRUE;
 						}
 					}
-
+					else if (strTempUpper.Find(_T("@EXCLUDE_GROUP")) == 0)
+					{
+						int iPosC = 0;
+						CString strName;
+						strName = _T("@EXCLUDE_GROUP:");
+						iPosC = strName.GetLength();
+						strName = strTemp.Mid(iPosC);
+						strName.TrimLeft();
+						strName.TrimRight();
+						arr_ExcludeGroup.Add(strName);
+					}
 				}
 				else if(strTempU.Find(_T("-"))==0)
 				{
@@ -562,6 +578,7 @@ public:
 						pRedirectData->m_strExecExeFullPath=strExecExeFullPath;
 						pRedirectData->m_arr_URL.Copy(arr_URL);
 						pRedirectData->m_arr_URL_EX.Copy(arr_URL_EX);
+						pRedirectData->m_arr_ExcludeGroup.Copy(arr_ExcludeGroup);
 						pRedirectData->m_bTopPageOnly=bTopPageOnly;
 						pRedirectData->m_dRedirectPageAction=dRedirectPageAction;
 						pRedirectData->m_dwCloseTimeout=dwCloseTimeout;
@@ -574,6 +591,7 @@ public:
 					strExecExeFullPath.Empty();
 					arr_URL.RemoveAll();
 					arr_URL_EX.RemoveAll();
+					arr_ExcludeGroup.RemoveAll();
 					pRedirectData = NULL;
 					bDisabled=FALSE;
 				}
