@@ -75,6 +75,7 @@ BOOL CTBRedirectorApp::InitInstance()
 
 	//Delay load
 	m_RedirectList.SetArrayData(m_strRedirectFilePath);
+	m_RedirectList.PopulateExcludeGroup();
 	logmsg = _T("InitInstance Stage:02");
 	this->WriteDebugTraceDateTime(logmsg);
 
