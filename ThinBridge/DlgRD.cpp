@@ -496,7 +496,7 @@ BOOL CDlgRuleBase::OnInitDialog()
 			strLineData=strLineData.Mid(1);
 		}
 		strTempFormat.Empty();
-		strLineData.Format(_T("@EXCLUDE_GROUP:%s\n"),strTempFormat);
+		strTempFormat.Format(_T("@EXCLUDE_GROUP:%s\n"),strLineData);
 		this->m_List2.SetItemText(iItem,URL,strTempFormat);
 		this->m_List2.SetItemText(iItem,ENABLE,bEnable?_T("›"):_T("|"));
 	}
