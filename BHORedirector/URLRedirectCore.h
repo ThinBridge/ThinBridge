@@ -285,6 +285,7 @@ public:
 	{
 		Clear();
 	}
+
 	void Clear()
 	{
 		m_bURLOnly=FALSE;
@@ -310,6 +311,7 @@ public:
 		}
 		m_arr_RedirectBrowser.RemoveAll();
 	}
+
 	void SetArrayDataDelayLoad(LPCTSTR lPath)
 	{
 		if(lPath==NULL)return;
@@ -365,6 +367,7 @@ public:
 		CloseHandle(hFile);
 		return bRet;
 	}
+
 	void SetArrayData(LPCTSTR lPath)
 	{
 		if(lPath==NULL)return;
