@@ -591,7 +591,45 @@ public:
 					bDisabled=FALSE;
 				}
 			}
+			PopulateExcludeGroup();
 			m_bDataCached=TRUE;
+		}
+	}
+
+	void PopulateExcludeGroup()
+	{
+		CString strTemp;
+		CString strName;
+		CURLRedirectDataClass* pRedirectData=NULL;
+		CURLRedirectDataClass* pReferredRedirectData=NULL;
+
+		int imax = (int)m_arr_RedirectBrowser.GetCount();
+		for (int i = 0; i < imax; i++)
+		{
+			pRedirectData = (CURLRedirectDataClass*)m_arr_RedirectBrowser.GetAt(i);
+			if (!pRedirectData) continue;
+			int jmax = (int)pRedirectData->m_arr_ExcludeGroup.GetCount();
+			for (int j = 0; j < jmax; j++)
+			{
+				strName.Empty();
+				strName = pRedirectData->m_arr_ExcludeGroup.GetAt(j);
+
+				int kmax = (int)m_arr_RedirectBrowser.GetCount();
+				for (int k = 0; j < kmax; k++)
+				{
+					pReferredRedirectData = (CURLRedirectDataClass*)m_arr_RedirectBrowser.GetAt(k);
+					if (!pReferredRedirectData) continue;
+					if (pReferredRedirectData->m_strExecType != strName) continue;
+					int lmax = (int)pReferredRedirectData->m_arr_URL.GetCount();
+					for (int l = 0; l < lmax; l++)
+					{
+						strTemp.Empty();
+						strTemp = pReferredRedirectData->m_arr_URL.GetAt(l);
+						pRedirectData->m_arr_URL_EX.Add(strTemp);
+					}
+					break;
+				}
+			}
 		}
 	}
 
