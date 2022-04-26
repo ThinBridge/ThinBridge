@@ -1052,7 +1052,20 @@ public:
 					{
 						strWriteLine.Empty();
 						strWriteLine = ptr->m_arr_ExcludeGroup.GetAt(ii);
-						strTempFormat.Format(_T("@EXCLUDE_GROUP:%s\n"),strWriteLine);
+						if(strWriteLine.Find(_T("#")) == 0)
+						{
+							strWriteLine = strWriteLine.Mid(1);
+							strTempFormat.Format(_T("#@EXCLUDE_GROUP:%s\n"),strWriteLine);
+						}
+						else if(strWriteLine.Find(_T(";")) == 0)
+						{
+							strWriteLine = strWriteLine.Mid(1);
+							strTempFormat.Format(_T(";@EXCLUDE_GROUP:%s\n"),strWriteLine);
+						}
+						else
+						{
+							strTempFormat.Format(_T("@EXCLUDE_GROUP:%s\n"),strWriteLine);
+						}
 						out.WriteString(strTempFormat);
 						pstrOutPutData+=strTempFormat;
 					}

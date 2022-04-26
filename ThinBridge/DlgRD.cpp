@@ -561,6 +561,44 @@ LRESULT CDlgRuleBase::Set_OK(WPARAM wParam, LPARAM lParam)
 	CString strTemp;
 	int iSelCount = -1;
 
+	//@EXCLUDE_GROUP
+	m_URDSave.m_arr_ExcludeGroup.RemoveAll();
+	iSelCount = -1;
+	while((iSelCount = m_List2.GetNextItem(iSelCount,LVNI_ALL)) != -1)
+	{
+		strURL.Empty();
+		strTemp.Empty();
+		strURL = m_List2.GetItemText(iSelCount,URL);
+		strURL.TrimLeft();
+		strURL.TrimRight();
+		strTemp = m_List2.GetItemText(iSelCount,ENABLE);
+		strTemp.TrimLeft();
+		strTemp.TrimRight();
+
+		if (!strURL.IsEmpty() &&
+			strURL.Find(_T("@EXCLUDE_GROUP")) == 0)
+		{
+			int iPosC = 0;
+			CString strName;
+			strName = _T("@EXCLUDE_GROUP:");
+			iPosC = strName.GetLength();
+			strName = strURL.Mid(iPosC);
+			strName.TrimLeft();
+			strName.TrimRight();
+
+			if(strTemp==_T("Å|"))
+			{
+				strData =_T("#");
+				strData += strName;
+			}
+			else
+			{
+				strData = strName;
+			}
+			m_URDSave.m_arr_ExcludeGroup.Add(strData);
+		}
+	}
+
 	m_URDSave.m_arr_URL.RemoveAll();
 	while((iSelCount = m_List.GetNextItem(iSelCount,LVNI_ALL)) != -1)
 	{
@@ -602,7 +640,8 @@ LRESULT CDlgRuleBase::Set_OK(WPARAM wParam, LPARAM lParam)
 		strTemp.TrimLeft();
 		strTemp.TrimRight();
 
-		if(!strURL.IsEmpty())
+		if (!strURL.IsEmpty() &&
+			strURL.Find(_T("@EXCLUDE_GROUP")) != 0)
 		{
 			if(strTemp==_T("Å|"))
 			{
