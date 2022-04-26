@@ -107,36 +107,34 @@ public:
 				CStringA strList_A(strTemp);
 
 				//ワイルドカード対応
-				if(wildcmp(strList_A,strURL_A))
-				{
-					//Hitした場合
-					bRet = TRUE;
-					m_strHitReason.Format(_T("ターゲットURLルール：%s"),strTemp);
-					break;
-				}
+				if(!wildcmp(strList_A,strURL_A))continue;
+
+				//Hitした場合
+				bRet = TRUE;
+				m_strHitReason.Format(_T("ターゲットURLルール：%s"),strTemp);
+				break;
 			}
 		}
 		//除外の確認
 		//除外にヒットした場合は、FALSEに戻す。
 		if(bRet==TRUE)
 		{
-			int imax2 = (int)m_arr_URL_EX.GetCount();
-			for(int j=0;j<imax2;j++)
+			int imax = (int)m_arr_URL_EX.GetCount();
+			for(int i=0;i<imax;i++)
 			{
 				strTemp.Empty();
-				strTemp = m_arr_URL_EX.GetAt(j);
+				strTemp = m_arr_URL_EX.GetAt(i);
 				CStringA strURL_A(pURL);
 				CStringA strList_A(strTemp);
 
 				//ワイルドカード対応
-				if(wildcmp(strList_A,strURL_A))
-				{
-					//除外にヒットした場合は、FALSEに戻す。
-					//Hitした場合
-					bRet = FALSE;
-					m_strHitReason.Format(_T("除外URLルール：%s"),strTemp);
-					break;
-				}
+				if(!wildcmp(strList_A,strURL_A))continue;
+
+				//除外にヒットした場合は、FALSEに戻す。
+				//Hitした場合
+				bRet = FALSE;
+				m_strHitReason.Format(_T("除外URLルール：%s"),strTemp);
+				break;
 			}
 		}
 		return bRet;
