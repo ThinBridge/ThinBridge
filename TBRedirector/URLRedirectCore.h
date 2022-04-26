@@ -412,6 +412,7 @@ public:
 					bDisabled=FALSE;
 				}
 			}
+			PopulateExcludeGroup();
 		}
 	}
 
