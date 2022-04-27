@@ -92,6 +92,7 @@ var ThinBridgeTalkClient = {
 			}
 			var isStartup = (this.cached == null);
 			this.cached = resp.config;
+			this.cached.NamedSections = Object.fromEntries(resp.config.Sections.map(section => [section.Name, section])));
 			console.log('Fetch config', JSON.stringify(this.cached));
 
 			if (isStartup) {
@@ -160,18 +161,29 @@ var ThinBridgeTalkClient = {
 		});
 	},
 
-	match: function(section, url) {
-		var i;
-		for (i = 0; i < section.Excludes.length; i++) {
-			if (wildcmp(section.Excludes[i], url)) {
-				console.log(`* Match Exclude ${section.Name} [${section.Excludes[i]}]`);
+	match: function(section, url, namedSections) {
+		for (const name of section.ExcludeGroups) {
+			const foreignSection = namedSections[name];
+			if (!foreignSection)
+				continue;
+			for (const pattern of foreignSection.Patterns) {
+				if (wildcmp(pattern, url)) {
+					console.log(`* Match Exclude ${section.Name} (referring ${name}) [${pattern}]`);
+					return false;
+				}
+			}
+		}
+
+		for (const pattern of section.Excludes) {
+			if (wildcmp(pattern, url)) {
+				console.log(`* Match Exclude ${section.Name} [${pattern}]`);
 				return false;
 			}
 		}
 
-		for (i = 0; i < section.Patterns.length; i++) {
-			if (wildcmp(section.Patterns[i], url)) {
-				console.log(`* Match ${section.Name} [${section.Patterns[i]}]`);
+		for (const pattern of section.Patterns) {
+			if (wildcmp(pattern, url)) {
+				console.log(`* Match ${section.Name} [${pattern}]`);
 				return true;
 			}
 		}
@@ -216,7 +228,7 @@ var ThinBridgeTalkClient = {
 		for (var i = 0; i < config.Sections.length; i++) {
 			section = config.Sections[i];
 
-			if (this.match(section, url)) {
+			if (this.match(section, url, config.NamedSections)) {
 				matches.push(this.getBrowserName(section))
 			}
 		}
