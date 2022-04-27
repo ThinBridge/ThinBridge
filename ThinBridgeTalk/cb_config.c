@@ -27,6 +27,7 @@ struct section {
 	char name[16];
 	char path[MAX_PATH];
 	int disabled;
+	struct strbuf exclude_groups;
 	struct strbuf patterns;
 	struct strbuf excludes;
 	struct section *next;    /* linked list */
@@ -126,6 +127,10 @@ static void parse_conf(char *data, struct config *conf)
 				else if (strstr(line, "@BROWSER_PATH:") == line) {
 					strcpy(section->path, line + strlen("@BROWSER_PATH:"));
 				}
+				else if (strstr(line, "@EXCLUDE_GROUP:") == line) {
+					strbuf_concat(&section->exclude_groups, line + strlen("@EXCLUDE_GROUP:"));
+					strbuf_putchar(&section->exclude_groups, '\n');
+				}
 			}
 			break;
 	    case '-':
@@ -160,6 +165,21 @@ static char *dump_section(struct section *section)
 	strbuf_concat_jsonstr(&sb, section->path, strlen(section->path));
 	strbuf_putchar(&sb, ',');
 
+	strbuf_concat(&sb, "\"ExcludeGroups\":[");
+	if (section->exclude_groups.buf) {
+		ptr = section->exclude_groups.buf;
+		need_comma = 0;
+		while (*ptr) {
+			if (need_comma)
+				strbuf_putchar(&sb, ',');
+
+			end = strchr(ptr, '\n');
+			strbuf_concat_jsonstr(&sb, ptr, end - ptr);
+			need_comma = 1;
+			ptr = end + 1;
+		}
+	}
+	strbuf_concat(&sb, "],");
 
 	/* URLPatterns */
 	strbuf_concat(&sb, "\"Patterns\":[");
@@ -338,6 +358,7 @@ int cb_config(char *cmd)
 	section = conf.section;
 	while (section) {
 		next = section->next;
+		free(section->exclude_groups.buf);
 		free(section->patterns.buf);
 		free(section->excludes.buf);
 		free(section);
