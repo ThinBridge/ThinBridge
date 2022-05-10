@@ -435,7 +435,7 @@ public:
 				strName = pRedirectData->m_arr_ExcludeGroup.GetAt(j);
 
 				int kmax = (int)m_arr_RedirectBrowser.GetCount();
-				for (int k = 0; j < kmax; k++)
+				for (int k = 0; k < kmax; k++)
 				{
 					pReferredRedirectData = (CURLRedirectDataClass*)m_arr_RedirectBrowser.GetAt(k);
 					if (!pReferredRedirectData) continue;
