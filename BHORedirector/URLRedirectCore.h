@@ -112,7 +112,8 @@ public:
 
 				//Hitした場合
 				bRet = TRUE;
-				m_strHitReason.Format(_T("ターゲットURLルール：%s"),strTemp);
+				if(m_gbTraceLog)
+					m_strHitReason.Format(_T("ターゲットURLルール：%s"),strTemp);
 				break;
 			}
 		}
@@ -134,7 +135,8 @@ public:
 				//除外にヒットした場合は、FALSEに戻す。
 				//Hitした場合
 				bRet = FALSE;
-				m_strHitReason.Format(_T("除外URLルール：%s"),strTemp);
+				if(m_gbTraceLog)
+					m_strHitReason.Format(_T("除外URLルール：%s"),strTemp);
 				break;
 			}
 		}
