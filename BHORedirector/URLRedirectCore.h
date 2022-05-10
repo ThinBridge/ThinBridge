@@ -100,7 +100,7 @@ public:
 		if(bRet==FALSE)
 		{
 			int imax = (int)m_arr_URL.GetCount();
-			for(int i=0;i<imax;i++)
+			for(int i = 0; i < imax; i++)
 			{
 				strTemp.Empty();
 				strTemp = m_arr_URL.GetAt(i);
@@ -120,11 +120,11 @@ public:
 		//除外にヒットした場合は、FALSEに戻す。
 		if(bRet==TRUE)
 		{
-			int imax = (int)m_arr_URL_EX.GetCount();
-			for(int i=0;i<imax;i++)
+			int jmax = (int)m_arr_URL_EX.GetCount();
+			for(int j = 0; j < jmax; j++)
 			{
 				strTemp.Empty();
-				strTemp = m_arr_URL_EX.GetAt(i);
+				strTemp = m_arr_URL_EX.GetAt(j);
 				CStringA strURL_A(pURL);
 				CStringA strList_A(strTemp);
 
