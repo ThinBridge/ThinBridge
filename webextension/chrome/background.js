@@ -327,4 +327,65 @@ const ThinBridgeTalkClient = {
   }
 };
 
+/*
+ * Support ThinBridge's resource cap feature
+ */
+const ResourceCap = {
+
+  init() {
+    chrome.webNavigation.onCommitted.addListener(ResourceCap.onNavigationCommitted);
+    console.log('Running Resource Cap client');
+  },
+
+  /*
+   * On each navigation, we ask the host program to check the
+   * current resource usage.
+   */
+  onNavigationCommitted(details) {
+    console.log(`onNavigationCommitted: ${details.url}`);
+
+    /* frameId != 0 indicates iframe requests */
+    if (details.frameId) {
+      console.log(`* Ignore subframe requests`);
+      return;
+    }
+
+    chrome.tabs.query({}).then(tabs => {
+      const ntabs = ResourceCap.count(tabs);
+      console.log(`* Perform resource check (ntabs=${ntabs})`);
+      ResourceCap.check(details.tabId, ntabs);
+    });
+  },
+
+  check(tabId, ntabs) {
+    const query = new String(`R ${BROWSER} ${ntabs}`);
+    chrome.runtime.sendNativeMessage(SERVER_NAME, query).then(resp => {
+      // Need this to support ThinBridge v4.0.2.3 (or before)
+      if (chrome.runtime.lastError) {
+        return;
+      }
+
+      if (resp.closeTab) {
+        chrome.tabs.remove(tabId).then(() => {
+          if (chrome.runtime.lastError) {
+            console.log(`* ${chrome.runtime.lastError}`);
+            return;
+          }
+          console.log(`* Close Tab#${tabId}`)
+        });
+      }
+    });
+  },
+
+  count(tabs) {
+    /* Exclude the internal pages such as "edge://blank" */
+    tabs = tabs.filter((tab) => {
+      const url = tab.url || tab.pendingUrl;
+      return /^https?:/.test(url);
+    });
+    return tabs.length;
+  }
+};
+
 ThinBridgeTalkClient.init();
+ResourceCap.init();
