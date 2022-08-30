@@ -1,0 +1,3 @@
+*.zip
+*.xpi
+node_modules/
