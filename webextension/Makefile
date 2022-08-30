@@ -9,7 +9,7 @@ clean:
 	rm -f *.zip
 	rm -f *.xpi
 
-packages: clean
+packages: clean lint
 	cd chrome && make && make dev && mv *.zip ../
 	cd edge && make && make dev && mv *.zip ../
 	cd firefox && make && mv *.xpi ../
