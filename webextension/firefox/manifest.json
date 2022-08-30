@@ -7,6 +7,7 @@
 		"nativeMessaging",
 		"alarms",
 		"tabs",
+		"webNavigation",
 		"webRequest",
 		"webRequestBlocking",
 		"<all_urls>"
