@@ -1,11 +1,13 @@
+.PHONY: clean xpi
+
 FILES = manifest.json \
         misc/128x128.png \
         background.js
 
-all: ThinBridgeFirefox.zip
+all: xpi
 
 clean:
-	rm -f ThinBridgeFirefox.zip
+	rm -f ThinBridgeFirefox.xpi
 
-ThinBridgeFirefox.zip: $(FILES)
-	zip -9 - $(FILES) > $@
+xpi: $(FILES)
+	zip -9 - $(FILES) > ThinBridgeFirefox.xpi

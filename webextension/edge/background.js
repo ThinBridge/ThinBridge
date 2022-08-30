@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 /*
  * Basic settings for modern browsers
@@ -92,7 +92,7 @@ const ThinBridgeTalkClient = {
       }
       const isStartup = (this.cached == null);
       this.cached = resp.config;
-      this.cached.NamedSections = Object.fromEntries(resp.config.Sections.map(section => [section.Name, section])));
+      this.cached.NamedSections = Object.fromEntries(resp.config.Sections.map(section => [section.Name, section]));
       console.log('Fetch config', JSON.stringify(this.cached));
 
       if (isStartup) {
@@ -113,10 +113,10 @@ const ThinBridgeTalkClient = {
 
     /* Refresh config for every N minute */
     console.log('Poll config for every', ALARM_MINUTES , 'minutes');
-    chrome.alarms.create("poll-config", {'periodInMinutes': ALARM_MINUTES});
+    chrome.alarms.create('poll-config', {'periodInMinutes': ALARM_MINUTES});
 
     chrome.alarms.onAlarm.addListener((alarm) => {
-      if (alarm.name === "poll-config") {
+      if (alarm.name === 'poll-config') {
         this.configure();
       }
     });
@@ -159,7 +159,7 @@ const ThinBridgeTalkClient = {
       }
 
       const query = new String('Q ' + BROWSER + ' ' + url);
-      chrome.runtime.sendNativeMessage(SERVER_NAME, query).then(resp => {
+      chrome.runtime.sendNativeMessage(SERVER_NAME, query).then(_resp => {
         if (closeTab) {
           chrome.tabs.remove(tabId);
         }
@@ -205,7 +205,7 @@ const ThinBridgeTalkClient = {
 
     /* Guess the browser name from the executable path */
     if (name.match(/^custom/i)) {
-      if (section.Path.match(RegExp(BROWSER, "i")))
+      if (section.Path.match(RegExp(BROWSER, 'i')))
         return BROWSER;
     }
     return name;
@@ -262,7 +262,7 @@ const ThinBridgeTalkClient = {
           break sectionsLoop;
       }
       else {
-        switch (browserName) {
+        switch (this.getBrowserName(section)) {
           case 'custom18':
             console.log(` => action not defined, default action for CUSTMO18: load`);
             loadCount++;
@@ -282,7 +282,7 @@ const ThinBridgeTalkClient = {
         }
       }
     }
-    console.log(`* Result: [${matches.join(", ")}]`);
+    console.log(`* Result: [${matchedSectionNames.join(', ')}]`);
 
     if (redirectCount > 0 || loadCount == 0) {
       console.log(`* Redirect to another browser`);
