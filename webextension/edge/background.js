@@ -211,10 +211,7 @@ const ThinBridgeTalkClient = {
     return name;
   },
 
-  isRedirectURL(config, url) {
-    let section;
-    const matches = [];
-
+  handleURLAndBlock(config, tabId, url, isClosableTab) {
     if (!url) {
       console.log(`* Empty URL found`);
       return false;
@@ -231,24 +228,68 @@ const ThinBridgeTalkClient = {
 
     console.log(`* Lookup sections for ${url}`);
 
-    for (let i = 0; i < config.Sections.length; i++) {
-      section = config.Sections[i];
+    let loadCount     = 0;
+    let redirectCount = 0;
+    let closeTabCount = 0;
+    const matchedSectionNames = [];
+    sectionsLoop:
+    for (const section of config.Sections) {
+      console.log(`handleURLAndBlock: check for section ${section.Name} (${JSON.stringify(section)})`);
+      if (!this.match(section, url, config.NamedSections)) {
+        console.log(` => unmached`);
+        continue;
+      }
 
-      if (this.match(section, url, config.NamedSections)) {
-        matches.push(this.getBrowserName(section))
+      const sectionName = (config.Name || '').toLowerCase();
+      matchedSectionNames.push(sectionName);
+
+      if (config.CloseEmptyTab && isClosableTab)
+        closeTabCount++;
+
+      console.log(` => matched, action = ${config.Action}`);
+      if (section.Action) {
+        switch(section.Action.toLowerCase()) {
+          case 'redirect':
+            redirectCount++;
+            break;
+
+          case 'load':
+          default:
+            loadCount++;
+            break;
+        }
+        if (sectionName == 'custom18' || sectionName == 'custom19')
+          break sectionsLoop;
+      }
+      else {
+        switch (browserName) {
+          case 'custom18':
+            console.log(` => action not defined, default action for CUSTMO18: load`);
+            loadCount++;
+            break sectionsLoop;
+
+          case BROWSER.toLowerCase():
+            console.log(` => action not defined, default action for ${BROWSER}: load`);
+            loadCount++;
+            break;
+
+          default:
+            console.log(` => action not defined, default action: redirect`);
+            redirectCount++;
+            if (sectionName == 'custom19')
+              break sectionsLoop;
+            break;
+        }
       }
     }
     console.log(`* Result: [${matches.join(", ")}]`);
 
-    if (matches.length > 0) {
-      return !(matches.includes(CUSTOM18) || matches.includes(BROWSER));
-    } else if (config.DefaultBrowser) {
-      console.log(`* Use DefaultBrowser: ${config.DefaultBrowser}`);
-      return !config.DefaultBrowser.match(RegExp(BROWSER, 'i'));
-    } else {
-      console.log(`* DefaultBrowser is blank`);
-      return false;
+    if (redirectCount > 0 || loadCount == 0) {
+      console.log(`* Redirect to another browser`);
+      this.redirect(url, tabId, closeTabCount > 0);
     }
+    console.log(`* Continue to load: ${loadCount > 0}`);
+    return loadCount == 0;
   },
 
   /* Handle startup tabs preceding to onBeforeRequest */
@@ -257,38 +298,9 @@ const ThinBridgeTalkClient = {
       tabs.forEach((tab) => {
         const url = tab.url || tab.pendingUrl;
         console.log(`handleStartup ${url} (tab=${tab.id})`);
-        if (this.isRedirectURL(config, url)) {
-          console.log(`* Redirect to another browser`);
-          this.redirect(url, tab.id, config.CloseEmptyTab);
-        }
+        this.handleURLAndBlock(config, tab.id, url, true);
       });
     });
-  },
-
-  onTabUpdated(tabId, info, tab) {
-    const config = this.cached;
-    const url = tab.pendingUrl || tab.url;
-
-    if (info.status !== "loading") {
-      return;
-    }
-    if (!config) {
-      return;
-    }
-
-    console.log(`onTabUpdated ${url} (tab=${tabId})`);
-
-    if (this.isRedirectURL(config, url)) {
-      console.log(`* Redirect to another browser`);
-      this.redirect(url, tabId, false);
-
-      /* Call executeScript() to stop the page loading immediately.
-       * Then let the tab go back to the previous page.
-       */
-      chrome.tabs.executeScript(tabId, {code: "window.stop()", runAt: "document_start"}).then(() => {
-        chrome.tabs.goBack(tabId);
-      });
-    }
   },
 
   /* Callback for webRequest.onBeforeRequest */
