@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 /*
  * Basic settings for modern browsers
@@ -7,11 +7,11 @@
  * It should work fine across Edge, Chrome and Firefox without any
  * further modifications.
  */
-var BROWSER = 'firefox';
-var CUSTOM18 = 'custom18';
-var SERVER_NAME = 'com.clear_code.thinbridge';
-var ALARM_MINUTES = 1;
-var CANCEL_REQUEST = {cancel: 1}
+const BROWSER = 'firefox';
+const CUSTOM18 = 'custom18';
+const SERVER_NAME = 'com.clear_code.thinbridge';
+const ALARM_MINUTES = 1;
+const CANCEL_REQUEST = {cancel: 1}
 
 /*
  * ThinBridge's matching function (See BHORedirector/URLRedirectCore.h)
@@ -23,39 +23,39 @@ var CANCEL_REQUEST = {cancel: 1}
  * true
  */
 function wildcmp(wild, string) {
-	var i = 0;
-	var j = 0;
-	var mp, cp;
+  let i = 0;
+  let j = 0;
+  let mp, cp;
 
-	while ((j < string.length) && (wild[i] != '*')) {
-		if ((wild[i] != string[j]) && (wild[i] != '?')) {
-			return 0;
-		}
-		i += 1;
-		j += 1;
-	}
-	while (j < string.length) {
-		if (wild[i] == '*') {
-			i += 1;
+  while ((j < string.length) && (wild[i] != '*')) {
+    if ((wild[i] != string[j]) && (wild[i] != '?')) {
+      return 0;
+    }
+    i += 1;
+    j += 1;
+  }
+  while (j < string.length) {
+    if (wild[i] == '*') {
+      i += 1;
 
-			if (i == wild.length) {
-				return 1;
-			}
-			mp = i;
-			cp = j + 1
-		} else if ((wild[i] == string[j]) || (wild[i] == '?')) {
-			i += 1;
-			j += 1;
-		} else {
-			i = mp;
-			j = cp;
-			cp += 1;
-		}
-	}
-	while (wild[i] == '*' && i < wild.length) {
-		i += 1;
-	}
-	return i >= wild.length;
+      if (i == wild.length) {
+        return 1;
+      }
+      mp = i;
+      cp = j + 1
+    } else if ((wild[i] == string[j]) || (wild[i] == '?')) {
+      i += 1;
+      j += 1;
+    } else {
+      i = mp;
+      j = cp;
+      cp += 1;
+    }
+  }
+  while (wild[i] == '*' && i < wild.length) {
+    i += 1;
+  }
+  return i >= wild.length;
 };
 
 /*
@@ -71,228 +71,260 @@ function wildcmp(wild, string) {
  *   ]
  * }
  */
-var ThinBridgeTalkClient = {
+const ThinBridgeTalkClient = {
 
-	init: function() {
-		this.cached = null;
-		this.callback = this.onBeforeRequest.bind(this);
-		this.isNewTab = {};
-		this.configure();
-		this.listen();
-		console.log('Running as Thinbridge Talk client');
-	},
+  init() {
+    this.cached = null;
+    this.callback = this.onBeforeRequest.bind(this);
+    this.isNewTab = {};
+    this.configure();
+    this.listen();
+    console.log('Running as Thinbridge Talk client');
+  },
 
-	configure: function() {
-		var query = new String('C ' + BROWSER);
+  configure() {
+    const query = new String('C ' + BROWSER);
 
-		chrome.runtime.sendNativeMessage(SERVER_NAME, query, (resp) => {
-			if (chrome.runtime.lastError) {
-				console.log('Cannot fetch config', JSON.stringify(chrome.runtime.lastError));
-				return;
-			}
-			var isStartup = (this.cached == null);
-			this.cached = resp.config;
-			this.cached.NamedSections = Object.fromEntries(resp.config.Sections.map(section => [section.Name, section])));
-			console.log('Fetch config', JSON.stringify(this.cached));
+    browser.runtime.sendNativeMessage(SERVER_NAME, query).then(resp => {
+      if (browser.runtime.lastError) {
+        console.log('Cannot fetch config', JSON.stringify(browser.runtime.lastError));
+        return;
+      }
+      const isStartup = (this.cached == null);
+      this.cached = resp.config;
+      this.cached.NamedSections = Object.fromEntries(resp.config.Sections.map(section => [section.Name, section]));
+      console.log('Fetch config', JSON.stringify(this.cached));
 
-			if (isStartup) {
-				this.handleStartup(this.cached);
-			}
-		});
-	},
+      if (isStartup) {
+        this.handleStartup(this.cached);
+      }
+    });
+  },
 
-	listen: function() {
-		chrome.webRequest.onBeforeRequest.addListener(
-			this.callback,
-			{
-				urls: ['<all_urls>'],
-				types: ['main_frame','sub_frame']
-			},
-			['blocking']
-		);
+  listen() {
+    browser.webRequest.onBeforeRequest.addListener(
+      this.callback,
+      {
+        urls: ['<all_urls>'],
+        types: ['main_frame','sub_frame']
+      },
+      ['blocking']
+    );
 
-		/* Refresh config for every N minute */
-		console.log('Poll config for every', ALARM_MINUTES , 'minutes');
-		chrome.alarms.create("poll-config", {'periodInMinutes': ALARM_MINUTES});
+    /* Refresh config for every N minute */
+    console.log('Poll config for every', ALARM_MINUTES , 'minutes');
+    browser.alarms.create('poll-config', {'periodInMinutes': ALARM_MINUTES});
 
-		chrome.alarms.onAlarm.addListener((alarm) => {
-			if (alarm.name === "poll-config") {
-				this.configure();
-			}
-		});
+    browser.alarms.onAlarm.addListener((alarm) => {
+      if (alarm.name === 'poll-config') {
+        this.configure();
+      }
+    });
 
-		/* Tab book-keeping for intelligent tab handlings */
-		chrome.tabs.onCreated.addListener(tab => {
-			this.isNewTab[tab.id] = 1;
-		});
+    /* Tab book-keeping for intelligent tab handlings */
+    browser.tabs.onCreated.addListener(tab => {
+      this.isNewTab[tab.id] = 1;
+    });
 
-		chrome.tabs.onUpdated.addListener((id, info, tab) => {
-			if (info.status === 'complete') {
-				delete this.isNewTab[tab.id];
-			}
-		});
-	},
+    browser.tabs.onUpdated.addListener((id, info, tab) => {
+      if (info.status === 'complete') {
+        delete this.isNewTab[tab.id];
+      }
+    });
+  },
 
-	/*
-	 * Request redirection to Native Messaging Hosts.
-	 *
-	 * * chrome.tabs.get() is to confirm that the URL is originated from
-	 *   an actual tab (= not an internal prefetch request).
-	 *
-	 * * Request Example: "Q edge https://example.com/".
-	 */
-	redirect: function(url, tabId, closeTab) {
-		chrome.tabs.get(tabId, (tab) => {
-			if (chrome.runtime.lastError) {
-				console.log(`* Ignore prefetch request`);
-				return;
-			}
-			if (!tab) {
-				console.log(`* URL is not coming from an actual tab`);
-				return;
-			}
+  /*
+   * Request redirection to Native Messaging Hosts.
+   *
+   * * browser.tabs.get() is to confirm that the URL is originated from
+   *   an actual tab (= not an internal prefetch request).
+   *
+   * * Request Example: "Q edge https://example.com/".
+   */
+  redirect(url, tabId, closeTab) {
+    browser.tabs.get(tabId).then(tab => {
+      if (browser.runtime.lastError) {
+        console.log(`* Ignore prefetch request`);
+        return;
+      }
+      if (!tab) {
+        console.log(`* URL is not coming from an actual tab`);
+        return;
+      }
 
-			var query = new String('Q ' + BROWSER + ' ' + url);
-			chrome.runtime.sendNativeMessage(SERVER_NAME, query, (resp) => {
-				if (closeTab) {
-					chrome.tabs.remove(tabId);
-				}
-			});
-		});
-	},
+      const query = new String('Q ' + BROWSER + ' ' + url);
+      browser.runtime.sendNativeMessage(SERVER_NAME, query).then(_resp => {
+        if (closeTab) {
+          browser.tabs.remove(tabId);
+        }
+      });
+    });
+  },
 
-	match: function(section, url, namedSections) {
-		for (const name of section.ExcludeGroups) {
-			const foreignSection = namedSections[name];
-			if (!foreignSection)
-				continue;
-			for (const pattern of foreignSection.Patterns) {
-				if (wildcmp(pattern, url)) {
-					console.log(`* Match Exclude ${section.Name} (referring ${name}) [${pattern}]`);
-					return false;
-				}
-			}
-		}
+  match(section, url, namedSections) {
+    for (const name of section.ExcludeGroups) {
+      const foreignSection = namedSections[name];
+      if (!foreignSection)
+        continue;
+      for (const pattern of foreignSection.Patterns) {
+        if (wildcmp(pattern, url)) {
+          console.log(`* Match Exclude ${section.Name} (referring ${name}) [${pattern}]`);
+          return false;
+        }
+      }
+    }
 
-		for (const pattern of section.Excludes) {
-			if (wildcmp(pattern, url)) {
-				console.log(`* Match Exclude ${section.Name} [${pattern}]`);
-				return false;
-			}
-		}
+    for (const pattern of section.Excludes) {
+      if (wildcmp(pattern, url)) {
+        console.log(`* Match Exclude ${section.Name} [${pattern}]`);
+        return false;
+      }
+    }
 
-		for (const pattern of section.Patterns) {
-			if (wildcmp(pattern, url)) {
-				console.log(`* Match ${section.Name} [${pattern}]`);
-				return true;
-			}
-		}
-		return false;
-	},
+    for (const pattern of section.Patterns) {
+      if (wildcmp(pattern, url)) {
+        console.log(`* Match ${section.Name} [${pattern}]`);
+        return true;
+      }
+    }
+    return false;
+  },
 
-	getBrowserName: function(section) {
-		var name = section.Name.toLowerCase();
+  getBrowserName(section) {
+    const name = section.Name.toLowerCase();
 
-		/* CUSTOM18 means "common" URL */
-		if (name == CUSTOM18)
-			return name;
+    /* CUSTOM18 means "common" URL */
+    if (name == CUSTOM18)
+      return name;
 
-		/* Guess the browser name from the executable path */
-		if (name.match(/^custom/i)) {
-			if (section.Path.match(RegExp(BROWSER, "i")))
-				return BROWSER;
-		}
-		return name;
-	},
+    /* Guess the browser name from the executable path */
+    if (name.match(/^custom/i)) {
+      if (section.Path.match(RegExp(BROWSER, 'i')))
+        return BROWSER;
+    }
+    return name;
+  },
 
-	isRedirectURL: function(config, url) {
-		var section;
-		var matches = [];
+  handleURLAndBlock(config, tabId, url, isClosableTab) {
+    if (!url) {
+      console.log(`* Empty URL found`);
+      return false;
+    }
 
-		if (!url) {
-			console.log(`* Empty URL found`);
-			return false;
-		}
+    if (!/^https?:/.test(url)) {
+      console.log(`* Ignore non-HTTP/HTTPS URL`);
+      return false;
+    }
 
-		if (!/^https?:/.test(url)) {
-			console.log(`* Ignore non-HTTP/HTTPS URL`);
-			return false;
-		}
+    if (config.IgnoreQueryString) {
+      url = url.replace(/\?.*/, '');
+    }
 
-		if (config.IgnoreQueryString) {
-			url = url.replace(/\?.*/, '');
-		}
+    console.log(`* Lookup sections for ${url}`);
 
-		console.log(`* Lookup sections for ${url}`);
+    let loadCount     = 0;
+    let redirectCount = 0;
+    let closeTabCount = 0;
+    const matchedSectionNames = [];
+    sectionsLoop:
+    for (const section of config.Sections) {
+      console.log(`handleURLAndBlock: check for section ${section.Name} (${JSON.stringify(section)})`);
+      if (!this.match(section, url, config.NamedSections)) {
+        console.log(` => unmached`);
+        continue;
+      }
 
-		for (var i = 0; i < config.Sections.length; i++) {
-			section = config.Sections[i];
+      const sectionName = (config.Name || '').toLowerCase();
+      matchedSectionNames.push(sectionName);
 
-			if (this.match(section, url, config.NamedSections)) {
-				matches.push(this.getBrowserName(section))
-			}
-		}
-		console.log(`* Result: [${matches.join(", ")}]`);
+      if (config.CloseEmptyTab && isClosableTab)
+        closeTabCount++;
 
-		if (matches.length > 0) {
-			return !(matches.includes(CUSTOM18) || matches.includes(BROWSER));
-		} else if (config.DefaultBrowser) {
-			console.log(`* Use DefaultBrowser: ${config.DefaultBrowser}`);
-			return !config.DefaultBrowser.match(RegExp(BROWSER, 'i'));
-		} else {
-			console.log(`* DefaultBrowser is blank`);
-			return false;
-		}
-	},
+      console.log(` => matched, action = ${config.Action}`);
+      if (section.Action) {
+        switch(section.Action.toLowerCase()) {
+          case 'redirect':
+            redirectCount++;
+            break;
 
-	/* Handle startup tabs preceding to onBeforeRequest */
-	handleStartup: function(config) {
-		chrome.tabs.query({}, (tabs) => {
-			tabs.forEach((tab) => {
-				var url = tab.url || tab.pendingUrl;
-				console.log(`handleStartup ${url} (tab=${tab.id})`);
-				if (this.isRedirectURL(config, url)) {
-					console.log(`* Redirect to another browser`);
-					this.redirect(url, tab.id, config.CloseEmptyTab);
-				}
-			});
-		});
-	},
+          case 'load':
+          default:
+            loadCount++;
+            break;
+        }
+        if (sectionName == 'custom18' || sectionName == 'custom19')
+          break sectionsLoop;
+      }
+      else {
+        switch (this.getBrowserName(section)) {
+          case 'custom18':
+            console.log(` => action not defined, default action for CUSTMO18: load`);
+            loadCount++;
+            break sectionsLoop;
 
-	/* Callback for webRequest.onBeforeRequest */
-	onBeforeRequest: function(details) {
-		var config = this.cached;
-		var closeTab = false;
-		var isMainFrame = (details.type == 'main_frame');
+          case BROWSER.toLowerCase():
+            console.log(` => action not defined, default action for ${BROWSER}: load`);
+            loadCount++;
+            break;
 
-		console.log(`onBeforeRequest ${details.url} (tab=${details.tabId})`);
+          default:
+            console.log(` => action not defined, default action: redirect`);
+            redirectCount++;
+            if (sectionName == 'custom19')
+              break sectionsLoop;
+            break;
+        }
+      }
+    }
+    console.log(`* Result: [${matchedSectionNames.join(', ')}]`);
 
-		if (!config) {
-			console.log('* Config cache is empty. Fetching...');
-			this.configure();
-			return;
-		}
+    if (redirectCount > 0 || loadCount == 0) {
+      console.log(`* Redirect to another browser`);
+      this.redirect(url, tabId, closeTabCount > 0);
+    }
+    console.log(`* Continue to load: ${loadCount > 0}`);
+    return loadCount == 0;
+  },
 
-		if (details.tabId < 0) {
-			console.log(`* Ignore internal request`);
-			return;
-		}
+  /* Handle startup tabs preceding to onBeforeRequest */
+  handleStartup(config) {
+    browser.tabs.query({}).then(tabs => {
+      tabs.forEach((tab) => {
+        const url = tab.url || tab.pendingUrl;
+        console.log(`handleStartup ${url} (tab=${tab.id})`);
+        this.handleURLAndBlock(config, tab.id, url, true);
+      });
+    });
+  },
 
-		if (config.OnlyMainFrame && !isMainFrame) {
-			console.log(`* Ignore subframe request`);
-			return;
-		}
+  /* Callback for webRequest.onBeforeRequest */
+  onBeforeRequest(details) {
+    const config = this.cached;
+    const isMainFrame = (details.type == 'main_frame');
 
-		if (config.CloseEmptyTab && isMainFrame && this.isNewTab[details.tabId]) {
-			closeTab = true;
-		}
+    console.log(`onBeforeRequest ${details.url} (tab=${details.tabId})`);
 
-		if (this.isRedirectURL(config, details.url)) {
-			console.log(`* Redirect to another browser`);
-			this.redirect(details.url, details.tabId, closeTab);
-			return CANCEL_REQUEST;
-		}
-	}
+    if (!config) {
+      console.log('* Config cache is empty. Fetching...');
+      this.configure();
+      return;
+    }
+
+    if (details.tabId < 0) {
+      console.log(`* Ignore internal request`);
+      return;
+    }
+
+    if (config.OnlyMainFrame && !isMainFrame) {
+      console.log(`* Ignore subframe request`);
+      return;
+    }
+
+    const isClosableTab = isMainFrame && this.isNewTab[details.tabId];
+
+    if (this.handleURLAndBlock(config, details.tabId, details.url, isClosableTab))
+      return CANCEL_REQUEST;
+  }
 };
 
 ThinBridgeTalkClient.init();
