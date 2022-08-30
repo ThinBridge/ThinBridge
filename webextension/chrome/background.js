@@ -73,7 +73,7 @@ function wildcmp(wild, string) {
  */
 const ThinBridgeTalkClient = {
 
-  init: function() {
+  init() {
     this.cached = null;
     this.callback = this.onBeforeRequest.bind(this);
     this.isNewTab = {};
@@ -82,10 +82,10 @@ const ThinBridgeTalkClient = {
     console.log('Running as Thinbridge Talk client');
   },
 
-  configure: function() {
+  configure() {
     const query = new String('C ' + BROWSER);
 
-    chrome.runtime.sendNativeMessage(SERVER_NAME, query, (resp) => {
+    chrome.runtime.sendNativeMessage(SERVER_NAME, query).then(resp => {
       if (chrome.runtime.lastError) {
         console.log('Cannot fetch config', JSON.stringify(chrome.runtime.lastError));
         return;
@@ -101,7 +101,7 @@ const ThinBridgeTalkClient = {
     });
   },
 
-  listen: function() {
+  listen() {
     chrome.webRequest.onBeforeRequest.addListener(
       this.callback,
       {
@@ -141,8 +141,8 @@ const ThinBridgeTalkClient = {
    *
    * * Request Example: "Q edge https://example.com/".
    */
-  redirect: function(url, tabId, closeTab) {
-    chrome.tabs.get(tabId, (tab) => {
+  redirect(url, tabId, closeTab) {
+    chrome.tabs.get(tabId).then(tab => {
       if (chrome.runtime.lastError) {
         console.log(`* Ignore prefetch request`);
         return;
@@ -153,7 +153,7 @@ const ThinBridgeTalkClient = {
       }
 
       const query = new String('Q ' + BROWSER + ' ' + url);
-      chrome.runtime.sendNativeMessage(SERVER_NAME, query, (resp) => {
+      chrome.runtime.sendNativeMessage(SERVER_NAME, query).then(resp => {
         if (closeTab) {
           chrome.tabs.remove(tabId);
         }
@@ -161,7 +161,7 @@ const ThinBridgeTalkClient = {
     });
   },
 
-  match: function(section, url, namedSections) {
+  match(section, url, namedSections) {
     for (const name of section.ExcludeGroups) {
       const foreignSection = namedSections[name];
       if (!foreignSection)
@@ -190,7 +190,7 @@ const ThinBridgeTalkClient = {
     return false;
   },
 
-  getBrowserName: function(section) {
+  getBrowserName(section) {
     const name = section.Name.toLowerCase();
 
     /* CUSTOM18 means "common" URL */
@@ -205,7 +205,7 @@ const ThinBridgeTalkClient = {
     return name;
   },
 
-  isRedirectURL: function(config, url) {
+  isRedirectURL(config, url) {
     let section;
     const matches = [];
 
@@ -246,8 +246,8 @@ const ThinBridgeTalkClient = {
   },
 
   /* Handle startup tabs preceding to onBeforeRequest */
-  handleStartup: function(config) {
-    chrome.tabs.query({}, (tabs) => {
+  handleStartup(config) {
+    chrome.tabs.query({}).then(tabs => {
       tabs.forEach((tab) => {
         const url = tab.url || tab.pendingUrl;
         console.log(`handleStartup ${url} (tab=${tab.id})`);
@@ -260,7 +260,7 @@ const ThinBridgeTalkClient = {
   },
 
   /* Callback for webRequest.onBeforeRequest */
-  onBeforeRequest: function(details) {
+  onBeforeRequest(details) {
     const config = this.cached;
     let closeTab = false;
     const isMainFrame = (details.type == 'main_frame');
