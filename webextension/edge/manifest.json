@@ -19,5 +19,6 @@
 	},
 	"icons": {
 		"128": "misc/128x128.png"
-	}
+	},
+	"default_locale": "ja"
 }
