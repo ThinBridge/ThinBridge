@@ -1,5 +1,5 @@
 {
-	"manifest_version": 2,
+	"manifest_version": 3,
 	"name": "__MSG_extName__",
 	"version": "99.99.99",
 	"description": "__MSG_extDescription__",
@@ -7,15 +7,15 @@
 		"nativeMessaging",
 		"alarms",
 		"tabs",
-		"webNavigation",
 		"webRequest",
-		"webRequestBlocking",
+		"webRequestBlocking"
+	],
+	"host_permissions": [
 		"<all_urls>"
 	],
 	"background": {
-		"scripts": [
-			"background.js"
-		]
+		"service_worker": "background.js",
+		"type": "module"
 	},
 	"icons": {
 		"128": "misc/128x128.png"
