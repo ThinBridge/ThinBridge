@@ -234,7 +234,7 @@ const ThinBridgeTalkClient = {
         continue;
       }
 
-      const sectionName = (config.Name || '').toLowerCase();
+      const sectionName = (section.Name || '').toLowerCase();
       matchedSectionNames.push(sectionName);
 
       if (config.CloseEmptyTab && isClosableTab)
