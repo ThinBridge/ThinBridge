@@ -309,7 +309,7 @@ const ThinBridgeTalkClient = {
   onTabUpdated(tabId, info, tab) {
     const config = this.cached;
 
-    if (info.status !== "loading" ||
+    if (info.status !== 'loading' ||
         !config)
       return;
 
