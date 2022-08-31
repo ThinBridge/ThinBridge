@@ -131,6 +131,14 @@ const ThinBridgeTalkClient = {
         delete this.isNewTab[tab.id];
       }
     });
+
+    if (BROWSER == 'edge') {
+      /*
+       * Edge won't call webRequest.onBeforeRequest() when navigating
+       * from Edge-IE to Edge (GitLab#11).
+       */
+      browser.tabs.onUpdated.addListener(this.onTabUpdated.bind(this));
+    }
   },
 
   /*
@@ -163,7 +171,8 @@ const ThinBridgeTalkClient = {
 
   match(section, url, namedSections) {
     for (const name of section.ExcludeGroups) {
-      const foreignSection = namedSections[name];
+      const foreignSection = namedSections[name.toLowerCase()];
+      //console.log(`* Referring exlude group ${name}: ${JSON.stringify(foreignSection && foreignSection.Patterns)}`);
       if (!foreignSection)
         continue;
       for (const pattern of foreignSection.Patterns) {
@@ -294,6 +303,28 @@ const ThinBridgeTalkClient = {
         console.log(`handleStartup ${url} (tab=${tab.id})`);
         this.handleURLAndBlock(config, tab.id, url, true);
       });
+    });
+  },
+
+  onTabUpdated(tabId, info, tab) {
+    const config = this.cached;
+
+    if (info.status !== "loading" ||
+        !config)
+      return;
+
+    const url = tab.pendingUrl || tab.url;
+    console.log(`onTabUpdated ${url} (tab=${tabId})`);
+
+    if (!this.handleURLAndBlock(config, url))
+      return;
+
+    console.log(`* Redirect to another browser`);
+    /* Call executeScript() to stop the page loading immediately.
+     * Then let the tab go back to the previous page.
+     */
+    browser.tabs.executeScript(tabId, {code: 'window.stop()', runAt: 'document_start'}).then(() => {
+      browser.tabs.goBack(tabId);
     });
   },
 
