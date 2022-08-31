@@ -203,8 +203,7 @@ const ThinBridgeTalkClient = {
   getBrowserName(section) {
     const name = section.Name.toLowerCase();
 
-    /* CUSTOM18 means "common" URL */
-    if (name == CUSTOM18)
+    if (name == DMZ_SECTION)
       return name;
 
     /* Guess the browser name from the executable path */
@@ -262,12 +261,12 @@ const ThinBridgeTalkClient = {
             loadCount++;
             break;
         }
-        if (sectionName == CUSTOM18 || sectionName == CONTINUOUS_SECTION)
+        if (sectionName == DMZ_SECTION || sectionName == CONTINUOUS_SECTION)
           break sectionsLoop;
       }
       else {
         switch (this.getBrowserName(section)) {
-          case CUSTOM18:
+          case DMZ_SECTION:
             console.log(` => action not defined, default action for CUSTMO18: load`);
             loadCount++;
             break sectionsLoop;
