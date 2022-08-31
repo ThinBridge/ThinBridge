@@ -171,7 +171,8 @@ const ThinBridgeTalkClient = {
 
   match(section, url, namedSections) {
     for (const name of section.ExcludeGroups) {
-      const foreignSection = namedSections[name];
+      const foreignSection = namedSections[name.toLowerCase()];
+      console.log(`* Referring exlude group ${name}: ${JSON.stringify(foreignSection && foreignSection.Patterns)}`);
       if (!foreignSection)
         continue;
       for (const pattern of foreignSection.Patterns) {
