@@ -8,7 +8,8 @@
  * further modifications.
  */
 const BROWSER = 'firefox';
-const CUSTOM18 = 'custom18';
+const DMZ_SECTION = 'custom18';
+const CONTINUOUS_SECTION = 'custom19';
 const SERVER_NAME = 'com.clear_code.thinbridge';
 const ALARM_MINUTES = 1;
 const CANCEL_REQUEST = {cancel: 1}
@@ -261,12 +262,12 @@ const ThinBridgeTalkClient = {
             loadCount++;
             break;
         }
-        if (sectionName == 'custom18' || sectionName == 'custom19')
+        if (sectionName == CUSTOM18 || sectionName == CONTINUOUS_SECTION)
           break sectionsLoop;
       }
       else {
         switch (this.getBrowserName(section)) {
-          case 'custom18':
+          case CUSTOM18:
             console.log(` => action not defined, default action for CUSTMO18: load`);
             loadCount++;
             break sectionsLoop;
@@ -279,7 +280,7 @@ const ThinBridgeTalkClient = {
           default:
             console.log(` => action not defined, default action: redirect`);
             redirectCount++;
-            if (sectionName == 'custom19')
+            if (sectionName == CONTINUOUS_SECTION)
               break sectionsLoop;
             break;
         }

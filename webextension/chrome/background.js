@@ -8,7 +8,8 @@
  * further modifications.
  */
 const BROWSER = 'chrome';
-const CUSTOM18 = 'custom18';
+const DMZ_SECTION = 'custom18';
+const CONTINUOUS_SECTION = 'custom19';
 const SERVER_NAME = 'com.clear_code.thinbridge';
 const ALARM_MINUTES = 1;
 const CANCEL_REQUEST = {redirectUrl:`data:text/html,${escape('<script type="application/javascript">history.back()</script>')}`};
@@ -202,8 +203,7 @@ const ThinBridgeTalkClient = {
   getBrowserName(section) {
     const name = section.Name.toLowerCase();
 
-    /* CUSTOM18 means "common" URL */
-    if (name == CUSTOM18)
+    if (name == DMZ_SECTION)
       return name;
 
     /* Guess the browser name from the executable path */
@@ -261,12 +261,12 @@ const ThinBridgeTalkClient = {
             loadCount++;
             break;
         }
-        if (sectionName == 'custom18' || sectionName == 'custom19')
+        if (sectionName == DMZ_SECTION || sectionName == CONTINUOUS_SECTION)
           break sectionsLoop;
       }
       else {
         switch (this.getBrowserName(section)) {
-          case 'custom18':
+          case DMZ_SECTION:
             console.log(` => action not defined, default action for CUSTMO18: load`);
             loadCount++;
             break sectionsLoop;
@@ -279,7 +279,7 @@ const ThinBridgeTalkClient = {
           default:
             console.log(` => action not defined, default action: redirect`);
             redirectCount++;
-            if (sectionName == 'custom19')
+            if (sectionName == CONTINUOUS_SECTION)
               break sectionsLoop;
             break;
         }
