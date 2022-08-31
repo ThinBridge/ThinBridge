@@ -132,11 +132,13 @@ const ThinBridgeTalkClient = {
       }
     });
 
-    /*
-     * Edge won't call webRequest.onBeforeRequest() when navigating
-     * from Edge-IE to Edge (GitLab#11).
-     */
-    chrome.tabs.onUpdated.addListener(this.onTabUpdated.bind(this));
+    if (BROWSER == 'edge') {
+      /*
+       * Edge won't call webRequest.onBeforeRequest() when navigating
+       * from Edge-IE to Edge (GitLab#11).
+       */
+      chrome.tabs.onUpdated.addListener(this.onTabUpdated.bind(this));
+    }
   },
 
   /*
@@ -303,10 +305,31 @@ const ThinBridgeTalkClient = {
     });
   },
 
+  onTabUpdated(tabId, info, tab) {
+    const config = this.cached;
+
+    if (info.status !== "loading" ||
+        !config)
+      return;
+
+    const url = tab.pendingUrl || tab.url;
+    console.log(`onTabUpdated ${url} (tab=${tabId})`);
+
+    if (!this.handleURLAndBlock(config, url))
+      return;
+
+    console.log(`* Redirect to another browser`);
+    /* Call executeScript() to stop the page loading immediately.
+     * Then let the tab go back to the previous page.
+     */
+    chrome.tabs.executeScript(tabId, {code: 'window.stop()', runAt: 'document_start'}).then(() => {
+      chrome.tabs.goBack(tabId);
+    });
+  },
+
   /* Callback for webRequest.onBeforeRequest */
   onBeforeRequest(details) {
     const config = this.cached;
-    let closeTab = false;
     const isMainFrame = (details.type == 'main_frame');
 
     console.log(`onBeforeRequest ${details.url} (tab=${details.tabId})`);
@@ -327,15 +350,10 @@ const ThinBridgeTalkClient = {
       return;
     }
 
-    if (config.CloseEmptyTab && isMainFrame && this.isNewTab[details.tabId]) {
-      closeTab = true;
-    }
+    const isClosableTab = isMainFrame && this.isNewTab[details.tabId];
 
-    if (this.isRedirectURL(config, details.url)) {
-      console.log(`* Redirect to another browser`);
-      this.redirect(details.url, details.tabId, closeTab);
+    if (this.handleURLAndBlock(config, details.tabId, details.url, isClosableTab))
       return CANCEL_REQUEST;
-    }
   }
 };
 
