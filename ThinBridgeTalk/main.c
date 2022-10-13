@@ -107,6 +107,9 @@ int main(int argc, char *argv[])
 	int len;
 	int ret;
 
+	/* Prevent Windows from corrupting data */
+	setmode(_fileno(stdin), O_BINARY);
+
 	ret = fread(&len, sizeof(len), 1, stdin);
 	if (ret < 1) {
 	    fprintf(stderr, "cannot read %i bytes", sizeof(len));
