@@ -1,0 +1,16 @@
+# .github/release.yml
+
+changelog:
+  categories:
+    - title: 前回からの互換性のない変更点 🛠
+      labels:
+        - breaking-change
+    - title: 新機能 🎉
+      labels:
+        - enhancement
+    - title: 不具合の修正
+      labels:
+        - bug
+    - title: その他の変更点
+      labels:
+        - "*"
