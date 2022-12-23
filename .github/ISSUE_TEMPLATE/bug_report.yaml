@@ -1,0 +1,65 @@
+name: Bug Report
+description: Create a report with a procedure for reproducing the bug
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe the bug
+      description: A clear and concise description of what the bug is
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: To Reproduce
+      description: Steps to reproduce the behavior
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: A clear and concise description of what you expected to happen
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Your Environment
+      description: |
+        - ThinBridge version:
+        - ThinBridge browser addon/extension version: See chrome://extensions (Chrome), about:addons (Firefox)
+
+        Tip: If you hit the problem with older ThinBridge version, try latest version first.
+      value: |
+        - ThinBridge version:
+        - ThinBridge Chrome extension version:
+        - ThinBridge Edge extension version:
+        - ThinBridge Firefox addon version:
+      render: markdown
+    validations:
+      required: true
+  - type: textarea
+    id: configuration
+    attributes:
+      label: Your Configuration
+      description: |
+        Write your ThinBridgeBHO.ini  configuration. Minimum reproducible ThinBridgeBHO.ini is recommended.
+      render: ini
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Your TRACE log (IE)
+      description: Write your TRACE log here
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: addtional-context
+    attributes:
+      label: Additional context
+      description: Add any other context about the problem here.
+    validations:
+      required: false
