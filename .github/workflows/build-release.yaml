@@ -4,8 +4,8 @@ jobs:
   build:
     runs-on: [ windows-2019 ]
     steps:
-      - uses: actions/checkout@v2
-      - uses: microsoft/setup-msbuild@v1.0.2
+      - uses: actions/checkout@v3
+      - uses: microsoft/setup-msbuild@v1.2
       - name: Compile x86
         run: msbuild /p:Platform=Win32 /p:Configuration=Release
       - name: Compile x64
@@ -17,21 +17,21 @@ jobs:
       - name: Make Installer (x64)
         run: iscc.exe ThinBridgeX64.iss
       - name: Upload Binaries
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: Binaries
           path: |
             Release/*.exe
             Release/*.dll
       - name: Upload Installer
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: Installers
           path: SetupOutput/*.exe
   assets:
     runs-on: [ ubuntu-latest ]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Build Testing Extensions
         run: |
           cp webextension/edge/manifest.json.dev webextension/edge/manifest.json
@@ -40,12 +40,12 @@ jobs:
           make -C webextension/chrome
           make -C webextension/firefox
       - name: Upload Extensions
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: WebExtensions
           path: webextension/*/*.zip
       - name: Upload GPO Templates
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: Templates
           path: Resources/GPO/*.adm*
