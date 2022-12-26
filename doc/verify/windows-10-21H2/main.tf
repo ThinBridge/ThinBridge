@@ -452,6 +452,39 @@ resource "local_file" "playbook" {
 #        state: present
 #        canonical_name: hostname.example.com
 #        ip_address: '93.184.216.34'
+    - name: Prepare directory to put ThinBridgeBHO.ini
+      win_file:
+        path: 'C:\Program Files\ThinBridge'
+        state: directory
+    - name: Create shortcut to ThinBridge
+      win_shortcut:
+        src: 'C:\Program Files\ThinBridge'
+        dest: '%Public%\Desktop\ThinBridge.lnk'
+    - name: "Install configs for ThinBridge: Rulefile (64bit)"
+      win_regedit:
+        key: HKLM:\Software\ThinBridge
+        value: Rulefile
+        data: 'C:\Program Files\ThinBridge\ThinBridgeBHO.ini'
+    - name: "Install configs for ThinBridge: Rulefile (32bit)"
+      win_regedit:
+        key: HKLM:\Software\WOW6432Node\ThinBridge
+        value: Rulefile
+        data: 'C:\Program Files\ThinBridge\ThinBridgeBHO.ini'
+    - name: "copy ThinBridgeBHO.ini to the ThinBridge directory"
+      win_copy:
+        src: ../../ThinBridgeBHO.ini
+        dest: 'C:\Program Files\ThinBridge\'
+    - name: "upload site.xml"
+      win_copy:
+        src: ../../site.xml
+        dest: 'C:\Users\Public\'
+    - name: "copy setup registry for Edge IE mode"
+      win_copy:
+        src: ../../activate-edge-ie-mode.reg
+        dest: 'C:\Users\Public\'
+    - name: "activate Edge IE mode"
+      win_regmerge:
+        path: 'C:\Users\Public\activate-edge-ie-mode.reg'
 EOL
 }
 
