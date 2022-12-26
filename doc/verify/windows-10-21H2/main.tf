@@ -485,6 +485,20 @@ resource "local_file" "playbook" {
     - name: "activate Edge IE mode"
       win_regmerge:
         path: 'C:\Users\Public\activate-edge-ie-mode.reg'
+    - name: "copy setup registry for disabled protect mode"
+      win_copy:
+        src: ../../disable-protect-mode.reg
+        dest: 'C:\Users\Public\'
+    - name: "Disable protect mode of IE for ユーザー"
+      become: yes
+      become_user: "ユーザー"
+      win_regmerge:
+        path: 'C:\Users\Public\disable-protect-mode.reg'
+    - name: "Disable protect mode of IE for 管理者"
+      become: yes
+      become_user: "管理者"
+      win_regmerge:
+        path: 'C:\Users\Public\disable-protect-mode.reg'
 EOL
 }
 
