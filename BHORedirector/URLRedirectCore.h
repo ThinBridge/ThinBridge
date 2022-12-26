@@ -899,16 +899,16 @@ public:
 			//Defaultブラウザーへリダイレクトする。
 			if (pRedirectData_Default)
 			{
-					//何かしら設定されている。
-					if(!pRedirectData_Default->m_strExecExeFullPath.IsEmpty())
+				//何かしら設定されている。
+				if(!pRedirectData_Default->m_strExecExeFullPath.IsEmpty())
+				{
+					//IE以外の場合（IEの場合は、何もしない。）
+					if(pRedirectData_Default->m_strExecExeFullPath.CompareNoCase(_T("IE")) != 0)
 					{
-						//IE以外の場合（IEの場合は、何もしない。）
-						if(pRedirectData_Default->m_strExecExeFullPath.CompareNoCase(_T("IE")) != 0)
-						{
-							arr_RedirectBrowserHit->Add((intptr_t)pRedirectData_Default);
-							return TRUE;
-						}
+						arr_RedirectBrowserHit->Add((intptr_t)pRedirectData_Default);
+						return TRUE;
 					}
+				}
 			}
 			//#define MAX_PassThroughURL 100
 			int iMaxCache=(int)m_MapPassThroughURLs.GetCount();
@@ -1218,16 +1218,16 @@ public:
 			//Defaultブラウザーへリダイレクトする。
 			if (pRedirectData_Default)
 			{
-					//何かしら設定されている。
-					if (!pRedirectData_Default->m_strExecExeFullPath.IsEmpty())
+				//何かしら設定されている。
+				if (!pRedirectData_Default->m_strExecExeFullPath.IsEmpty())
+				{
+					//Edge以外の場合（Edgeの場合は、何もしない。）
+					if (pRedirectData_Default->m_strExecExeFullPath.CompareNoCase(_T("Edge")) != 0)
 					{
-						//Edge以外の場合（Edgeの場合は、何もしない。）
-						if (pRedirectData_Default->m_strExecExeFullPath.CompareNoCase(_T("Edge")) != 0)
-						{
-							arr_RedirectBrowserHit->Add((intptr_t)pRedirectData_Default);
-							return TRUE;
-						}
+						arr_RedirectBrowserHit->Add((intptr_t)pRedirectData_Default);
+						return TRUE;
 					}
+				}
 			}
 			//#define MAX_PassThroughURL 100
 			int iMaxCache = (int)m_MapPassThroughURLs.GetCount();
@@ -1449,12 +1449,12 @@ public:
 			//Defaultブラウザーへリダイレクトする。
 			if (pRedirectData_Default)
 			{
-					//何かしら設定されている。
-					if (!pRedirectData_Default->m_strExecExeFullPath.IsEmpty())
-					{
-						arr_RedirectBrowserHit->Add((intptr_t)pRedirectData_Default);
-						return TRUE;
-					}
+				//何かしら設定されている。
+				if (!pRedirectData_Default->m_strExecExeFullPath.IsEmpty())
+				{
+					arr_RedirectBrowserHit->Add((intptr_t)pRedirectData_Default);
+					return TRUE;
+				}
 			}
 			//#define MAX_PassThroughURL 100
 			int iMaxCache = (int)m_MapPassThroughURLs.GetCount();
