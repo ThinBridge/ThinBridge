@@ -899,9 +899,6 @@ public:
 			//Defaultブラウザーへリダイレクトする。
 			if (pRedirectData_Default)
 			{
-				//TopURLの場合だけ
-				if (bTopPage == TRUE)
-				{
 					//何かしら設定されている。
 					if(!pRedirectData_Default->m_strExecExeFullPath.IsEmpty())
 					{
@@ -912,7 +909,6 @@ public:
 							return TRUE;
 						}
 					}
-				}
 			}
 			//#define MAX_PassThroughURL 100
 			int iMaxCache=(int)m_MapPassThroughURLs.GetCount();
@@ -1222,9 +1218,6 @@ public:
 			//Defaultブラウザーへリダイレクトする。
 			if (pRedirectData_Default)
 			{
-				//TopURLの場合だけ
-				if (bTopPage == TRUE)
-				{
 					//何かしら設定されている。
 					if (!pRedirectData_Default->m_strExecExeFullPath.IsEmpty())
 					{
@@ -1235,7 +1228,6 @@ public:
 							return TRUE;
 						}
 					}
-				}
 			}
 			//#define MAX_PassThroughURL 100
 			int iMaxCache = (int)m_MapPassThroughURLs.GetCount();
@@ -1457,16 +1449,12 @@ public:
 			//Defaultブラウザーへリダイレクトする。
 			if (pRedirectData_Default)
 			{
-				//TopURLの場合だけ
-				if (bTopPage == TRUE)
-				{
 					//何かしら設定されている。
 					if (!pRedirectData_Default->m_strExecExeFullPath.IsEmpty())
 					{
 						arr_RedirectBrowserHit->Add((intptr_t)pRedirectData_Default);
 						return TRUE;
 					}
-				}
 			}
 			//#define MAX_PassThroughURL 100
 			int iMaxCache = (int)m_MapPassThroughURLs.GetCount();
