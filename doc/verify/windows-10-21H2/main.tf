@@ -484,19 +484,16 @@ resource "local_file" "playbook" {
         value: InternetExplorerIntegrationLevel
         data: 00000001
         datatype: dword
-    - name: "set enterprise site list"
       win_regedit:
         key: HKLM:\SOFTWARE\Policies\Microsoft\Edge
         value: InternetExplorerIntegrationSiteList
         data: 00000001
         string: 'C:\\Users\\Public\\site.xml'
-    - name: "activate Edge IE mode (32bit)"
       win_regedit:
         key: HKLM:\SOFTWARE\WOW6432Node\Policies\Microsoft\Edge
         value: InternetExplorerIntegrationLevel
         data: 00000001
         datatype: dword
-    - name: "set enterprise site list (32bit)"
       win_regedit:
         key: HKLM:\SOFTWARE\WOW6432Node\Policies\Microsoft\Edge
         value: InternetExplorerIntegrationSiteList
@@ -510,9 +507,6 @@ resource "local_file" "playbook" {
         value: 2500
         data: 00000003
         datatype: dword
-    - name: "Disable protect mode of IE for ユーザー (32bit)"
-      become: yes
-      become_user: "ユーザー"
       win_regedit:
         key: HKCU:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Internet Settings\Zones\3
         value: 2500
@@ -526,9 +520,6 @@ resource "local_file" "playbook" {
         value: 2500
         data: 00000003
         datatype: dword
-    - name: "Disable protect mode of IE for 管理者 (32bit)"
-      become: yes
-      become_user: "管理者"
       win_regedit:
         key: HKCU:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Internet Settings\Zones\3
         value: 2500
