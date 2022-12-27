@@ -15,7 +15,7 @@ https://github.com/ThinBridge/ThinBridge/issues/18
 
 1. Run a command line: `"C:\Program Files (x86)\Internet Explorer\iexplore.exe" about:blank`
    * This should starts IE with a blank tab.
-2. Type and enter a URL `https://powerbi.microsoft.com/ja-jp/` to IE's address bar.
+2. Type and enter a URL `https://developer.mozilla.org/ja/docs/Web/HTML/Element/iframe` to IE's address bar.
    * This should load the page with IE.
    * Chrome should not be started.
 3. Quit IE.
@@ -25,9 +25,9 @@ https://github.com/ThinBridge/ThinBridge/issues/18
 7. Click `OK`.
 8. Run a command line: `"C:\Program Files (x86)\Internet Explorer\iexplore.exe" about:blank`
    * This should starts IE with a blank tab.
-9. Type and enter a URL `https://powerbi.microsoft.com/ja-jp/` to IE's address bar.
+9. Type and enter a URL `https://developer.mozilla.org/ja/docs/Web/HTML/Element/iframe` to IE's address bar.
    * This should load the page with IE.
-   * Chrome should be started with a URL like `https://publisher.liveperson.net/iframe-le-tag/...` by ThinBridge.
+   * Chrome should be started with a URL like `https://interactive-examples.mdn.mozilla.net/pages/tabbed/iframe.html` by ThinBridge.
 10. Quit both IE and Chrome.
 11. Run a command line: `"C:\Program Files\ThinBridge\ThinBridgeSetting.exe"`
 12. Go to the section `URLリダイレクト全般設定` and check `アドレスバーに表示されるURLのみを判定する`.
@@ -37,7 +37,7 @@ https://github.com/ThinBridge/ThinBridge/issues/18
 
 1. Run a command line: `"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" --profile-directory=Default edge://blank`
    * This should starts Edge with a blank tab.
-2. Type and enter a URL `https://powerbi.microsoft.com/ja-jp/` to Edge's address bar.
+2. Type and enter a URL `https://developer.mozilla.org/ja/docs/Web/HTML/Element/iframe` to Edge's address bar.
    * This should load the page with Edge's IE mode tab.
    * Chrome should not be started.
 3. Quit Edge.
@@ -47,9 +47,9 @@ https://github.com/ThinBridge/ThinBridge/issues/18
 7. Click `OK`.
 8. Run a command line: `"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" --profile-directory=Default edge://blank`
    * This should starts Edge with a blank tab.
-9. Type and enter a URL `https://powerbi.microsoft.com/ja-jp/` to Edge's address bar.
+9. Type and enter a URL `https://developer.mozilla.org/ja/docs/Web/HTML/Element/iframe` to Edge's address bar.
    * This should load the page with Edge's IE mode tab.
-   * Chrome should be started with a URL like `https://publisher.liveperson.net/iframe-le-tag/...` by ThinBridge.
+   * Chrome should be started with a URL like `https://interactive-examples.mdn.mozilla.net/pages/tabbed/iframe.html` by ThinBridge.
 10. Quit both Edge and Chrome.
 11. Run a command line: `"C:\Program Files\ThinBridge\ThinBridgeSetting.exe"`
 12. Go to the section `URLリダイレクト全般設定` and check `アドレスバーに表示されるURLのみを判定する`.

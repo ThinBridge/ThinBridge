@@ -8,7 +8,7 @@
     <compat-mode>IE8Enterprise</compat-mode>
     <open-in>IE11</open-in>
   </site>
-  <site url="powerbi.microsoft.com">
+  <site url="developer.mozilla.org">
     <compat-mode>IE8Enterprise</compat-mode>
     <open-in>IE11</open-in>
   </site>
