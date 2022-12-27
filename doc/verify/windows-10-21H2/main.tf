@@ -460,20 +460,13 @@ resource "local_file" "playbook" {
       win_shortcut:
         src: 'C:\Program Files\ThinBridge'
         dest: '%Public%\Desktop\ThinBridge.lnk'
-    - name: "Install configs for ThinBridge: Rulefile (64bit)"
-      win_regedit:
-        key: HKLM:\Software\ThinBridge
-        value: Rulefile
-        data: 'C:\Program Files\ThinBridge\ThinBridgeBHO.ini'
-    - name: "Install configs for ThinBridge: Rulefile (32bit)"
-      win_regedit:
-        key: HKLM:\Software\WOW6432Node\ThinBridge
-        value: Rulefile
-        data: 'C:\Program Files\ThinBridge\ThinBridgeBHO.ini'
-    - name: "copy ThinBridgeBHO.ini to the ThinBridge directory"
+    - name: "copy setup registry for ThinBridge"
       win_copy:
-        src: ../../ThinBridgeBHO.ini
-        dest: 'C:\Program Files\ThinBridge\'
+        src: ../../activate-thinbridge.reg
+        dest: 'C:\Users\Public\'
+    - name: "Install configs for ThinBridge"
+      win_regmerge:
+        path: 'C:\Users\Public\activate-thinbridge.reg'
     - name: "upload site.xml"
       win_copy:
         src: ../../site.xml
