@@ -899,7 +899,7 @@ public:
 			//Defaultブラウザーへリダイレクトする。
 			if (pRedirectData_Default)
 			{
-				if (bTopPage == TRUE || m_bTopPageOnly == FALSE)
+				if (bTopPage == TRUE || m_bTopURLOnly == FALSE)
 				{
 					//何かしら設定されている。
 					if(!pRedirectData_Default->m_strExecExeFullPath.IsEmpty())
@@ -1221,7 +1221,7 @@ public:
 			//Defaultブラウザーへリダイレクトする。
 			if (pRedirectData_Default)
 			{
-				if (bTopPage == TRUE || m_bTopPageOnly == FALSE)
+				if (bTopPage == TRUE || m_bTopURLOnly == FALSE)
 				{
 					//何かしら設定されている。
 					if (!pRedirectData_Default->m_strExecExeFullPath.IsEmpty())
@@ -1455,7 +1455,7 @@ public:
 			//Defaultブラウザーへリダイレクトする。
 			if (pRedirectData_Default)
 			{
-				if (bTopPage == TRUE || m_bTopPageOnly == FALSE)
+				if (bTopPage == TRUE || m_bTopURLOnly == FALSE)
 				{
 					//何かしら設定されている。
 					if (!pRedirectData_Default->m_strExecExeFullPath.IsEmpty())
