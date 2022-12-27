@@ -452,6 +452,46 @@ resource "local_file" "playbook" {
 #        state: present
 #        canonical_name: hostname.example.com
 #        ip_address: '93.184.216.34'
+    - name: Prepare directory to put ThinBridgeBHO.ini
+      win_file:
+        path: 'C:\Program Files\ThinBridge'
+        state: directory
+    - name: Create shortcut to ThinBridge
+      win_shortcut:
+        src: 'C:\Program Files\ThinBridge'
+        dest: '%Public%\Desktop\ThinBridge.lnk'
+    - name: "copy setup registry for ThinBridge"
+      win_copy:
+        src: ../../activate-thinbridge.reg
+        dest: 'C:\Users\Public\'
+    - name: "Install configs for ThinBridge"
+      win_regmerge:
+        path: 'C:\Users\Public\activate-thinbridge.reg'
+    - name: "upload site.xml"
+      win_copy:
+        src: ../../site.xml
+        dest: 'C:\Users\Public\'
+    - name: "copy setup registry for Edge IE mode"
+      win_copy:
+        src: ../../activate-edge-ie-mode.reg
+        dest: 'C:\Users\Public\'
+    - name: "activate Edge IE mode"
+      win_regmerge:
+        path: 'C:\Users\Public\activate-edge-ie-mode.reg'
+    - name: "copy setup registry for disabled protect mode"
+      win_copy:
+        src: ../../disable-protect-mode.reg
+        dest: 'C:\Users\Public\'
+    - name: "Disable protect mode of IE for ユーザー"
+      become: yes
+      become_user: "ユーザー"
+      win_regmerge:
+        path: 'C:\Users\Public\disable-protect-mode.reg'
+    - name: "Disable protect mode of IE for 管理者"
+      become: yes
+      become_user: "管理者"
+      win_regmerge:
+        path: 'C:\Users\Public\disable-protect-mode.reg'
 EOL
 }
 

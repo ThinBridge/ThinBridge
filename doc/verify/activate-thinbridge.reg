@@ -1,0 +1,8 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_LOCAL_MACHINE\Software\ThinBridge]
+"Rulefile"="C:\Program Files\ThinBridge\ThinBridgeBHO.ini"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\ThinBridge]
+"Rulefile"="C:\Program Files\ThinBridge\ThinBridgeBHO.ini"
+
