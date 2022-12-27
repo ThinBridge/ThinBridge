@@ -478,27 +478,53 @@ resource "local_file" "playbook" {
       win_copy:
         src: ../../site.xml
         dest: 'C:\Users\Public\'
-    - name: "copy setup registry for Edge IE mode"
-      win_copy:
-        src: ../../activate-edge-ie-mode.reg
-        dest: 'C:\Users\Public\'
     - name: "activate Edge IE mode"
-      win_regmerge:
-        path: 'C:\Users\Public\activate-edge-ie-mode.reg'
-    - name: "copy setup registry for disabled protect mode"
-      win_copy:
-        src: ../../disable-protect-mode.reg
-        dest: 'C:\Users\Public\'
+      win_regedit:
+        key: HKLM:\SOFTWARE\Policies\Microsoft\Edge
+        value: InternetExplorerIntegrationLevel
+        data: 00000001
+        datatype: dword
+      win_regedit:
+        key: HKLM:\SOFTWARE\Policies\Microsoft\Edge
+        value: InternetExplorerIntegrationSiteList
+        data: 00000001
+        string: 'C:\\Users\\Public\\site.xml'
+      win_regedit:
+        key: HKLM:\SOFTWARE\WOW6432Node\Policies\Microsoft\Edge
+        value: InternetExplorerIntegrationLevel
+        data: 00000001
+        datatype: dword
+      win_regedit:
+        key: HKLM:\SOFTWARE\WOW6432Node\Policies\Microsoft\Edge
+        value: InternetExplorerIntegrationSiteList
+        data: 00000001
+        string: 'C:\\Users\\Public\\site.xml'
     - name: "Disable protect mode of IE for ユーザー"
       become: yes
       become_user: "ユーザー"
-      win_regmerge:
-        path: 'C:\Users\Public\disable-protect-mode.reg'
+      win_regedit:
+        key: HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Zones\3
+        value: 2500
+        data: 00000003
+        datatype: dword
+      win_regedit:
+        key: HKCU:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Internet Settings\Zones\3
+        value: 2500
+        data: 00000003
+        datatype: dword
     - name: "Disable protect mode of IE for 管理者"
       become: yes
       become_user: "管理者"
-      win_regmerge:
-        path: 'C:\Users\Public\disable-protect-mode.reg'
+      win_regedit:
+        key: HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Zones\3
+        value: 2500
+        data: 00000003
+        datatype: dword
+      win_regedit:
+        key: HKCU:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Internet Settings\Zones\3
+        value: 2500
+        data: 00000003
+        datatype: dword
 EOL
 }
 
