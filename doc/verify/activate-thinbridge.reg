@@ -6,3 +6,9 @@ Windows Registry Editor Version 5.00
 [HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\ThinBridge]
 "Rulefile"="C:\Program Files\ThinBridge\ThinBridgeBHO.ini"
 
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Ext]
+"ListBox_Support_CLSID"=dword:00000001
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Ext\CLSID]
+"{3A56619B-37AC-40DA-833E-410F3BEDCBDC}"="1"
+
