@@ -899,14 +899,17 @@ public:
 			//Defaultブラウザーへリダイレクトする。
 			if (pRedirectData_Default)
 			{
-				//何かしら設定されている。
-				if(!pRedirectData_Default->m_strExecExeFullPath.IsEmpty())
+				if (bTopPage == TRUE || m_bTopURLOnly == FALSE)
 				{
-					//IE以外の場合（IEの場合は、何もしない。）
-					if(pRedirectData_Default->m_strExecExeFullPath.CompareNoCase(_T("IE")) != 0)
+					//何かしら設定されている。
+					if(!pRedirectData_Default->m_strExecExeFullPath.IsEmpty())
 					{
-						arr_RedirectBrowserHit->Add((intptr_t)pRedirectData_Default);
-						return TRUE;
+						//IE以外の場合（IEの場合は、何もしない。）
+						if(pRedirectData_Default->m_strExecExeFullPath.CompareNoCase(_T("IE")) != 0)
+						{
+							arr_RedirectBrowserHit->Add((intptr_t)pRedirectData_Default);
+							return TRUE;
+						}
 					}
 				}
 			}
@@ -1218,14 +1221,17 @@ public:
 			//Defaultブラウザーへリダイレクトする。
 			if (pRedirectData_Default)
 			{
-				//何かしら設定されている。
-				if (!pRedirectData_Default->m_strExecExeFullPath.IsEmpty())
+				if (bTopPage == TRUE || m_bTopURLOnly == FALSE)
 				{
-					//Edge以外の場合（Edgeの場合は、何もしない。）
-					if (pRedirectData_Default->m_strExecExeFullPath.CompareNoCase(_T("Edge")) != 0)
+					//何かしら設定されている。
+					if (!pRedirectData_Default->m_strExecExeFullPath.IsEmpty())
 					{
-						arr_RedirectBrowserHit->Add((intptr_t)pRedirectData_Default);
-						return TRUE;
+						//Edge以外の場合（Edgeの場合は、何もしない。）
+						if (pRedirectData_Default->m_strExecExeFullPath.CompareNoCase(_T("Edge")) != 0)
+						{
+							arr_RedirectBrowserHit->Add((intptr_t)pRedirectData_Default);
+							return TRUE;
+						}
 					}
 				}
 			}
@@ -1449,11 +1455,14 @@ public:
 			//Defaultブラウザーへリダイレクトする。
 			if (pRedirectData_Default)
 			{
-				//何かしら設定されている。
-				if (!pRedirectData_Default->m_strExecExeFullPath.IsEmpty())
+				if (bTopPage == TRUE || m_bTopURLOnly == FALSE)
 				{
-					arr_RedirectBrowserHit->Add((intptr_t)pRedirectData_Default);
-					return TRUE;
+					//何かしら設定されている。
+					if (!pRedirectData_Default->m_strExecExeFullPath.IsEmpty())
+					{
+						arr_RedirectBrowserHit->Add((intptr_t)pRedirectData_Default);
+						return TRUE;
+					}
 				}
 			}
 			//#define MAX_PassThroughURL 100

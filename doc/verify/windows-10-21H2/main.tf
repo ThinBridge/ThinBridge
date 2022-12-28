@@ -452,6 +452,12 @@ resource "local_file" "playbook" {
 #        state: present
 #        canonical_name: hostname.example.com
 #        ip_address: '93.184.216.34'
+    - name: Install Google Chrome
+      win_chocolatey:
+        name: googlechrome
+        state: present
+        allow_empty_checksums: yes
+        ignore_checksums: yes
     - name: Prepare directory to put ThinBridgeBHO.ini
       win_file:
         path: 'C:\Program Files\ThinBridge'

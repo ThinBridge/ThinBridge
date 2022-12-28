@@ -5,7 +5,11 @@
     <date-created>02/23/2020 14:28:42</date-created>
   </created-by>
   <site url="www.example.com">
-    <compat-mode>IE7Enterprise</compat-mode>
+    <compat-mode>IE8Enterprise</compat-mode>
+    <open-in>IE11</open-in>
+  </site>
+  <site url="developer.mozilla.org">
+    <compat-mode>IE8Enterprise</compat-mode>
     <open-in>IE11</open-in>
   </site>
 </site-list>
