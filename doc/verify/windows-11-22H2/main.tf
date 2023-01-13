@@ -510,6 +510,10 @@ resource "local_file" "playbook" {
       become_user: "管理者"
       win_regmerge:
         path: 'C:\Users\Public\disable-protect-mode.reg'
+    - name: "Copy script to start legacy Internet Explorer"
+      win_copy:
+        src: '../../Start Internet Explorer.vbs'
+        dest: '%Public%\Desktop\'
 EOL
 }
 
