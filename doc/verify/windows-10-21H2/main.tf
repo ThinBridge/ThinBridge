@@ -503,6 +503,11 @@ resource "local_file" "playbook" {
         state: present
         allow_empty_checksums: yes
         ignore_checksums: yes
+    - name: Download Google Chrome installer
+      when: not "${var.chrome-installer-download-url}" == ""
+      win_get_url:
+        url: "${var.chrome-installer-download-url}"
+        dest: 'C:\Users\Public\ChromeSetup.msi'
     - name: Install Google Chrome from Installer
       when: not "${var.chrome-installer-download-url}" == ""
       win_command: 'msiexec /i C:\Users\Public\ChromeSetup.msi /passive /norestart'
