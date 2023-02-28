@@ -67,7 +67,7 @@ resource "azurerm_virtual_machine" "firefoxverify_vm" {
     # Windows 10 Professional 1809
     publisher = "MicrosoftWindowsDesktop"
     offer     = "Windows-10"
-    sku       = "rs5-enterprise"
+    sku       = "rs5-enterprise-g2"
     version   = "latest"
   }
 
