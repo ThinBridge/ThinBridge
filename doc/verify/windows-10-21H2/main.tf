@@ -558,6 +558,61 @@ resource "local_file" "playbook" {
     - name: Install Google Chrome policy template (ja-JP locale)
       when: not "${var.chrome-policy-template-url}" == ""
       win_command: xcopy /y C:\Users\Public\chrome_policy_templates\windows\admx\ja-JP C:\Windows\PolicyDefinitions\ja-JP
+    - name: Download Edge installer
+      when: not "${var.edge-installer-download-url}" == ""
+      win_get_url:
+        url: "${var.edge-installer-download-url}"
+        dest: 'C:\Users\Public\EdgeSetup.msi'
+    - name: Install Edge from Installer
+      when: not "${var.edge-installer-download-url}" == ""
+      win_command: 'msiexec /i C:\Users\Public\EdgeSetup.msi /passive /norestart'
+    - name: Disable Edge Update Service (edgeupdate)
+      when: not "${var.edge-installer-download-url}" == ""
+      win_service:
+        name: edgeupdate
+        start_mode: disabled
+        state: stopped
+    - name: Disable Edge Update Service (edgeupdatem)
+      when: not "${var.edge-installer-download-url}" == ""
+      win_service:
+        name: edgeupdatem
+        start_mode: disabled
+        state: stopped
+    - name: Create shortcut for Edge with debug logs
+      win_shortcut:
+        src: 'C:\Program Files\Microsoft\Edge\Application\msedge.exe'
+        arguments: '--enable-logging -v=1'
+        dest: '%Public%\Desktop\Edge (logging).lnk'
+    - name: Download Edge policy template
+      when: not "${var.edge-policy-template-url}" == ""
+      win_get_url:
+        url: "${var.edge-policy-template-url}"
+        dest: 'C:\Users\Public\MicrosoftEdgePolicyTemplates.zip'
+    - name: Extract Edge policy template
+      when: not "${var.edge-policy-template-url}" == ""
+      win_unzip:
+        src: 'C:\Users\Public\MicrosoftEdgePolicyTemplates.zip'
+        dest: 'c:\Users\Public'
+        delete_archive: yes
+    - name: Install Edge policy template (definitions)
+      when: not "${var.edge-policy-template-url}" == ""
+      win_command: xcopy /y C:\Users\Public\MicrosoftEdgePolicyTemplates\windows\admx\* C:\Windows\PolicyDefinitions\
+    - name: Prepare directory to put Edge policy template (en-US locale)
+      when: not "${var.edge-policy-template-url}" == ""
+      win_file:
+        path: C:\Windows\PolicyDefinitions\en-US
+        state: directory
+    - name: Install Edge policy template (en-US locale)
+      when: not "${var.edge-policy-template-url}" == ""
+      win_command: xcopy /y C:\Users\Public\MicrosoftEdgePolicyTemplates\windows\admx\en-US C:\Windows\PolicyDefinitions\en-US
+    - name: Prepare directory to put Edge policy template (ja-JP locale)
+      when: not "${var.edge-policy-template-url}" == ""
+      win_file:
+        path: C:\Windows\PolicyDefinitions\ja-JP
+        state: directory
+    - name: Install Edge policy template (ja-JP locale)
+      when: not "${var.edge-policy-template-url}" == ""
+      win_command: xcopy /y C:\Users\Public\MicrosoftEdgePolicyTemplates\windows\admx\ja-JP C:\Windows\PolicyDefinitions\ja-JP
 EOL
 }
 

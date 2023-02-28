@@ -8,3 +8,5 @@ variable "debugview-download-url" {}
 variable "old-ie-download-url" {}
 variable "chrome-installer-download-url" {}
 variable "chrome-policy-template-url" {}
+variable "edge-installer-download-url" {}
+variable "edge-policy-template-url" {}
