@@ -634,6 +634,14 @@ resource "local_file" "playbook" {
       become_user: "管理者"
       win_regmerge:
         path: 'C:\Users\Public\join-to-fake-domain.reg'
+    - name: Prepare directory to put manifest.xml
+      win_file:
+        path: C:\Users\Public\webextensions
+        state: directory
+    - name: "Upload manifest.xml"
+      win_copy:
+        src: ../../site.xml
+        dest: 'C:\Users\Public\webextensions\'
 EOL
 }
 
