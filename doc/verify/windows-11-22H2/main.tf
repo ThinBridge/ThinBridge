@@ -464,12 +464,6 @@ resource "local_file" "playbook" {
 #        state: present
 #        canonical_name: hostname.example.com
 #        ip_address: '93.184.216.34'
-    - name: Install Google Chrome
-      win_chocolatey:
-        name: googlechrome
-        state: present
-        allow_empty_checksums: yes
-        ignore_checksums: yes
     - name: Prepare directory to put ThinBridgeBHO.ini
       win_file:
         path: 'C:\Program Files\ThinBridge'
@@ -514,6 +508,57 @@ resource "local_file" "playbook" {
       win_copy:
         src: '../../Start Internet Explorer.vbs'
         dest: '%Public%\Desktop\'
+    - name: Install Google Chrome via Chocolatey
+      win_chocolatey:
+        name: googlechrome
+        state: present
+        allow_empty_checksums: yes
+        ignore_checksums: yes
+    - name: Disable Google Update Service (gupdate)
+      win_service:
+        name: gupdate
+        start_mode: disabled
+        state: stopped
+    - name: Disable Google Update Service (gupdatem)
+      win_service:
+        name: gupdatem
+        start_mode: disabled
+        state: stopped
+    - name: Create shortcut for Google Chrome with debug logs
+      win_shortcut:
+        src: 'C:\Program Files\Google\Chrome\Application\chrome.exe'
+        arguments: '--enable-logging -v=1'
+        dest: '%Public%\Desktop\Google Chrome (logging).lnk'
+    - name: Download Google Chrome policy template
+      when: not "${var.chrome-policy-template-url}" == ""
+      win_get_url:
+        url: "${var.chrome-policy-template-url}"
+        dest: 'C:\Users\Public\chrome-policy-template.zip'
+    - name: Extract Google Chrome policy template
+      when: not "${var.chrome-policy-template-url}" == ""
+      win_unzip:
+        src: 'C:\Users\Public\chrome-policy-template.zip'
+        dest: 'c:\Users\Public'
+        delete_archive: yes
+    - name: Install Google Chrome policy template (definitions)
+      when: not "${var.chrome-policy-template-url}" == ""
+      win_command: xcopy /y C:\Users\Public\chrome_policy_templates\windows\admx\* C:\Windows\PolicyDefinitions\
+    - name: Prepare directory to put Google Chrome policy template (en-US locale)
+      when: not "${var.chrome-policy-template-url}" == ""
+      win_file:
+        path: C:\Windows\PolicyDefinitions\en-US
+        state: directory
+    - name: Install Google Chrome policy template (en-US locale)
+      when: not "${var.chrome-policy-template-url}" == ""
+      win_command: xcopy /y C:\Users\Public\chrome_policy_templates\windows\admx\en-US C:\Windows\PolicyDefinitions\en-US
+    - name: Prepare directory to put Google Chrome policy template (ja-JP locale)
+      when: not "${var.chrome-policy-template-url}" == ""
+      win_file:
+        path: C:\Windows\PolicyDefinitions\ja-JP
+        state: directory
+    - name: Install Google Chrome policy template (ja-JP locale)
+      when: not "${var.chrome-policy-template-url}" == ""
+      win_command: xcopy /y C:\Users\Public\chrome_policy_templates\windows\admx\ja-JP C:\Windows\PolicyDefinitions\ja-JP
 EOL
 }
 
