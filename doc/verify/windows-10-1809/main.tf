@@ -461,17 +461,23 @@ resource "local_file" "playbook" {
         src: '../../Start Internet Explorer.vbs'
         dest: '%Public%\Desktop\'
     - name: Install Google Chrome via Chocolatey
+      when: "${var.chrome-installer-download-url}" == ""
       win_chocolatey:
         name: googlechrome
         state: present
         allow_empty_checksums: yes
         ignore_checksums: yes
+    - name: Install Google Chrome from Installer
+      when: not "${var.chrome-installer-download-url}" == ""
+      win_command: 'msiexec /i C:\Users\Public\ChromeSetup.msi /passive /norestart'
     - name: Disable Google Update Service (gupdate)
+      when: not "${var.chrome-installer-download-url}" == ""
       win_service:
         name: gupdate
         start_mode: disabled
         state: stopped
     - name: Disable Google Update Service (gupdatem)
+      when: not "${var.chrome-installer-download-url}" == ""
       win_service:
         name: gupdatem
         start_mode: disabled
