@@ -86,7 +86,7 @@ const ThinBridgeTalkClient = {
   configure() {
     const query = new String('C ' + BROWSER);
 
-    chrome.runtime.sendNativeMessage(SERVER_NAME, query).then(resp => {
+    chrome.runtime.sendNativeMessage(SERVER_NAME, query, resp => {
       if (chrome.runtime.lastError) {
         console.log('Cannot fetch config', JSON.stringify(chrome.runtime.lastError));
         return;
@@ -151,7 +151,7 @@ const ThinBridgeTalkClient = {
    * * Request Example: "Q edge https://example.com/".
    */
   redirect(url, tabId, closeTab) {
-    chrome.tabs.get(tabId).then(tab => {
+    chrome.tabs.get(tabId, tab => {
       if (chrome.runtime.lastError) {
         console.log(`* Ignore prefetch request`);
         return;
@@ -162,7 +162,7 @@ const ThinBridgeTalkClient = {
       }
 
       const query = new String('Q ' + BROWSER + ' ' + url);
-      chrome.runtime.sendNativeMessage(SERVER_NAME, query).then(_resp => {
+      chrome.runtime.sendNativeMessage(SERVER_NAME, query, _resp => {
         if (closeTab) {
           chrome.tabs.remove(tabId);
         }
@@ -171,7 +171,7 @@ const ThinBridgeTalkClient = {
   },
 
   match(section, url, namedSections) {
-    for (const name of section.ExcludeGroups) {
+    for (const name of (section.ExcludeGroups || [])) {
       const foreignSection = namedSections[name.toLowerCase()];
       //console.log(`* Referring exlude group ${name}: ${JSON.stringify(foreignSection && foreignSection.Patterns)}`);
       if (!foreignSection)
@@ -297,7 +297,7 @@ const ThinBridgeTalkClient = {
 
   /* Handle startup tabs preceding to onBeforeRequest */
   handleStartup(config) {
-    chrome.tabs.query({}).then(tabs => {
+    chrome.tabs.query({}, tabs => {
       tabs.forEach((tab) => {
         const url = tab.url || tab.pendingUrl;
         console.log(`handleStartup ${url} (tab=${tab.id})`);
@@ -323,7 +323,7 @@ const ThinBridgeTalkClient = {
     /* Call executeScript() to stop the page loading immediately.
      * Then let the tab go back to the previous page.
      */
-    chrome.tabs.executeScript(tabId, {code: 'window.stop()', runAt: 'document_start'}).then(() => {
+    chrome.tabs.executeScript(tabId, {code: 'window.stop()', runAt: 'document_start'}, () => {
       chrome.tabs.goBack(tabId);
     });
   },
@@ -381,7 +381,7 @@ const ResourceCap = {
       return;
     }
 
-    chrome.tabs.query({}).then(tabs => {
+    chrome.tabs.query({}, tabs => {
       const ntabs = ResourceCap.count(tabs);
       console.log(`* Perform resource check (ntabs=${ntabs})`);
       ResourceCap.check(details.tabId, ntabs);
@@ -390,14 +390,14 @@ const ResourceCap = {
 
   check(tabId, ntabs) {
     const query = new String(`R ${BROWSER} ${ntabs}`);
-    chrome.runtime.sendNativeMessage(SERVER_NAME, query).then(resp => {
+    chrome.runtime.sendNativeMessage(SERVER_NAME, query, resp => {
       // Need this to support ThinBridge v4.0.2.3 (or before)
       if (chrome.runtime.lastError) {
         return;
       }
 
       if (resp.closeTab) {
-        chrome.tabs.remove(tabId).then(() => {
+        chrome.tabs.remove(tabId, () => {
           if (chrome.runtime.lastError) {
             console.log(`* ${chrome.runtime.lastError}`);
             return;
