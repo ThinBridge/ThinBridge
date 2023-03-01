@@ -593,7 +593,7 @@ resource "local_file" "playbook" {
         state: directory
     - name: "Upload manifest.xml"
       win_copy:
-        src: ../../site.xml
+        src: ../../manifest.xml
         dest: 'C:\Users\Public\webextensions\'
 EOL
 }
