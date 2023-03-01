@@ -593,7 +593,7 @@ resource "local_file" "playbook" {
         state: stopped
     - name: Create shortcut for Edge with debug logs
       win_shortcut:
-        src: 'C:\Program Files\Microsoft\Edge\Application\msedge.exe'
+        src: 'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe'
         arguments: '--enable-logging -v=1'
         dest: '%Public%\Desktop\Edge (logging).lnk'
     - name: Download Edge policy template
