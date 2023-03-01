@@ -275,6 +275,7 @@ resource "local_file" "playbook" {
   become_method: runas
   vars:
     ansible_become_password: "${var.windows-password}"
+    chrome_installer_download_url: "${var.chrome-installer-download-url}"
   tasks:
     - name: Allow copy and paste to the UAC dialog
       win_regedit:
@@ -464,12 +465,6 @@ resource "local_file" "playbook" {
 #        state: present
 #        canonical_name: hostname.example.com
 #        ip_address: '93.184.216.34'
-    - name: Install Google Chrome
-      win_chocolatey:
-        name: googlechrome
-        state: present
-        allow_empty_checksums: yes
-        ignore_checksums: yes
     - name: Prepare directory to put ThinBridgeBHO.ini
       win_file:
         path: 'C:\Program Files\ThinBridge'
@@ -514,6 +509,140 @@ resource "local_file" "playbook" {
       win_copy:
         src: '../../Start Internet Explorer.vbs'
         dest: '%Public%\Desktop\'
+    - name: Install Google Chrome via Chocolatey
+      when: chrome_installer_download_url | length == 0
+      win_chocolatey:
+        name: googlechrome
+        state: present
+        allow_empty_checksums: yes
+        ignore_checksums: yes
+    - name: Download Google Chrome installer
+      when: not "${var.chrome-installer-download-url}" == ""
+      win_get_url:
+        url: "${var.chrome-installer-download-url}"
+        dest: 'C:\Users\Public\ChromeSetup.msi'
+    - name: Install Google Chrome from Installer
+      when: not "${var.chrome-installer-download-url}" == ""
+      win_command: 'msiexec /i C:\Users\Public\ChromeSetup.msi /passive /norestart'
+    - name: Disable Google Update Service (gupdate)
+      when: not "${var.chrome-installer-download-url}" == ""
+      win_service:
+        name: gupdate
+        start_mode: disabled
+        state: stopped
+    - name: Disable Google Update Service (gupdatem)
+      when: not "${var.chrome-installer-download-url}" == ""
+      win_service:
+        name: gupdatem
+        start_mode: disabled
+        state: stopped
+    - name: Create shortcut for Google Chrome with debug logs
+      win_shortcut:
+        src: 'C:\Program Files\Google\Chrome\Application\chrome.exe'
+        arguments: '--enable-logging -v=1'
+        dest: '%Public%\Desktop\Google Chrome (logging).lnk'
+    - name: Download Google Chrome policy template
+      when: not "${var.chrome-policy-template-url}" == ""
+      win_get_url:
+        url: "${var.chrome-policy-template-url}"
+        dest: 'C:\Users\Public\chrome-policy-template.zip'
+    - name: Extract Google Chrome policy template
+      when: not "${var.chrome-policy-template-url}" == ""
+      win_unzip:
+        src: 'C:\Users\Public\chrome-policy-template.zip'
+        dest: 'c:\Users\Public'
+        delete_archive: yes
+    - name: Install Google Chrome policy template (definitions)
+      when: not "${var.chrome-policy-template-url}" == ""
+      win_command: xcopy /y C:\Users\Public\chrome_policy_templates\windows\admx\* C:\Windows\PolicyDefinitions\
+    - name: Prepare directory to put Google Chrome policy template (en-US locale)
+      when: not "${var.chrome-policy-template-url}" == ""
+      win_file:
+        path: C:\Windows\PolicyDefinitions\en-US
+        state: directory
+    - name: Install Google Chrome policy template (en-US locale)
+      when: not "${var.chrome-policy-template-url}" == ""
+      win_command: xcopy /y C:\Users\Public\chrome_policy_templates\windows\admx\en-US C:\Windows\PolicyDefinitions\en-US
+    - name: Prepare directory to put Google Chrome policy template (ja-JP locale)
+      when: not "${var.chrome-policy-template-url}" == ""
+      win_file:
+        path: C:\Windows\PolicyDefinitions\ja-JP
+        state: directory
+    - name: Install Google Chrome policy template (ja-JP locale)
+      when: not "${var.chrome-policy-template-url}" == ""
+      win_command: xcopy /y C:\Users\Public\chrome_policy_templates\windows\admx\ja-JP C:\Windows\PolicyDefinitions\ja-JP
+    - name: Download Edge installer
+      when: not "${var.edge-installer-download-url}" == ""
+      win_get_url:
+        url: "${var.edge-installer-download-url}"
+        dest: 'C:\Users\Public\EdgeSetup.msi'
+    - name: Install Edge from Installer
+      when: not "${var.edge-installer-download-url}" == ""
+      win_command: 'msiexec /i C:\Users\Public\EdgeSetup.msi /passive /norestart'
+    - name: Disable Edge Update Service (edgeupdate)
+      when: not "${var.edge-installer-download-url}" == ""
+      win_service:
+        name: edgeupdate
+        start_mode: disabled
+        state: stopped
+    - name: Disable Edge Update Service (edgeupdatem)
+      when: not "${var.edge-installer-download-url}" == ""
+      win_service:
+        name: edgeupdatem
+        start_mode: disabled
+        state: stopped
+    - name: Create shortcut for Edge with debug logs
+      win_shortcut:
+        src: 'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe'
+        arguments: '--enable-logging -v=1'
+        dest: '%Public%\Desktop\Edge (logging).lnk'
+    - name: Download Edge policy template
+      when: not "${var.edge-policy-template-url}" == ""
+      win_get_url:
+        url: "${var.edge-policy-template-url}"
+        dest: 'C:\Users\Public\MicrosoftEdgePolicyTemplates.zip'
+    - name: Extract Edge policy template
+      when: not "${var.edge-policy-template-url}" == ""
+      win_unzip:
+        src: 'C:\Users\Public\MicrosoftEdgePolicyTemplates.zip'
+        dest: 'c:\Users\Public'
+        delete_archive: yes
+    - name: Install Edge policy template (definitions)
+      when: not "${var.edge-policy-template-url}" == ""
+      win_command: xcopy /y C:\Users\Public\MicrosoftEdgePolicyTemplates\windows\admx\* C:\Windows\PolicyDefinitions\
+    - name: Prepare directory to put Edge policy template (en-US locale)
+      when: not "${var.edge-policy-template-url}" == ""
+      win_file:
+        path: C:\Windows\PolicyDefinitions\en-US
+        state: directory
+    - name: Install Edge policy template (en-US locale)
+      when: not "${var.edge-policy-template-url}" == ""
+      win_command: xcopy /y C:\Users\Public\MicrosoftEdgePolicyTemplates\windows\admx\en-US C:\Windows\PolicyDefinitions\en-US
+    - name: Prepare directory to put Edge policy template (ja-JP locale)
+      when: not "${var.edge-policy-template-url}" == ""
+      win_file:
+        path: C:\Windows\PolicyDefinitions\ja-JP
+        state: directory
+    - name: Install Edge policy template (ja-JP locale)
+      when: not "${var.edge-policy-template-url}" == ""
+      win_command: xcopy /y C:\Users\Public\MicrosoftEdgePolicyTemplates\windows\admx\ja-JP C:\Windows\PolicyDefinitions\ja-JP
+    - name: "Copy setup registry to join to a fake domain"
+      win_copy:
+        src: ../../join-to-fake-domain.reg
+        dest: 'C:\Users\Public\'
+    - name: "Join to a fake domain"
+      become: yes
+      become_user: "管理者"
+      win_regmerge:
+        path: 'C:\Users\Public\join-to-fake-domain.reg'
+    - name: Prepare directory to put manifest.xml
+      win_file:
+        path: C:\Users\Public\webextension
+        state: directory
+    - name: "Upload manifest.xml"
+      win_copy:
+        src: ../../manifest.xml
+        dest: 'C:\Users\Public\webextension\'
 EOL
 }
 
