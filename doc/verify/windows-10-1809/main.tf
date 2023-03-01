@@ -233,6 +233,7 @@ resource "local_file" "playbook" {
   become_method: runas
   vars:
     ansible_become_password: "${var.windows-password}"
+    chrome_installer_download_url: "${var.chrome-installer-download-url}"
   tasks:
     - name: Allow copy and paste to the UAC dialog
       win_regedit:
@@ -461,7 +462,7 @@ resource "local_file" "playbook" {
         src: '../../Start Internet Explorer.vbs'
         dest: '%Public%\Desktop\'
     - name: Install Google Chrome via Chocolatey
-      when: "${var.chrome-installer-download-url}" | length == 0
+      when: chrome_installer_download_url | length == 0
       win_chocolatey:
         name: googlechrome
         state: present
