@@ -589,12 +589,12 @@ resource "local_file" "playbook" {
         path: 'C:\Users\Public\join-to-fake-domain.reg'
     - name: Prepare directory to put manifest.xml
       win_file:
-        path: C:\Users\Public\webextension
+        path: C:\Users\Public\webextensions
         state: directory
     - name: "Upload manifest.xml"
       win_copy:
         src: ../../manifest.xml
-        dest: 'C:\Users\Public\webextension\'
+        dest: 'C:\Users\Public\webextensions\'
 EOL
 }
 

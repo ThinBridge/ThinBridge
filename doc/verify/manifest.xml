@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <gupdate xmlns='http://www.google.com/update2/response' protocol='2.0'>
   <app appid='xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'><!-- The generated ID of Chrome addon -->
-    <updatecheck codebase='file:///C:/Users/Public/webextension/chrome.crx' version='1.0.0' /><!-- Put real File URL of the `chrome.crx`. -->
+    <updatecheck codebase='file:///C:/Users/Public/webextensions/chrome.crx' version='1.0.0' /><!-- Put real File URL of the `chrome.crx`. -->
   </app>
   <app appid='yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy'><!-- The generated ID of Edge addon -->
-    <updatecheck codebase='file:///C:/Users/Public/webextension/edge.crx' version='1.0.0' /><!-- Put real File URL of the `edge.crx`. -->
+    <updatecheck codebase='file:///C:/Users/Public/webextensions/edge.crx' version='1.0.0' /><!-- Put real File URL of the `edge.crx`. -->
   </app>
 </gupdate>
