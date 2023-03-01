@@ -17,5 +17,5 @@ dev: $(FILES)
 	rm -rf dev
 	mkdir -p dev
 	cp -R manifest.json misc _locales background.js dev/
-	sed -i -E -e 's/ThinBridge/ThinBridge Enterrpise Developer Edition/g' dev/_locales/*/messages.json
+	sed -i -E -e 's/ThinBridge/ThinBridge Enterprise Developer Edition/g' dev/_locales/*/messages.json
 	cd dev && zip -9 - $(FILES) > ../ThinBridgeEdgeDev.zip
