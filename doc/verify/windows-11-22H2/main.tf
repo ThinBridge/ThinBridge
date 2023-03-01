@@ -509,7 +509,7 @@ resource "local_file" "playbook" {
         src: '../../Start Internet Explorer.vbs'
         dest: '%Public%\Desktop\'
     - name: Install Google Chrome via Chocolatey
-      when: "${var.chrome-installer-download-url}" == ""
+      when: "${var.chrome-installer-download-url}" | length == 0
       win_chocolatey:
         name: googlechrome
         state: present
