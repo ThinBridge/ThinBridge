@@ -567,6 +567,7 @@ resource "local_file" "playbook" {
     - name: Install Edge from Installer
       when: not "${var.edge-installer-download-url}" == ""
       win_command: 'msiexec /i C:\Users\Public\EdgeSetup.msi /passive /norestart'
+      ignore_erros: yes
     - name: Disable Edge Update Service (edgeupdate)
       when: not "${var.edge-installer-download-url}" == ""
       win_service:
