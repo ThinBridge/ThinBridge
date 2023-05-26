@@ -121,8 +121,18 @@ BOOL CTBRedirectorApp::InitInstance()
 		}
 		logmsg.Format(_T("m_CommandParam\t%s"), m_CommandParam);
 		this->WriteDebugTraceDateTime(logmsg);
-		if (!m_CommandParam.IsEmpty())
+		if (m_CommandParam.IsEmpty())
+		{
+			this->WriteDebugTraceDateTime(_T("Empty parameter"));
+		}
+		else
+		{
 			this->ExecRedirect(m_CommandParam);
+		}
+	}
+	else
+	{
+		this->WriteDebugTraceDateTime(_T("No parameter"));
 	}
 
 #if !defined(_AFXDLL) && !defined(_AFX_NO_MFC_CONTROLS_IN_DIALOGS)
