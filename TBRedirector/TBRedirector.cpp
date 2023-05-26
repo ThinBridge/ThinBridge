@@ -83,9 +83,11 @@ BOOL CTBRedirectorApp::InitInstance()
 	//コマンドラインあり。
 	if (m_lpCmdLine[0] != '\0')
 	{
+		this->WriteDebugTraceDateTime(_T("Called with command any line parameter"));
 		//パラメータが1つだけ
 		if (__argc == 2)
 		{
+			this->WriteDebugTraceDateTime(_T("Called with just one parameter"));
 			Command1 = CString(__wargv[1]);
 			Command1.Replace(_T("\""), _T(""));
 			Command1.TrimLeft();
@@ -93,6 +95,8 @@ BOOL CTBRedirectorApp::InitInstance()
 
 			if (!Command1.IsEmpty())
 			{
+				logmsg.Format(_T("Command1\t%s"), Command1);
+				this->WriteDebugTraceDateTime(logmsg);
 				//URLかFilePathの場合は、強制的にm_CommandParamとする。
 				if (SBUtil::IsURL(Command1))
 				{
@@ -115,6 +119,8 @@ BOOL CTBRedirectorApp::InitInstance()
 				}
 			}
 		}
+		logmsg.Format(_T("m_CommandParam\t%s"), m_CommandParam);
+		this->WriteDebugTraceDateTime(logmsg);
 		if (!m_CommandParam.IsEmpty())
 			this->ExecRedirect(m_CommandParam);
 	}
@@ -127,8 +133,11 @@ BOOL CTBRedirectorApp::InitInstance()
 
 void CTBRedirectorApp::ExecRedirect(LPCTSTR lpURL)
 {
+	CString logmsg;
 	if (!SBUtil::IsURL_HTTP(lpURL))
 	{
+		logmsg.Format(_T("ExecRedirect: it is not a HTTP URL\t%s"), lpURL);
+		this->WriteDebugTraceDateTime(logmsg);
 //		CString strMsg;
 //		strMsg.Format(_T("%s [%s]"), _T("URLが正しく設定されていません。"), lpURL);
 //		::MessageBox(NULL, strMsg, m_strExeNameNoExt, MB_ICONERROR);
@@ -211,20 +220,22 @@ void CTBRedirectorApp::ExecRedirect(LPCTSTR lpURL)
 			return;
 		}
 
-
+		this->WriteDebugTraceDateTime(_T("ShellExecute with null command"));
 		if (::ShellExecute(NULL, NULL, lpURL, NULL, NULL, SW_SHOW) <= HINSTANCE(32))
 		{
+			this->WriteDebugTraceDateTime(_T("ShellExecute with open command"));
 			if (::ShellExecute(NULL, _T("open"), lpURL, NULL, NULL, SW_SHOW) <= HINSTANCE(32))
 			{
+				this->WriteDebugTraceDateTime(_T("ShellExecute with explorer.exe"));
 				if (::ShellExecute(NULL, NULL, _T("explorer.exe"), lpURL, NULL, SW_SHOW) <= HINSTANCE(32))
 				{
+					this->WriteDebugTraceDateTime(_T("ShellExecute with open command and explorer.exe"));
 					::ShellExecute(NULL, _T("open"), _T("explorer.exe"), lpURL, NULL, SW_SHOW);
 				}
 			}
 		}
 		return;
 	}
-	CString logmsg;
 	CString strURL = lpURL;
 	CString strURL_FULL = strURL;
 	strURL = SBUtil::Trim_URLOnly(strURL);
@@ -238,9 +249,14 @@ void CTBRedirectorApp::ExecRedirect(LPCTSTR lpURL)
 	//判定結果 リダイレクトする。
 	if (bResultRedirectURL)
 	{
+		this->WriteDebugTraceDateTime(_T("Matched"));
+		logmsg.Format(_T("Command1\t%s"), Command1);
+		this->WriteDebugTraceDateTime(logmsg);
 		int iColMax = (int)arr_RedirectBrowserHit.GetCount();
-		if (iColMax < 1)
+		if (iColMax < 1) {
+			this->WriteDebugTraceDateTime(_T("No hit"));
 			return;
+		}
 
 		logmsg.Format(_T("#ThinBridge_Redirect(%d)\t%s"), iColMax, m_RedirectList.m_strHitReasonAll);
 		this->WriteDebugTraceDateTime(logmsg);
@@ -249,6 +265,7 @@ void CTBRedirectorApp::ExecRedirect(LPCTSTR lpURL)
 		pRedirectData = (CURLRedirectDataClass*)arr_RedirectBrowserHit.GetAt(0);
 		if (pRedirectData)
 		{
+			this->WriteDebugTraceDateTime(_T("Redirecting..."));
 			for (int i = 0; i < iColMax; i++)
 			{
 				pRedirectData = (CURLRedirectDataClass*)arr_RedirectBrowserHit.GetAt(i);
@@ -264,6 +281,7 @@ void CTBRedirectorApp::ExecRedirect(LPCTSTR lpURL)
 	//HITしない
 	else
 	{
+		this->WriteDebugTraceDateTime(_T("Not matched"));
 		//Defaultブラウザーへリダイレクトする。
 		int imax = (int)m_RedirectList.m_arr_RedirectBrowser.GetCount();
 		CURLRedirectDataClass* pRedirectData_Default = NULL;
@@ -284,6 +302,7 @@ void CTBRedirectorApp::ExecRedirect(LPCTSTR lpURL)
 		if (pRedirectData_Default)
 		{
 			//何かしら設定されている。
+			this->WriteDebugTraceDateTime(_T("Has default browser setting"));
 			if (!pRedirectData_Default->m_strExecExeFullPath.IsEmpty())
 			{
 				logmsg.Format(_T("#ThinBridge_Redirect Default[%s]"), pRedirectData_Default->m_strExecExeFullPath);
@@ -299,9 +318,11 @@ void CTBRedirectorApp::ExecRedirect(LPCTSTR lpURL)
 
 		if (IsDefaultBrowser())//ThinBridgeを既定のブラウザーhttp/httpsにしている場合は、ループするので他にする。
 		{
+			this->WriteDebugTraceDateTime(_T("Opening with the default browser"));
 			strDefBrowserName = GetDefaultHTMLBrowser();
 			if(strDefBrowserName.IsEmpty())
 			{
+				this->WriteDebugTraceDateTime(_T("Missing default browser name"));
 				Rd.m_strExecType = _T("IE");
 				this->OpenAnotherBrowser(&Rd, strURL_FULL);
 				return;
@@ -312,6 +333,8 @@ void CTBRedirectorApp::ExecRedirect(LPCTSTR lpURL)
 			strDefBrowserName = GetDefaultBrowser();
 		}
 		strDefBrowserName = strDefBrowserName.MakeUpper();
+		logmsg.Format(_T("strDefBrowserName\t%s"), strDefBrowserName);
+		this->WriteDebugTraceDateTime(logmsg);
 
 		//MS-Edge
 		if(strDefBrowserName.Find(_T("MSEDGE"))==0)
