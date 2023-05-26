@@ -250,8 +250,6 @@ void CTBRedirectorApp::ExecRedirect(LPCTSTR lpURL)
 	if (bResultRedirectURL)
 	{
 		this->WriteDebugTraceDateTime(_T("Matched"));
-		logmsg.Format(_T("Command1\t%s"), Command1);
-		this->WriteDebugTraceDateTime(logmsg);
 		int iColMax = (int)arr_RedirectBrowserHit.GetCount();
 		if (iColMax < 1) {
 			this->WriteDebugTraceDateTime(_T("No hit"));
