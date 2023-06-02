@@ -95,7 +95,7 @@ BOOL CTBRedirectorApp::InitInstance()
 
 			if (!Command1.IsEmpty())
 			{
-				logmsg.Format(_T("Command1\t%s"), Command1);
+				logmsg.Format(_T("Command1\t%s"), static_cast<LPCTSTR>(Command1));
 				this->WriteDebugTraceDateTime(logmsg);
 				//URLかFilePathの場合は、強制的にm_CommandParamとする。
 				if (SBUtil::IsURL(Command1))
