@@ -119,7 +119,7 @@ BOOL CTBRedirectorApp::InitInstance()
 				}
 			}
 		}
-		logmsg.Format(_T("m_CommandParam\t%s"), m_CommandParam);
+		logmsg.Format(_T("m_CommandParam\t%s"), static_cast<LPCTSTR>(m_CommandParam));
 		this->WriteDebugTraceDateTime(logmsg);
 		if (m_CommandParam.IsEmpty())
 		{
