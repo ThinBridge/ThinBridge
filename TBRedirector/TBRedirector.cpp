@@ -341,7 +341,7 @@ void CTBRedirectorApp::ExecRedirect(LPCTSTR lpURL)
 			strDefBrowserName = GetDefaultBrowser();
 		}
 		strDefBrowserName = strDefBrowserName.MakeUpper();
-		logmsg.Format(_T("strDefBrowserName\t%s"), strDefBrowserName);
+		logmsg.Format(_T("strDefBrowserName\t%s"), static_cast<LPCTSTR>(strDefBrowserName));
 		this->WriteDebugTraceDateTime(logmsg);
 
 		//MS-Edge
