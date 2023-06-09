@@ -1729,7 +1729,10 @@ void CCRre::IEStart(CString& strURL)
 	HCONV hConv={0};
 	HDDEDATA hDDEData={0};
 	DWORD m_dwDDEID = 0;
-
+	CString quotedURL;
+	if (!strURL.IsEmpty()) {
+		quotedURL.Format(_T("\"%s\""), (LPCTSTR)strURL);
+	}
 	//DDE呼び出しが有効な場合 Default有効
 	if(!theApp.m_RedirectList.m_bDisableIE_DDE)
 	{
@@ -1745,9 +1748,7 @@ void CCRre::IEStart(CString& strURL)
 				if(hConv)
 				{
 					CString cmd;
-					//2021-11-12 URLに,カンマが含まれているとDDE経由でURLが欠損する。
-					//回避するために、URLパラメータ全体をダブルクオートで括る。
-					cmd.Format(_T("\"%s\""),strURL);
+					cmd.Format(_T("%s"),quotedURL);
 					DWORD result=0;
 					hDDEData = DdeClientTransaction((LPBYTE)cmd.GetBuffer(0),static_cast<DWORD>((cmd.GetLength()+1)*2),hConv,0,0,XTYP_EXECUTE,30000,&result);
 					DdeDisconnect(hConv);
@@ -1761,22 +1762,22 @@ void CCRre::IEStart(CString& strURL)
 			}
 		}
 	}
-	if(::ShellExecute(NULL,_T("open"),_T("iexplore.exe"),strURL,NULL, SW_SHOW) <= HINSTANCE(32))
+	if(::ShellExecute(NULL,_T("open"),_T("iexplore.exe"),quotedURL,NULL, SW_SHOW) <= HINSTANCE(32))
 	{
 		CString IEcmd;
-		IEcmd.Format(_T("iexplorer.exe %s"),strURL);
+		IEcmd.Format(_T("iexplorer.exe %s"),quotedURL);
 		if(::ShellExecute(NULL,NULL,IEcmd,NULL,NULL, SW_SHOW) <= HINSTANCE(32))
 		{
 			IEcmd=_T("");
-			IEcmd.Format(_T("\"%s\" %s"),theApp.m_strIE_FullPath,strURL);
+			IEcmd.Format(_T("\"%s\" %s"),theApp.m_strIE_FullPath,quotedURL);
 			if(::ShellExecute(NULL,NULL,IEcmd,NULL,NULL, SW_SHOW) <= HINSTANCE(32))
 			{
 				IEcmd=_T("");
-				IEcmd.Format(_T("\"C:\\Program Files (x86)\\Internet Explorer\\iexplore.exe\" %s"),strURL);
+				IEcmd.Format(_T("\"C:\\Program Files (x86)\\Internet Explorer\\iexplore.exe\" %s"),quotedURL);
 				if(::ShellExecute(NULL,NULL,IEcmd,NULL,NULL, SW_SHOW) <= HINSTANCE(32))
 				{
 					IEcmd=_T("");
-					IEcmd.Format(_T("\"C:\\Program Files\\Internet Explorer\\iexplore.exe\" %s"),strURL);
+					IEcmd.Format(_T("\"C:\\Program Files\\Internet Explorer\\iexplore.exe\" %s"),quotedURL);
 					::ShellExecute(NULL,NULL,IEcmd,NULL,NULL, SW_SHOW);
 				}
 			}
@@ -1800,22 +1801,26 @@ void CCRre::IEStart(CString& strURL)
 
 void CCRre::FirefoxStart(CString& strURL)
 {
-	if(::ShellExecute(NULL,_T("open"),_T("firefox.exe"),strURL,NULL, SW_SHOW) <= HINSTANCE(32))
+	CString quotedURL;
+	if (!strURL.IsEmpty()) {
+		quotedURL.Format(_T("\"%s\""), strURL);
+	}
+	if(::ShellExecute(NULL,_T("open"),_T("firefox.exe"),quotedURL,NULL, SW_SHOW) <= HINSTANCE(32))
 	{
 		CString IEcmd;
 		IEcmd.Format(_T("firefox.exe %s"),m_strURL);
 		if(::ShellExecute(NULL,NULL,IEcmd,NULL,NULL, SW_SHOW) <= HINSTANCE(32))
 		{
 			IEcmd=_T("");
-			IEcmd.Format(_T("\"%s\" %s"),theApp.m_strFirefox_FullPath,strURL);
+			IEcmd.Format(_T("\"%s\" %s"),theApp.m_strFirefox_FullPath,quotedURL);
 			if(::ShellExecute(NULL,NULL,IEcmd,NULL,NULL, SW_SHOW) <= HINSTANCE(32))
 			{
 				IEcmd=_T("");
-				IEcmd.Format(_T("\"C:\\Program Files (x86)\\Mozilla Firefox\\firefox.exe\" %s"),strURL);
+				IEcmd.Format(_T("\"C:\\Program Files (x86)\\Mozilla Firefox\\firefox.exe\" %s"),quotedURL);
 				if(::ShellExecute(NULL,NULL,IEcmd,NULL,NULL, SW_SHOW) <= HINSTANCE(32))
 				{
 					IEcmd=_T("");
-					IEcmd.Format(_T("\"C:\\Program Files\\Mozilla Firefox\\firefox.exe\" %s"),strURL);
+					IEcmd.Format(_T("\"C:\\Program Files\\Mozilla Firefox\\firefox.exe\" %s"),quotedURL);
 					::ShellExecute(NULL,NULL,IEcmd,NULL,NULL, SW_SHOW);
 				}
 			}
@@ -1825,22 +1830,26 @@ void CCRre::FirefoxStart(CString& strURL)
 
 void CCRre::ChromeStart(CString& strURL)
 {
-	if(::ShellExecute(NULL,_T("open"),_T("chrome.exe"),strURL,NULL, SW_SHOW) <= HINSTANCE(32))
+	CString quotedURL;
+	if (!strURL.IsEmpty()) {
+		quotedURL.Format(_T("\"%s\""), (LPCTSTR)strURL);
+	}
+	if(::ShellExecute(NULL,_T("open"),_T("chrome.exe"),quotedURL,NULL, SW_SHOW) <= HINSTANCE(32))
 	{
 		CString IEcmd;
-		IEcmd.Format(_T("chrome.exe %s"),strURL);
+		IEcmd.Format(_T("chrome.exe %s"),quotedURL);
 		if(::ShellExecute(NULL,NULL,IEcmd,NULL,NULL, SW_SHOW) <= HINSTANCE(32))
 		{
 			IEcmd=_T("");
-			IEcmd.Format(_T("\"%s\" %s"),theApp.m_strChrome_FullPath,strURL);
+			IEcmd.Format(_T("\"%s\" %s"),theApp.m_strChrome_FullPath,quotedURL);
 			if(::ShellExecute(NULL,NULL,IEcmd,NULL,NULL, SW_SHOW) <= HINSTANCE(32))
 			{
 				IEcmd=_T("");
-				IEcmd.Format(_T("\"C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe\" %s"),strURL);
+				IEcmd.Format(_T("\"C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe\" %s"),quotedURL);
 				if(::ShellExecute(NULL,NULL,IEcmd,NULL,NULL, SW_SHOW) <= HINSTANCE(32))
 				{
 					IEcmd=_T("");
-					IEcmd.Format(_T("\"C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe\" %s"),strURL);
+					IEcmd.Format(_T("\"C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe\" %s"),quotedURL);
 					::ShellExecute(NULL,NULL,IEcmd,NULL,NULL, SW_SHOW);
 				}
 			}
@@ -1857,13 +1866,17 @@ void CCRre::EdgeStart(CString& strURL)
 
 void CCRre::DefaultBrowserStart(CString& strURL)
 {
-	if(::ShellExecute(NULL,NULL,strURL,NULL,NULL, SW_SHOW) <= HINSTANCE(32))
+	CString quotedURL;
+	if (!strURL.IsEmpty()) {
+		quotedURL.Format(_T("\"%s\""), (LPCTSTR)strURL);
+	}
+	if(::ShellExecute(NULL,NULL,quotedURL,NULL,NULL, SW_SHOW) <= HINSTANCE(32))
 	{
-		if(::ShellExecute(NULL,_T("open"),strURL,NULL,NULL, SW_SHOW) <= HINSTANCE(32))
+		if(::ShellExecute(NULL,_T("open"),quotedURL,NULL,NULL, SW_SHOW) <= HINSTANCE(32))
 		{
-			if(::ShellExecute(NULL,NULL,_T("explorer.exe"),strURL,NULL, SW_SHOW) <= HINSTANCE(32))
+			if(::ShellExecute(NULL,NULL,_T("explorer.exe"),quotedURL,NULL, SW_SHOW) <= HINSTANCE(32))
 			{
-				::ShellExecute(NULL,_T("open"),_T("iexplore.exe"),strURL,NULL, SW_SHOW);
+				::ShellExecute(NULL,_T("open"),_T("iexplore.exe"),quotedURL,NULL, SW_SHOW);
 			}
 		}
 	}
@@ -1871,9 +1884,13 @@ void CCRre::DefaultBrowserStart(CString& strURL)
 
 void CCRre::CustomBrowserStart(CString& strPath,CString& strURL)
 {
+	CString quotedURL;
+	if (!strURL.IsEmpty()) {
+		quotedURL.Format(_T("\"%s\""), (LPCTSTR)strURL);
+	}
 	CString IEcmd;
 	IEcmd=_T("");
-	IEcmd.Format(_T("\"%s\" %s"),strPath,strURL);
+	IEcmd.Format(_T("\"%s\" %s"),strPath,quotedURL);
 	CString strPathQ;
 	strPathQ.Format(_T("\"%s\""),strPath);
 	STARTUPINFO si={0};
@@ -1886,10 +1903,10 @@ void CCRre::CustomBrowserStart(CString& strPath,CString& strURL)
 		STARTUPINFO si2={0};
 		PROCESS_INFORMATION pi2={0};
 		si2.cb = sizeof( si2 );
-		if(!CreateProcess( strPathQ,(LPTSTR)(LPCTSTR)strURL,NULL, NULL, FALSE, 0, NULL,NULL, &si2, &pi2 ))
+		if(!CreateProcess( strPathQ,(LPTSTR)(LPCTSTR)quotedURL,NULL, NULL, FALSE, 0, NULL,NULL, &si2, &pi2 ))
 		{
 			SetLastError(NO_ERROR);
-			if(::ShellExecute(NULL,_T("open"),strPathQ,strURL,NULL, SW_SHOW) <= HINSTANCE(32))
+			if(::ShellExecute(NULL,_T("open"),strPathQ,quotedURL,NULL, SW_SHOW) <= HINSTANCE(32))
 			{
 				SetLastError(NO_ERROR);
 				::ShellExecute(NULL,NULL,IEcmd,NULL,NULL, SW_SHOW);
@@ -2209,7 +2226,7 @@ void CCRre::Exec()
 			}
 			else
 			{
-				strCommand.Format(_T("-qlaunch \"%s\" %s"),m_strCitrix_AppName,m_strURL);
+				strCommand.Format(_T("-qlaunch \"%s\" \"%s\""),m_strCitrix_AppName,m_strURL);
 			}
 			this->CitrixXenAppStart(strCommand);
 			break;
