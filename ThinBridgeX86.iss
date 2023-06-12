@@ -80,7 +80,7 @@ Root: HKLM; Subkey: "SOFTWARE\Clients\StartMenuInternet\ThinBridge\InstallInfo";
 Root: HKLM; Subkey: "SOFTWARE\Clients\StartMenuInternet\ThinBridge\shell"; Flags: uninsdeletekey
 Root: HKLM; Subkey: "SOFTWARE\Clients\StartMenuInternet\ThinBridge\shell\open"; Flags: uninsdeletekey
 Root: HKLM; Subkey: "SOFTWARE\Clients\StartMenuInternet\ThinBridge\shell\open\command"; Flags: uninsdeletekey
-Root: HKLM; Subkey: "SOFTWARE\Clients\StartMenuInternet\ThinBridge\shell\open\command"; ValueType: string; ValueData: """{app}\TBRedirector.exe"" %1"
+Root: HKLM; Subkey: "SOFTWARE\Clients\StartMenuInternet\ThinBridge\shell\open\command"; ValueType: string; ValueData: """{app}\TBRedirector.exe"" ""%1"""
 
 Root: HKLM; Subkey: "SOFTWARE\RegisteredApplications"; ValueType: string; ValueName: "ThinBridge"; ValueData: "Software\Clients\StartMenuInternet\ThinBridge\Capabilities"
 
@@ -102,7 +102,7 @@ Root: HKLM; Subkey: "SOFTWARE\Classes\ThinBridgeURL\DefaultIcon"; ValueType: str
 Root: HKLM; Subkey: "SOFTWARE\Classes\ThinBridgeURL\shell"; Flags: uninsdeletekey
 Root: HKLM; Subkey: "SOFTWARE\Classes\ThinBridgeURL\shell\open"; Flags: uninsdeletekey
 Root: HKLM; Subkey: "SOFTWARE\Classes\ThinBridgeURL\shell\open\command"; Flags: uninsdeletekey
-Root: HKLM; Subkey: "SOFTWARE\Classes\ThinBridgeURL\shell\open\command"; ValueType: string; ValueData: """{app}\TBRedirector.exe"" %1"
+Root: HKLM; Subkey: "SOFTWARE\Classes\ThinBridgeURL\shell\open\command"; ValueType: string; ValueData: """{app}\TBRedirector.exe"" ""%1"""
 
 [Languages]
 Name: jp; MessagesFile: "compiler:Languages\Japanese.isl"

@@ -81,7 +81,7 @@ Root: HKLM; Subkey: "SOFTWARE\Clients\StartMenuInternet\ThinBridge\InstallInfo";
 Root: HKLM; Subkey: "SOFTWARE\Clients\StartMenuInternet\ThinBridge\shell"; Flags: uninsdeletekey
 Root: HKLM; Subkey: "SOFTWARE\Clients\StartMenuInternet\ThinBridge\shell\open"; Flags: uninsdeletekey
 Root: HKLM; Subkey: "SOFTWARE\Clients\StartMenuInternet\ThinBridge\shell\open\command"; Flags: uninsdeletekey
-Root: HKLM; Subkey: "SOFTWARE\Clients\StartMenuInternet\ThinBridge\shell\open\command"; ValueType: string; ValueData: """{app}\TBRedirector.exe"" %1"
+Root: HKLM; Subkey: "SOFTWARE\Clients\StartMenuInternet\ThinBridge\shell\open\command"; ValueType: string; ValueData: """{app}\TBRedirector.exe"" ""%1"""
 
 Root: HKLM; Subkey: "SOFTWARE\RegisteredApplications"; ValueType: string; ValueName: "ThinBridge"; ValueData: "Software\Clients\StartMenuInternet\ThinBridge\Capabilities"
 
@@ -103,7 +103,7 @@ Root: HKLM; Subkey: "SOFTWARE\Classes\ThinBridgeURL\DefaultIcon"; ValueType: str
 Root: HKLM; Subkey: "SOFTWARE\Classes\ThinBridgeURL\shell"; Flags: uninsdeletekey
 Root: HKLM; Subkey: "SOFTWARE\Classes\ThinBridgeURL\shell\open"; Flags: uninsdeletekey
 Root: HKLM; Subkey: "SOFTWARE\Classes\ThinBridgeURL\shell\open\command"; Flags: uninsdeletekey
-Root: HKLM; Subkey: "SOFTWARE\Classes\ThinBridgeURL\shell\open\command"; ValueType: string; ValueData: """{app}\TBRedirector.exe"" %1"
+Root: HKLM; Subkey: "SOFTWARE\Classes\ThinBridgeURL\shell\open\command"; ValueType: string; ValueData: """{app}\TBRedirector.exe"" ""%1"""
 
 
 ;///////////////////
@@ -125,7 +125,7 @@ Root: HKLM; Subkey: "SOFTWARE\WOW6432Node\Clients\StartMenuInternet\ThinBridge\D
 Root: HKLM; Subkey: "SOFTWARE\WOW6432Node\Clients\StartMenuInternet\ThinBridge\shell"; Flags: uninsdeletekey
 Root: HKLM; Subkey: "SOFTWARE\WOW6432Node\Clients\StartMenuInternet\ThinBridge\shell\open"; Flags: uninsdeletekey
 Root: HKLM; Subkey: "SOFTWARE\WOW6432Node\Clients\StartMenuInternet\ThinBridge\shell\open\command"; Flags: uninsdeletekey
-Root: HKLM; Subkey: "SOFTWARE\WOW6432Node\Clients\StartMenuInternet\ThinBridge\shell\open\command"; ValueType: string; ValueData: """{app}\TBRedirector.exe"" %1"
+Root: HKLM; Subkey: "SOFTWARE\WOW6432Node\Clients\StartMenuInternet\ThinBridge\shell\open\command"; ValueType: string; ValueData: """{app}\TBRedirector.exe"" ""%1"""
 
 Root: HKLM; Subkey: "SOFTWARE\WOW6432Node\Clients\StartMenuInternet\ThinBridge\InstallInfo"; Flags: uninsdeletekey
 Root: HKLM; Subkey: "SOFTWARE\WOW6432Node\Clients\StartMenuInternet\ThinBridge\InstallInfo"; ValueType: string; ValueName: "HideIconsCommand"; ValueData: """{app}\ThinBridge.exe"" --hide-icons"
@@ -136,7 +136,7 @@ Root: HKLM; Subkey: "SOFTWARE\WOW6432Node\Clients\StartMenuInternet\ThinBridge\I
 Root: HKLM; Subkey: "SOFTWARE\WOW6432Node\Clients\StartMenuInternet\ThinBridge\shell"; Flags: uninsdeletekey
 Root: HKLM; Subkey: "SOFTWARE\WOW6432Node\Clients\StartMenuInternet\ThinBridge\shell\open"; Flags: uninsdeletekey
 Root: HKLM; Subkey: "SOFTWARE\WOW6432Node\Clients\StartMenuInternet\ThinBridge\shell\open\command"; Flags: uninsdeletekey
-Root: HKLM; Subkey: "SOFTWARE\WOW6432Node\Clients\StartMenuInternet\ThinBridge\shell\open\command"; ValueType: string; ValueData: """{app}\TBRedirector.exe"" %1"
+Root: HKLM; Subkey: "SOFTWARE\WOW6432Node\Clients\StartMenuInternet\ThinBridge\shell\open\command"; ValueType: string; ValueData: """{app}\TBRedirector.exe"" ""%1"""
 
 Root: HKLM; Subkey: "SOFTWARE\WOW6432Node\RegisteredApplications"; ValueType: string; ValueName: "ThinBridge"; ValueData: "Software\Clients\StartMenuInternet\ThinBridge\Capabilities"
 
