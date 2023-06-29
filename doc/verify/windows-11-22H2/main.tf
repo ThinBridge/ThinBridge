@@ -431,11 +431,15 @@ resource "local_file" "playbook" {
       win_get_url:
         url: "${var.flash-installer-url}"
         dest: 'C:\Users\Public\flash_installer.exe'
+        url_username: "${var.download-user}"
+        url_password: "${var.download-token}"
     - name: Download HookDate to override system time for Firefox
       when: not "${var.hookdate-download-url}" == ""
       win_get_url:
         url: "${var.hookdate-download-url}"
         dest: 'C:\Users\Public\hookdate.zip'
+        url_username: "${var.download-user}"
+        url_password: "${var.download-token}"
     - name: Extract contents
       when: not "${var.hookdate-download-url}" == ""
       win_unzip:
@@ -447,6 +451,8 @@ resource "local_file" "playbook" {
       win_get_url:
         url: "${var.debugview-download-url}"
         dest: 'C:\Users\Public\DebugView.zip'
+        url_username: "${var.download-user}"
+        url_password: "${var.download-token}"
     - name: Extract contents
       when: not "${var.old-ie-download-url}" == ""
       win_unzip:
@@ -556,6 +562,8 @@ resource "local_file" "playbook" {
       win_get_url:
         url: "${var.chrome-installer-download-url}"
         dest: 'C:\Users\Public\ChromeSetup.msi'
+        url_username: "${var.download-user}"
+        url_password: "${var.download-token}"
     - name: Install Google Chrome from Installer
       when: not "${var.chrome-installer-download-url}" == ""
       win_command: 'msiexec /i C:\Users\Public\ChromeSetup.msi /passive /norestart'
@@ -581,6 +589,8 @@ resource "local_file" "playbook" {
       win_get_url:
         url: "${var.chrome-policy-template-url}"
         dest: 'C:\Users\Public\chrome-policy-template.zip'
+        url_username: "${var.download-user}"
+        url_password: "${var.download-token}"
     - name: Extract Google Chrome policy template
       when: not "${var.chrome-policy-template-url}" == ""
       win_unzip:
@@ -601,6 +611,8 @@ resource "local_file" "playbook" {
       win_get_url:
         url: "${var.edge-installer-download-url}"
         dest: 'C:\Users\Public\EdgeSetup.msi'
+        url_username: "${var.download-user}"
+        url_password: "${var.download-token}"
     - name: Install Edge from Installer
       when: not "${var.edge-installer-download-url}" == ""
       win_command: 'msiexec /i C:\Users\Public\EdgeSetup.msi /passive /norestart'
@@ -626,6 +638,8 @@ resource "local_file" "playbook" {
       win_get_url:
         url: "${var.edge-policy-template-url}"
         dest: 'C:\Users\Public\MicrosoftEdgePolicyTemplates.zip'
+        url_username: "${var.download-user}"
+        url_password: "${var.download-token}"
     - name: Extract Edge policy template
       when: not "${var.edge-policy-template-url}" == ""
       win_unzip:
