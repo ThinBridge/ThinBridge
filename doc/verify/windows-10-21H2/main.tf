@@ -536,13 +536,10 @@ resource "local_file" "playbook" {
         delete_archive: yes
     - name: Install Firefox policy template (definitions)
       when: not "${var.firefox-policy-template-url}" == ""
-      win_command: xcopy /y C:\Users\Public\firefox_policy_templates\windows\admx\* C:\Windows\PolicyDefinitions\
+      win_command: xcopy /y C:\Users\Public\firefox_policy_templates\windows\* C:\Windows\PolicyDefinitions\
     - name: Install Firefox policy template (en-US locale)
       when: not "${var.firefox-policy-template-url}" == ""
-      win_command: xcopy /y C:\Users\Public\firefox_policy_templates\windows\admx\en-US C:\Windows\PolicyDefinitions\en-US
-    - name: Install Firefox policy template (ja-JP locale)
-      when: not "${var.firefox-policy-template-url}" == ""
-      win_command: xcopy /y C:\Users\Public\firefox_policy_templates\windows\admx\ja-JP C:\Windows\PolicyDefinitions\ja-JP
+      win_command: xcopy /y C:\Users\Public\firefox_policy_templates\windows\en-US C:\Windows\PolicyDefinitions\en-US
     - name: Install Google Chrome via Chocolatey
       when: chrome_installer_download_url | length == 0
       win_chocolatey:
