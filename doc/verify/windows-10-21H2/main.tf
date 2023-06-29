@@ -299,6 +299,8 @@ resource "local_file" "playbook" {
       win_get_url:
         url: "${var.windows-language-pack-url}"
         dest: 'c:\temp\lp.cab'
+        url_username: "${var.download-user}"
+        url_password: "${var.download-token}"
     - name: Install language pack
       when: not "${var.windows-language-pack-url}" == ""
       win_shell: |
