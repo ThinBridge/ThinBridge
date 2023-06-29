@@ -474,6 +474,39 @@ resource "local_file" "playbook" {
       win_copy:
         src: '../../Start Internet Explorer.vbs'
         dest: '%Public%\Desktop\'
+    - name: Prepare directory to put policy templates (en-US locale)
+      win_file:
+        path: C:\Windows\PolicyDefinitions\en-US
+        state: directory
+    - name: Prepare directory to put policy templates (ja-JP locale)
+      win_file:
+        path: C:\Windows\PolicyDefinitions\ja-JP
+        state: directory
+    - name: Download Firefox policy template
+      when: not "${var.firefox-policy-template-url}" == ""
+      win_get_url:
+        url: "${var.firefox-policy-template-url}"
+        dest: 'C:\Users\Public\firefox-policy-template.zip'
+    - name: Prepare directory to extract Firefox policy template
+      when: not "${var.firefox-policy-template-url}" == ""
+      win_file:
+        path: 'c:\Users\Public\firefox_policy_templates'
+        state: directory
+    - name: Extract Firefox policy template
+      when: not "${var.firefox-policy-template-url}" == ""
+      win_unzip:
+        src: 'C:\Users\Public\firefox-policy-template.zip'
+        dest: 'c:\Users\Public\firefox_policy_templates'
+        delete_archive: yes
+    - name: Install Firefox policy template (definitions)
+      when: not "${var.firefox-policy-template-url}" == ""
+      win_command: xcopy /y C:\Users\Public\firefox_policy_templates\windows\admx\* C:\Windows\PolicyDefinitions\
+    - name: Install Firefox policy template (en-US locale)
+      when: not "${var.firefox-policy-template-url}" == ""
+      win_command: xcopy /y C:\Users\Public\firefox_policy_templates\windows\admx\en-US C:\Windows\PolicyDefinitions\en-US
+    - name: Install Firefox policy template (ja-JP locale)
+      when: not "${var.firefox-policy-template-url}" == ""
+      win_command: xcopy /y C:\Users\Public\firefox_policy_templates\windows\admx\ja-JP C:\Windows\PolicyDefinitions\ja-JP
     - name: Install Google Chrome via Chocolatey
       when: chrome_installer_download_url | length == 0
       win_chocolatey:
@@ -520,19 +553,9 @@ resource "local_file" "playbook" {
     - name: Install Google Chrome policy template (definitions)
       when: not "${var.chrome-policy-template-url}" == ""
       win_command: xcopy /y C:\Users\Public\chrome_policy_templates\windows\admx\* C:\Windows\PolicyDefinitions\
-    - name: Prepare directory to put Google Chrome policy template (en-US locale)
-      when: not "${var.chrome-policy-template-url}" == ""
-      win_file:
-        path: C:\Windows\PolicyDefinitions\en-US
-        state: directory
     - name: Install Google Chrome policy template (en-US locale)
       when: not "${var.chrome-policy-template-url}" == ""
       win_command: xcopy /y C:\Users\Public\chrome_policy_templates\windows\admx\en-US C:\Windows\PolicyDefinitions\en-US
-    - name: Prepare directory to put Google Chrome policy template (ja-JP locale)
-      when: not "${var.chrome-policy-template-url}" == ""
-      win_file:
-        path: C:\Windows\PolicyDefinitions\ja-JP
-        state: directory
     - name: Install Google Chrome policy template (ja-JP locale)
       when: not "${var.chrome-policy-template-url}" == ""
       win_command: xcopy /y C:\Users\Public\chrome_policy_templates\windows\admx\ja-JP C:\Windows\PolicyDefinitions\ja-JP
