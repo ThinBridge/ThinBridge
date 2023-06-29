@@ -631,19 +631,9 @@ resource "local_file" "playbook" {
     - name: Install Edge policy template (definitions)
       when: not "${var.edge-policy-template-url}" == ""
       win_command: xcopy /y C:\Users\Public\MicrosoftEdgePolicyTemplates\windows\admx\* C:\Windows\PolicyDefinitions\
-    - name: Prepare directory to put Edge policy template (en-US locale)
-      when: not "${var.edge-policy-template-url}" == ""
-      win_file:
-        path: C:\Windows\PolicyDefinitions\en-US
-        state: directory
     - name: Install Edge policy template (en-US locale)
       when: not "${var.edge-policy-template-url}" == ""
       win_command: xcopy /y C:\Users\Public\MicrosoftEdgePolicyTemplates\windows\admx\en-US C:\Windows\PolicyDefinitions\en-US
-    - name: Prepare directory to put Edge policy template (ja-JP locale)
-      when: not "${var.edge-policy-template-url}" == ""
-      win_file:
-        path: C:\Windows\PolicyDefinitions\ja-JP
-        state: directory
     - name: Install Edge policy template (ja-JP locale)
       when: not "${var.edge-policy-template-url}" == ""
       win_command: xcopy /y C:\Users\Public\MicrosoftEdgePolicyTemplates\windows\admx\ja-JP C:\Windows\PolicyDefinitions\ja-JP
