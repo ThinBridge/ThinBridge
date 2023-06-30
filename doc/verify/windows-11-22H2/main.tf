@@ -305,6 +305,8 @@ resource "local_file" "playbook" {
       win_get_url:
         url: "${var.windows-language-pack-url}"
         dest: 'c:\temp\lp.cab'
+        url_username: "${var.download-user}"
+        url_password: "${var.download-token}"
     - name: Install language pack
       when: not "${var.windows-language-pack-url}" == ""
       win_shell: |
@@ -431,11 +433,15 @@ resource "local_file" "playbook" {
       win_get_url:
         url: "${var.flash-installer-url}"
         dest: 'C:\Users\Public\flash_installer.exe'
+        url_username: "${var.download-user}"
+        url_password: "${var.download-token}"
     - name: Download HookDate to override system time for Firefox
       when: not "${var.hookdate-download-url}" == ""
       win_get_url:
         url: "${var.hookdate-download-url}"
         dest: 'C:\Users\Public\hookdate.zip'
+        url_username: "${var.download-user}"
+        url_password: "${var.download-token}"
     - name: Extract contents
       when: not "${var.hookdate-download-url}" == ""
       win_unzip:
@@ -447,6 +453,8 @@ resource "local_file" "playbook" {
       win_get_url:
         url: "${var.debugview-download-url}"
         dest: 'C:\Users\Public\DebugView.zip'
+        url_username: "${var.download-user}"
+        url_password: "${var.download-token}"
     - name: Extract contents
       when: not "${var.old-ie-download-url}" == ""
       win_unzip:
@@ -522,6 +530,28 @@ resource "local_file" "playbook" {
       win_copy:
         src: '../../Start Internet Explorer.vbs'
         dest: '%Public%\Desktop\'
+    - name: Download Firefox policy template
+      when: not "${var.firefox-policy-template-url}" == ""
+      win_get_url:
+        url: "${var.firefox-policy-template-url}"
+        dest: 'C:\Users\Public\firefox-policy-template.zip'
+    - name: Prepare directory to extract Firefox policy template
+      when: not "${var.firefox-policy-template-url}" == ""
+      win_file:
+        path: 'c:\Users\Public\firefox_policy_templates'
+        state: directory
+    - name: Extract Firefox policy template
+      when: not "${var.firefox-policy-template-url}" == ""
+      win_unzip:
+        src: 'C:\Users\Public\firefox-policy-template.zip'
+        dest: 'c:\Users\Public\firefox_policy_templates'
+        delete_archive: yes
+    - name: Install Firefox policy template (definitions)
+      when: not "${var.firefox-policy-template-url}" == ""
+      win_command: xcopy /y C:\Users\Public\firefox_policy_templates\windows\* C:\Windows\PolicyDefinitions\
+    - name: Install Firefox policy template (en-US locale)
+      when: not "${var.firefox-policy-template-url}" == ""
+      win_command: xcopy /y C:\Users\Public\firefox_policy_templates\windows\en-US C:\Windows\PolicyDefinitions\en-US
     - name: Install Google Chrome via Chocolatey
       when: chrome_installer_download_url | length == 0
       win_chocolatey:
@@ -534,6 +564,8 @@ resource "local_file" "playbook" {
       win_get_url:
         url: "${var.chrome-installer-download-url}"
         dest: 'C:\Users\Public\ChromeSetup.msi'
+        url_username: "${var.download-user}"
+        url_password: "${var.download-token}"
     - name: Install Google Chrome from Installer
       when: not "${var.chrome-installer-download-url}" == ""
       win_command: 'msiexec /i C:\Users\Public\ChromeSetup.msi /passive /norestart'
@@ -559,6 +591,8 @@ resource "local_file" "playbook" {
       win_get_url:
         url: "${var.chrome-policy-template-url}"
         dest: 'C:\Users\Public\chrome-policy-template.zip'
+        url_username: "${var.download-user}"
+        url_password: "${var.download-token}"
     - name: Extract Google Chrome policy template
       when: not "${var.chrome-policy-template-url}" == ""
       win_unzip:
@@ -568,19 +602,9 @@ resource "local_file" "playbook" {
     - name: Install Google Chrome policy template (definitions)
       when: not "${var.chrome-policy-template-url}" == ""
       win_command: xcopy /y C:\Users\Public\chrome_policy_templates\windows\admx\* C:\Windows\PolicyDefinitions\
-    - name: Prepare directory to put Google Chrome policy template (en-US locale)
-      when: not "${var.chrome-policy-template-url}" == ""
-      win_file:
-        path: C:\Windows\PolicyDefinitions\en-US
-        state: directory
     - name: Install Google Chrome policy template (en-US locale)
       when: not "${var.chrome-policy-template-url}" == ""
       win_command: xcopy /y C:\Users\Public\chrome_policy_templates\windows\admx\en-US C:\Windows\PolicyDefinitions\en-US
-    - name: Prepare directory to put Google Chrome policy template (ja-JP locale)
-      when: not "${var.chrome-policy-template-url}" == ""
-      win_file:
-        path: C:\Windows\PolicyDefinitions\ja-JP
-        state: directory
     - name: Install Google Chrome policy template (ja-JP locale)
       when: not "${var.chrome-policy-template-url}" == ""
       win_command: xcopy /y C:\Users\Public\chrome_policy_templates\windows\admx\ja-JP C:\Windows\PolicyDefinitions\ja-JP
@@ -589,6 +613,8 @@ resource "local_file" "playbook" {
       win_get_url:
         url: "${var.edge-installer-download-url}"
         dest: 'C:\Users\Public\EdgeSetup.msi'
+        url_username: "${var.download-user}"
+        url_password: "${var.download-token}"
     - name: Install Edge from Installer
       when: not "${var.edge-installer-download-url}" == ""
       win_command: 'msiexec /i C:\Users\Public\EdgeSetup.msi /passive /norestart'
@@ -614,6 +640,8 @@ resource "local_file" "playbook" {
       win_get_url:
         url: "${var.edge-policy-template-url}"
         dest: 'C:\Users\Public\MicrosoftEdgePolicyTemplates.zip'
+        url_username: "${var.download-user}"
+        url_password: "${var.download-token}"
     - name: Extract Edge policy template
       when: not "${var.edge-policy-template-url}" == ""
       win_unzip:
@@ -623,19 +651,9 @@ resource "local_file" "playbook" {
     - name: Install Edge policy template (definitions)
       when: not "${var.edge-policy-template-url}" == ""
       win_command: xcopy /y C:\Users\Public\MicrosoftEdgePolicyTemplates\windows\admx\* C:\Windows\PolicyDefinitions\
-    - name: Prepare directory to put Edge policy template (en-US locale)
-      when: not "${var.edge-policy-template-url}" == ""
-      win_file:
-        path: C:\Windows\PolicyDefinitions\en-US
-        state: directory
     - name: Install Edge policy template (en-US locale)
       when: not "${var.edge-policy-template-url}" == ""
       win_command: xcopy /y C:\Users\Public\MicrosoftEdgePolicyTemplates\windows\admx\en-US C:\Windows\PolicyDefinitions\en-US
-    - name: Prepare directory to put Edge policy template (ja-JP locale)
-      when: not "${var.edge-policy-template-url}" == ""
-      win_file:
-        path: C:\Windows\PolicyDefinitions\ja-JP
-        state: directory
     - name: Install Edge policy template (ja-JP locale)
       when: not "${var.edge-policy-template-url}" == ""
       win_command: xcopy /y C:\Users\Public\MicrosoftEdgePolicyTemplates\windows\admx\ja-JP C:\Windows\PolicyDefinitions\ja-JP
