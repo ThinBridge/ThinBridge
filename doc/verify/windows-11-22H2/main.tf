@@ -551,7 +551,7 @@ resource "local_file" "playbook" {
       win_command: xcopy /y C:\Users\Public\firefox_policy_templates\windows\* C:\Windows\PolicyDefinitions\
     - name: Install Firefox policy template (en-US locale)
       when: not "${var.firefox-policy-template-url}" == ""
-      win_command: xcopy /y C:\Users\Public\firefox_policy_templates\windows\en-US C:\Windows\PolicyDefinitions\en-US
+      win_command: xcopy /y C:\Users\Public\firefox_policy_templates\windows\en-US\* C:\Windows\PolicyDefinitions\en-US\
     - name: Install Google Chrome via Chocolatey
       when: chrome_installer_download_url | length == 0
       win_chocolatey:
@@ -604,10 +604,10 @@ resource "local_file" "playbook" {
       win_command: xcopy /y C:\Users\Public\chrome_policy_templates\windows\admx\* C:\Windows\PolicyDefinitions\
     - name: Install Google Chrome policy template (en-US locale)
       when: not "${var.chrome-policy-template-url}" == ""
-      win_command: xcopy /y C:\Users\Public\chrome_policy_templates\windows\admx\en-US C:\Windows\PolicyDefinitions\en-US
+      win_command: xcopy /y C:\Users\Public\chrome_policy_templates\windows\admx\en-US\* C:\Windows\PolicyDefinitions\en-US\
     - name: Install Google Chrome policy template (ja-JP locale)
       when: not "${var.chrome-policy-template-url}" == ""
-      win_command: xcopy /y C:\Users\Public\chrome_policy_templates\windows\admx\ja-JP C:\Windows\PolicyDefinitions\ja-JP
+      win_command: xcopy /y C:\Users\Public\chrome_policy_templates\windows\admx\ja-JP\* C:\Windows\PolicyDefinitions\ja-JP\
     - name: Download Edge installer
       when: not "${var.edge-installer-download-url}" == ""
       win_get_url:
@@ -653,10 +653,10 @@ resource "local_file" "playbook" {
       win_command: xcopy /y C:\Users\Public\MicrosoftEdgePolicyTemplates\windows\admx\* C:\Windows\PolicyDefinitions\
     - name: Install Edge policy template (en-US locale)
       when: not "${var.edge-policy-template-url}" == ""
-      win_command: xcopy /y C:\Users\Public\MicrosoftEdgePolicyTemplates\windows\admx\en-US C:\Windows\PolicyDefinitions\en-US
+      win_command: xcopy /y C:\Users\Public\MicrosoftEdgePolicyTemplates\windows\admx\en-US\* C:\Windows\PolicyDefinitions\en-US\
     - name: Install Edge policy template (ja-JP locale)
       when: not "${var.edge-policy-template-url}" == ""
-      win_command: xcopy /y C:\Users\Public\MicrosoftEdgePolicyTemplates\windows\admx\ja-JP C:\Windows\PolicyDefinitions\ja-JP
+      win_command: xcopy /y C:\Users\Public\MicrosoftEdgePolicyTemplates\windows\admx\ja-JP\* C:\Windows\PolicyDefinitions\ja-JP\
     - name: "Copy setup registry to join to a fake domain"
       win_copy:
         src: ../../join-to-fake-domain.reg
