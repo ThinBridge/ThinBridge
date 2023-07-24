@@ -649,10 +649,10 @@ resource "local_file" "playbook" {
       win_command: xcopy /y C:\Users\Public\MicrosoftEdgePolicyTemplates\windows\admx\* C:\Windows\PolicyDefinitions\
     - name: Install Edge policy template (en-US locale)
       when: not "${var.edge-policy-template-url}" == ""
-      win_command: xcopy /y C:\Users\Public\MicrosoftEdgePolicyTemplates\windows\admx\en-US C:\Windows\PolicyDefinitions\en-US
+      win_command: xcopy /y C:\Users\Public\MicrosoftEdgePolicyTemplates\windows\admx\en-US\* C:\Windows\PolicyDefinitions\en-US\
     - name: Install Edge policy template (ja-JP locale)
       when: not "${var.edge-policy-template-url}" == ""
-      win_command: xcopy /y C:\Users\Public\MicrosoftEdgePolicyTemplates\windows\admx\ja-JP C:\Windows\PolicyDefinitions\ja-JP
+      win_command: xcopy /y C:\Users\Public\MicrosoftEdgePolicyTemplates\windows\admx\ja-JP\* C:\Windows\PolicyDefinitions\ja-JP\
     - name: "Copy setup registry to join to a fake domain"
       win_copy:
         src: ../../join-to-fake-domain.reg
