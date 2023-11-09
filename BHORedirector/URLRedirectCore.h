@@ -277,7 +277,6 @@ public:
 		FILETIME FileTimeZero={0};
 		m_FileTime=FileTimeZero;
 		m_bURLOnly=FALSE;
-		m_gbTraceLog=FALSE;
 		m_bQuickRedirect = FALSE;
 		m_bUseNeutralSite =FALSE;
 		m_bTopURLOnly=FALSE;
@@ -291,7 +290,6 @@ public:
 	void Clear()
 	{
 		m_bURLOnly=FALSE;
-		m_gbTraceLog=FALSE;
 		m_bQuickRedirect = FALSE;
 		m_bUseNeutralSite =FALSE;
 		m_bTopURLOnly=FALSE;
