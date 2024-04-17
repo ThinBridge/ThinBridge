@@ -287,6 +287,14 @@ const ThinBridgeTalkClient = {
     }
     console.log(`* Result: [${matchedSectionNames.join(', ')}]`);
 
+    if (redirectCount == 0) {
+      if (config.DefaultBrowser == '' ||
+          String(config.DefaultBrowser).toLowerCase() == BROWSER.toLowerCase())
+        loadCount++;
+      else
+        redirectCount++;
+    }
+
     if (redirectCount > 0 || loadCount == 0) {
       console.log(`* Redirect to another browser`);
       this.redirect(url, tabId, closeTabCount > 0);
