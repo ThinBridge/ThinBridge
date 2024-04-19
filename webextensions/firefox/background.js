@@ -287,6 +287,19 @@ const ThinBridgeTalkClient = {
     }
     console.log(`* Result: [${matchedSectionNames.join(', ')}]`);
 
+    if (redirectCount == 0) {
+      console.log(`* No redirection: fallback to default`);
+      if (config.DefaultBrowser == '' ||
+          String(config.DefaultBrowser).toLowerCase() == BROWSER.toLowerCase()) {
+        console.log(`* Continue to load as the default reaction`);
+        loadCount++;
+      }
+      else {
+        console.log(`* Redirect to the default browser ${config.DefaultBrowser}`);
+        redirectCount++;
+      }
+    }
+
     if (redirectCount > 0 || loadCount == 0) {
       console.log(`* Redirect to another browser`);
       this.redirect(url, tabId, closeTabCount > 0);
