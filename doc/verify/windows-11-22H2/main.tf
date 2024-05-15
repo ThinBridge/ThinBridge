@@ -490,6 +490,10 @@ resource "local_file" "playbook" {
       win_file:
         path: 'C:\Program Files\ThinBridge'
         state: directory
+    - name: "Upload ThinBridgeBHO.ini"
+      win_copy:
+        src: ../../../ThinBridgeBHO.PreRelease.ini
+        dest: 'C:\Program Files\ThinBridge\ThinBridgeBHO.ini'
     - name: Create shortcut to ThinBridge
       win_shortcut:
         src: 'C:\Program Files\ThinBridge'
