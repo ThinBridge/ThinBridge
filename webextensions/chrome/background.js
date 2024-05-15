@@ -339,7 +339,7 @@ const ThinBridgeTalkClient = {
     this.save();
   },
 
-  async onTabRemoved(tabId, removeInfo) {
+  async onTabRemoved(tabId, _removeInfo) {
     await this.ensureLoadedAndConfigured();
     this.newTabIds.delete(tabId);
     this.knownTabIds.delete(tabId);
