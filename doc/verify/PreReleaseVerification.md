@@ -156,15 +156,15 @@
       window.open('https://example.net/', '_blank');
       ```
       * 期待される結果：
-        * 空白のタブが開かれ、すぐに閉じられる。
         * Chromeでタブが開かれ、https://example.net/ が読み込まれる。
+        * 空白のタブがEdge上に残っていない。
    3. 以下のスクリプトを貼り付けて実行する。
       ```
       window.open('https://example.net/', '_blank', 'toolbar=no');
       ```
       * 期待される結果：
-        * 空白のポップアップウィンドウが開かれ、すぐに閉じられる。
         * Chromeでタブが開かれ、https://example.net/ が読み込まれる。
+        * 空白のポップアップウィンドウがEdge上に残っていない。
 4. リンクによるChromeからEdgeへのページ遷移の検証：
    1. Chrome→Edgeの検証のため、Chromeで https://groonga.org/ を開く。
       * 期待される結果：
@@ -183,15 +183,15 @@
       window.open('https://example.com/', '_blank');
       ```
       * 期待される結果：
-        * 空白のタブが開かれ、すぐに閉じられる。
         * Edgeでタブが開かれ、 https://example.com/ が読み込まれる。
+        * 空白のタブがChrome上に残っていない。
    3. 以下のスクリプトを貼り付けて実行する。
       ```
       window.open('https://example.com/', '_blank', 'toolbar=no');
       ```
       * 期待される結果：
-        * 空白のポップアップウィンドウが開かれ、すぐに閉じられる。
         * Edgeでタブが開かれ、https://example.com/ が読み込まれる。
+        * 空白のポップアップウィンドウがChrome上に残っていない。
 6. [!65](https://gitlab.com/clear-code/browserselector/-/merge_requests/65)の検証：
    1. Edgeで https://piro.sakura.ne.jp/apps/jspanel.html を開く。
       * 期待される結果：
@@ -205,22 +205,22 @@
    3. そのまま1分から2分待つ。
       * 期待される結果：
         * IEモードのポップアップウィンドウが残っている。
-        * https://example.net/ がChromeへリダイレクトされない。
+        * Chromeでタブが開かれ、https://example.net/ が読み込まれる。
 7. [!68](https://gitlab.com/clear-code/browserselector/-/merge_requests/68)の検証：
    1. Edgeで https://example.com/ を開く。
       * 期待される結果：
         * Edge上で https://example.com/ が読み込まれる。
    2. `More information...` のリンクをミドルクリックする。
       * 期待される結果：
-        * Edge上で空白のタブが開かれ、自動的に閉じられる。
         * Chrome上で https://www.iana.org/help/example-domains が開かれる。
+        * 空白のタブがEdge上に残っていない。
    3. Chromeで https://www.piro.sakura.ne.jp/ を開く。
       * 期待される結果：
         * Chrome上で https://www.piro.sakura.ne.jp/ が読み込まれる。
    4. ページ最下部の `outsider reflex` のリンクをミドルクリックする。
       * 期待される結果：
-        * Chrome上で空白のタブが開かれ、自動的に閉じられる。
         * Edge上で https://piro.sakura.ne.jp/ が開かれる。
+        * 空白のタブがChrome上に残っていない。
 8. Edge、Chromeを終了する。
 
 ### BHO有効時のIEモードのタブの挙動を含む、Manifest V3での動作
@@ -299,6 +299,7 @@
       ```
       * 期待される結果：
         * Chromeでタブが開かれ、https://example.net/ が読み込まれる。
+        * IEモードのポップアップウィンドウが残っていない。
 3. Edge、Chromeを終了する。
 
 
