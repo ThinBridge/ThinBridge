@@ -165,6 +165,9 @@ const ThinBridgeTalkClient = {
       const query = new String('Q ' + BROWSER + ' ' + url);
       chrome.runtime.sendNativeMessage(SERVER_NAME, query);
 
+      if (!closeTab)
+        return;
+
       let existingTab = tab;
       let counter = 0;
       do {
