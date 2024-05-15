@@ -646,7 +646,7 @@ resource "local_file" "playbook" {
         dest: '%Public%\Desktop\webextensions.lnk'
     - name: "Upload manifest.xml"
       win_copy:
-        src: ../../manifest.xml
+        src: manifest.xml
         dest: 'C:\Users\Public\webextensions\'
 EOL
 }
