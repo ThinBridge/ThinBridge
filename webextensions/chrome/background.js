@@ -76,10 +76,8 @@ const ThinBridgeTalkClient = {
 
   init() {
     this.cached = null;
-    this.callback = this.onBeforeRequest.bind(this);
     this.isNewTab = {};
     this.configure();
-    this.listen();
     console.log('Running as Thinbridge Talk client');
   },
 
@@ -100,46 +98,6 @@ const ThinBridgeTalkClient = {
         this.handleStartup(this.cached);
       }
     });
-  },
-
-  listen() {
-    chrome.webRequest.onBeforeRequest.addListener(
-      this.callback,
-      {
-        urls: ['<all_urls>'],
-        types: ['main_frame','sub_frame']
-      },
-      ['blocking']
-    );
-
-    /* Refresh config for every N minute */
-    console.log('Poll config for every', ALARM_MINUTES , 'minutes');
-    chrome.alarms.create('poll-config', {'periodInMinutes': ALARM_MINUTES});
-
-    chrome.alarms.onAlarm.addListener((alarm) => {
-      if (alarm.name === 'poll-config') {
-        this.configure();
-      }
-    });
-
-    /* Tab book-keeping for intelligent tab handlings */
-    chrome.tabs.onCreated.addListener(tab => {
-      this.isNewTab[tab.id] = 1;
-    });
-
-    chrome.tabs.onUpdated.addListener((id, info, tab) => {
-      if (info.status === 'complete') {
-        delete this.isNewTab[tab.id];
-      }
-    });
-
-    if (BROWSER == 'edge') {
-      /*
-       * Edge won't call webRequest.onBeforeRequest() when navigating
-       * from Edge-IE to Edge (GitLab#11).
-       */
-      chrome.tabs.onUpdated.addListener(this.onTabUpdated.bind(this));
-    }
   },
 
   /*
@@ -319,8 +277,16 @@ const ThinBridgeTalkClient = {
     });
   },
 
-  onTabUpdated(tabId, info, tab) {
+  async onTabCreated(tab) {
+    this.isNewTab[tab.id] = 1;
+  },
+
+  async onTabUpdated(tabId, info, tab) {
     const config = this.cached;
+
+    if (info.status === 'complete') {
+      delete this.isNewTab[tabId];
+    }
 
     if (info.status !== 'loading' ||
         !config)
@@ -368,8 +334,32 @@ const ThinBridgeTalkClient = {
 
     if (this.handleURLAndBlock(config, details.tabId, details.url, isClosableTab))
       return CANCEL_REQUEST;
-  }
+  },
 };
+
+chrome.webRequest.onBeforeRequest.addListener(
+  ThinBridgeTalkClient.onBeforeRequest.bind(ThinBridgeTalkClient),
+  {
+    urls: ['<all_urls>'],
+    types: ['main_frame','sub_frame']
+  },
+  ['blocking']
+);
+
+/* Refresh config for every N minute */
+console.log('Poll config for every', ALARM_MINUTES , 'minutes');
+chrome.alarms.create('poll-config', {'periodInMinutes': ALARM_MINUTES});
+
+chrome.alarms.onAlarm.addListener((alarm) => {
+  if (alarm.name === 'poll-config') {
+    ThinBridgeTalkClient.configure();
+  }
+});
+
+/* Tab book-keeping for intelligent tab handlings */
+chrome.tabs.onCreated.addListener(ThinBridgeTalkClient.onTabCreated.bind(ThinBridgeTalkClient));
+chrome.tabs.onUpdated.addListener(ThinBridgeTalkClient.onTabUpdated.bind(ThinBridgeTalkClient));
+
 
 /*
  * Support ThinBridge's resource cap feature
