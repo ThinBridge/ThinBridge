@@ -9,6 +9,7 @@
 		"scripting",
 		"storage",
 		"tabs",
+		"webNavigation",
 		"webRequest",
 		"webRequestBlocking"
 	],
