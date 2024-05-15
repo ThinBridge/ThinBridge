@@ -378,7 +378,7 @@ const ThinBridgeTalkClient = {
 
     console.log(`onTabUpdated ${url} (tab=${tabId}, windowId=${tab.windowId}, status=${info.status}/${tab.status})`);
 
-    if (!this.handleURLAndBlock(config, url))
+    if (!this.handleURLAndBlock(config, tabId, url))
       return;
 
     console.log(`* Redirect to another browser`);
