@@ -73,30 +73,73 @@ function wildcmp(wild, string) {
  * }
  */
 const ThinBridgeTalkClient = {
+  newTabIds: new Set(),
+  knownTabIds: new Set(),
+  resumed: false,
 
   init() {
     this.cached = null;
-    this.isNewTab = {};
-    this.configure();
+    this.ensureLoadedAndConfigured();
     console.log('Running as Thinbridge Talk client');
   },
 
-  configure() {
+  async ensureLoadedAndConfigured() {
+    return Promise.all([
+      !this.cached && this.configure(),
+      this.load(),
+    ]);
+  },
+
+  async configure() {
     const query = new String('C ' + BROWSER);
 
-    chrome.runtime.sendNativeMessage(SERVER_NAME, query).then(resp => {
-      if (chrome.runtime.lastError) {
-        console.log('Cannot fetch config', JSON.stringify(chrome.runtime.lastError));
-        return;
-      }
-      const isStartup = (this.cached == null);
-      this.cached = resp.config;
-      this.cached.NamedSections = Object.fromEntries(resp.config.Sections.map(section => [section.Name, section]));
-      console.log('Fetch config', JSON.stringify(this.cached));
+    const resp = await chrome.runtime.sendNativeMessage(SERVER_NAME, query);
+    if (chrome.runtime.lastError) {
+      console.log('Cannot fetch config', JSON.stringify(chrome.runtime.lastError));
+      return;
+    }
+    const isStartup = (this.cached == null);
+    this.cached = resp.config;
+    this.cached.NamedSections = Object.fromEntries(resp.config.Sections.map(section => [section.Name, section]));
+    console.log('Fetch config', JSON.stringify(this.cached));
 
-      if (isStartup) {
-        this.handleStartup(this.cached);
+    if (isStartup && !this.resumed) {
+      this.handleStartup(this.cached);
+    }
+  },
+
+  save() {
+    chrome.storage.session.set({
+      newTabIds: [...this.newTabIds],
+      knownTabIds: [...this.knownTabIds],
+    });
+  },
+
+  async load() {
+    if (this.$promisedLoaded)
+      return this.$promisedLoaded;
+
+    console.log(`Redirector: loading previous state`);
+    return this.$promisedLoaded = new Promise(async (resolve, _reject) => {
+      try {
+        const { newTabIds, knownTabIds } = await chrome.storage.session.get({ newTabIds: null, knownTabIds: null });
+        console.log(`ThinBridgeTalkClient: loaded newTabIds, knownTabIds => `, JSON.stringify(newTabIds), JSON.stringify(knownTabIds));
+        this.resumed = !!(newTabIds || knownTabIds);
+        if (newTabIds) {
+          for (const tabId of newTabIds) {
+            this.newTabIds.add(tabId);
+          }
+        }
+        if (knownTabIds) {
+          for (const tabId of knownTabIds) {
+            this.knownTabIds.add(tabId);
+          }
+        }
       }
+      catch(error) {
+        console.log('ThinBridgeTalkClient: failed to load previous state: ', error.name, error.message);
+      }
+      resolve();
     });
   },
 
@@ -109,7 +152,7 @@ const ThinBridgeTalkClient = {
    * * Request Example: "Q edge https://example.com/".
    */
   redirect(url, tabId, closeTab) {
-    chrome.tabs.get(tabId).then(tab => {
+    chrome.tabs.get(tabId).then(async tab => {
       if (chrome.runtime.lastError) {
         console.log(`* Ignore prefetch request`);
         return;
@@ -120,11 +163,21 @@ const ThinBridgeTalkClient = {
       }
 
       const query = new String('Q ' + BROWSER + ' ' + url);
-      chrome.runtime.sendNativeMessage(SERVER_NAME, query).then(_resp => {
-        if (closeTab) {
-          chrome.tabs.remove(tabId);
+      chrome.runtime.sendNativeMessage(SERVER_NAME, query);
+
+      let existingTab = tab;
+      let counter = 0;
+      do {
+        if (!existingTab)
+          break;
+        if (counter > 100) {
+          console.log(`couldn't close tab ${tabId} within ${counter} times retry.`);
+          break;
         }
-      });
+        if (counter++ > 0)
+          console.log(`tab ${tabId} still exists: trying to close (${counter})`);
+        chrome.tabs.remove(tabId);
+      } while (existingTab = await chrome.tabs.get(tabId).catch(_error => null));
     });
   },
 
@@ -278,22 +331,49 @@ const ThinBridgeTalkClient = {
   },
 
   async onTabCreated(tab) {
-    this.isNewTab[tab.id] = 1;
+    await this.ensureLoadedAndConfigured();
+    this.newTabIds.add(tab.id);
+    this.save();
+  },
+
+  async onTabRemoved(tabId, removeInfo) {
+    await this.ensureLoadedAndConfigured();
+    this.newTabIds.delete(tabId);
+    this.knownTabIds.delete(tabId);
+    this.save();
   },
 
   async onTabUpdated(tabId, info, tab) {
-    const config = this.cached;
+    await this.ensureLoadedAndConfigured();
 
-    if (info.status === 'complete') {
-      delete this.isNewTab[tabId];
+    this.knownTabIds.add(tabId);
+
+    if (info.status === 'complete' ||
+        (info.status !== 'loading' && info.url)) {
+      this.newTabIds.delete(tabId);
     }
 
-    if (info.status !== 'loading' ||
-        !config)
+    if (BROWSER !== 'edge') {
+      this.save();
       return;
+    }
 
+    /*
+     * Edge won't call webRequest.onBeforeRequest() when navigating
+     * from Edge-IE to Edge, so we need to handle requests on this timing.
+     * On such case, info.status is always undefined and only URL changes
+     * are notified.
+     */
+
+    const config = this.cached;
     const url = tab.pendingUrl || tab.url;
-    console.log(`onTabUpdated ${url} (tab=${tabId})`);
+
+    if (!config) {
+      this.save();
+      return;
+    }
+
+    console.log(`onTabUpdated ${url} (tab=${tabId}, windowId=${tab.windowId}, status=${info.status}/${tab.status})`);
 
     if (!this.handleURLAndBlock(config, url))
       return;
@@ -302,8 +382,13 @@ const ThinBridgeTalkClient = {
     /* Call executeScript() to stop the page loading immediately.
      * Then let the tab go back to the previous page.
      */
-    chrome.tabs.executeScript(tabId, {code: 'window.stop()', runAt: 'document_start'}).then(() => {
-      chrome.tabs.goBack(tabId);
+    chrome.scripting.executeScript({
+      target: { tabId },
+      func: function goBack(tabId) {
+        window.stop();
+        chrome.tabs.goBack(tabId);
+      },
+      args: [tabId],
     });
   },
 
@@ -330,7 +415,7 @@ const ThinBridgeTalkClient = {
       return;
     }
 
-    const isClosableTab = isMainFrame && this.isNewTab[details.tabId];
+    const isClosableTab = isMainFrame && (this.newTabIds.has(details.tabId) || !this.knownTabIds.has(details.tabId));
 
     if (this.handleURLAndBlock(config, details.tabId, details.url, isClosableTab))
       return CANCEL_REQUEST;
