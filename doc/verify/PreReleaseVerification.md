@@ -193,7 +193,7 @@
       * 期待される結果：
         * Edgeでタブが開かれ、https://example.com/ が読み込まれる。
         * 空白のポップアップウィンドウがChrome上に残っていない。
-6. [!65](https://gitlab.com/clear-code/browserselector/-/merge_requests/65)の検証：
+6. EdgeのIEモードのタブから開かれたポップアップウィンドウからのページ遷移の検証：
    1. Edgeで https://piro.sakura.ne.jp/apps/jspanel.html を開く。
       * 期待される結果：
         * タブがIEモードに切り替わる。
@@ -207,7 +207,7 @@
       * 期待される結果：
         * IEモードのポップアップウィンドウが残っている。
         * Chromeでタブが開かれ、https://example.net/ が読み込まれる。
-7. [!68](https://gitlab.com/clear-code/browserselector/-/merge_requests/68)の検証：
+7. リダイレクト対象のURLを新規タブで開いた際の挙動の検証：
    1. Edgeで https://example.com/ を開く。
       * 期待される結果：
         * Edge上で https://example.com/ が読み込まれる。
@@ -290,7 +290,7 @@
       * 期待される結果：
         * EdgeのIEモードのタブがページ遷移しないでそのまま維持される。
         * Chromeでタブが開かれ、https://groonga.org/ が読み込まれる。
-2. [!65](https://gitlab.com/clear-code/browserselector/-/merge_requests/65)の検証：
+2. EdgeのIEモードのタブから開かれたポップアップウィンドウからのページ遷移の検証：
    1. Edgeで https://piro.sakura.ne.jp/apps/jspanel.html を開く。
       * 期待される結果：
         * タブがIEモードに切り替わる。
