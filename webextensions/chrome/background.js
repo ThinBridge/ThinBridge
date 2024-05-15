@@ -367,7 +367,6 @@ chrome.tabs.onUpdated.addListener(ThinBridgeTalkClient.onTabUpdated.bind(ThinBri
 const ResourceCap = {
 
   init() {
-    chrome.webNavigation.onCommitted.addListener(ResourceCap.onNavigationCommitted);
     console.log('Running Resource Cap client');
   },
 
@@ -385,9 +384,9 @@ const ResourceCap = {
     }
 
     chrome.tabs.query({}).then(tabs => {
-      const ntabs = ResourceCap.count(tabs);
+      const ntabs = this.count(tabs);
       console.log(`* Perform resource check (ntabs=${ntabs})`);
-      ResourceCap.check(details.tabId, ntabs);
+      this.check(details.tabId, ntabs);
     });
   },
 
@@ -420,6 +419,8 @@ const ResourceCap = {
     return tabs.length;
   }
 };
+
+chrome.webNavigation.onCommitted.addListener(ResourceCap.onNavigationCommitted.bind(ResourceCap));
 
 ThinBridgeTalkClient.init();
 ResourceCap.init();
