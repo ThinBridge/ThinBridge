@@ -14,7 +14,8 @@
 
 準備は以下の手順で行う。
 
-1. https://github.com/ThinBridge/ThinBridge/releases/latest よりThinBridgeの最新のインストーラ `ThinBridgeSetup_x64.exe` をダウンロードし、実行、インストールする。
+1. https://github.com/ThinBridge/ThinBridge/releases/latest もしくは
+   https://github.com/ThinBridge/ThinBridge/actions/workflows/build-release.yaml よりThinBridgeの最新のインストーラ `ThinBridgeSetup_x64.exe` をダウンロードし、実行、インストールする。
 2. Chrome用アドオンの開発版パッケージを用意し、インストールするための設定を行う。
    1. Chromeを起動する。
    2. アドオンの管理画面（`chrome:extensions`）を開く。
