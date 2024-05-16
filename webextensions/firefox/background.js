@@ -267,7 +267,7 @@ const ThinBridgeTalkClient = {
       else {
         switch (this.getBrowserName(section)) {
           case DMZ_SECTION:
-            console.log(` => action not defined, default action for CUSTMO18: load`);
+            console.log(` => action not defined, default action for CUSTOM18: load`);
             loadCount++;
             break sectionsLoop;
 
