@@ -20,15 +20,15 @@
    1. Chromeを起動する。
    2. アドオンの管理画面（`chrome:extensions`）を開く。
    3. `デベロッパーモード` を有効化する。
-   4. `拡張機能をパッケージ化` で `C:\Users\Public\webextensions¥chrome` をパックする。（1つ上のディレクトリーに `chrome.crx` と `chrome.pem` が作られる）
+   4. `拡張機能をパッケージ化` で `C:\Users\Public\webextensions\chrome` をパックする。（1つ上のディレクトリーに `chrome.crx` と `chrome.pem` が作られる）
    5. `chrome.crx` をChromeのアドオン管理画面にドラッグ＆ドロップし、インストールして、IDを控える。
       例：`egoppdngdcoikeknmbgiakconmchahhf`
    6. アドオンを一旦アンインストールする。
    7. `C:\Program Files\ThinBridge\ThinBridgeHost\chrome.json` のアクセス権を変更し、ユーザー権限での書き込みを許可した上で、`"allowed_origins"` に先ほど控えたIDに基づくURLを追加する。
       例：`"chrome-extension://egoppdngdcoikeknmbgiakconmchahhf/"`
-   8. `C:\Users\Public\webextensions¥manifest.xml` のChrome用アドオンのIDを、先程控えたIDで置き換える。
+   8. `C:\Users\Public\webextensions\manifest.xml` のChrome用アドオンのIDを、先程控えたIDで置き換える。
    9. `gpedit.msc` を起動する。
-   10. `Computer Configuration\Administrative Templates\Google\Google Chrome\Extensions` （`コンピューターの構成¥管理用テンプレート\Google\Google Chrome\拡張機能`）を開いて、以下のポリシーを設定する。
+   10. `Computer Configuration\Administrative Templates\Google\Google Chrome\Extensions` （`コンピューターの構成\管理用テンプレート\Google\Google Chrome\拡張機能`）を開いて、以下のポリシーを設定する。
        * `Configure the list of force-installed apps and extensions`（`自動インストールするアプリと拡張機能のリストの設定`）
          * `Enabled`（`有効`）に設定して、`Show...`（`表示...`）をクリックし、以下の項目を追加する。
            * `<先程控えたID>;file:///C:/Users/Public/webextensions/manifest.xml`
@@ -37,27 +37,27 @@
    1. Edgeを起動する。
    2. アドオンの管理画面（`edge:extensions`）を開く。
    3. `開発者モード` を有効化する。
-   4. `拡張機能のパック` で `C:\Users\Public\webextensions¥edge` をパックする。（1つ上のディレクトリーに `edge.crx` と `edge.pem` が作られる）
+   4. `拡張機能のパック` で `C:\Users\Public\webextensions\edge` をパックする。（1つ上のディレクトリーに `edge.crx` と `edge.pem` が作られる）
    5. `edge.crx` をEdgeのアドオン管理画面にドラッグ＆ドロップし、インストールして、IDを控える。
       例：`oapdkmbdgdcjpacbjpcdfhncifimimcj`
    6. アドオンを一旦アンインストールする。
    7. `C:\Program Files\ThinBridge\ThinBridgeHost\edge.json` のアクセス権を変更し、ユーザー権限での書き込みを許可した上で、`"allowed_origins"` に、先ほど控えたIDに基づくURLを追加する。
       例：`"chrome-extension://oapdkmbdgdcjpacbjpcdfhncifimimcj/"`
-   8. `C:\Users\Public\webextensions¥manifest.xml` のEdge用アドオンのIDを、先程控えたIDで置き換える。
+   8. `C:\Users\Public\webextensions\manifest.xml` のEdge用アドオンのIDを、先程控えたIDで置き換える。
    9. `gpedit.msc` を起動する。
-   10. `Computer Configuration\Administrative Templates\Microsoft Edge\Extensions`（`コンピューターの構成¥管理用テンプレート¥Microsoft Edge¥拡張機能`）を開いて、以下のポリシーを設定する。
+   10. `Computer Configuration\Administrative Templates\Microsoft Edge\Extensions`（`コンピューターの構成\管理用テンプレート\Microsoft Edge\拡張機能`）を開いて、以下のポリシーを設定する。
        * `Configure the list of force-installed apps and extensions`（`サイレント インストールされる拡張機能を制御する`）
          * `Enabled`（`有効`）に設定して、`Show...`（`表示...`）をクリックし、以下の項目を追加する。
            * `<先程控えたID>;file:///C:/Users/Public/webextensions/manifest.xml`
              例：`oapdkmbdgdcjpacbjpcdfhncifimimcj;file:///C:/Users/Public/webextensions/manifest.xml`
 4. BHOの管理のためのポリシー設定を行う。
    1. `gpedit.msc` を起動する。
-   2. `Computer Configuration\Administrative Templates\Windows Components\Internet Explorer` （`コンピューターの構成¥管理用テンプレート¥Windows コンポーネント¥Internet Explorer`）を開いて、以下のポリシーを設定する。
+   2. `Computer Configuration\Administrative Templates\Windows Components\Internet Explorer` （`コンピューターの構成\管理用テンプレート\Windows コンポーネント\Internet Explorer`）を開いて、以下のポリシーを設定する。
       * `Turn off add-on performance notifications`（`アドオンのパフォーマンスの通知を無効にする`）：`Enabled`（`有効`）
       * `Automatically activate newly installed add-ons`（`新たにインストールされたアドオンを自動的にアクティブ化する`）：`Enabled`（`有効`）
-   3. `Computer Configuration\Administrative Templates\Windows Components\Internet Explorer¥Internet Control Panel\Advance Page` （`コンピューターの構成¥管理用テンプレート¥Windows コンポーネント¥Internet Explorer¥インターネット コントロール パネル¥[詳細設定]ページ`）を開いて、以下のポリシーを設定する。
+   3. `Computer Configuration\Administrative Templates\Windows Components\Internet Explorer\Internet Control Panel\Advance Page` （`コンピューターの構成\管理用テンプレート\Windows コンポーネント\Internet Explorer\インターネット コントロール パネル\[詳細設定]ページ`）を開いて、以下のポリシーを設定する。
       * `Allow third-party browser extensions`（`サード パーティ製のブラウザー拡張を許可する`）：`Enabled`（`有効`）
-   4. `Computer Configuration\Administrative Templates\Windows Components\Internet Explorer¥Security Features\Add-on Management` （`コンピューターの構成¥管理用テンプレート¥Windows コンポーネント¥Internet Explorer¥セキュリティの機能¥アドオン管理`）を開いて、以下のポリシーを設定する。
+   4. `Computer Configuration\Administrative Templates\Windows Components\Internet Explorer\Security Features\Add-on Management` （`コンピューターの構成\管理用テンプレート\Windows コンポーネント\Internet Explorer\セキュリティの機能\アドオン管理`）を開いて、以下のポリシーを設定する。
       * `Add-on List`（`アドオンの一覧`）
         * `Enabled`（`有効`）に設定して、`Add-on List`→`Show...`（`アドオンの一覧`→`表示...`）をクリックし、以下の項目を追加する。
           * `Value name`（`値の名前`）：`{3A56619B-37AC-40DA-833E-410F3BEDCBDC}`
@@ -120,7 +120,7 @@
   @REDIRECT_PAGE_ACTION:0
   @CLOSE_TIMEOUT:3
   ```
-* `Computer Configuration\Administrative Templates\Windows Components\Internet Explorer¥Security Features\Add-on Management` （`コンピューターの構成¥管理用テンプレート¥Windows コンポーネント¥Internet Explorer¥セキュリティの機能¥アドオン管理`）を開いて、以下のポリシーを設定する。
+* `Computer Configuration\Administrative Templates\Windows Components\Internet Explorer\Security Features\Add-on Management` （`コンピューターの構成\管理用テンプレート\Windows コンポーネント\Internet Explorer\セキュリティの機能\アドオン管理`）を開いて、以下のポリシーを設定する。
   * `Add-on List`（`アドオンの一覧`）
     * `Add-on List`→`Show...`（`アドオンの一覧`→`表示...`）をクリックし、`{3A56619B-37AC-40DA-833E-410F3BEDCBDC}` の値を `0` に設定する。
 
@@ -269,7 +269,7 @@
   @REDIRECT_PAGE_ACTION:0
   @CLOSE_TIMEOUT:3
   ```
-* `Computer Configuration\Administrative Templates\Windows Components\Internet Explorer¥Security Features\Add-on Management` （`コンピューターの構成¥管理用テンプレート¥Windows コンポーネント¥Internet Explorer¥セキュリティの機能¥アドオン管理`）を開いて、以下のポリシーを設定する。
+* `Computer Configuration\Administrative Templates\Windows Components\Internet Explorer\Security Features\Add-on Management` （`コンピューターの構成\管理用テンプレート\Windows コンポーネント\Internet Explorer\セキュリティの機能\アドオン管理`）を開いて、以下のポリシーを設定する。
   * `Add-on List`（`アドオンの一覧`）
     * `Add-on List`→`Show...`（`アドオンの一覧`→`表示...`）をクリックし、`{3A56619B-37AC-40DA-833E-410F3BEDCBDC}` の値を `1` に設定する。
 
