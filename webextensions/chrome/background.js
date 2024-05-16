@@ -253,7 +253,7 @@ const ThinBridgeTalkClient = {
     for (const section of config.Sections) {
       console.log(`handleURLAndBlock: check for section ${section.Name} (${JSON.stringify(section)})`);
       if (!this.match(section, url, config.NamedSections)) {
-        console.log(` => unmached`);
+        console.log(` => unmatched`);
         continue;
       }
 
