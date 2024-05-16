@@ -2,8 +2,8 @@
 
 ## 検証環境の用意
 
-検証には原則として `/doc/verify/windows-11-22H2` の環境を使用する。
-他の環境を使用する場合は、以下の条件を事前に整えておく。
+検証には原則として `/doc/verify` 配下のいずれかの環境（推奨：`/doc/verify/windows-11-22H2`）を使用する。
+`/doc/verify` 配下の物ではない他のWindows環境を使用する場合は、以下の条件を事前に整えておく。
 
 * Active Directoryドメイン参加状態である。
   （または、`/doc/verify/join-to-fake-domain.reg` の内容を管理者権限でインポート済みである。）
