@@ -122,7 +122,7 @@
   ```
 * `Computer Configuration\Administrative Templates\Windows Components\Internet Explorer\Security Features\Add-on Management` （`コンピューターの構成\管理用テンプレート\Windows コンポーネント\Internet Explorer\セキュリティの機能\アドオン管理`）を開いて、以下のポリシーを設定する。
   * `Add-on List`（`アドオンの一覧`）
-    * `Add-on List`→`Show...`（`アドオンの一覧`→`表示...`）をクリックし、`{3A56619B-37AC-40DA-833E-410F3BEDCBDC}` の値を `0` に設定する。
+    * `Add-on List`→`Show...`（`アドオンの一覧`→`表示...`）をクリックし、`{3A56619B-37AC-40DA-833E-410F3BEDCBDC}` の値を `0` に設定して、`OK` を押してダイアログを閉じ、`OK` を押して変更を保存する。
 
 #### 検証
 
@@ -271,7 +271,7 @@
   ```
 * `Computer Configuration\Administrative Templates\Windows Components\Internet Explorer\Security Features\Add-on Management` （`コンピューターの構成\管理用テンプレート\Windows コンポーネント\Internet Explorer\セキュリティの機能\アドオン管理`）を開いて、以下のポリシーを設定する。
   * `Add-on List`（`アドオンの一覧`）
-    * `Add-on List`→`Show...`（`アドオンの一覧`→`表示...`）をクリックし、`{3A56619B-37AC-40DA-833E-410F3BEDCBDC}` の値を `1` に設定する。
+    * `Add-on List`→`Show...`（`アドオンの一覧`→`表示...`）をクリックし、`{3A56619B-37AC-40DA-833E-410F3BEDCBDC}` の値を `1` に設定して、`OK` を押してダイアログを閉じ、`OK` を押して変更を保存する。
 
 #### 検証
 
