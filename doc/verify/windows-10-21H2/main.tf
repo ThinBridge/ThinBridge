@@ -478,6 +478,10 @@ resource "local_file" "playbook" {
       win_file:
         path: 'C:\Program Files\ThinBridge'
         state: directory
+    - name: "Upload ThinBridgeBHO.ini"
+      win_copy:
+        src: ../../../ThinBridgeBHO.PreRelease.ini
+        dest: 'C:\Program Files\ThinBridge\ThinBridgeBHO.ini'
     - name: Create shortcut to ThinBridge
       win_shortcut:
         src: 'C:\Program Files\ThinBridge'
@@ -662,13 +666,27 @@ resource "local_file" "playbook" {
       become_user: "管理者"
       win_regmerge:
         path: 'C:\Users\Public\join-to-fake-domain.reg'
-    - name: Prepare directory to put manifest.xml
-      win_file:
-        path: C:\Users\Public\webextensions
-        state: directory
+    - name: Download ThinBridge for webextensions
+      win_get_url:
+        url: "https://github.com/ThinBridge/ThinBridge/archive/refs/heads/master.zip"
+        dest: 'c:\Users\Public\thinbridge-master.zip'
+    - name: Extract contents
+      win_unzip:
+        src: 'c:\Users\Public\thinbridge-master.zip'
+        dest: 'c:\Users\Public'
+        delete_archive: yes
+    - name: Extract only webextensions
+      win_copy:
+        src: 'c:\Users\Public\thinbridge-master\webextensions'
+        dest: 'c:\Users\Public'
+        remote_src: True
+    - name: Create shortcut to webextensions
+      win_shortcut:
+        src: '%Public%\webextensions'
+        dest: '%Public%\Desktop\webextensions.lnk'
     - name: "Upload manifest.xml"
       win_copy:
-        src: ../../manifest.xml
+        src: manifest.xml
         dest: 'C:\Users\Public\webextensions\'
 EOL
 }

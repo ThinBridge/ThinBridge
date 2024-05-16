@@ -173,7 +173,7 @@ const ThinBridgeTalkClient = {
   match(section, url, namedSections) {
     for (const name of (section.ExcludeGroups || [])) {
       const foreignSection = namedSections[name.toLowerCase()];
-      //console.log(`* Referring exlude group ${name}: ${JSON.stringify(foreignSection && foreignSection.Patterns)}`);
+      //console.log(`* Referring exclude group ${name}: ${JSON.stringify(foreignSection && foreignSection.Patterns)}`);
       if (!foreignSection)
         continue;
       for (const pattern of foreignSection.Patterns) {
@@ -239,7 +239,7 @@ const ThinBridgeTalkClient = {
     for (const section of config.Sections) {
       console.log(`handleURLAndBlock: check for section ${section.Name} (${JSON.stringify(section)})`);
       if (!this.match(section, url, config.NamedSections)) {
-        console.log(` => unmached`);
+        console.log(` => unmatched`);
         continue;
       }
 
@@ -267,7 +267,7 @@ const ThinBridgeTalkClient = {
       else {
         switch (this.getBrowserName(section)) {
           case DMZ_SECTION:
-            console.log(` => action not defined, default action for CUSTMO18: load`);
+            console.log(` => action not defined, default action for CUSTOM18: load`);
             loadCount++;
             break sectionsLoop;
 
