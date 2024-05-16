@@ -261,7 +261,7 @@
   @REDIRECT_PAGE_ACTION:0
   @CLOSE_TIMEOUT:3
   @EXCLUDE_GROUP:Edge
-  *://*
+  *
   
   [Default]
   @BROWSER_PATH:
