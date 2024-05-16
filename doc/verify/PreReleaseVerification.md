@@ -46,7 +46,7 @@
    8. `C:\Users\Public\webextensions\manifest.xml` のEdge用アドオンのIDを、先程控えたIDで置き換える。
    9. `gpedit.msc` を起動する。
    10. `Computer Configuration\Administrative Templates\Microsoft Edge\Extensions`（`コンピューターの構成\管理用テンプレート\Microsoft Edge\拡張機能`）を開いて、以下のポリシーを設定する。
-       * `Configure the list of force-installed apps and extensions`（`サイレント インストールされる拡張機能を制御する`）
+       * `Control which extensions are installed silently`（`サイレント インストールされる拡張機能を制御する`）
          * `Enabled`（`有効`）に設定して、`Show...`（`表示...`）をクリックし、以下の項目を追加する。
            * `<先程控えたID>;file:///C:/Users/Public/webextensions/manifest.xml`
              例：`oapdkmbdgdcjpacbjpcdfhncifimimcj;file:///C:/Users/Public/webextensions/manifest.xml`
