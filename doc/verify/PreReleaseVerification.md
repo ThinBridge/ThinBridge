@@ -35,7 +35,7 @@
              例：`egoppdngdcoikeknmbgiakconmchahhf;file:///C:/Users/Public/webextensions/manifest.xml`
 3. Edgeアドオンの開発版パッケージを用意し、インストールするための設定を行う。
    1. Edgeを起動する。
-   2. アドオンの管理画面（`edge:extensions`）を開く。
+   2. アドオンの管理画面（`edge://extensions`）を開く。
    3. `開発者モード` を有効化する。
    4. `拡張機能のパック` で `C:\Users\Public\webextensions\edge` をパックする。（1つ上のディレクトリーに `edge.crx` と `edge.pem` が作られる）
    5. `edge.crx` をEdgeのアドオン管理画面にドラッグ＆ドロップし、インストールして、IDを控える。
