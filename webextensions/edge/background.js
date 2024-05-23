@@ -301,7 +301,7 @@ const ThinBridgeTalkClient = {
     }
     console.log(`* Result: [${matchedSectionNames.join(', ')}]`);
 
-    if (redirectCount == 0) {
+    if (redirectCount == 0 && loadCount == 0) {
       console.log(`* No redirection: fallback to default`);
       if (config.DefaultBrowser == '' ||
           String(config.DefaultBrowser).toLowerCase() == BROWSER.toLowerCase()) {
