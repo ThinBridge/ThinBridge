@@ -234,6 +234,7 @@ resource "local_file" "playbook" {
   become_method: runas
   vars:
     ansible_become_password: "${var.windows-password}"
+    edge_installer_download_url: "${var.edge-installer-download-url}"
     chrome_installer_download_url: "${var.chrome-installer-download-url}"
   tasks:
     - name: Wait for reachable by polling after 'delay' until 'timeout'
@@ -343,6 +344,7 @@ resource "local_file" "playbook" {
       become: yes
       become_user: "ユーザー"
       win_command: reg add "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v HideFileExt /t REG_DWORD /d 0 /f
+    - win_reboot:
     - name: Setup chocolatey
       win_chocolatey:
         name: chocolatey
@@ -572,6 +574,13 @@ resource "local_file" "playbook" {
     - name: Install Google Chrome policy template (ja-JP locale)
       when: not "${var.chrome-policy-template-url}" == ""
       win_command: xcopy /y C:\Users\Public\chrome_policy_templates\windows\admx\ja-JP\* C:\Windows\PolicyDefinitions\ja-JP\
+    - name: Install Edge via Chocolatey
+      when: edge_installer_download_url | length == 0
+      win_chocolatey:
+        name: microsoft-edge
+        state: present
+        allow_empty_checksums: yes
+        ignore_checksums: yes
     - name: Download Edge installer
       when: not "${var.edge-installer-download-url}" == ""
       win_get_url:
