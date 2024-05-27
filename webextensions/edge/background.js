@@ -228,6 +228,8 @@ const ThinBridgeTalkClient = {
     return name;
   },
 
+  // Return true if redirected and current loading is to-be-blocked.
+  // Return false if we should continue to load.
   handleURLAndBlock(config, tabId, url, isClosableTab) {
     if (!url) {
       console.log(`* Empty URL found`);
@@ -300,6 +302,11 @@ const ThinBridgeTalkClient = {
       }
     }
     console.log(`* Result: [${matchedSectionNames.join(', ')}]`);
+
+    if (loadCount > 0) {
+      console.log(`* Continue to load, from matched actions`);
+      return false;
+    }
 
     if (redirectCount == 0) {
       console.log(`* No redirection: fallback to default`);
