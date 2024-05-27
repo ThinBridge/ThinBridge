@@ -302,7 +302,28 @@
       * 期待される結果：
         * Chromeでタブが開かれ、https://example.net/ が読み込まれる。
         * IEモードのポップアップウィンドウが残っていない。
-3. Edge、Chromeを終了する。
+3. クエリーパラメーターを含むURLをリダイレクトする際の挙動の検証：
+   1. Edgeの通常タブ→Chromeの検証のため、Edgeで https://piro.sakura.ne.jp/apps/jspanel を開く。
+      * 期待される結果：
+        * Edge上で https://piro.sakura.ne.jp/apps/jspanel が読み込まれる。
+   2. 以下のスクリプトを貼り付けて実行する。
+      ```
+      window.open('https://example.net/?query-parameter=value', '_blank');
+      ```
+      * 期待される結果：
+        * Chromeでタブが開かれ、https://example.net/?query-parameter=value が読み込まれる。
+        * 空白のタブがEdge上に残っていない。
+   3. EdgeのIEモードのタブ→Chromeの検証のため、Edgeで https://piro.sakura.ne.jp/apps/jspanel.html を開く。
+      * 期待される結果：
+        * Edge上で https://piro.sakura.ne.jp/apps/jspanel.html が読み込まれる。
+   4. 以下のスクリプトを貼り付けて実行する。
+      ```
+      location.href = 'https://example.net/?query-parameter=value';
+      ```
+      * 期待される結果：
+        * Chromeでタブが開かれ、https://example.net/?query-parameter=value が読み込まれる。
+        * 空白のタブがEdge上に残っていない。
+4. Edge、Chromeを終了する。
 
 
 
