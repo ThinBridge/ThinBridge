@@ -235,15 +235,13 @@ const ThinBridgeTalkClient = {
     }
 
     if (!/^https?:/.test(url)) {
-      console.log(`* Ignore non-HTTP/HTTPS URL`);
+      console.log(`* Ignore non-HTTP/HTTPS URL ${url}`);
       return false;
     }
 
-    if (config.IgnoreQueryString) {
-      url = url.replace(/\?.*/, '');
-    }
+    const urlToMatch = config.IgnoreQueryString ? url.replace(/\?.*/, '') : url;
 
-    console.log(`* Lookup sections for ${url}`);
+    console.log(`* Lookup sections for ${urlToMatch}`);
 
     let loadCount     = 0;
     let redirectCount = 0;
@@ -252,7 +250,7 @@ const ThinBridgeTalkClient = {
     sectionsLoop:
     for (const section of config.Sections) {
       console.log(`handleURLAndBlock: check for section ${section.Name} (${JSON.stringify(section)})`);
-      if (!this.match(section, url, config.NamedSections)) {
+      if (!this.match(section, urlToMatch, config.NamedSections)) {
         console.log(` => unmatched`);
         continue;
       }
