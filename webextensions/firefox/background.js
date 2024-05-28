@@ -247,7 +247,7 @@ const ThinBridgeTalkClient = {
       if (config.CloseEmptyTab && isClosableTab)
         closeTabCount++;
 
-      console.log(` => matched, action = ${config.Action}`);
+      console.log(` => matched, action = ${section.Action}`);
       if (section.Action) {
         switch(section.Action.toLowerCase()) {
           case 'redirect':
