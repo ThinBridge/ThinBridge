@@ -772,7 +772,7 @@
         * ThinBridgeによるリダイレクトが発生しない。
    9. アドレスバーに https://pgroonga.github.io/ を入力し、Enterする。
       * 期待される結果：
-        * Edgeのタブでの読み込みが中断される。
+        * 初回試行時には、EdgeのタブがThinBridgeにより閉じられる。2回目以降の試行時には、Edgeのタブは閉じられずにタブでの読み込みが中断される。
         * ThinBridgeによるリダイレクトが発生し、「Citrixがインストールされていないか、設定されていないため起動できません。」というメッセージが表示される。
    10. Edge（IEモード）→Edge（IEモード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
        * 追加： https://pgroonga.github.io/
