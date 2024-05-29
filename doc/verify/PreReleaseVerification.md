@@ -786,4 +786,278 @@
          * ThinBridgeによるリダイレクトが発生し、「Citrixがインストールされていないか、設定されていないため起動できません。」というメッセージが表示される。
 5. Edgeを終了する。
 
+### EdgeのIEモード境界をまたぐページ遷移におけるDefault設定なしの動作
 
+#### 準備
+
+以下の通り設定して検証を行う。
+
+* `C:\Program Files\ThinBridge\ThinBridgeBHO.ini` を以下の内容に設定する。
+  ```
+  #####################################################################
+  ## Configuration File for ThinBridge (ver2.0)
+  ## 2024-05-29 13:16:58
+  #####################################################################
+  
+  [GLOBAL]
+  @DISABLED
+  @TOP_PAGE_ONLY
+  @INTRANET_ZONE
+  @TRUSTED_ZONE
+  @UNTRUSTED_ZONE
+  @CTX_APPNAME:仮想ブラウザー
+  @RDP_APPMODE
+  
+  [RDP]
+  @BROWSER_PATH:
+  @DISABLED
+  @TOP_PAGE_ONLY
+  @REDIRECT_PAGE_ACTION:0
+  @CLOSE_TIMEOUT:3
+  
+  [VMWARE]
+  @BROWSER_PATH:
+  @DISABLED
+  @TOP_PAGE_ONLY
+  @REDIRECT_PAGE_ACTION:0
+  @CLOSE_TIMEOUT:3
+  
+  [CITRIX]
+  @BROWSER_PATH:
+  @DISABLED
+  @TOP_PAGE_ONLY
+  @REDIRECT_PAGE_ACTION:0
+  @CLOSE_TIMEOUT:3
+  
+  [Firefox]
+  @BROWSER_PATH:
+  @DISABLED
+  @TOP_PAGE_ONLY
+  @REDIRECT_PAGE_ACTION:0
+  @CLOSE_TIMEOUT:3
+  
+  [Chrome]
+  @BROWSER_PATH:
+  @DISABLED
+  @TOP_PAGE_ONLY
+  @REDIRECT_PAGE_ACTION:0
+  @CLOSE_TIMEOUT:3
+  
+  [Edge]
+  @BROWSER_PATH:
+  @TOP_PAGE_ONLY
+  @REDIRECT_PAGE_ACTION:0
+  @CLOSE_TIMEOUT:3
+  *://example.com*
+  *://www.iana.org*
+  *://groonga.org*
+  
+  [IE]
+  @BROWSER_PATH:
+  @TOP_PAGE_ONLY
+  @REDIRECT_PAGE_ACTION:0
+  @CLOSE_TIMEOUT:3
+  *://example.com*
+  *://www.iana.org*
+  *://groonga.org*
+  *://mroonga.org*
+  
+  [Default]
+  @BROWSER_PATH:
+  @TOP_PAGE_ONLY
+  @REDIRECT_PAGE_ACTION:0
+  @CLOSE_TIMEOUT:3
+  
+  [CUSTOM01]
+  @BROWSER_PATH:
+  @DISABLED
+  @TOP_PAGE_ONLY
+  @REDIRECT_PAGE_ACTION:0
+  @CLOSE_TIMEOUT:3
+  
+  [CUSTOM02]
+  @BROWSER_PATH:
+  @DISABLED
+  @TOP_PAGE_ONLY
+  @REDIRECT_PAGE_ACTION:0
+  @CLOSE_TIMEOUT:3
+  
+  [CUSTOM03]
+  @BROWSER_PATH:
+  @DISABLED
+  @TOP_PAGE_ONLY
+  @REDIRECT_PAGE_ACTION:0
+  @CLOSE_TIMEOUT:3
+  
+  [CUSTOM04]
+  @BROWSER_PATH:
+  @DISABLED
+  @TOP_PAGE_ONLY
+  @REDIRECT_PAGE_ACTION:0
+  @CLOSE_TIMEOUT:3
+  
+  [CUSTOM05]
+  @BROWSER_PATH:
+  @DISABLED
+  @TOP_PAGE_ONLY
+  @REDIRECT_PAGE_ACTION:0
+  @CLOSE_TIMEOUT:3
+  
+  [CUSTOM18]
+  @BROWSER_PATH:
+  @DISABLED
+  @TOP_PAGE_ONLY
+  @REDIRECT_PAGE_ACTION:0
+  @CLOSE_TIMEOUT:3
+  
+  [CUSTOM19]
+  @BROWSER_PATH:
+  @DISABLED
+  @TOP_PAGE_ONLY
+  @REDIRECT_PAGE_ACTION:0
+  @CLOSE_TIMEOUT:3
+  
+  [CUSTOM20]
+  @BROWSER_PATH:
+  @DISABLED
+  @TOP_PAGE_ONLY
+  @REDIRECT_PAGE_ACTION:0
+  @CLOSE_TIMEOUT:3
+  ```
+* `Computer Configuration\Administrative Templates\Windows Components\Internet Explorer\Security Features\Add-on Management` （`コンピューターの構成\管理用テンプレート\Windows コンポーネント\Internet Explorer\セキュリティの機能\アドオン管理`）を開いて、以下のポリシーを設定する。
+  * `Add-on List`（`アドオンの一覧`）
+    * `Enabled`（`有効`）に設定して、`Add-on List`→`Show...`（`アドオンの一覧`→`表示...`）をクリックし、以下の名前の項目を設定（項目がなければ追加）して、`OK` を押してダイアログを閉じ、`OK` を押して変更を保存する。
+      * `Value name`（`値の名前`）：`{3A56619B-37AC-40DA-833E-410F3BEDCBDC}`
+      * `Value`（`値`）：`1`
+* EdgeのIEモードタブの設定を以下の通り行う。
+   1. Edgeを起動し、`edge://settings/defaultBrowser` を開く。
+   2. すべての項目を削除する。
+
+#### 検証
+
+1. Edgeを起動する。
+2. EdgeとIEの両方に該当するURLの動作の検証：
+   1. Edge（通常モード）→Edge（通常モード）の検証のため、Edgeで新しいタブで https://example.com/ を開く。
+      * 期待される結果：
+        * Edgeの通常タブで https://example.com/ が読み込まれる。
+        * ThinBridgeによるリダイレクトが発生しない。
+   2. `More information...` のリンクをクリックする。
+      * 期待される結果：
+        * Edgeの通常タブで https://www.iana.org/help/example-domains が開かれる。
+        * ThinBridgeによるリダイレクトが発生しない。
+   3. Edge（通常モード）→Edge（IEモード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
+      * 追加： https://www.iana.org/help/example-domains
+   4. Edgeで新しいタブで https://example.com/ を開く。
+      * 期待される結果：
+        * Edgeの通常タブで https://example.com/ が読み込まれる。
+        * ThinBridgeによるリダイレクトが発生しない。
+   5. `More information...` のリンクをクリックする。
+      * 期待される結果：
+        * タブがIEモードに切り替わり、 https://www.iana.org/help/example-domains が開かれる。
+        * ThinBridgeによるリダイレクトが発生しない。
+   6. Edge（IEモード）→Edge（通常モード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
+      * 削除： https://www.iana.org/help/example-domains
+      * 追加： https://example.com/
+   7. Edgeで新しいタブで https://example.com/ を開く。
+      * 期待される結果：
+        * EdgeのIEモードのタブで https://example.com/ が読み込まれる。
+        * ThinBridgeによるリダイレクトが発生しない。
+   8. アドレスバーに https://www.iana.org/help/example-domains を入力し、Enterする。
+      * 期待される結果：
+        * タブが通常モードに切り替わり、 https://www.iana.org/help/example-domains が開かれる。
+        * ThinBridgeによるリダイレクトが発生しない。
+   9. Edge（IEモード）→Edge（IEモード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
+      * 追加： https://www.iana.org/help/example-domains
+   7. Edgeで新しいタブで https://example.com/ を開く。
+      * 期待される結果：
+        * EdgeのIEモードのタブで https://example.com/ が読み込まれる。
+        * ThinBridgeによるリダイレクトが発生しない。
+   8. `More information...` のリンクをクリックする。
+      * 期待される結果：
+        * EdgeのIEモードのタブで https://www.iana.org/help/example-domains が読み込まれる。
+        * ThinBridgeによるリダイレクトが発生しない。
+3. IEのみに該当するURLの動作の検証：
+   1. Edge（通常モード）→Edge（通常モード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
+      * 削除： 全項目
+   2. Edgeで新しいタブで https://groonga.org/related-projects.html を開く。
+      * 期待される結果：
+        * Edgeの通常タブで https://groonga.org/related-projects.html が読み込まれる。
+        * ThinBridgeによるリダイレクトが発生しない。
+   3. `Mroonga` のリンクをクリックする。
+      * 期待される結果：
+        * Edgeのタブでの読み込みが中断される。
+        * ThinBridgeによるリダイレクトが発生し、 https://mroonga.org/ がIEで開かれるか、IEの起動を試みている旨を示すダイアログが表示される。
+   4. Edge（通常モード）→Edge（IEモード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
+      * 追加： https://mroonga.org/
+   5. Edgeで新しいタブで https://groonga.org/related-projects.html を開く。
+      * 期待される結果：
+        * Edgeの通常タブで https://groonga.org/related-projects.html が読み込まれる。
+        * ThinBridgeによるリダイレクトが発生しない。
+   6. `Mroonga` のリンクをクリックする。
+      * 期待される結果：
+        * タブがIEモードに切り替わらず、読み込みが中断される。
+        * ThinBridgeによるリダイレクトが発生し、 https://mroonga.org/ がIEで開かれるか、IEの起動を試みている旨を示すダイアログが表示される。
+   7. Edge（IEモード）→Edge（通常モード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
+      * 削除： https://mroonga.org/
+      * 追加： https://groonga.org/related-projects.html
+   8. Edgeで新しいタブで https://groonga.org/related-projects.html を開く。
+      * 期待される結果：
+        * EdgeのIEモードのタブで https://groonga.org/related-projects.html が読み込まれる。
+        * ThinBridgeによるリダイレクトが発生しない。
+   9. アドレスバーに https://mroonga.org/ を入力し、Enterする。
+      * 期待される結果：
+        * EdgeのタブがThinBridgeにより閉じられる。
+        * ThinBridgeによるリダイレクトが発生し、 https://mroonga.org/ がIEで開かれるか、IEの起動を試みている旨を示すダイアログが表示される。
+   10. Edge（IEモード）→Edge（IEモード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
+       * 追加： https://mroonga.org/
+   11. Edgeで新しいタブで https://groonga.org/related-projects.html を開く。
+       * 期待される結果：
+         * EdgeのIEモードのタブで https://groonga.org/related-projects.html が読み込まれる。
+         * ThinBridgeによるリダイレクトが発生しない。
+   12. `Mroonga` のリンクをクリックする。
+       * 期待される結果：
+          * Edgeのタブでの読み込みが中断される。
+          * ThinBridgeによるリダイレクトが発生し、 https://mroonga.org/ がIEで開かれるか、IEの起動を試みている旨を示すダイアログが表示される。
+4. いずれのブラウザーにも該当しないURLの動作の検証：
+   1. Edge（通常モード）→Edge（通常モード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
+      * 削除： 全項目
+   2. Edgeで新しいタブで https://groonga.org/related-projects.html を開く。
+      * 期待される結果：
+        * Edgeの通常タブで https://groonga.org/related-projects.html が読み込まれる。
+        * ThinBridgeによるリダイレクトが発生しない。
+   3. `PGroonga` のリンクをクリックする。
+      * 期待される結果：
+        * Edgeの通常タブで https://pgroonga.github.io/ が読み込まれる。
+        * ThinBridgeによるリダイレクトが発生しない。
+   4. Edge（通常モード）→Edge（IEモード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
+      * 追加： https://pgroonga.github.io/
+   5. Edgeで新しいタブで https://groonga.org/related-projects.html を開く。
+      * 期待される結果：
+        * Edgeの通常タブで https://groonga.org/related-projects.html が読み込まれる。
+        * ThinBridgeによるリダイレクトが発生しない。
+   6. `PGroonga` のリンクをクリックする。
+      * 期待される結果：
+        * EdgeのIEモードのタブで https://pgroonga.github.io/ が読み込まれる。
+        * ThinBridgeによるリダイレクトが発生しない。
+   7. Edge（IEモード）→Edge（通常モード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
+      * 削除： https://pgroonga.github.io/
+      * 追加： https://groonga.org/related-projects.html
+   8. Edgeで新しいタブで https://groonga.org/related-projects.html を開く。
+      * 期待される結果：
+        * EdgeのIEモードのタブで https://groonga.org/related-projects.html が読み込まれる。
+        * ThinBridgeによるリダイレクトが発生しない。
+   9. アドレスバーに https://pgroonga.github.io/ を入力し、Enterする。
+      * 期待される結果：
+        * Edgeの通常タブで https://pgroonga.github.io/ が読み込まれる。
+        * ThinBridgeによるリダイレクトが発生しない。
+   10. Edge（IEモード）→Edge（IEモード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
+       * 追加： https://pgroonga.github.io/
+   11. Edgeで新しいタブで https://groonga.org/related-projects.html を開く。
+       * 期待される結果：
+         * EdgeのIEモードのタブで https://groonga.org/related-projects.html が読み込まれる。
+         * ThinBridgeによるリダイレクトが発生しない。
+   12. `PGroonga` のリンクをクリックする。
+       * 期待される結果：
+        * EdgeのIEモードのタブで https://pgroonga.github.io/ が読み込まれる。
+        * ThinBridgeによるリダイレクトが発生しない。
+5. Edgeを終了する。
