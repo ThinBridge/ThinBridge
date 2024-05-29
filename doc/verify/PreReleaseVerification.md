@@ -709,8 +709,8 @@
         * ThinBridgeによるリダイレクトが発生しない。
    3. `Mroonga` のリンクをクリックする。
       * 期待される結果：
-        * Edgeの通常タブで https://mroonga.org/ が開かれる。
-        * ThinBridgeによるリダイレクトが発生しない。
+        * タブの読み込みが中断される。
+        * ThinBridgeによるリダイレクトが発生し、 https://mroonga.org/ がIEで開かれるか、IEの起動を試みている旨を示すダイアログが表示される。
    4. Edge（通常モード）→Edge（IEモード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
       * 追加： https://mroonga.org/
    5. Edgeで新しいタブで https://groonga.org/related-projects.html を開く。
