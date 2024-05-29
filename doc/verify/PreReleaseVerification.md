@@ -629,10 +629,10 @@
   
   [CUSTOM18]
   @BROWSER_PATH:
-  @DISABLED
   @TOP_PAGE_ONLY
   @REDIRECT_PAGE_ACTION:0
   @CLOSE_TIMEOUT:3
+  *://ranguba.org/*
   
   [CUSTOM19]
   @BROWSER_PATH:
@@ -742,7 +742,49 @@
        * 期待される結果：
           * Edgeのタブでの読み込みが中断される。
           * ThinBridgeによるリダイレクトが発生し、 https://mroonga.org/ がIEで開かれるか、IEの起動を試みている旨を示すダイアログが表示される。
-4. いずれのブラウザーにも該当しないURLの動作の検証：
+4. 共用URL（CUSTOM18）に該当するURLの動作の検証：
+   1. Edge（通常モード）→Edge（通常モード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
+      * 削除： 全項目
+   2. Edgeで新しいタブで https://groonga.org/related-projects.html を開く。
+      * 期待される結果：
+        * Edgeの通常タブで https://groonga.org/related-projects.html が読み込まれる。
+        * ThinBridgeによるリダイレクトが発生しない。
+   3. `Rroonga` のリンクをクリックする。
+      * 期待される結果：
+        * Edgeの通常タブで http://ranguba.org/#about-rroonga が開かれる。
+        * ThinBridgeによるリダイレクトが発生しない。
+   4. Edge（通常モード）→Edge（IEモード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
+      * 追加： http://ranguba.org/#about-rroonga
+   5. Edgeで新しいタブで https://groonga.org/related-projects.html を開く。
+      * 期待される結果：
+        * Edgeの通常タブで https://groonga.org/related-projects.html が読み込まれる。
+        * ThinBridgeによるリダイレクトが発生しない。
+   6. `Rroonga` のリンクをクリックする。
+      * 期待される結果：
+        * タブがIEモードに切り替わり、 http://ranguba.org/#about-rroonga が開かれる。
+        * ThinBridgeによるリダイレクトが発生しない。
+   7. Edge（IEモード）→Edge（通常モード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
+      * 削除： http://ranguba.org/#about-rroonga
+      * 追加： https://groonga.org/related-projects.html
+   8. Edgeで新しいタブで https://groonga.org/related-projects.html を開く。
+      * 期待される結果：
+        * EdgeのIEモードのタブで https://groonga.org/related-projects.html が読み込まれる。
+        * ThinBridgeによるリダイレクトが発生しない。
+   9. アドレスバーに http://ranguba.org/#about-rroonga を入力し、Enterする。
+      * 期待される結果：
+        * タブが通常モードに切り替わり、 http://ranguba.org/#about-rroonga が開かれる。
+        * ThinBridgeによるリダイレクトが発生しない。
+   10. Edge（IEモード）→Edge（IEモード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
+       * 追加： http://ranguba.org/#about-rroonga
+   11. Edgeで新しいタブで https://groonga.org/related-projects.html を開く。
+       * 期待される結果：
+         * EdgeのIEモードのタブで https://groonga.org/related-projects.html が読み込まれる。
+         * ThinBridgeによるリダイレクトが発生しない。
+   12. `Rroonga` のリンクをクリックする。
+       * 期待される結果：
+         * EdgeのIEモードのタブで http://ranguba.org/#about-rroonga が読み込まれる。
+         * ThinBridgeによるリダイレクトが発生しない。
+5. いずれのブラウザーにも該当しないURLの動作の検証：
    1. Edge（通常モード）→Edge（通常モード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
       * 削除： 全項目
    2. Edgeで新しいタブで https://groonga.org/related-projects.html を開く。
@@ -784,7 +826,7 @@
        * 期待される結果：
          * Edgeのタブでの読み込みが中断される。
          * ThinBridgeによるリダイレクトが発生し、「Citrixがインストールされていないか、設定されていないため起動できません。」というメッセージが表示される。
-5. Edgeを終了する。
+6. Edgeを終了する。
 
 ### EdgeのIEモード境界をまたぐページ遷移におけるDefault設定なしの動作
 
@@ -905,10 +947,10 @@
   
   [CUSTOM18]
   @BROWSER_PATH:
-  @DISABLED
   @TOP_PAGE_ONLY
   @REDIRECT_PAGE_ACTION:0
   @CLOSE_TIMEOUT:3
+  *://ranguba.org/*
   
   [CUSTOM19]
   @BROWSER_PATH:
@@ -1018,7 +1060,49 @@
        * 期待される結果：
           * Edgeのタブでの読み込みが中断される。
           * ThinBridgeによるリダイレクトが発生し、 https://mroonga.org/ がIEで開かれるか、IEの起動を試みている旨を示すダイアログが表示される。
-4. いずれのブラウザーにも該当しないURLの動作の検証：
+4. 共用URL（CUSTOM18）に該当するURLの動作の検証：
+   1. Edge（通常モード）→Edge（通常モード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
+      * 削除： 全項目
+   2. Edgeで新しいタブで https://groonga.org/related-projects.html を開く。
+      * 期待される結果：
+        * Edgeの通常タブで https://groonga.org/related-projects.html が読み込まれる。
+        * ThinBridgeによるリダイレクトが発生しない。
+   3. `Rroonga` のリンクをクリックする。
+      * 期待される結果：
+        * Edgeの通常タブで http://ranguba.org/#about-rroonga が開かれる。
+        * ThinBridgeによるリダイレクトが発生しない。
+   4. Edge（通常モード）→Edge（IEモード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
+      * 追加： http://ranguba.org/#about-rroonga
+   5. Edgeで新しいタブで https://groonga.org/related-projects.html を開く。
+      * 期待される結果：
+        * Edgeの通常タブで https://groonga.org/related-projects.html が読み込まれる。
+        * ThinBridgeによるリダイレクトが発生しない。
+   6. `Rroonga` のリンクをクリックする。
+      * 期待される結果：
+        * タブがIEモードに切り替わり、 http://ranguba.org/#about-rroonga が開かれる。
+        * ThinBridgeによるリダイレクトが発生しない。
+   7. Edge（IEモード）→Edge（通常モード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
+      * 削除： http://ranguba.org/#about-rroonga
+      * 追加： https://groonga.org/related-projects.html
+   8. Edgeで新しいタブで https://groonga.org/related-projects.html を開く。
+      * 期待される結果：
+        * EdgeのIEモードのタブで https://groonga.org/related-projects.html が読み込まれる。
+        * ThinBridgeによるリダイレクトが発生しない。
+   9. アドレスバーに http://ranguba.org/#about-rroonga を入力し、Enterする。
+      * 期待される結果：
+        * タブが通常モードに切り替わり、 http://ranguba.org/#about-rroonga が開かれる。
+        * ThinBridgeによるリダイレクトが発生しない。
+   10. Edge（IEモード）→Edge（IEモード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
+       * 追加： http://ranguba.org/#about-rroonga
+   11. Edgeで新しいタブで https://groonga.org/related-projects.html を開く。
+       * 期待される結果：
+         * EdgeのIEモードのタブで https://groonga.org/related-projects.html が読み込まれる。
+         * ThinBridgeによるリダイレクトが発生しない。
+   12. `Rroonga` のリンクをクリックする。
+       * 期待される結果：
+         * EdgeのIEモードのタブで http://ranguba.org/#about-rroonga が読み込まれる。
+         * ThinBridgeによるリダイレクトが発生しない。
+5. いずれのブラウザーにも該当しないURLの動作の検証：
    1. Edge（通常モード）→Edge（通常モード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
       * 削除： 全項目
    2. Edgeで新しいタブで https://groonga.org/related-projects.html を開く。
@@ -1060,4 +1144,4 @@
        * 期待される結果：
         * EdgeのIEモードのタブで https://pgroonga.github.io/ が読み込まれる。
         * ThinBridgeによるリダイレクトが発生しない。
-5. Edgeを終了する。
+6. Edgeを終了する。
