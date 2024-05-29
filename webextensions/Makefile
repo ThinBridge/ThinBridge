@@ -5,6 +5,20 @@ NPM_BIN_DIR := $(NPM_MOD_DIR)/.bin
 
 all: packages
 
+testee:
+	mkdir $@
+
+testee/edge.js: edge/background.js testee
+	sed -e "s/ThinBridgeTalkClient.init();/exports.client = ThinBridgeTalkClient/g" -e "s/ResourceCap.init();//g" edge/background.js > $@
+
+unittest: install_dependency testee/edge.js
+	npx mocha --require mocha-suppress-logs test
+
+test: unittest
+
+test-verbose: install_dependency testee/edge.js
+	npx mocha test
+
 clean:
 	rm -f *.zip
 	rm -f *.xpi
