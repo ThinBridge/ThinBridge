@@ -730,7 +730,7 @@
         * ThinBridgeによるリダイレクトが発生しない。
    9. アドレスバーに https://mroonga.org/ を入力し、Enterする。
       * 期待される結果：
-        * EdgeのタブがThinBridgeにより閉じられる。
+        * 初回試行時には、EdgeのタブがThinBridgeにより閉じられる。2回目以降の試行時には、Edgeのタブは閉じられずにタブでの読み込みが中断される。
         * ThinBridgeによるリダイレクトが発生し、 https://mroonga.org/ がIEで開かれるか、IEの起動を試みている旨を示すダイアログが表示される。
    10. Edge（IEモード）→Edge（IEモード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
        * 追加： https://mroonga.org/
@@ -1006,7 +1006,7 @@
         * ThinBridgeによるリダイレクトが発生しない。
    9. アドレスバーに https://mroonga.org/ を入力し、Enterする。
       * 期待される結果：
-        * EdgeのタブがThinBridgeにより閉じられる。
+        * 初回試行時には、EdgeのタブがThinBridgeにより閉じられる。2回目以降の試行時には、Edgeのタブは閉じられずにタブでの読み込みが中断される。
         * ThinBridgeによるリダイレクトが発生し、 https://mroonga.org/ がIEで開かれるか、IEの起動を試みている旨を示すダイアログが表示される。
    10. Edge（IEモード）→Edge（IEモード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
        * 追加： https://mroonga.org/
