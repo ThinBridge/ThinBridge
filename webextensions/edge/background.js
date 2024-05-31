@@ -246,10 +246,15 @@ const ThinBridgeTalkClient = {
     let loadCount     = 0;
     let redirectCount = 0;
     let closeTabCount = 0;
+    let isActionMode  = false;
     const matchedSectionNames = [];
     sectionsLoop:
     for (const section of config.Sections) {
       console.log(`handleURLAndBlock: check for section ${section.Name} (${JSON.stringify(section)})`);
+
+      if (section.Action)
+        isActionMode = true;
+
       if (!this.match(section, urlToMatch, config.NamedSections)) {
         console.log(` => unmatched`);
         continue;
@@ -263,6 +268,7 @@ const ThinBridgeTalkClient = {
 
       console.log(` => matched, action = ${section.Action}`);
       if (section.Action) {
+        // a.k.a "full mode" in IE View WE
         switch(section.Action.toLowerCase()) {
           case 'redirect':
             redirectCount++;
@@ -277,6 +283,7 @@ const ThinBridgeTalkClient = {
           break sectionsLoop;
       }
       else {
+        // Compatible mode with ManifestV2 version of this add-on
         switch (this.getBrowserName(section)) {
           case DMZ_SECTION:
             console.log(` => action not defined, default action for CUSTOM18: load`);
@@ -299,25 +306,44 @@ const ThinBridgeTalkClient = {
     }
     console.log(`* Result: [${matchedSectionNames.join(', ')}]`);
 
-    if (redirectCount == 0) {
-      console.log(`* No redirection: fallback to default`);
-      if (config.DefaultBrowser == '' ||
-          String(config.DefaultBrowser).toLowerCase() == BROWSER.toLowerCase()) {
-        console.log(`* Continue to load as the default reaction`);
-        loadCount++;
+    if (isActionMode) {
+      // a.k.a "full mode" in IE View WE
+      console.log(`* Dispatch as action mode`);
+      if (redirectCount > 0 || loadCount == 0) {
+        console.log(`* Redirect to another browser`);
+        this.redirect(url, tabId, closeTabCount > 0);
       }
-      else {
-        console.log(`* Redirect to the default browser ${config.DefaultBrowser}`);
-        redirectCount++;
-      }
+      console.log(`* Continue to load: ${loadCount > 0}`);
+      return loadCount == 0;
     }
+    else {
+      // Compatible mode with ManifestV2 version of this add-on
+      console.log(`* Dispatch as compatible mode`);
 
-    if (redirectCount > 0 || loadCount == 0) {
-      console.log(`* Redirect to another browser`);
-      this.redirect(url, tabId, closeTabCount > 0);
+      if (loadCount > 0) {
+        console.log(`* Continue to load`);
+        return false;
+      }
+
+      if (redirectCount > 0) {
+        console.log(`* Redirect to another browser`);
+        this.redirect(url, tabId, closeTabCount > 0);
+        return true;
+      }
+
+      if (config.DefaultBrowser) {
+        console.log(`* Use DefaultBrowser: ${config.DefaultBrowser}`);
+        if (String(config.DefaultBrowser).toLowerCase() == BROWSER.toLowerCase()) {
+          return false;
+        } else {
+          this.redirect(url, tabId, closeTabCount > 0);
+          return true;
+        }
+      } else {
+        console.log(`* DefaultBrowser is blank`);
+        return false;
+      }
     }
-    console.log(`* Continue to load: ${loadCount > 0}`);
-    return loadCount == 0;
   },
 
   /* Handle startup tabs preceding to onBeforeRequest */
