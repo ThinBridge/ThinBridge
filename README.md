@@ -71,6 +71,23 @@ ThinBridgeのリリース手順
     * `ThinBridgeSetup_x86.exe` （`Installers`から取り出す）
     * `Templates.zip` （`Templates`をそのまま使用）
 
+ThinBridgeアドオンのリリース手順
+--------------------------------
+
+ 1. リリース対象のアドオンについて、マニフェスト内のバージョン番号を繰り上げる。
+    * webextensions/edge/manifest.json
+    * webextensions/chrome/manifest.json
+    * webextensions/firefox/manifest.json
+ 2. `webextensions` ディレクトリー内で `make` を実行し、アップロード用のファイルを作成する。
+ 3. 各ブラウザーのアドオンストアに、2で作成したファイルをアップロードする。
+    * Edge用アドオンについては、使用手順の説明を以下の通り入力する。
+      ```
+      This extension requires its native messaging host.
+      https://github.com/ThinBridge/ThinBridge/releases/tag/v4.0.2.4
+      And this extension needs to be installed to Active Directory managed environments, via GPO. Steps:
+      https://github.com/ThinBridge/ThinBridge/blob/master/DEVELOPMENT.md#how-to-try-extensions-for-development
+      ```
+
 
 CRXファイルを取得する
 ---------------------
