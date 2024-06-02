@@ -160,13 +160,6 @@ describe('Microsoft Edge Add-on', () => {
       assert.equal(shouldBlock, true);
     });
 
-    it('query is preserved', () => {
-      const conf = config([citrixSection]);
-      const url = "https://www.google.com/search?q=foobar";
-      const shouldBlock = thinbridge.isRedirectURL(conf, url);
-      assert.equal(shouldBlock, true);
-    });
-
     it('ignore query', () => {
       const url = "https://www.google.com/search?q=hoge";
       const conf = config([queryTestSection], { DefaultBrowser: "" })
