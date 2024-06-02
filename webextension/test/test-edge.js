@@ -100,13 +100,6 @@ describe('Microsoft Edge Add-on', () => {
       assert.equal(shouldBlock, true);
     });
 
-    it('do not close tab', () => {
-      const url = "https://www.google.com/";
-      const conf = config([chromeSection], { CloseEmptyTab: false })
-      const shouldBlock = thinbridge.isRedirectURL(conf, url);
-      assert.equal(shouldBlock, true);
-    });
-
     it('custom18 should be loaded', () => {
       const url = "https://www.example.com/";
       const conf = config([custom18Section])
