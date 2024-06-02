@@ -22,6 +22,7 @@ test-verbose: install_dependency testee/edge.js
 clean:
 	rm -f *.zip
 	rm -f *.xpi
+	rm -rf testee
 
 packages: clean lint
 	cd chrome && make && make dev && mv *.zip ../
