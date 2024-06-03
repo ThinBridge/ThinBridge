@@ -92,7 +92,7 @@ var ThinBridgeTalkClient = {
 			}
 			var isStartup = (this.cached == null);
 			this.cached = resp.config;
-			this.cached.NamedSections = Object.fromEntries(resp.config.Sections.map(section => [section.Name, section])));
+			this.cached.NamedSections = Object.fromEntries(resp.config.Sections.map(section => [section.Name, section]));
 			console.log('Fetch config', JSON.stringify(this.cached));
 
 			if (isStartup) {
