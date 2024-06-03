@@ -3,141 +3,265 @@ const sinon = require('sinon');
 const chromestub = require('./chrome-stub.js')
 const edge = require('../testee/edge.js');
 
-describe('Microsoft Edge Add-on', function() {
+describe('Microsoft Edge Add-on', () => {
   const isClosableTab = true;
   const tabId = 123;
   const shouldCloseTab = true;
+  const baseConfig = {
+    CloseEmptyTab: 1,
+    DefaultBrowser: "Chrome",
+    IgnoreQueryString: 1,
+    OnlyMainFrame : 1,
+    Sections: [],
+  }
+  const citrixSection = {
+    "Name": "citrix",
+    "Patterns": ["https://www.google.com/*"],
+    "Excludes": [],
+  };
+  const edgeSection = { // should not redirect since it's me
+    "Name": "edge",
+    "Patterns": ["https://www.microsoft.com/*"],
+    "Excludes": [],
+  };
+  const chromeSection = {
+    "Name": "chrome",
+    "Patterns": ["*://*"],
+    "Excludes": [],
+  };
+  const custom18Section = {  // a.k.a DMZ section, should not redirect
+    "Name": "custom18",
+    "Patterns": ["https://www.example.com/*"],
+    "Excludes": [],
+  };
+  const queryTestSection = {
+    "Name": "firefox",
+    "Patterns": ["https://www.google.com/search"],
+    "Excludes": [],
+  };
 
-  describe('redirect rule: compatible mode', function() {
-    const thinbridge = edge.client;
-    let mock;
-    const baseConfig = {
-      CloseEmptyTab: 1,
-      DefaultBrowser: "Chrome",
-      IgnoreQueryString: 1,
-      OnlyMainFrame : 1,
-      Sections: [{
-        "Name": "custom18",
-        "Patterns": [],
-        "Excludes": [],
-      }],
-    }
+  function config(sections = [], additionals = {}) {
+    const config = {...baseConfig, ...additionals};
+    config.Sections = [...config.Sections, ...sections];
+    config.NamedSections = Object.fromEntries(config.Sections.map(section => [section.Name, section]));
+    return config;
+  }
 
-    function config(sections, additionals){
-      const config = {...baseConfig, ...additionals};
-      config.Sections = [...config.Sections, ...sections];
-      config.NamedSections = Object.fromEntries(config.Sections.map(section => [section.Name, section]));
-      return config;
-    }
 
-    beforeEach(function() {
-      mock = sinon.mock(thinbridge);
-    });
+  const thinbridge = edge.client;
+  let thinbridge_mock;
 
-    afterEach(function() {
-      mock.restore();
-    });
+  beforeEach(() => {
+    thinbridge_mock = sinon.mock(thinbridge);
+  });
 
-    it('query is preserved', function() {
-      const conf = config(
-        [
-          {
-            "Name": "citrix",
-            "Patterns": ["https://www.google.com/*"],
-            "Excludes": [],
-          }
-        ],
-      );
-      const url = "https://www.google.com/search?q=foobar";
-      mock.expects("redirect").once().withArgs(url, tabId, shouldCloseTab);
+  afterEach(() => {
+    thinbridge_mock.restore();
+  });
+
+
+  //
+  // * redirect rule: compatible mode
+  //   This mode is for common usage and should be compatible with v1.x
+  //   especially v1.4.0 which is ManifestV2 version of this add-on.
+  //   v1.4.0 was the latest version of public v1.x releases, v1.5.0 isn't
+  //   published.
+  //
+  describe('redirect rule: compatible mode', () => {
+
+    it('redirect no match URL', () => {
+      const url = "https://www.google.com/";
+      const conf = config();
+      thinbridge_mock.expects("redirect").once().withArgs(url, tabId, !shouldCloseTab);
       const shouldBlock = thinbridge.handleURLAndBlock(conf, tabId, url, isClosableTab);
-      mock.verify();
+      thinbridge_mock.verify();
       assert.equal(shouldBlock, true);
     });
 
-    it('no match should be redirected', function() {
+    it('load no match URL with no default browser', () => {
       const url = "https://www.google.com/";
-      mock.expects("redirect").once().withArgs(url, tabId, !shouldCloseTab);
-      const shouldBlock = thinbridge.handleURLAndBlock(baseConfig, tabId, url, isClosableTab);
-      mock.verify();
+      const conf = config([], { DefaultBrowser: "" });
+      thinbridge_mock.expects("redirect").never();
+      const shouldBlock = thinbridge.handleURLAndBlock(conf, tabId, url, isClosableTab);
+      thinbridge_mock.verify();
+      assert.equal(shouldBlock, false);
+    });
+
+    it('redirect matched URL', () => {
+      const url = "https://www.google.com/";
+      const conf = config([chromeSection])
+      thinbridge_mock.expects("redirect").once().withArgs(url, tabId, shouldCloseTab);
+      const shouldBlock = thinbridge.handleURLAndBlock(conf, tabId, url, isClosableTab);
+      thinbridge_mock.verify();
       assert.equal(shouldBlock, true);
     });
 
-    it('custom18 should be loaded', function() {
-      const url = "https://www.google.com/";
+    it('redirect URL matched to one of patterns', () => {
+      const url = "https://www.example.com/";
       const conf = config(
-        [
-          {
-            "Name": "custom18",
-            "Patterns": [url],
-            "Excludes": [],
-          }
-        ]);
-      mock.expects("redirect").never()
+        [{
+          "Name": "chrome",
+          "Patterns": [
+            "https://www.google.com/*",
+            "https://www.microsoft.com/*",
+            "https://www.example.com/*",
+          ],
+          "Excludes": [],
+        }]
+      )
+      thinbridge_mock.expects("redirect").once().withArgs(url, tabId, shouldCloseTab);
+      const shouldBlock = thinbridge.handleURLAndBlock(conf, tabId, url, isClosableTab);
+      thinbridge_mock.verify();
+      assert.equal(shouldBlock, true);
+    });
+
+    it('do not close tab with CloseEmptyTab option', () => {
+      const url = "https://www.google.com/";
+      const conf = config([chromeSection], { CloseEmptyTab: false })
+      thinbridge_mock.expects("redirect").once().withArgs(url, tabId, !shouldCloseTab);
+      const shouldBlock = thinbridge.handleURLAndBlock(conf, tabId, url, isClosableTab);
+      thinbridge_mock.verify();
+      assert.equal(shouldBlock, true);
+    });
+
+    it('load URL matched to custom18', () => {
+      const url = "https://www.example.com/";
+      const conf = config([custom18Section])
+      thinbridge_mock.expects("redirect").never()
       const shouldBlock = thinbridge.handleURLAndBlock(conf, 0, url, isClosableTab);
-      mock.verify();
+      thinbridge_mock.verify();
+      assert.equal(shouldBlock, false);
+    });
+
+    it('treat custom18 prior than others', () => {
+      const url = "https://www.example.com/";
+      const conf = config([chromeSection, custom18Section])
+      thinbridge_mock.expects("redirect").never()
+      const shouldBlock = thinbridge.handleURLAndBlock(conf, 0, url, isClosableTab);
+      thinbridge_mock.verify();
+      assert.equal(shouldBlock, false);
+    });
+
+    it('load URL matched to edge', () => {
+      const url = "https://www.microsoft.com/";
+      const conf = config([edgeSection])
+      thinbridge_mock.expects("redirect").never()
+      const shouldBlock = thinbridge.handleURLAndBlock(conf, 0, url, isClosableTab);
+      thinbridge_mock.verify();
+      assert.equal(shouldBlock, false);
+    });
+
+    it('treat edge prior than others', () => {
+      const url = "https://www.microsoft.com/";
+      const conf = config([chromeSection, edgeSection])
+      thinbridge_mock.expects("redirect").never()
+      const shouldBlock = thinbridge.handleURLAndBlock(conf, 0, url, isClosableTab);
+      thinbridge_mock.verify();
+      assert.equal(shouldBlock, false);
+    });
+
+    it('treat URL as unmatched to custom18, when it matched to exclude pattern', () => {
+      const url = "https://www.example.com/index.html";
+      const conf = config([custom18Section])
+      conf.Sections[0].Excludes = [url]
+      thinbridge_mock.expects("redirect").once().withArgs(url, tabId, !shouldCloseTab);
+      const shouldBlock = thinbridge.handleURLAndBlock(conf, tabId, url, isClosableTab);
+      thinbridge_mock.verify();
+      assert.equal(shouldBlock, true);
+    });
+
+    it('treat URL as unmatched to custom18, when it matched to one of multiple exclude patterns', () => {
+      const url = "https://www.example.com/";
+      const conf = config(
+        [{
+          "Name": "custom18",
+          "Patterns": ["*"],
+          "Excludes": [
+            "https://www.google.com/*",
+            "https://www.microsoft.com/*",
+            "https://www.example.com/*",
+          ],
+        }]
+      );
+      thinbridge_mock.expects("redirect").once().withArgs(url, tabId, !shouldCloseTab);
+      const shouldBlock = thinbridge.handleURLAndBlock(conf, tabId, url, isClosableTab);
+      thinbridge_mock.verify();
+      assert.equal(shouldBlock, true);
+    });
+
+    it('preserve query for redirection', () => {
+      const conf = config([citrixSection]);
+      const url = "https://www.google.com/search?q=foobar";
+      thinbridge_mock.expects("redirect").once().withArgs(url, tabId, shouldCloseTab);
+      const shouldBlock = thinbridge.handleURLAndBlock(conf, tabId, url, isClosableTab);
+      thinbridge_mock.verify();
+      assert.equal(shouldBlock, true);
+    });
+
+    it('ignore URL query when matching with IgnoreQueryString=1', () => {
+      const url = "https://www.google.com/search?q=hoge";
+      const conf = config([queryTestSection], { DefaultBrowser: "" })
+      thinbridge_mock.expects("redirect").once().withArgs(url, tabId, shouldCloseTab);
+      const shouldBlock = thinbridge.handleURLAndBlock(conf, tabId, url, isClosableTab);
+      thinbridge_mock.verify();
+      assert.equal(shouldBlock, true);
+    });
+
+    it('regard URL query when matching with IgnoreQueryString=0', () => {
+      const url = "https://www.google.com/search?q=hoge";
+      const conf = config([queryTestSection], { DefaultBrowser: "", IgnoreQueryString: 0 })
+      thinbridge_mock.expects("redirect").never();
+      const shouldBlock = thinbridge.handleURLAndBlock(conf, tabId, url, isClosableTab);
+      thinbridge_mock.verify();
       assert.equal(shouldBlock, false);
     });
   });
 
-  describe('redirect rule: action mode', function() {
-    const thinbridge = edge.client;
-    let mock;
-    const baseConfig = {
-      CloseEmptyTab: 1,
-      DefaultBrowser: "Chrome",
-      IgnoreQueryString: 1,
-      OnlyMainFrame : 1,
-      Sections: [],
-    }
 
-    function config(sections, additionals){
-      const config = {...baseConfig, ...additionals};
-      config.Sections = [...config.Sections, ...sections];
-      config.NamedSections = Object.fromEntries(config.Sections.map(section => [section.Name, section]));
-      return config;
-    }
+  //
+  // * redirect rule: action mode
+  //   This mode is for a perticular usage, not for public.
+  //
+  describe('redirect rule: action mode', () => {
 
-    beforeEach(function() {
-      mock = sinon.mock(thinbridge);
-    });
-
-    afterEach(function() {
-      mock.restore();
-    });
-
-    it('load action', function() {
+    it('override default redirect action to load', () => {
       const url = "https://www.google.com/";
-      const conf = config(
-	[
-	  {
-            "Name": "chrome",
-            "Patterns": ["https://www.google.com/*"],
-            "Excludes": [],
-            "Action": "load",
-          }
-	]);
-      mock.expects("redirect").never();
+      const conf = config([{...chromeSection}]);
+      conf.Sections[0].Action = "load";
+      thinbridge_mock.expects("redirect").never();
       const shouldBlock = thinbridge.handleURLAndBlock(conf, tabId, url, isClosableTab);
-      mock.verify();
+      thinbridge_mock.verify();
       assert.equal(shouldBlock, false);
     });
 
-    it('redirect action', function() {
-      const url = "https://www.google.com/";
-      const conf = config(
-	[
-	  {
-            "Name": "chrome",
-            "Patterns": ["https://www.google.com/*"],
-            "Excludes": [],
-            "Action": "redirect",
-          }
-	]);
-      mock.expects("redirect").once().withArgs(url, tabId, true);
+    it('override default load action to redirect', () => {
+      const url = "https://www.microsoft.com/";
+      const conf = config([{...edgeSection}]);
+      conf.Sections[0].Action = "redirect";
+      thinbridge_mock.expects("redirect").once().withArgs(url, tabId, true);
       const shouldBlock = thinbridge.handleURLAndBlock(conf, tabId, url, isClosableTab);
-      mock.verify();
+      thinbridge_mock.verify();
       assert.equal(shouldBlock, true);
+    });
+
+    it('set default redirect action explicitly', () => {
+      const url = "https://www.google.com/";
+      const conf = config([{...chromeSection}]);
+      conf.Sections[0].Action = "redirect";
+      thinbridge_mock.expects("redirect").once().withArgs(url, tabId, true);
+      const shouldBlock = thinbridge.handleURLAndBlock(conf, tabId, url, isClosableTab);
+      thinbridge_mock.verify();
+      assert.equal(shouldBlock, true);
+    });
+
+    it('set default load action explicitly', () => {
+      const url = "https://www.microsoft.com/";
+      const conf = config([{...edgeSection}]);
+      conf.Sections[0].Action = "load";
+      thinbridge_mock.expects("redirect").never();
+      const shouldBlock = thinbridge.handleURLAndBlock(conf, tabId, url, isClosableTab);
+      thinbridge_mock.verify();
+      assert.equal(shouldBlock, false);
     });
   });
 });
