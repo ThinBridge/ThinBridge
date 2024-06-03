@@ -69,7 +69,7 @@ describe('Microsoft Edge Add-on', () => {
   //
   describe('redirect rule: compatible mode', () => {
 
-    it('no match should be redirected', () => {
+    it('redirect no match URL', () => {
       const url = "https://www.google.com/";
       const conf = config();
       thinbridge_mock.expects("redirect").once().withArgs(url, tabId, !shouldCloseTab);
@@ -78,7 +78,7 @@ describe('Microsoft Edge Add-on', () => {
       assert.equal(shouldBlock, true);
     });
 
-    it('no match and no default should be loaded', () => {
+    it('load no match URL with no default browser', () => {
       const url = "https://www.google.com/";
       const conf = config([], { DefaultBrowser: "" });
       thinbridge_mock.expects("redirect").never();
@@ -87,7 +87,7 @@ describe('Microsoft Edge Add-on', () => {
       assert.equal(shouldBlock, false);
     });
 
-    it('match redirect', () => {
+    it('redirect matched URL', () => {
       const url = "https://www.google.com/";
       const conf = config([chromeSection])
       thinbridge_mock.expects("redirect").once().withArgs(url, tabId, shouldCloseTab);
@@ -96,7 +96,7 @@ describe('Microsoft Edge Add-on', () => {
       assert.equal(shouldBlock, true);
     });
 
-    it('multiple patterns', () => {
+    it('redirect URL matched to one of patterns', () => {
       const url = "https://www.example.com/";
       const conf = config(
         [{
@@ -115,7 +115,7 @@ describe('Microsoft Edge Add-on', () => {
       assert.equal(shouldBlock, true);
     });
 
-    it('do not close tab', () => {
+    it('do not close tab with CloseEmptyTab option', () => {
       const url = "https://www.google.com/";
       const conf = config([chromeSection], { CloseEmptyTab: false })
       thinbridge_mock.expects("redirect").once().withArgs(url, tabId, !shouldCloseTab);
@@ -124,7 +124,7 @@ describe('Microsoft Edge Add-on', () => {
       assert.equal(shouldBlock, true);
     });
 
-    it('custom18 should be loaded', () => {
+    it('load URL matched to custom18', () => {
       const url = "https://www.example.com/";
       const conf = config([custom18Section])
       thinbridge_mock.expects("redirect").never()
@@ -133,7 +133,7 @@ describe('Microsoft Edge Add-on', () => {
       assert.equal(shouldBlock, false);
     });
 
-    it('custom18 should be prior than others', () => {
+    it('treat custom18 prior than others', () => {
       const url = "https://www.example.com/";
       const conf = config([chromeSection, custom18Section])
       thinbridge_mock.expects("redirect").never()
@@ -142,7 +142,7 @@ describe('Microsoft Edge Add-on', () => {
       assert.equal(shouldBlock, false);
     });
 
-    it('edge section should be loaded', () => {
+    it('load URL matched to edge', () => {
       const url = "https://www.microsoft.com/";
       const conf = config([edgeSection])
       thinbridge_mock.expects("redirect").never()
@@ -151,7 +151,7 @@ describe('Microsoft Edge Add-on', () => {
       assert.equal(shouldBlock, false);
     });
 
-    it('edge section should be prior than others', () => {
+    it('treat edge prior than others', () => {
       const url = "https://www.microsoft.com/";
       const conf = config([chromeSection, edgeSection])
       thinbridge_mock.expects("redirect").never()
@@ -160,7 +160,7 @@ describe('Microsoft Edge Add-on', () => {
       assert.equal(shouldBlock, false);
     });
 
-    it('match exclude pattern', () => {
+    it('treat URL as unmatched to custom18, when it matched to exclude pattern', () => {
       const url = "https://www.example.com/index.html";
       const conf = config([custom18Section])
       conf.Sections[0].Excludes = [url]
@@ -170,7 +170,7 @@ describe('Microsoft Edge Add-on', () => {
       assert.equal(shouldBlock, true);
     });
 
-    it('match multiple exclude pattern', () => {
+    it('treat URL as unmatched to custom18, when it matched to one of multiple exclude patterns', () => {
       const url = "https://www.example.com/";
       const conf = config(
         [{
@@ -189,7 +189,7 @@ describe('Microsoft Edge Add-on', () => {
       assert.equal(shouldBlock, true);
     });
 
-    it('query is preserved', () => {
+    it('preserve query for redirection', () => {
       const conf = config([citrixSection]);
       const url = "https://www.google.com/search?q=foobar";
       thinbridge_mock.expects("redirect").once().withArgs(url, tabId, shouldCloseTab);
@@ -198,7 +198,7 @@ describe('Microsoft Edge Add-on', () => {
       assert.equal(shouldBlock, true);
     });
 
-    it('ignore query', () => {
+    it('ignore URL query when matching with IgnoreQueryString=1', () => {
       const url = "https://www.google.com/search?q=hoge";
       const conf = config([queryTestSection], { DefaultBrowser: "" })
       thinbridge_mock.expects("redirect").once().withArgs(url, tabId, shouldCloseTab);
@@ -207,7 +207,7 @@ describe('Microsoft Edge Add-on', () => {
       assert.equal(shouldBlock, true);
     });
 
-    it('match with query', () => {
+    it('regard URL query when matching with IgnoreQueryString=0', () => {
       const url = "https://www.google.com/search?q=hoge";
       const conf = config([queryTestSection], { DefaultBrowser: "", IgnoreQueryString: 0 })
       thinbridge_mock.expects("redirect").never();
@@ -224,7 +224,7 @@ describe('Microsoft Edge Add-on', () => {
   //
   describe('redirect rule: action mode', () => {
 
-    it('load action', () => {
+    it('load matched URL based on action', () => {
       const url = "https://www.google.com/";
       const conf = config([{...chromeSection}]);
       conf.Sections[0].Action = "load";
@@ -234,7 +234,7 @@ describe('Microsoft Edge Add-on', () => {
       assert.equal(shouldBlock, false);
     });
 
-    it('redirect action', () => {
+    it('redirect matched URL based on action', () => {
       const url = "https://www.google.com/";
       const conf = config([{...chromeSection}]);
       conf.Sections[0].Action = "redirect";
