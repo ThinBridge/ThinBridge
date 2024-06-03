@@ -24,7 +24,7 @@ clean:
 	rm -f *.xpi
 	rm -rf testee
 
-packages: clean lint
+packages: test clean lint
 	cd chrome && make && make dev && mv *.zip ../
 	cd edge && make && make dev && mv *.zip ../
 	cd firefox && make && mv *.xpi ../
