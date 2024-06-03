@@ -224,7 +224,7 @@ describe('Microsoft Edge Add-on', () => {
   //
   describe('redirect rule: action mode', () => {
 
-    it('load matched URL based on action', () => {
+    it('override default redirect action to load', () => {
       const url = "https://www.google.com/";
       const conf = config([{...chromeSection}]);
       conf.Sections[0].Action = "load";
@@ -234,7 +234,17 @@ describe('Microsoft Edge Add-on', () => {
       assert.equal(shouldBlock, false);
     });
 
-    it('redirect matched URL based on action', () => {
+    it('override default load action to redirect', () => {
+      const url = "https://www.microsoft.com/";
+      const conf = config([{...edgeSection}]);
+      conf.Sections[0].Action = "redirect";
+      thinbridge_mock.expects("redirect").once().withArgs(url, tabId, true);
+      const shouldBlock = thinbridge.handleURLAndBlock(conf, tabId, url, isClosableTab);
+      thinbridge_mock.verify();
+      assert.equal(shouldBlock, true);
+    });
+
+    it('set default redirect action explicitly', () => {
       const url = "https://www.google.com/";
       const conf = config([{...chromeSection}]);
       conf.Sections[0].Action = "redirect";
@@ -242,6 +252,16 @@ describe('Microsoft Edge Add-on', () => {
       const shouldBlock = thinbridge.handleURLAndBlock(conf, tabId, url, isClosableTab);
       thinbridge_mock.verify();
       assert.equal(shouldBlock, true);
+    });
+
+    it('set default load action explicitly', () => {
+      const url = "https://www.microsoft.com/";
+      const conf = config([{...edgeSection}]);
+      conf.Sections[0].Action = "load";
+      thinbridge_mock.expects("redirect").never();
+      const shouldBlock = thinbridge.handleURLAndBlock(conf, tabId, url, isClosableTab);
+      thinbridge_mock.verify();
+      assert.equal(shouldBlock, false);
     });
   });
 });
