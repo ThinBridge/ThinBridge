@@ -72,7 +72,7 @@ describe('Microsoft Edge Add-on', () => {
     it('redirect no match URL', () => {
       const url = "https://www.google.com/";
       const conf = config();
-      thinbridge_mock.expects("redirect").once().withArgs(url, tabId, !shouldCloseTab);
+      thinbridge_mock.expects("redirect").once().withArgs(url, tabId, shouldCloseTab);
       const shouldBlock = thinbridge.handleURLAndBlock(conf, tabId, url, isClosableTab);
       thinbridge_mock.verify();
       assert.equal(shouldBlock, true);
@@ -164,7 +164,7 @@ describe('Microsoft Edge Add-on', () => {
       const url = "https://www.example.com/index.html";
       const conf = config([custom18Section])
       conf.Sections[0].Excludes = [url]
-      thinbridge_mock.expects("redirect").once().withArgs(url, tabId, !shouldCloseTab);
+      thinbridge_mock.expects("redirect").once().withArgs(url, tabId, shouldCloseTab);
       const shouldBlock = thinbridge.handleURLAndBlock(conf, tabId, url, isClosableTab);
       thinbridge_mock.verify();
       assert.equal(shouldBlock, true);
@@ -183,7 +183,7 @@ describe('Microsoft Edge Add-on', () => {
           ],
         }]
       );
-      thinbridge_mock.expects("redirect").once().withArgs(url, tabId, !shouldCloseTab);
+      thinbridge_mock.expects("redirect").once().withArgs(url, tabId, shouldCloseTab);
       const shouldBlock = thinbridge.handleURLAndBlock(conf, tabId, url, isClosableTab);
       thinbridge_mock.verify();
       assert.equal(shouldBlock, true);

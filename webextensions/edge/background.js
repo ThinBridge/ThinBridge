@@ -243,9 +243,10 @@ const ThinBridgeTalkClient = {
 
     console.log(`* Lookup sections for ${urlToMatch}`);
 
+    const closeTabOnRedirect = config.CloseEmptyTab && isClosableTab;
+
     let loadCount     = 0;
     let redirectCount = 0;
-    let closeTabCount = 0;
     let isActionMode  = false;
     const matchedSectionNames = [];
     sectionsLoop:
@@ -262,9 +263,6 @@ const ThinBridgeTalkClient = {
 
       const sectionName = (section.Name || '').toLowerCase();
       matchedSectionNames.push(sectionName);
-
-      if (config.CloseEmptyTab && isClosableTab)
-        closeTabCount++;
 
       console.log(` => matched, action = ${section.Action}`);
       if (section.Action) {
@@ -311,7 +309,7 @@ const ThinBridgeTalkClient = {
       console.log(`* Dispatch as action mode`);
       if (redirectCount > 0 || loadCount == 0) {
         console.log(`* Redirect to another browser`);
-        this.redirect(url, tabId, closeTabCount > 0);
+        this.redirect(url, tabId, closeTabOnRedirect);
       }
       console.log(`* Continue to load: ${loadCount > 0}`);
       return loadCount == 0;
@@ -327,7 +325,7 @@ const ThinBridgeTalkClient = {
 
       if (redirectCount > 0) {
         console.log(`* Redirect to another browser`);
-        this.redirect(url, tabId, closeTabCount > 0);
+        this.redirect(url, tabId, closeTabOnRedirect);
         return true;
       }
 
@@ -336,7 +334,7 @@ const ThinBridgeTalkClient = {
         if (String(config.DefaultBrowser).toLowerCase() == BROWSER.toLowerCase()) {
           return false;
         } else {
-          this.redirect(url, tabId, closeTabCount > 0);
+          this.redirect(url, tabId, closeTabOnRedirect);
           return true;
         }
       } else {
