@@ -709,7 +709,7 @@
         * ThinBridgeによるリダイレクトが発生しない。
    3. `Mroonga` のリンクをクリックする。
       * 期待される結果：
-        * タブの読み込みが中断される。
+        * タブがページ遷移しない。
         * ThinBridgeによるリダイレクトが発生し、 https://mroonga.org/ がIEで開かれるか、IEの起動を試みている旨を示すダイアログが表示される。
    4. Edge（通常モード）→Edge（IEモード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
       * 追加： https://mroonga.org/
@@ -719,7 +719,7 @@
         * ThinBridgeによるリダイレクトが発生しない。
    6. `Mroonga` のリンクをクリックする。
       * 期待される結果：
-        * タブがIEモードに切り替わらず、読み込みが中断される。
+        * タブがIEモードに切り替わらず、ページ遷移しない。
         * ThinBridgeによるリダイレクトが発生し、 https://mroonga.org/ がIEで開かれるか、IEの起動を試みている旨を示すダイアログが表示される。
    7. Edge（IEモード）→Edge（通常モード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
       * 削除： https://mroonga.org/
@@ -730,7 +730,7 @@
         * ThinBridgeによるリダイレクトが発生しない。
    9. アドレスバーに https://mroonga.org/ を入力し、Enterする。
       * 期待される結果：
-        * 初回試行時には、EdgeのタブがThinBridgeにより閉じられる。2回目以降の試行時には、Edgeのタブは閉じられずにタブでの読み込みが中断される。
+        * Edgeのタブがページ遷移しない。また、試行回によってはタブがThinBridgeによって閉じられる。
         * ThinBridgeによるリダイレクトが発生し、 https://mroonga.org/ がIEで開かれるか、IEの起動を試みている旨を示すダイアログが表示される。
    10. Edge（IEモード）→Edge（IEモード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
        * 追加： https://mroonga.org/
@@ -740,7 +740,7 @@
          * ThinBridgeによるリダイレクトが発生しない。
    12. `Mroonga` のリンクをクリックする。
        * 期待される結果：
-          * Edgeのタブでの読み込みが中断される。
+          * Edgeのタブがページ遷移しない。
           * ThinBridgeによるリダイレクトが発生し、 https://mroonga.org/ がIEで開かれるか、IEの起動を試みている旨を示すダイアログが表示される。
 4. 共用URL（CUSTOM18）に該当するURLの動作の検証：
    1. Edge（通常モード）→Edge（通常モード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
@@ -793,7 +793,7 @@
         * ThinBridgeによるリダイレクトが発生しない。
    3. `PGroonga` のリンクをクリックする。
       * 期待される結果：
-        * Edgeのタブでの読み込みが中断される。
+        * Edgeのタブがページ遷移しない。
         * ThinBridgeによるリダイレクトが発生し、「Citrixがインストールされていないか、設定されていないため起動できません。」というメッセージが表示される。
    4. Edge（通常モード）→Edge（IEモード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
       * 追加： https://pgroonga.github.io/
@@ -803,7 +803,7 @@
         * ThinBridgeによるリダイレクトが発生しない。
    6. `PGroonga` のリンクをクリックする。
       * 期待される結果：
-        * Edgeのタブでの読み込みが中断される。
+        * Edgeのタブがページ遷移しない。
         * ThinBridgeによるリダイレクトが発生し、「Citrixがインストールされていないか、設定されていないため起動できません。」というメッセージが表示される。
    7. Edge（IEモード）→Edge（通常モード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
       * 削除： https://pgroonga.github.io/
@@ -814,7 +814,7 @@
         * ThinBridgeによるリダイレクトが発生しない。
    9. アドレスバーに https://pgroonga.github.io/ を入力し、Enterする。
       * 期待される結果：
-        * 初回試行時には、EdgeのタブがThinBridgeにより閉じられる。2回目以降の試行時には、Edgeのタブは閉じられずにタブでの読み込みが中断される。
+        * Edgeのタブがページ遷移しない。また、試行回によってはタブがThinBridgeによって閉じられる。
         * ThinBridgeによるリダイレクトが発生し、「Citrixがインストールされていないか、設定されていないため起動できません。」というメッセージが表示される。
    10. Edge（IEモード）→Edge（IEモード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
        * 追加： https://pgroonga.github.io/
@@ -824,7 +824,7 @@
          * ThinBridgeによるリダイレクトが発生しない。
    12. `PGroonga` のリンクをクリックする。
        * 期待される結果：
-         * Edgeのタブでの読み込みが中断される。
+         * Edgeのタブがページ遷移しない。
          * ThinBridgeによるリダイレクトが発生し、「Citrixがインストールされていないか、設定されていないため起動できません。」というメッセージが表示される。
 6. Edgeを終了する。
 
@@ -1027,7 +1027,7 @@
         * ThinBridgeによるリダイレクトが発生しない。
    3. `Mroonga` のリンクをクリックする。
       * 期待される結果：
-        * Edgeのタブでの読み込みが中断される。
+        * Edgeのタブがページ遷移しない。
         * ThinBridgeによるリダイレクトが発生し、 https://mroonga.org/ がIEで開かれるか、IEの起動を試みている旨を示すダイアログが表示される。
    4. Edge（通常モード）→Edge（IEモード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
       * 追加： https://mroonga.org/
@@ -1037,7 +1037,7 @@
         * ThinBridgeによるリダイレクトが発生しない。
    6. `Mroonga` のリンクをクリックする。
       * 期待される結果：
-        * タブがIEモードに切り替わらず、読み込みが中断される。
+        * タブがIEモードに切り替わらず、ページ遷移しない。
         * ThinBridgeによるリダイレクトが発生し、 https://mroonga.org/ がIEで開かれるか、IEの起動を試みている旨を示すダイアログが表示される。
    7. Edge（IEモード）→Edge（通常モード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
       * 削除： https://mroonga.org/
@@ -1048,7 +1048,7 @@
         * ThinBridgeによるリダイレクトが発生しない。
    9. アドレスバーに https://mroonga.org/ を入力し、Enterする。
       * 期待される結果：
-        * 初回試行時には、EdgeのタブがThinBridgeにより閉じられる。2回目以降の試行時には、Edgeのタブは閉じられずにタブでの読み込みが中断される。
+        * Edgeのタブがページ遷移しない。また、試行回によってはタブがThinBridgeによって閉じられる。
         * ThinBridgeによるリダイレクトが発生し、 https://mroonga.org/ がIEで開かれるか、IEの起動を試みている旨を示すダイアログが表示される。
    10. Edge（IEモード）→Edge（IEモード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
        * 追加： https://mroonga.org/
@@ -1058,7 +1058,7 @@
          * ThinBridgeによるリダイレクトが発生しない。
    12. `Mroonga` のリンクをクリックする。
        * 期待される結果：
-          * Edgeのタブでの読み込みが中断される。
+          * Edgeのタブがページ遷移しない。
           * ThinBridgeによるリダイレクトが発生し、 https://mroonga.org/ がIEで開かれるか、IEの起動を試みている旨を示すダイアログが表示される。
 4. 共用URL（CUSTOM18）に該当するURLの動作の検証：
    1. Edge（通常モード）→Edge（通常モード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
