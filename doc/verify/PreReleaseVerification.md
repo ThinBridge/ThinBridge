@@ -33,7 +33,7 @@
          * `Enabled`（`有効`）に設定して、`Show...`（`表示...`）をクリックし、以下の項目を追加する。
            * `<先程控えたID>;file:///C:/Users/Public/webextensions/manifest.xml`
              例：`egoppdngdcoikeknmbgiakconmchahhf;file:///C:/Users/Public/webextensions/manifest.xml`
-   11. Chromeを再起動し、アドオンの管理画面（`chrome://extensions`）を開いて、BrowserSelectorの開発版が管理者によってインストールされた状態になっていることを確認する。
+   11. Chromeを再起動し、アドオンの管理画面（`chrome://extensions`）を開いて、ThinBridgeの開発版が管理者によってインストールされた状態になっていることを確認する。
 3. Edgeアドオンの開発版パッケージを用意し、インストールするための設定を行う。
    1. Edgeを起動する。
    2. アドオンの管理画面（`edge://extensions`）を開く。
@@ -51,7 +51,7 @@
          * `Enabled`（`有効`）に設定して、`Show...`（`表示...`）をクリックし、以下の項目を追加する。
            * `<先程控えたID>;file:///C:/Users/Public/webextensions/manifest.xml`
              例：`oapdkmbdgdcjpacbjpcdfhncifimimcj;file:///C:/Users/Public/webextensions/manifest.xml`
-   11. Edgeを再起動し、アドオンの管理画面（`edge://extensions`）を開いて、BrowserSelectorの開発版が管理者によってインストールされた状態になっていることを確認する。
+   11. Edgeを再起動し、アドオンの管理画面（`edge://extensions`）を開いて、ThinBridgeの開発版が管理者によってインストールされた状態になっていることを確認する。
 4. BHOの管理のためのポリシー設定を行う。
    1. `gpedit.msc` を起動する。
    2. `Computer Configuration\Administrative Templates\Windows Components\Internet Explorer` （`コンピューターの構成\管理用テンプレート\Windows コンポーネント\Internet Explorer`）を開いて、以下のポリシーを設定する。

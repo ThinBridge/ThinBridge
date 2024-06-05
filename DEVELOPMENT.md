@@ -46,7 +46,7 @@ You need to load development version of addons with following steps, If you are 
    4. Choose the folder `webextensions¥chrome` to pack the addon with `Pack extension`. (Then you'll see `chrome.crx` and `chrome.pem` at the upper folder.)
    5. Drag `chrome.crx` and drop onto Chrome's window to install it, and memorise its generated ID. For example: `egoppdngdcoikeknmbgiakconmchahhf`
    6. Uninstall the addon.
-   7. Add a URL entry with the generated ID, to the list of `"allowed_origins"` in `C:\Program Files (x86)\ThinBridge\chrome.json`. For example: `"chrome-extension://egoppdngdcoikeknmbgiakconmchahhf/"`
+   7. Add a URL entry with the generated ID, to the list of `"allowed_origins"` in `C:\Program Files\ThinBridge\ThinBridgeHost\chrome.json`. For example: `"chrome-extension://egoppdngdcoikeknmbgiakconmchahhf/"`
 3. Create a development package for Edge.
    1. Launch Edge.
    2. Go to addons manager (`edge:extensions`).
@@ -54,7 +54,7 @@ You need to load development version of addons with following steps, If you are 
    4. Choose the folder `webextensions¥edge` to pack the addon with `Pack extension`. (Then you'll see `edge.crx` and `edge.pem` at the upper folder.)
    5. Drag `edge.crx` and drop onto Edge's window to install it, and memorise its generated ID. For example: `oapdkmbdgdcjpacbjpcdfhncifimimcj`
    6. Uninstall the addon.
-   7. Add a URL entry with the generated ID, to the list of `"allowed_origins"` in `C:\Program Files (x86)\ThinBridge\edge.json`. For example: `"chrome-extension://oapdkmbdgdcjpacbjpcdfhncifimimcj/"`
+   7. Add a URL entry with the generated ID, to the list of `"allowed_origins"` in `C:\Program Files\ThinBridge\ThinBridgeHost\edge.json`. For example: `"chrome-extension://oapdkmbdgdcjpacbjpcdfhncifimimcj/"`
 4. Create the manifest file for installation.
    Put an XML file into the folder `chrome.crx` and `edge.crx` exist in, with following contents including IDs of Chrome addon and Edge addon.
    Assume that it is placed at `C:\Users\Public\webextensions¥manifest.xml`.
