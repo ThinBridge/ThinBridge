@@ -163,7 +163,7 @@ const ThinBridgeTalkClient = {
       }
 
       const query = new String('Q ' + BROWSER + ' ' + url);
-      chrome.runtime.sendNativeMessage(SERVER_NAME, query);
+      await chrome.runtime.sendNativeMessage(SERVER_NAME, query);
 
       if (!closeTab)
         return;
