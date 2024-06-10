@@ -371,24 +371,9 @@ const ThinBridgeTalkClient = {
   async onTabUpdated(tabId, info, tab) {
     await this.ensureLoadedAndConfigured();
 
+    const isClosableTab = this.newTabIds.has(tabId);
     this.knownTabIds.add(tabId);
-
-    if (info.status === 'complete' ||
-        (info.status !== 'loading' && info.url)) {
-      this.newTabIds.delete(tabId);
-    }
-
-    if (BROWSER !== 'edge') {
-      this.save();
-      return;
-    }
-
-    /*
-     * Edge won't call webRequest.onBeforeRequest() when navigating
-     * from Edge-IE to Edge, so we need to handle requests on this timing.
-     * On such case, info.status is always undefined and only URL changes
-     * are notified.
-     */
+    this.newTabIds.delete(tabId);
 
     const config = this.cached;
     const url = tab.pendingUrl || tab.url;
@@ -398,22 +383,29 @@ const ThinBridgeTalkClient = {
       return;
     }
 
-    console.log(`onTabUpdated ${url} (tab=${tabId}, windowId=${tab.windowId}, status=${info.status}/${tab.status})`);
-
-    if (!this.handleURLAndBlock(config, tabId, url))
+    if (info.status !== 'loading')
       return;
 
-    console.log(`* Redirect to another browser`);
+    console.log(`onTabUpdated ${url} (tab=${tabId}, windowId=${tab.windowId}, status=${info.status}/${tab.status})`);
+
+    // If onBeforeRequest() fails to redirect due to missing config, the next chance to do it is here.
+    if (!this.handleURLAndBlock(config, tabId, url, isClosableTab))
+      return;
+
+    if (isClosableTab) {
+      // The tab is considered to be closed by handleURLAndBlock().
+      return;
+    }
+
     /* Call executeScript() to stop the page loading immediately.
      * Then let the tab go back to the previous page.
      */
     chrome.scripting.executeScript({
       target: { tabId },
-      func: function goBack(tabId) {
+      func: function goBack() {
         window.stop();
-        chrome.tabs.goBack(tabId);
+        window.history.back();
       },
-      args: [tabId],
     });
   },
 
