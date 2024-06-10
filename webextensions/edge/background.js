@@ -11,7 +11,7 @@ const BROWSER = 'edge';
 const DMZ_SECTION = 'custom18';
 const CONTINUOUS_SECTION = 'custom19';
 const SERVER_NAME = 'com.clear_code.thinbridge';
-const ALARM_MINUTES = 1;
+const ALARM_MINUTES = 0.5;
 const CANCEL_REQUEST = {redirectUrl:`data:text/html,${escape('<script type="application/javascript">history.back()</script>')}`};
 
 /*
