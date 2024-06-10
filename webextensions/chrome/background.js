@@ -80,6 +80,7 @@ const ThinBridgeTalkClient = {
   init() {
     this.cached = null;
     this.ensureLoadedAndConfigured();
+    this.recentRedirections = {};
     console.log('Running as Thinbridge Talk client');
   },
 
@@ -368,6 +369,23 @@ const ThinBridgeTalkClient = {
     this.save();
   },
 
+  checkRedirectIntervalLimit(tabId, url) {
+    const intervalLimit = 1000;
+    const now = Date.now();
+    let skip = false;
+    for (const key in this.recentRedirections) {
+      if (Math.abs(now - this.recentRedirections[key].time) > intervalLimit)
+        delete this.recentRedirections[key];
+    }
+    const recent = this.recentRedirections[tabId];
+    if (recent && recent.url === url) {
+      console.log(`Redirection for same URL and same tabId already occurred in ${intervalLimit} msec. Skip it.`);
+      skip = true;
+    }
+    this.recentRedirections[tabId] = { tabId: tabId, url: url, time: now }
+    return skip;
+  },
+
   async onTabUpdated(tabId, info, tab) {
     await this.ensureLoadedAndConfigured();
 
@@ -387,6 +405,9 @@ const ThinBridgeTalkClient = {
       return;
 
     console.log(`onTabUpdated ${url} (tab=${tabId}, windowId=${tab.windowId}, status=${info.status}/${tab.status})`);
+
+    if (this.checkRedirectIntervalLimit(tabId, url))
+      return;
 
     // If onBeforeRequest() fails to redirect due to missing config, the next chance to do it is here.
     if (!this.handleURLAndBlock(config, tabId, url, isClosableTab))
