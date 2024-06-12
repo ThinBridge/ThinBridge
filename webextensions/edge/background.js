@@ -11,8 +11,9 @@ const BROWSER = 'edge';
 const DMZ_SECTION = 'custom18';
 const CONTINUOUS_SECTION = 'custom19';
 const SERVER_NAME = 'com.clear_code.thinbridge';
-const ALARM_MINUTES = 1;
+const ALARM_MINUTES = 0.5;
 const CANCEL_REQUEST = {redirectUrl:`data:text/html,${escape('<script type="application/javascript">history.back()</script>')}`};
+const REDIRECT_INTERVAL_LIMIT = 1000;
 
 /*
  * ThinBridge's matching function (See BHORedirector/URLRedirectCore.h)
@@ -80,6 +81,7 @@ const ThinBridgeTalkClient = {
   init() {
     this.cached = null;
     this.ensureLoadedAndConfigured();
+    this.recentRequests = {};
     console.log('Running as Thinbridge Talk client');
   },
 
@@ -163,7 +165,7 @@ const ThinBridgeTalkClient = {
       }
 
       const query = new String('Q ' + BROWSER + ' ' + url);
-      chrome.runtime.sendNativeMessage(SERVER_NAME, query);
+      await chrome.runtime.sendNativeMessage(SERVER_NAME, query);
 
       if (!closeTab)
         return;
@@ -228,6 +230,25 @@ const ThinBridgeTalkClient = {
     return name;
   },
 
+  checkRedirectIntervalLimit(tabId, url) {
+    const now = Date.now();
+    let skip = false;
+    if (!this.recentRequests) {
+      // in unit test
+      return false;
+    }
+    for (const key in this.recentRequests) {
+      if (Math.abs(now - this.recentRequests[key].time) > REDIRECT_INTERVAL_LIMIT)
+        delete this.recentRequests[key];
+    }
+    const recent = this.recentRequests[tabId];
+    if (recent && recent.url === url) {
+      skip = true;
+    }
+    this.recentRequests[tabId] = { tabId: tabId, url: url, time: now }
+    return skip;
+  },
+
   handleURLAndBlock(config, tabId, url, isClosableTab) {
     if (!url) {
       console.log(`* Empty URL found`);
@@ -238,6 +259,11 @@ const ThinBridgeTalkClient = {
       console.log(`* Ignore non-HTTP/HTTPS URL ${url}`);
       return false;
     }
+
+    // Just store recent request, don't block here.
+    // It should be determined by caller.
+    // （onBeforeRequest() should always block loading redirect URL.）
+    this.checkRedirectIntervalLimit(tabId, url);
 
     const urlToMatch = config.IgnoreQueryString ? url.replace(/\?.*/, '') : url;
 
@@ -371,24 +397,9 @@ const ThinBridgeTalkClient = {
   async onTabUpdated(tabId, info, tab) {
     await this.ensureLoadedAndConfigured();
 
+    const isClosableTab = this.newTabIds.has(tabId);
     this.knownTabIds.add(tabId);
-
-    if (info.status === 'complete' ||
-        (info.status !== 'loading' && info.url)) {
-      this.newTabIds.delete(tabId);
-    }
-
-    if (BROWSER !== 'edge') {
-      this.save();
-      return;
-    }
-
-    /*
-     * Edge won't call webRequest.onBeforeRequest() when navigating
-     * from Edge-IE to Edge, so we need to handle requests on this timing.
-     * On such case, info.status is always undefined and only URL changes
-     * are notified.
-     */
+    this.newTabIds.delete(tabId);
 
     const config = this.cached;
     const url = tab.pendingUrl || tab.url;
@@ -400,20 +411,33 @@ const ThinBridgeTalkClient = {
 
     console.log(`onTabUpdated ${url} (tab=${tabId}, windowId=${tab.windowId}, status=${info.status}/${tab.status})`);
 
-    if (!this.handleURLAndBlock(config, tabId, url))
+    if (info.status !== 'loading' &&
+        info.status !== undefined /* IE Mode tab on Edge will have undefined status */)
       return;
 
-    console.log(`* Redirect to another browser`);
+    if (this.checkRedirectIntervalLimit(tabId, url)) {
+      console.log(`A request for same URL and same tabId already occurred in ${REDIRECT_INTERVAL_LIMIT} msec. Skip it.`);
+      return false;
+    }
+
+    // If onBeforeRequest() fails to redirect due to missing config, the next chance to do it is here.
+    if (!this.handleURLAndBlock(config, tabId, url, isClosableTab))
+      return;
+
+    if (isClosableTab) {
+      // The tab is considered to be closed by handleURLAndBlock().
+      return;
+    }
+
     /* Call executeScript() to stop the page loading immediately.
      * Then let the tab go back to the previous page.
      */
     chrome.scripting.executeScript({
       target: { tabId },
-      func: function goBack(tabId) {
+      func: function goBack() {
         window.stop();
-        chrome.tabs.goBack(tabId);
+        window.history.back();
       },
-      args: [tabId],
     });
   },
 

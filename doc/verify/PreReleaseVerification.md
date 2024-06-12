@@ -1145,3 +1145,134 @@
         * EdgeのIEモードのタブで https://pgroonga.github.io/ が読み込まれる。
         * ThinBridgeによるリダイレクトが発生しない。
 6. Edgeを終了する。
+
+
+
+### `onTabUpdated()`によるリダイレクトの動作検証
+
+#### 背景
+
+crxパッケージ化されたアドオンをGPOでインストールした状態では、通常は`onBeforeRequest()`でリダイレクトが行われる。しかし、`onBeforeRequest()`実行時点で設定の読み込みが完了していない状況においては、`onBeforeRequest()`ではリダイレクトが行われず、`onTabUpdated()`でリダイレクトが行われる。両者では、WebExtensionsの仕様上どうしても挙動が異なってくるが、本アドオンではいずれの状況においても安定的にリダイレクト機能を提供する必要がある。
+
+このため、本テスト項目は、常に`onTabUpdated()`でリダイレクトが行われる状況でテストを実施できるよう、開発者モードで実施する。
+（GPOインストールではない状況では仕様上`onBeforeRequest()`が動作しない。）
+
+#### 準備
+
+設定は`EdgeのIEモード境界をまたぐページ遷移におけるDefault設定の動作`と同一とする。
+
+1. Edgeを起動する。
+2. 拡張機能の管理画面（`edge://extensions`）を開く。
+3. `開発者モード` を有効化する。
+4. GPOでインストールした拡張機能を一時的にアンインストールする。
+   1. `gpedit.msc` を起動する。
+   2. `Computer Configuration\Administrative Templates\Microsoft Edge\Extensions`（`コンピューターの構成\管理用テンプレート\Microsoft Edge\拡張機能`）の `Control which extensions are installed silently`（`サイレント インストールされる拡張機能を制御する`）を開き、検証環境の準備段階で追加した項目について、先頭に `_` を挿入して保存する。
+   3. Edgeの拡張機能管理画面上からThinBridgeが消えたことを確認する。
+5. `展開して読み込み` で `C:\Users\Public\webextensions\edge` を読み込んで、IDを控える。
+   例：`bplpacmhanoonjdmoelfokbphgopcbma`
+6. `C:\Program Files\ThinBridge\ThinBridgeHost\edge.json` のアクセス権を変更し、ユーザー権限での書き込みを許可した上で、`"allowed_origins"` に、先ほど控えたIDに基づくURLを追加する。
+   例：`"chrome-extension://bplpacmhanoonjdmoelfokbphgopcbma/"`
+7. （必要に応じて: 「サービスワーカー」をクリックし、DevToolsを起動する。当画面で逐次状況を観察しながらテストする。）
+
+#### 検証
+
+本検証においてはリダイレクトが発生する場合の挙動に大きな違いがあるため、読み込みが継続する場合の挙動は検証せず、リダイレクトする場合の検証を重点的に行う。
+
+1. Edgeを起動する。
+2. IEへのリダイレクト時の動作の検証：
+   1. Edge（通常モード）→Edge（通常モード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
+      * 削除： 全項目
+   2. Edgeで新しいタブで https://groonga.org/ を開き、`Related projects` のリンクを辿って https://groonga.org/related-projects.html を開く。
+      * 期待される結果：
+        * Edgeの通常タブで https://groonga.org/related-projects.html が読み込まれる。
+        * ThinBridgeによるリダイレクトが発生しない。
+   3. `Mroonga` のリンクをクリックする。
+      * 期待される結果：
+        * タブが一瞬ページ遷移するが、 https://groonga.org/related-projects.html に戻っている。
+        * ThinBridgeによるリダイレクトが発生し、 https://mroonga.org/ がIEで開かれるか、IEの起動を試みている旨を示すダイアログが表示される。
+   4. Edge（通常モード）→Edge（IEモード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
+      * 追加： https://mroonga.org/
+   5. Edgeで新しいタブで https://groonga.org/ を開き、`Related projects` のリンクを辿って https://groonga.org/related-projects.html を開く。
+      * 期待される結果：
+        * Edgeの通常タブで https://groonga.org/related-projects.html が読み込まれる。
+        * ThinBridgeによるリダイレクトが発生しない。
+   6. `Mroonga` のリンクをクリックする。
+      * 期待される結果：
+        * タブが一瞬ページ遷移するが、通常モードのタブで https://groonga.org/related-projects.html に戻っている。
+        * ThinBridgeによるリダイレクトが発生し、 https://mroonga.org/ がIEで開かれるか、IEの起動を試みている旨を示すダイアログが表示される。
+   7. Edge（IEモード）→Edge（通常モード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
+      * 削除： https://mroonga.org/
+      * 追加： https://groonga.org/related-projects.html
+   8. Edgeで新しいタブで https://groonga.org/ を開き、`Related projects` のリンクを辿って https://groonga.org/related-projects.html を開く。
+      * 期待される結果：
+        * EdgeのIEモードのタブで https://groonga.org/related-projects.html が読み込まれる。
+        * ThinBridgeによるリダイレクトが発生しない。
+   9. アドレスバーに https://mroonga.org/ を入力し、Enterする。
+      * 期待される結果：
+        * タブが一瞬ページ遷移するが、 https://groonga.org/related-projects.html に戻っている。また、試行回によってはタブがThinBridgeによって閉じられる。
+        * ThinBridgeによるリダイレクトが発生し、 https://mroonga.org/ がIEで開かれるか、IEの起動を試みている旨を示すダイアログが表示される。
+   10. Edge（IEモード）→Edge（IEモード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
+       * 追加： https://mroonga.org/
+   11. Edgeで新しいタブで https://groonga.org/ を開き、`Related projects` のリンクを辿って https://groonga.org/related-projects.html を開く。
+       * 期待される結果：
+         * EdgeのIEモードのタブで https://groonga.org/related-projects.html が読み込まれる。
+         * ThinBridgeによるリダイレクトが発生しない。
+   12. `Mroonga` のリンクをクリックする。
+       * 期待される結果：
+         * タブが一瞬ページ遷移するが、 https://groonga.org/related-projects.html に戻っている。
+         * ThinBridgeによるリダイレクトが発生し、 https://mroonga.org/ がIEで開かれるか、IEの起動を試みている旨を示すダイアログが表示される。
+3. いずれのブラウザーにも該当しないURLの動作の検証：
+   1. Edge（通常モード）→Edge（通常モード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
+      * 削除： 全項目
+   2. Edgeで新しいタブで https://groonga.org/ を開き、`Related projects` のリンクを辿って https://groonga.org/related-projects.html を開く。
+      * 期待される結果：
+        * Edgeの通常タブで https://groonga.org/related-projects.html が読み込まれる。
+        * ThinBridgeによるリダイレクトが発生しない。
+   3. `PGroonga` のリンクをクリックする。
+      * 期待される結果：
+        * タブが一瞬ページ遷移するが、 https://groonga.org/related-projects.html に戻っている。
+        * ThinBridgeによるリダイレクトが発生し、「Citrixがインストールされていないか、設定されていないため起動できません。」というメッセージが表示される。
+   4. Edge（通常モード）→Edge（IEモード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
+      * 追加： https://pgroonga.github.io/
+   5. Edgeで新しいタブで https://groonga.org/ を開き、`Related projects` のリンクを辿って https://groonga.org/related-projects.html を開く。
+      * 期待される結果：
+        * Edgeの通常タブで https://groonga.org/related-projects.html が読み込まれる。
+        * ThinBridgeによるリダイレクトが発生しない。
+   6. `PGroonga` のリンクをクリックする。
+      * 期待される結果：
+        * タブが一瞬ページ遷移するが、 https://groonga.org/related-projects.html に戻っている。
+        * ThinBridgeによるリダイレクトが発生し、「Citrixがインストールされていないか、設定されていないため起動できません。」というメッセージが表示される。
+   7. Edge（IEモード）→Edge（通常モード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
+      * 削除： https://pgroonga.github.io/
+      * 追加： https://groonga.org/related-projects.html
+   8. Edgeで新しいタブで https://groonga.org/ を開き、`Related projects` のリンクを辿って https://groonga.org/related-projects.html を開く。
+      * 期待される結果：
+        * EdgeのIEモードのタブで https://groonga.org/related-projects.html が読み込まれる。
+        * ThinBridgeによるリダイレクトが発生しない。
+   9. アドレスバーに https://pgroonga.github.io/ を入力し、Enterする。
+      * 期待される結果：
+        * タブが一瞬ページ遷移するが、 https://groonga.org/related-projects.html に戻っている。また、試行回によってはタブがThinBridgeによって閉じられる。
+        * ThinBridgeによるリダイレクトが発生し、「Citrixがインストールされていないか、設定されていないため起動できません。」というメッセージが表示される。
+   10. Edge（IEモード）→Edge（IEモード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
+       * 追加： https://pgroonga.github.io/
+   11. Edgeで新しいタブで https://groonga.org/ を開き、`Related projects` のリンクを辿って https://groonga.org/related-projects.html を開く。
+       * 期待される結果：
+         * EdgeのIEモードのタブで https://groonga.org/related-projects.html が読み込まれる。
+         * ThinBridgeによるリダイレクトが発生しない。
+   12. `PGroonga` のリンクをクリックする。
+       * 期待される結果：
+         * タブが一瞬ページ遷移するが、 https://groonga.org/related-projects.html に戻っている。
+         * ThinBridgeによるリダイレクトが発生し、「Citrixがインストールされていないか、設定されていないため起動できません。」というメッセージが表示される。
+
+#### 後始末
+
+1. 拡張機能の管理画面（`edge://extensions`）を開く。
+2. 「ThinBridge」拡張機能を削除する。
+3. GPOで拡張機能をインストールする状態に戻す。
+   1. `gpedit.msc` を起動する。
+   2. `Computer Configuration\Administrative Templates\Microsoft Edge\Extensions`（`コンピューターの構成\管理用テンプレート\Microsoft Edge\拡張機能`）の `Control which extensions are installed silently`（`サイレント インストールされる拡張機能を制御する`）を開き、検証環境の準備段階で追加した項目について、先頭の `_` を削除して保存する。
+   3. Edgeの拡張機能管理画面上にThinBridgeが表示されたことを確認する。
+4. `開発者モード` を無効化する。
+5. Edgeを終了する。
+
+
