@@ -1168,8 +1168,11 @@ crxパッケージ化されたアドオンをGPOでインストールした状�
    1. `gpedit.msc` を起動する。
    2. `Computer Configuration\Administrative Templates\Microsoft Edge\Extensions`（`コンピューターの構成\管理用テンプレート\Microsoft Edge\拡張機能`）の `Control which extensions are installed silently`（`サイレント インストールされる拡張機能を制御する`）を開き、検証環境の準備段階で追加した項目について、先頭に `_` を挿入して保存する。
    3. Edgeの拡張機能管理画面上からThinBridgeが消えたことを確認する。
-5. 準備で作成した `edge.crx` をEdgeの拡張機能の管理画面にドラッグ＆ドロップし、インストールする。
-6. （必要に応じて: 「サービスワーカー」をクリックし、DevToolsを起動する。当画面で逐次状況を観察しながらテストする。）
+5. `展開して読み込み` で `C:\Users\Public\webextensions\edge` を読み込んで、IDを控える。
+   例：`bplpacmhanoonjdmoelfokbphgopcbma`
+6. `C:\Program Files\ThinBridge\ThinBridgeHost\edge.json` のアクセス権を変更し、ユーザー権限での書き込みを許可した上で、`"allowed_origins"` に、先ほど控えたIDに基づくURLを追加する。
+   例：`"chrome-extension://bplpacmhanoonjdmoelfokbphgopcbma/"`
+7. （必要に応じて: 「サービスワーカー」をクリックし、DevToolsを起動する。当画面で逐次状況を観察しながらテストする。）
 
 #### 検証
 
