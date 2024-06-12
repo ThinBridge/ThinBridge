@@ -261,7 +261,7 @@ const ThinBridgeTalkClient = {
     }
 
     // Just store recent redirection, don't block here.
-    // It should be determined by callee.
+    // It should be determined by caller.
     // （onBeforeRequest() should always block loading redirect URL.）
     this.checkRedirectIntervalLimit(tabId, url);
 
