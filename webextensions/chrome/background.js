@@ -401,10 +401,11 @@ const ThinBridgeTalkClient = {
       return;
     }
 
-    if (info.status !== 'loading')
-      return;
-
     console.log(`onTabUpdated ${url} (tab=${tabId}, windowId=${tab.windowId}, status=${info.status}/${tab.status})`);
+
+    if (info.status !== 'loading' &&
+        info.status !== undefined /* IE Mode tab on Edge will have undefined status */)
+      return;
 
     if (this.checkRedirectIntervalLimit(tabId, url))
       return;
