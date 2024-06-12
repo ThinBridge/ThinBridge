@@ -81,7 +81,7 @@ const ThinBridgeTalkClient = {
   init() {
     this.cached = null;
     this.ensureLoadedAndConfigured();
-    this.recentRedirections = {};
+    this.recentRequests = {};
     console.log('Running as Thinbridge Talk client');
   },
 
@@ -233,19 +233,19 @@ const ThinBridgeTalkClient = {
   checkRedirectIntervalLimit(tabId, url) {
     const now = Date.now();
     let skip = false;
-    if (!this.recentRedirections) {
+    if (!this.recentRequests) {
       // in unit test
       return false;
     }
-    for (const key in this.recentRedirections) {
-      if (Math.abs(now - this.recentRedirections[key].time) > REDIRECT_INTERVAL_LIMIT)
-        delete this.recentRedirections[key];
+    for (const key in this.recentRequests) {
+      if (Math.abs(now - this.recentRequests[key].time) > REDIRECT_INTERVAL_LIMIT)
+        delete this.recentRequests[key];
     }
-    const recent = this.recentRedirections[tabId];
+    const recent = this.recentRequests[tabId];
     if (recent && recent.url === url) {
       skip = true;
     }
-    this.recentRedirections[tabId] = { tabId: tabId, url: url, time: now }
+    this.recentRequests[tabId] = { tabId: tabId, url: url, time: now }
     return skip;
   },
 
@@ -416,7 +416,7 @@ const ThinBridgeTalkClient = {
       return;
 
     if (this.checkRedirectIntervalLimit(tabId, url)) {
-      console.log(`Redirection for same URL and same tabId already occurred in ${REDIRECT_INTERVAL_LIMIT} msec. Skip it.`);
+      console.log(`A request for same URL and same tabId already occurred in ${REDIRECT_INTERVAL_LIMIT} msec. Skip it.`);
       return false;
     }
 
