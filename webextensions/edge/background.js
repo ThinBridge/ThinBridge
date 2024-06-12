@@ -13,6 +13,7 @@ const CONTINUOUS_SECTION = 'custom19';
 const SERVER_NAME = 'com.clear_code.thinbridge';
 const ALARM_MINUTES = 0.5;
 const CANCEL_REQUEST = {redirectUrl:`data:text/html,${escape('<script type="application/javascript">history.back()</script>')}`};
+const REDIRECT_INTERVAL_LIMIT = 1000;
 
 /*
  * ThinBridge's matching function (See BHORedirector/URLRedirectCore.h)
@@ -229,6 +230,25 @@ const ThinBridgeTalkClient = {
     return name;
   },
 
+  checkRedirectIntervalLimit(tabId, url) {
+    const now = Date.now();
+    let skip = false;
+    if (!this.recentRedirections) {
+      // in unit test
+      return false;
+    }
+    for (const key in this.recentRedirections) {
+      if (Math.abs(now - this.recentRedirections[key].time) > REDIRECT_INTERVAL_LIMIT)
+        delete this.recentRedirections[key];
+    }
+    const recent = this.recentRedirections[tabId];
+    if (recent && recent.url === url) {
+      skip = true;
+    }
+    this.recentRedirections[tabId] = { tabId: tabId, url: url, time: now }
+    return skip;
+  },
+
   handleURLAndBlock(config, tabId, url, isClosableTab) {
     if (!url) {
       console.log(`* Empty URL found`);
@@ -239,6 +259,11 @@ const ThinBridgeTalkClient = {
       console.log(`* Ignore non-HTTP/HTTPS URL ${url}`);
       return false;
     }
+
+    // Just store recent redirection, don't block here.
+    // It should be determined by callee.
+    // （onBeforeRequest() should always block loading redirect URL.）
+    this.checkRedirectIntervalLimit(tabId, url);
 
     const urlToMatch = config.IgnoreQueryString ? url.replace(/\?.*/, '') : url;
 
@@ -369,23 +394,6 @@ const ThinBridgeTalkClient = {
     this.save();
   },
 
-  checkRedirectIntervalLimit(tabId, url) {
-    const intervalLimit = 1000;
-    const now = Date.now();
-    let skip = false;
-    for (const key in this.recentRedirections) {
-      if (Math.abs(now - this.recentRedirections[key].time) > intervalLimit)
-        delete this.recentRedirections[key];
-    }
-    const recent = this.recentRedirections[tabId];
-    if (recent && recent.url === url) {
-      console.log(`Redirection for same URL and same tabId already occurred in ${intervalLimit} msec. Skip it.`);
-      skip = true;
-    }
-    this.recentRedirections[tabId] = { tabId: tabId, url: url, time: now }
-    return skip;
-  },
-
   async onTabUpdated(tabId, info, tab) {
     await this.ensureLoadedAndConfigured();
 
@@ -406,8 +414,10 @@ const ThinBridgeTalkClient = {
 
     console.log(`onTabUpdated ${url} (tab=${tabId}, windowId=${tab.windowId}, status=${info.status}/${tab.status})`);
 
-    if (this.checkRedirectIntervalLimit(tabId, url))
-      return;
+    if (this.checkRedirectIntervalLimit(tabId, url)) {
+      console.log(`Redirection for same URL and same tabId already occurred in ${REDIRECT_INTERVAL_LIMIT} msec. Skip it.`);
+      return false;
+    }
 
     // If onBeforeRequest() fails to redirect due to missing config, the next chance to do it is here.
     if (!this.handleURLAndBlock(config, tabId, url, isClosableTab))
