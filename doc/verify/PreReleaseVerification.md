@@ -203,11 +203,8 @@
       window.open('https://example.net/', '_blank', 'toolbar=no');
       ```
       * 期待される結果：
-        * IEモードのポップアップウィンドウが開かれ、 https://example.net/ が読み込まれる。
-   3. そのまま1分から2分待つ。
-      * 期待される結果：
-        * IEモードのポップアップウィンドウが残っている。
-        * Chromeでタブが開かれない。
+        * IEモードのポップアップウィンドウが開かれるがすぐ閉じる。
+        * Chrome上でhttps://example.net/ が読み込まれる。
 7. リダイレクト対象のURLを新規タブで開いた際の挙動の検証：
    1. Edgeで https://example.com/ を開く。
       * 期待される結果：
