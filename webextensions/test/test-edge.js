@@ -124,6 +124,15 @@ describe('Microsoft Edge Add-on', () => {
       assert.equal(shouldBlock, true);
     });
 
+    it('do not close non-closable tab', () => {
+      const url = "https://www.google.com/";
+      const conf = config([chromeSection])
+      thinbridge_mock.expects("redirect").once().withArgs(url, tabId, !shouldCloseTab);
+      const shouldBlock = thinbridge.handleURLAndBlock(conf, tabId, url, !isClosableTab);
+      thinbridge_mock.verify();
+      assert.equal(shouldBlock, true);
+    });
+
     it('load URL matched to custom18', () => {
       const url = "https://www.example.com/";
       const conf = config([custom18Section])
