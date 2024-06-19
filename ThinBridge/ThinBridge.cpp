@@ -617,7 +617,11 @@ BOOL CRedirectApp::InitInstance()
 		if(m_strExeFileName.CompareNoCase(_T("ThinBridgeSetting.exe"))==0
 		|| m_OptionParam.CompareNoCase(_T("/Config")) == 0)
 		{
-			if (!IsSettingDisabled())
+			if (IsSettingDisabled())
+			{
+				ShowTimeoutMessageBox(_T("リダイレクト定義設定の起動は禁止されています。"), m_strThisAppName, MB_OK | MB_ICONWARNING | MB_SYSTEMMODAL, 10000);
+			}
+			else
 			{
 				this->InitShowSettingDlg();
 			}
