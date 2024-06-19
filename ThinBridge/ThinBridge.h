@@ -1948,8 +1948,7 @@ public:
 	BOOL IsCustomInstalled(CString strPath);
 	BOOL IsHorizonInstalled();
 	BOOL IsCitrixInstalled();
-
-        BOOL IsSettingDisabled();
+    BOOL IsSettingDisabled();
 
 
 	CURLRedirectList m_RedirectList;
