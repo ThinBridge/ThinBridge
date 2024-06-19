@@ -1616,7 +1616,7 @@ BOOL CRedirectApp::IsSettingDisabled()
 	LSTATUS lResult = 0L;
 
 	lResult = RegGetValue(HKEY_LOCAL_MACHINE,
-		_T("SOFTWARE\\ThinBridge"),
+		_T("SOFTWARE\\Policies\\ThinBridge"),
 		_T("DisableSetting"),
 		RRF_RT_DWORD | RRF_SUBKEY_WOW6464KEY,
 		NULL,
