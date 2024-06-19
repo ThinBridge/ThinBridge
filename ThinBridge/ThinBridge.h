@@ -1949,6 +1949,8 @@ public:
 	BOOL IsHorizonInstalled();
 	BOOL IsCitrixInstalled();
 
+        BOOL IsSettingDisabled();
+
 
 	CURLRedirectList m_RedirectList;
 	CURLRedirectList m_RedirectListSaveData;
