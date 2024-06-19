@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<policyDefinitions xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://schemas.microsoft.com/GroupPolicy/2006/07/PolicyDefinitions"
+                   revision="1.1" schemaVersion="1.0" >
+  <policyNamespaces>
+    <target prefix="ThinBridge" namespace="ThinBridge.Policies" />
+  </policyNamespaces>
+  <resources minRequiredRevision="1.0" />
+  <categories>
+    <category name="ThinBridge" displayName="$(string.ThinBridge)" />
+  </categories>
+  <policies>
+    <policy name="DisableSetting" 
+            valueName="DisableSetting"
+            class="Machine" 
+            displayName="$(string.DisableSetting)" 
+            key="SOFTWARE\Policies\ThinBridge"
+            explainText="$(string.DisableSetting_HELP)">
+      <parentCategory ref="ThinBridge"/>
+      <supportedOn ref="SUPPORTED_NotSpecified"/>
+      <enabledValue>
+        <decimal value="1"/>
+      </enabledValue>
+      <disabledValue>
+        <decimal value="0"/>
+      </disabledValue>
+    </policy>
+  </policies>
+</policyDefinitions>
