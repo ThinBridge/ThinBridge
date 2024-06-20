@@ -48,4 +48,4 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: Templates
-          path: Resources/GPO/*.adm*
+          path: Resources/GPO/**/*.adm*
