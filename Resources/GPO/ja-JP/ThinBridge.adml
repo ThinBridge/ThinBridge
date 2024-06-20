@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<policyDefinitionResources xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+                           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+                           xmlns="http://schemas.microsoft.com/GroupPolicy/2006/07/PolicyDefinition" 
+                           revision="1.0" schemaVersion="1.0">
+  <displayName />
+  <description />
+  <resources>
+    <stringTable>
+      <string id="ThinBridge">ThinBridge</string>
+      <string id="DisableSetting">リダイレクト定義設定の起動禁止</string>
+      <string id="DisableSetting_HELP">リダイレクト定義設定を行うThinBridgeSetting.exeの起動を禁止します。</string>
+    </stringTable>
+  </resources>
+</policyDefinitionResources>

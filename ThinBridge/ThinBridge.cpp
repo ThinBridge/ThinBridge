@@ -617,7 +617,14 @@ BOOL CRedirectApp::InitInstance()
 		if(m_strExeFileName.CompareNoCase(_T("ThinBridgeSetting.exe"))==0
 		|| m_OptionParam.CompareNoCase(_T("/Config")) == 0)
 		{
-			this->InitShowSettingDlg();
+			if (IsSettingDisabled())
+			{
+				ShowTimeoutMessageBox(_T("リダイレクト定義設定の起動は禁止されています。"), m_strThisAppName, MB_OK | MB_ICONWARNING | MB_SYSTEMMODAL, 10000);
+			}
+			else
+			{
+				this->InitShowSettingDlg();
+			}
 		}
 		//純粋にThinBridge.exeを実行した場合は、IEのスタートページを開く。
 		else
@@ -1604,6 +1611,27 @@ BOOL CRedirectApp::IsCitrixInstalled()
 	}
 
 	return bRet;
+}
+
+BOOL CRedirectApp::IsSettingDisabled()
+{
+	DWORD iVal = 0;
+	DWORD iSize = sizeof(iVal);
+	LSTATUS lResult = 0L;
+
+	lResult = RegGetValue(HKEY_LOCAL_MACHINE,
+		_T("SOFTWARE\\Policies\\ThinBridge"),
+		_T("DisableSetting"),
+		RRF_RT_DWORD | RRF_SUBKEY_WOW6464KEY,
+		NULL,
+		(PVOID) &iVal,
+		&iSize);
+	if(lResult == ERROR_SUCCESS)
+	{
+		return !!iVal;
+	}
+
+	return FALSE;
 }
 
 int CRedirectApp::ExitInstance()
