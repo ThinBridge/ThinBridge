@@ -11,7 +11,19 @@ var BROWSER = 'edge';
 var CUSTOM18 = 'custom18';
 var SERVER_NAME = 'com.clear_code.thinbridge';
 var ALARM_MINUTES = 1;
+/*
+ * When `{cancel: 1}` is used to block loading, Edge shows a warning page which
+ * indicates that loading is canceled by an add-on. To avoid it, move back to
+ * the previous page instead of blocking.
+ */
 var CANCEL_REQUEST = {redirectUrl:`data:text/html,${escape('<script type="application/javascript">history.back()</script>')}`};
+/*
+ *  Although even if we return `CANCEL_REQUEST` from `onBeforeRequest()` on a
+ *  sub frame, `history.back()` seems to be performed against it's parent main
+ *  frame. As a result main frame moves back to the previous page unexpectedly.
+ *  To avoid it, just move to blank page instead.
+ */
+var CANCEL_REQUEST_FOR_SUBFRAME = {redirectUrl:'about:blank'};
 
 /*
  * ThinBridge's matching function (See BHORedirector/URLRedirectCore.h)
@@ -310,7 +322,10 @@ var ThinBridgeTalkClient = {
 		if (this.isRedirectURL(config, details.url)) {
 			console.log(`* Redirect to another browser`);
 			this.redirect(details.url, details.tabId, closeTab);
-			return CANCEL_REQUEST;
+			if (isMainFrame)
+				return CANCEL_REQUEST;
+			else
+				return CANCEL_REQUEST_FOR_SUBFRAME;
 		}
 	}
 };
