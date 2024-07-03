@@ -374,9 +374,24 @@ const ThinBridgeTalkClient = {
   handleStartup(config) {
     chrome.tabs.query({}).then(tabs => {
       tabs.forEach((tab) => {
-        const url = tab.url || tab.pendingUrl;
-        console.log(`handleStartup ${url} (tab=${tab.id})`);
-        this.handleURLAndBlock(config, tab.id, url, true);
+        chrome.scripting.executeScript({
+          target: { tabId: tab.id },
+          func: () => {
+            return window.performance.timeOrigin;
+          },
+        }).then(results => {
+          const now = Date.now();
+          const timeOrigin = results && results.length ? results[0].result : 0;
+          if (Math.abs(now - timeOrigin) > 1000) {
+            // Considered to be an existing tab before installing this add-on.
+            this.knownTabIds.add(tab.id);
+          } else {
+            // Considered to be an opened tab just after lanching the browser.
+            const url = tab.url || tab.pendingUrl;
+            console.log(`handleStartup ${url} (tab=${tab.id})`);
+            this.handleURLAndBlock(config, tab.id, url, true);
+          }
+        });
       });
     });
   },
