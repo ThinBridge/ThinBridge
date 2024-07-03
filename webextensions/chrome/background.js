@@ -433,7 +433,7 @@ const ThinBridgeTalkClient = {
      * Then let the tab go back to the previous page.
      */
     chrome.scripting.executeScript({
-      target: { tabId },
+      target: { tabId: tabId },
       func: function goBack() {
         window.stop();
         window.history.back();
