@@ -389,7 +389,8 @@ const ThinBridgeTalkClient = {
       tabs.forEach((tab) => {
         const url = tab.url || tab.pendingUrl;
         console.log(`handleStartup ${url} (tab=${tab.id})`);
-        this.handleURLAndBlock(config, tab.id, url, true);
+        if (!this.handleURLAndBlock(config, tab.id, url, true))
+          this.knownTabIds.add(tab.id);
       });
     });
   },
