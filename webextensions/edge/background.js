@@ -374,6 +374,7 @@ const ThinBridgeTalkClient = {
   handleStartup(config) {
     chrome.tabs.query({}).then(tabs => {
       tabs.forEach((tab) => {
+        const url = tab.url || tab.pendingUrl;
         chrome.scripting.executeScript({
           target: { tabId: tab.id },
           func: () => {
@@ -384,13 +385,19 @@ const ThinBridgeTalkClient = {
           const timeOrigin = results && results.length ? results[0].result : 0;
           if (Math.abs(now - timeOrigin) > 1000) {
             // Considered to be an existing tab before installing this add-on.
+            console.log(`Detect as kwnon tab: ${tab.id}, ${url}`);
             this.knownTabIds.add(tab.id);
           } else {
             // Considered to be an opened tab just after lanching the browser.
-            const url = tab.url || tab.pendingUrl;
-            console.log(`handleStartup ${url} (tab=${tab.id})`);
-            this.handleURLAndBlock(config, tab.id, url, true);
+            console.log(`handleStartup: ${url} (tab=${tab.id})`);
+            if (!this.handleURLAndBlock(config, tab.id, url, true))
+              this.knownTabIds.add(tab.id);
           }
+        }).catch((error) => {
+          console.error(error);
+          console.log(`Ignore error of checking tab's time origin: ${url} (tab=${tab.id})`);
+          if (!this.handleURLAndBlock(config, tab.id, url, true))
+            this.knownTabIds.add(tab.id);
         });
       });
     });
