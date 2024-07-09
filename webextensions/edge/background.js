@@ -411,7 +411,10 @@ const ThinBridgeTalkClient = {
   async onTabUpdated(tabId, info, tab) {
     await this.ensureLoadedAndConfigured();
 
-    const isClosableTab = this.newTabIds.has(tabId);
+    // We should close new (empty) tab, but not for already handled tab by
+    // handleStartup or onBeforeReqeust that are possible to be called before
+    // onTabCreated. The later condition is the guard for it.
+    const isClosableTab = this.newTabIds.has(tabId) && !this.knownTabIds.has(tabId)
     this.knownTabIds.add(tabId);
     this.newTabIds.delete(tabId);
 
@@ -486,6 +489,8 @@ const ThinBridgeTalkClient = {
       else
         return CANCEL_REQUEST_FOR_SUBFRAME;
     }
+
+    this.knownTabIds.add(details.tabId);
   },
 };
 
