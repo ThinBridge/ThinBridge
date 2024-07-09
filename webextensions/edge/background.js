@@ -194,7 +194,7 @@ const ThinBridgeTalkClient = {
         }
         if (counter++ > 0)
           console.log(`tab ${tabId} still exists: trying to close (${counter})`);
-        chrome.tabs.remove(tabId);
+        await chrome.tabs.remove(tabId);
       } while (existingTab = await chrome.tabs.get(tabId).catch(_error => null));
     });
   },
