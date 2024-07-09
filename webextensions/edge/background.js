@@ -14,6 +14,7 @@ const SERVER_NAME = 'com.clear_code.thinbridge';
 const ALARM_MINUTES = 0.5;
 const CANCEL_REQUEST = {redirectUrl:`data:text/html,${escape('<script type="application/javascript">history.back()</script>')}`};
 const REDIRECT_INTERVAL_LIMIT = 1000;
+const INTERVAL_TO_DETECT_AS_EXISTING_TAB = 5000;
 
 /*
  * ThinBridge's matching function (See BHORedirector/URLRedirectCore.h)
@@ -383,7 +384,7 @@ const ThinBridgeTalkClient = {
         }).then(results => {
           const now = Date.now();
           const timeOrigin = results && results.length ? results[0].result : 0;
-          if (Math.abs(now - timeOrigin) > 1000) {
+          if (Math.abs(now - timeOrigin) > INTERVAL_TO_DETECT_AS_EXISTING_TAB) {
             // Considered to be an existing tab before installing this add-on.
             console.log(`Detect as kwnon tab: ${tab.id}, ${url}`);
             this.knownTabIds.add(tab.id);
