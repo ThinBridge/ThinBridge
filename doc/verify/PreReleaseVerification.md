@@ -1273,3 +1273,49 @@ crxパッケージ化されたアドオンをGPOでインストールした状�
 5. Edgeを終了する。
 
 
+### サブフレームでのリダイレクトの動作検証
+
+#### 準備
+
+`C:\Program Files\ThinBridge\ThinBridgeBHO.ini` を以下の内容に設定する。
+
+```
+[GLOBAL]
+@DISABLED
+@TRUSTED_ZONE
+@RDP_APPMODE
+@DISABLE_IE_DDE
+
+[Chrome]
+@BROWSER_PATH:
+@DISABLED
+@REDIRECT_PAGE_ACTION:0
+@CLOSE_TIMEOUT:3
+
+[Edge]
+@BROWSER_PATH:
+@REDIRECT_PAGE_ACTION:0
+@CLOSE_TIMEOUT:3
+
+[Default]
+@BROWSER_PATH:Chrome
+@REDIRECT_PAGE_ACTION:0
+@CLOSE_TIMEOUT:3
+
+[CUSTOM18]
+@BROWSER_PATH:
+@REDIRECT_PAGE_ACTION:0
+@CLOSE_TIMEOUT:3
+*://www.fluentd.org/*
+*://platform.twitter.com/*
+```
+
+#### 検証
+
+1. Edgeを起動する。
+2. 新規タブを開く。
+3. URLエントリに `https://www.fluentd.org` を入力してEnterキーを押下する。
+   * 期待される結果
+     * トップフレームは https://www.fluentd.org に遷移する。
+	 * サブフレームは空白ページに遷移する。
+	 * サブフレーム内のコンテンツ https://www.youtube.com/embed/sIVGsQgMHIo がChromeにリダイレクトされる。

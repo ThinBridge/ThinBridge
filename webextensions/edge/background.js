@@ -12,7 +12,20 @@ const DMZ_SECTION = 'custom18';
 const CONTINUOUS_SECTION = 'custom19';
 const SERVER_NAME = 'com.clear_code.thinbridge';
 const ALARM_MINUTES = 0.5;
+/*
+ * When `{cancel: 1}` is used to block loading, Edge shows a warning page which
+ * indicates that loading is canceled by an add-on. To avoid it, move back to
+ * the previous page instead of blocking.
+ */
 const CANCEL_REQUEST = {redirectUrl:`data:text/html,${escape('<script type="application/javascript">history.back()</script>')}`};
+/*
+ *  Although even if we return `CANCEL_REQUEST` from `onBeforeRequest()` on a
+ *  sub-frame, `history.back()` will be performed against it's parent main
+ *  frame when there is no page to back in the sub-frame. As a result main
+ *  frame moves back to the previous page unexpectedly.
+ *  To avoid it, just move to blank page instead.
+ */
+const CANCEL_REQUEST_FOR_SUBFRAME = {redirectUrl:'about:blank'};
 const REDIRECT_INTERVAL_LIMIT = 1000;
 
 /*
@@ -466,8 +479,12 @@ const ThinBridgeTalkClient = {
 
     const isClosableTab = isMainFrame && (this.newTabIds.has(details.tabId) || !this.knownTabIds.has(details.tabId));
 
-    if (this.handleURLAndBlock(config, details.tabId, details.url, isClosableTab))
-      return CANCEL_REQUEST;
+    if (this.handleURLAndBlock(config, details.tabId, details.url, isClosableTab)) {
+      if (isMainFrame)
+	return CANCEL_REQUEST;
+      else
+        return CANCEL_REQUEST_FOR_SUBFRAME;
+    }
   },
 };
 
