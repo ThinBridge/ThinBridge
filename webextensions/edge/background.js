@@ -20,8 +20,9 @@ const ALARM_MINUTES = 0.5;
 const CANCEL_REQUEST = {redirectUrl:`data:text/html,${escape('<script type="application/javascript">history.back()</script>')}`};
 /*
  *  Although even if we return `CANCEL_REQUEST` from `onBeforeRequest()` on a
- *  sub frame, `history.back()` seems to be performed against it's parent main
- *  frame. As a result main frame moves back to the previous page unexpectedly.
+ *  sub-frame, `history.back()` will be performed against it's parent main
+ *  frame when there is no page to back in the sub-frame. As a result main
+ *  frame moves back to the previous page unexpectedly.
  *  To avoid it, just move to blank page instead.
  */
 const CANCEL_REQUEST_FOR_SUBFRAME = {redirectUrl:'about:blank'};
