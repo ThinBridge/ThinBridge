@@ -194,7 +194,7 @@ const ThinBridgeTalkClient = {
         }
         if (counter++ > 0)
           console.log(`tab ${tabId} still exists: trying to close (${counter})`);
-        chrome.tabs.remove(tabId);
+        await chrome.tabs.remove(tabId);
       } while (existingTab = await chrome.tabs.get(tabId).catch(_error => null));
     });
   },
@@ -389,7 +389,8 @@ const ThinBridgeTalkClient = {
       tabs.forEach((tab) => {
         const url = tab.url || tab.pendingUrl;
         console.log(`handleStartup ${url} (tab=${tab.id})`);
-        this.handleURLAndBlock(config, tab.id, url, true);
+        if (!this.handleURLAndBlock(config, tab.id, url, true))
+          this.knownTabIds.add(tab.id);
       });
     });
   },
@@ -410,7 +411,10 @@ const ThinBridgeTalkClient = {
   async onTabUpdated(tabId, info, tab) {
     await this.ensureLoadedAndConfigured();
 
-    const isClosableTab = this.newTabIds.has(tabId);
+    // We should close new (empty) tab, but not for already handled tab by
+    // handleStartup or onBeforeReqeust that are possible to be called before
+    // onTabCreated. The later condition is the guard for it.
+    const isClosableTab = this.newTabIds.has(tabId) && !this.knownTabIds.has(tabId)
     this.knownTabIds.add(tabId);
     this.newTabIds.delete(tabId);
 
@@ -485,6 +489,8 @@ const ThinBridgeTalkClient = {
       else
         return CANCEL_REQUEST_FOR_SUBFRAME;
     }
+
+    this.knownTabIds.add(details.tabId);
   },
 };
 

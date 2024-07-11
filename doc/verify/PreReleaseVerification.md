@@ -1319,3 +1319,52 @@ crxパッケージ化されたアドオンをGPOでインストールした状�
      * トップフレームは https://www.fluentd.org に遷移する。
 	 * サブフレームは空白ページに遷移する。
 	 * サブフレーム内のコンテンツ https://www.youtube.com/embed/sIVGsQgMHIo がChromeにリダイレクトされる。
+
+
+### アドオンインストール前から存在する既存タブでの挙動
+
+#### 準備
+
+設定は`サブフレームでのリダイレクトの動作検証`と同一とする。
+
+#### 検証
+
+1. Edgeを起動する。
+2. 新規タブを開く。
+3. アドレスバーに https://www.google.com を入力し、Enterする。
+   * 期待される結果：
+     * Chromeでタブが開かれ、https://www.google.com/ が読み込まれる。
+     * Edgeのタブは閉じたりページ遷移したりせず新規タブがそのまま表示される。
+4. GPOでインストールした拡張機能を一時的にアンインストールする。
+   1. `gpedit.msc` を起動する。
+   2. `Computer Configuration\Administrative Templates\Microsoft Edge\Extensions`（`コンピューターの構成\管理用テンプレート\Microsoft Edge\拡張機能`）の `Control which extensions are installed silently`（`サイレント インストールされる拡張機能を制御する`）を開き、検証環境の準備段階で追加した項目について、先頭に `_` を挿入して保存する。
+   3. Edgeの拡張機能管理画面上からThinBridgeが消えたことを確認する。
+5. GPOでアンインストールした拡張機能を再度インストールする。
+   1. `gpedit.msc` を起動する。
+   2. `Computer Configuration\Administrative Templates\Microsoft Edge\Extensions`（`コンピューターの構成\管理用テンプレート\Microsoft Edge\拡張機能`）の `Control which extensions are installed silently`（`サイレント インストールされる拡張機能を制御する`）を開き、検証環境の準備段階で追加した項目について、先頭の `_` を削除して保存する。
+   3. Edgeの拡張機能管理画面にThinBridgeが再度表示されたことを確認する。
+   4. アドオン再インストール後の既存タブの挙動を確認する。
+     * 期待される結果：
+       * 2.で開いたタブが閉じられない。
+	   * 2で開いたタブのURLがChromeで新たに開かれていない。
+6. 2.で開いたタブのアドレスバーに https://www.google.com を入力し、Enterする。
+   * 期待される結果：
+     * Chromeでタブが開かれ、https://www.google.com/ が読み込まれる。
+     * Edgeのタブは閉じたりページ遷移したりせず新規タブがそのまま表示される。
+
+
+### 既定のブラウザによるリダイレクト対象URLの挙動
+
+#### 準備
+
+1. 設定は`サブフレームでのリダイレクトの動作検証`と同一とする。
+2. Windowsの既定のブラウザをEdgeに設定する。
+3. 全てのEdgeウインドウを閉じる
+
+#### 検証
+
+1. `Win + R`キーで「ファイル名を指定して実行」ウインドウを開く。
+2. https://www.google.com を入力し、Enterする。
+   * 期待される結果：
+     * 一瞬Edgeウインドウが開いたあと、すぐに閉じる
+     * Chromeでタブが開かれ、https://www.google.com/ が読み込まれる。
