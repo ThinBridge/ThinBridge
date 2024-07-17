@@ -5,8 +5,8 @@
 検証には原則として `/doc/verify` 配下のいずれかの環境（推奨：`/doc/verify/windows-11-22H2`）を使用する。
 `/doc/verify` 配下の物ではない他のWindows環境を使用する場合は、以下の条件を事前に整えておく。
 
-* Active Directoryドメイン参加状態である。
-  （または、[/doc/verify/join-to-fake-domain.reg](join-to-fake-domain.reg) の内容を管理者権限でインポート済みである。）
+* Active DirectoryドメインあるいはMDM（Mobile Device Management）サービスに参加状態である。
+  （または、[/doc/verify/join-to-fake-mdm.reg](join-to-fake-mdm.reg) の内容を管理者権限でインポート済みである。）
 * Google Chrome、Microsoft Edgeをインストール済みである。
 * Google Chrome、Microsoft EdgeのGPO用ポリシーテンプレートを導入済みである。
 * `C:\Users\Public\webextensions` 配下に `/webextensions/` の内容を配置済みである。
