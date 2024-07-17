@@ -9,6 +9,7 @@ https://github.com/ThinBridge/ThinBridge/issues/18
 1. Log into the verification environment.
 2. Quit all running IE and Chrome.
 3. Install ThinBridge with the installer.
+3. Put [ThinBridgeBHO.ini](ThinBridgeBHO.ini) to `C:\Program Files\ThinBridge\ThinBridgeBHO.ini`
 4. Start `cmd.exe`.
 
 ## Internet Explorer
