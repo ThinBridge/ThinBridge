@@ -129,7 +129,7 @@
       * 期待される結果：
         * Chromeでタブが開かれ、https://example.net/ が読み込まれる。
         * 空白のポップアップウィンドウがEdge上に残っていない。
-4. リンクによるChromeからEdgeへのページ遷移の検証：
+4. リンクによるChromeからEdgeへのページ遷移の検証 (`@EXCLUDE_GROUP`を使用するためThinBridge v4.2.0.0以降が必要)：
    1. Chrome→Edgeの検証のため、Chromeで https://groonga.org/ を開く。
       * 期待される結果：
         * Chrome上で https://groonga.org/ が読み込まれる。
@@ -833,8 +833,8 @@ crxパッケージ化されたアドオンをGPOでインストールした状�
 3. URLエントリに `https://www.fluentd.org` を入力してEnterキーを押下する。
    * 期待される結果
      * トップフレームは https://www.fluentd.org に遷移する。
-	 * サブフレームは空白ページに遷移する。
-	 * サブフレーム内のコンテンツ https://www.youtube.com/embed/sIVGsQgMHIo がChromeにリダイレクトされる。
+     * 「Featured Video」のサブフレームは空白ページに遷移する。
+     * 「Featured Video」サブフレーム内のコンテンツ https://www.youtube.com/embed/sIVGsQgMHIo がChromeにリダイレクトされる。
 
 
 ### アドオンインストール前から存在する既存タブでの挙動
@@ -855,11 +855,11 @@ crxパッケージ化されたアドオンをGPOでインストールした状�
 4. GPOでインストールした拡張機能を一時的にアンインストールする。
    1. `gpedit.msc` を起動する。
    2. `Computer Configuration\Administrative Templates\Microsoft Edge\Extensions`（`コンピューターの構成\管理用テンプレート\Microsoft Edge\拡張機能`）の `Control which extensions are installed silently`（`サイレント インストールされる拡張機能を制御する`）を開き、検証環境の準備段階で追加した項目について、先頭に `_` を挿入して保存する。
-   3. Edgeの拡張機能管理画面上からThinBridgeが消えたことを確認する。
+   3. Edgeの拡張機能管理画面上（`edge://extensions/`）からThinBridgeが消えたことを確認する。
 5. GPOでアンインストールした拡張機能を再度インストールする。
    1. `gpedit.msc` を起動する。
    2. `Computer Configuration\Administrative Templates\Microsoft Edge\Extensions`（`コンピューターの構成\管理用テンプレート\Microsoft Edge\拡張機能`）の `Control which extensions are installed silently`（`サイレント インストールされる拡張機能を制御する`）を開き、検証環境の準備段階で追加した項目について、先頭の `_` を削除して保存する。
-   3. Edgeの拡張機能管理画面にThinBridgeが再度表示されたことを確認する。
+   3. Edgeの拡張機能管理画面（`edge://extensions/`）にThinBridgeが再度表示されたことを確認する。
    4. アドオン再インストール後の既存タブの挙動を確認する。
      * 期待される結果：
        * 2.で開いたタブが閉じられない。
