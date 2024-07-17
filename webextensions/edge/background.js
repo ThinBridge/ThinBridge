@@ -485,7 +485,7 @@ const ThinBridgeTalkClient = {
 
     if (this.handleURLAndBlock(config, details.tabId, details.url, isClosableTab)) {
       if (isMainFrame)
-	return CANCEL_REQUEST;
+        return CANCEL_REQUEST;
       else
         return CANCEL_REQUEST_FOR_SUBFRAME;
     }
