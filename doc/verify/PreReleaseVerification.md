@@ -76,45 +76,7 @@
 
 以下の通り設定して検証を行う。
 
-* `C:\Program Files\ThinBridge\ThinBridgeBHO.ini` を以下の内容に設定する。
-  ```
-  [GLOBAL]
-  @DISABLED
-  @TOP_PAGE_ONLY
-  @REDIRECT_PAGE_ACTION:1
-  @INTRANET_ZONE
-  @TRUSTED_ZONE
-  @UNTRUSTED_ZONE
-  @RDP_APPMODE
-  
-  [Edge]
-  @BROWSER_PATH:
-  @TOP_PAGE_ONLY
-  @REDIRECT_PAGE_ACTION:0
-  @CLOSE_TIMEOUT:3
-  http*://example.com
-  http*://example.com/*
-  http*://*.example.com
-  http*://*.example.com/*
-  http*://piro.sakura.ne.jp
-  http*://piro.sakura.ne.jp/*
-  http*://groonga.org/ja
-  http*://groonga.org/ja/*
-  
-  [Chrome]
-  @BROWSER_PATH:
-  @TOP_PAGE_ONLY
-  @REDIRECT_PAGE_ACTION:0
-  @CLOSE_TIMEOUT:3
-  @EXCLUDE_GROUP:Edge
-  *
-  
-  [Default]
-  @BROWSER_PATH:
-  @TOP_PAGE_ONLY
-  @REDIRECT_PAGE_ACTION:0
-  @CLOSE_TIMEOUT:3
-  ```
+* [PreReleaseVerification/senario1.ini](PreReleaseVerification/senario1.ini) を `C:\Program Files\ThinBridge\ThinBridgeBHO.ini` に配置する。
 * `Computer Configuration\Administrative Templates\Windows Components\Internet Explorer\Security Features\Add-on Management` （`コンピューターの構成\管理用テンプレート\Windows コンポーネント\Internet Explorer\セキュリティの機能\アドオン管理`）を開いて、以下のポリシーを設定する。
   * `Add-on List`（`アドオンの一覧`）
     * `Enabled`（`有効`）に設定して、`Add-on List`→`Show...`（`アドオンの一覧`→`表示...`）をクリックし、以下の名前の項目を設定（項目がなければ追加）して、`OK` を押してダイアログを閉じ、`OK` を押して変更を保存する。
@@ -228,45 +190,7 @@
 
 以下の通り設定して検証を行う。
 
-* `C:\Program Files\ThinBridge\ThinBridgeBHO.ini` を以下の内容に設定する。
-  ```
-  [GLOBAL]
-  @DISABLED
-  @TOP_PAGE_ONLY
-  @REDIRECT_PAGE_ACTION:1
-  @INTRANET_ZONE
-  @TRUSTED_ZONE
-  @UNTRUSTED_ZONE
-  @RDP_APPMODE
-  
-  [Edge]
-  @BROWSER_PATH:
-  @TOP_PAGE_ONLY
-  @REDIRECT_PAGE_ACTION:0
-  @CLOSE_TIMEOUT:3
-  http*://example.com
-  http*://example.com/*
-  http*://*.example.com
-  http*://*.example.com/*
-  http*://piro.sakura.ne.jp
-  http*://piro.sakura.ne.jp/*
-  http*://groonga.org/ja
-  http*://groonga.org/ja/*
-  
-  [Chrome]
-  @BROWSER_PATH:
-  @TOP_PAGE_ONLY
-  @REDIRECT_PAGE_ACTION:0
-  @CLOSE_TIMEOUT:3
-  @EXCLUDE_GROUP:Edge
-  *
-  
-  [Default]
-  @BROWSER_PATH:
-  @TOP_PAGE_ONLY
-  @REDIRECT_PAGE_ACTION:0
-  @CLOSE_TIMEOUT:3
-  ```
+* 設定は`BHO無効時のIEモードのタブの挙動を含む、Manifest V3での動作`と同一とする。（[PreReleaseVerification/senario1.ini](PreReleaseVerification/senario1.ini) を `C:\Program Files\ThinBridge\ThinBridgeBHO.ini` に配置する。）
 * `Computer Configuration\Administrative Templates\Windows Components\Internet Explorer\Security Features\Add-on Management` （`コンピューターの構成\管理用テンプレート\Windows コンポーネント\Internet Explorer\セキュリティの機能\アドオン管理`）を開いて、以下のポリシーを設定する。
   * `Add-on List`（`アドオンの一覧`）
     * `Enabled`（`有効`）に設定して、`Add-on List`→`Show...`（`アドオンの一覧`→`表示...`）をクリックし、以下の名前の項目を設定（項目がなければ追加）して、`OK` を押してダイアログを閉じ、`OK` を押して変更を保存する。
@@ -335,128 +259,7 @@
 
 以下の通り設定して検証を行う。
 
-* `C:\Program Files\ThinBridge\ThinBridgeBHO.ini` を以下の内容に設定する。
-  ```
-  [GLOBAL]
-  @DISABLED
-  @TOP_PAGE_ONLY
-  @INTRANET_ZONE
-  @TRUSTED_ZONE
-  @UNTRUSTED_ZONE
-  @CTX_APPNAME:
-  @RDP_APPMODE
-  
-  [RDP]
-  @BROWSER_PATH:
-  @DISABLED
-  @TOP_PAGE_ONLY
-  @REDIRECT_PAGE_ACTION:0
-  @CLOSE_TIMEOUT:3
-  
-  [VMWARE]
-  @BROWSER_PATH:
-  @DISABLED
-  @TOP_PAGE_ONLY
-  @REDIRECT_PAGE_ACTION:0
-  @CLOSE_TIMEOUT:3
-  
-  [CITRIX]
-  @BROWSER_PATH:
-  @DISABLED
-  @TOP_PAGE_ONLY
-  @REDIRECT_PAGE_ACTION:0
-  @CLOSE_TIMEOUT:3
-  
-  [Firefox]
-  @BROWSER_PATH:
-  @DISABLED
-  @TOP_PAGE_ONLY
-  @REDIRECT_PAGE_ACTION:0
-  @CLOSE_TIMEOUT:3
-  
-  [Chrome]
-  @BROWSER_PATH:
-  @DISABLED
-  @TOP_PAGE_ONLY
-  @REDIRECT_PAGE_ACTION:0
-  @CLOSE_TIMEOUT:3
-  
-  [Edge]
-  @BROWSER_PATH:
-  @DISABLED
-  @TOP_PAGE_ONLY
-  @REDIRECT_PAGE_ACTION:0
-  @CLOSE_TIMEOUT:3
-  
-  [IE]
-  @BROWSER_PATH:
-  @DISABLED
-  @TOP_PAGE_ONLY
-  @REDIRECT_PAGE_ACTION:0
-  @CLOSE_TIMEOUT:3
-  
-  [Default]
-  @BROWSER_PATH:
-  @TOP_PAGE_ONLY
-  @REDIRECT_PAGE_ACTION:0
-  @CLOSE_TIMEOUT:3
-  
-  [CUSTOM01]
-  @BROWSER_PATH:
-  @DISABLED
-  @TOP_PAGE_ONLY
-  @REDIRECT_PAGE_ACTION:0
-  @CLOSE_TIMEOUT:3
-  
-  [CUSTOM02]
-  @BROWSER_PATH:
-  @DISABLED
-  @TOP_PAGE_ONLY
-  @REDIRECT_PAGE_ACTION:0
-  @CLOSE_TIMEOUT:3
-  
-  [CUSTOM03]
-  @BROWSER_PATH:
-  @DISABLED
-  @TOP_PAGE_ONLY
-  @REDIRECT_PAGE_ACTION:0
-  @CLOSE_TIMEOUT:3
-  
-  [CUSTOM04]
-  @BROWSER_PATH:
-  @DISABLED
-  @TOP_PAGE_ONLY
-  @REDIRECT_PAGE_ACTION:0
-  @CLOSE_TIMEOUT:3
-  
-  [CUSTOM05]
-  @BROWSER_PATH:
-  @DISABLED
-  @TOP_PAGE_ONLY
-  @REDIRECT_PAGE_ACTION:0
-  @CLOSE_TIMEOUT:3
-  
-  [CUSTOM18]
-  @BROWSER_PATH:
-  @DISABLED
-  @TOP_PAGE_ONLY
-  @REDIRECT_PAGE_ACTION:0
-  @CLOSE_TIMEOUT:3
-  
-  [CUSTOM19]
-  @BROWSER_PATH:
-  @DISABLED
-  @TOP_PAGE_ONLY
-  @REDIRECT_PAGE_ACTION:0
-  @CLOSE_TIMEOUT:3
-  
-  [CUSTOM20]
-  @BROWSER_PATH:
-  @DISABLED
-  @TOP_PAGE_ONLY
-  @REDIRECT_PAGE_ACTION:0
-  @CLOSE_TIMEOUT:3
-  ```
+* [PreReleaseVerification/senario2.ini](PreReleaseVerification/senario2.ini) を `C:\Program Files\ThinBridge\ThinBridgeBHO.ini` に配置する。
 * `Computer Configuration\Administrative Templates\Windows Components\Internet Explorer\Security Features\Add-on Management` （`コンピューターの構成\管理用テンプレート\Windows コンポーネント\Internet Explorer\セキュリティの機能\アドオン管理`）を開いて、以下のポリシーを設定する。
   * `Add-on List`（`アドオンの一覧`）
     * `Enabled`（`有効`）に設定して、`Add-on List`→`Show...`（`アドオンの一覧`→`表示...`）をクリックし、以下の名前の項目を設定（項目がなければ追加）して、`OK` を押してダイアログを閉じ、`OK` を押して変更を保存する。
@@ -518,133 +321,7 @@
 
 以下の通り設定して検証を行う。
 
-* `C:\Program Files\ThinBridge\ThinBridgeBHO.ini` を以下の内容に設定する。
-  ```
-  [GLOBAL]
-  @DISABLED
-  @TOP_PAGE_ONLY
-  @INTRANET_ZONE
-  @TRUSTED_ZONE
-  @UNTRUSTED_ZONE
-  @CTX_APPNAME:仮想ブラウザー
-  @RDP_APPMODE
-  
-  [RDP]
-  @BROWSER_PATH:
-  @DISABLED
-  @TOP_PAGE_ONLY
-  @REDIRECT_PAGE_ACTION:0
-  @CLOSE_TIMEOUT:3
-  
-  [VMWARE]
-  @BROWSER_PATH:
-  @DISABLED
-  @TOP_PAGE_ONLY
-  @REDIRECT_PAGE_ACTION:0
-  @CLOSE_TIMEOUT:3
-  
-  [CITRIX]
-  @BROWSER_PATH:
-  @DISABLED
-  @TOP_PAGE_ONLY
-  @REDIRECT_PAGE_ACTION:0
-  @CLOSE_TIMEOUT:3
-  
-  [Firefox]
-  @BROWSER_PATH:
-  @DISABLED
-  @TOP_PAGE_ONLY
-  @REDIRECT_PAGE_ACTION:0
-  @CLOSE_TIMEOUT:3
-  
-  [Chrome]
-  @BROWSER_PATH:
-  @DISABLED
-  @TOP_PAGE_ONLY
-  @REDIRECT_PAGE_ACTION:0
-  @CLOSE_TIMEOUT:3
-  
-  [Edge]
-  @BROWSER_PATH:
-  @TOP_PAGE_ONLY
-  @REDIRECT_PAGE_ACTION:0
-  @CLOSE_TIMEOUT:3
-  *://example.com*
-  *://www.iana.org*
-  *://groonga.org*
-  
-  [IE]
-  @BROWSER_PATH:
-  @TOP_PAGE_ONLY
-  @REDIRECT_PAGE_ACTION:0
-  @CLOSE_TIMEOUT:3
-  *://example.com*
-  *://www.iana.org*
-  *://groonga.org*
-  *://mroonga.org*
-  
-  [Default]
-  @BROWSER_PATH:CITRIX
-  @TOP_PAGE_ONLY
-  @REDIRECT_PAGE_ACTION:0
-  @CLOSE_TIMEOUT:3
-  
-  [CUSTOM01]
-  @BROWSER_PATH:
-  @DISABLED
-  @TOP_PAGE_ONLY
-  @REDIRECT_PAGE_ACTION:0
-  @CLOSE_TIMEOUT:3
-  
-  [CUSTOM02]
-  @BROWSER_PATH:
-  @DISABLED
-  @TOP_PAGE_ONLY
-  @REDIRECT_PAGE_ACTION:0
-  @CLOSE_TIMEOUT:3
-  
-  [CUSTOM03]
-  @BROWSER_PATH:
-  @DISABLED
-  @TOP_PAGE_ONLY
-  @REDIRECT_PAGE_ACTION:0
-  @CLOSE_TIMEOUT:3
-  
-  [CUSTOM04]
-  @BROWSER_PATH:
-  @DISABLED
-  @TOP_PAGE_ONLY
-  @REDIRECT_PAGE_ACTION:0
-  @CLOSE_TIMEOUT:3
-  
-  [CUSTOM05]
-  @BROWSER_PATH:
-  @DISABLED
-  @TOP_PAGE_ONLY
-  @REDIRECT_PAGE_ACTION:0
-  @CLOSE_TIMEOUT:3
-  
-  [CUSTOM18]
-  @BROWSER_PATH:
-  @TOP_PAGE_ONLY
-  @REDIRECT_PAGE_ACTION:0
-  @CLOSE_TIMEOUT:3
-  *://ranguba.org/*
-  
-  [CUSTOM19]
-  @BROWSER_PATH:
-  @DISABLED
-  @TOP_PAGE_ONLY
-  @REDIRECT_PAGE_ACTION:0
-  @CLOSE_TIMEOUT:3
-  
-  [CUSTOM20]
-  @BROWSER_PATH:
-  @DISABLED
-  @TOP_PAGE_ONLY
-  @REDIRECT_PAGE_ACTION:0
-  @CLOSE_TIMEOUT:3
-  ```
+* [PreReleaseVerification/senario3.ini](PreReleaseVerification/senario3.ini) を `C:\Program Files\ThinBridge\ThinBridgeBHO.ini` に配置する。
 * `Computer Configuration\Administrative Templates\Windows Components\Internet Explorer\Security Features\Add-on Management` （`コンピューターの構成\管理用テンプレート\Windows コンポーネント\Internet Explorer\セキュリティの機能\アドオン管理`）を開いて、以下のポリシーを設定する。
   * `Add-on List`（`アドオンの一覧`）
     * `Enabled`（`有効`）に設定して、`Add-on List`→`Show...`（`アドオンの一覧`→`表示...`）をクリックし、以下の名前の項目を設定（項目がなければ追加）して、`OK` を押してダイアログを閉じ、`OK` を押して変更を保存する。
@@ -831,138 +508,7 @@
 
 以下の通り設定して検証を行う。
 
-* `C:\Program Files\ThinBridge\ThinBridgeBHO.ini` を以下の内容に設定する。
-  ```
-  #####################################################################
-  ## Configuration File for ThinBridge (ver2.0)
-  ## 2024-05-29 13:16:58
-  #####################################################################
-  
-  [GLOBAL]
-  @DISABLED
-  @TOP_PAGE_ONLY
-  @INTRANET_ZONE
-  @TRUSTED_ZONE
-  @UNTRUSTED_ZONE
-  @CTX_APPNAME:仮想ブラウザー
-  @RDP_APPMODE
-  
-  [RDP]
-  @BROWSER_PATH:
-  @DISABLED
-  @TOP_PAGE_ONLY
-  @REDIRECT_PAGE_ACTION:0
-  @CLOSE_TIMEOUT:3
-  
-  [VMWARE]
-  @BROWSER_PATH:
-  @DISABLED
-  @TOP_PAGE_ONLY
-  @REDIRECT_PAGE_ACTION:0
-  @CLOSE_TIMEOUT:3
-  
-  [CITRIX]
-  @BROWSER_PATH:
-  @DISABLED
-  @TOP_PAGE_ONLY
-  @REDIRECT_PAGE_ACTION:0
-  @CLOSE_TIMEOUT:3
-  
-  [Firefox]
-  @BROWSER_PATH:
-  @DISABLED
-  @TOP_PAGE_ONLY
-  @REDIRECT_PAGE_ACTION:0
-  @CLOSE_TIMEOUT:3
-  
-  [Chrome]
-  @BROWSER_PATH:
-  @DISABLED
-  @TOP_PAGE_ONLY
-  @REDIRECT_PAGE_ACTION:0
-  @CLOSE_TIMEOUT:3
-  
-  [Edge]
-  @BROWSER_PATH:
-  @TOP_PAGE_ONLY
-  @REDIRECT_PAGE_ACTION:0
-  @CLOSE_TIMEOUT:3
-  *://example.com*
-  *://www.iana.org*
-  *://groonga.org*
-  
-  [IE]
-  @BROWSER_PATH:
-  @TOP_PAGE_ONLY
-  @REDIRECT_PAGE_ACTION:0
-  @CLOSE_TIMEOUT:3
-  *://example.com*
-  *://www.iana.org*
-  *://groonga.org*
-  *://mroonga.org*
-  
-  [Default]
-  @BROWSER_PATH:
-  @TOP_PAGE_ONLY
-  @REDIRECT_PAGE_ACTION:0
-  @CLOSE_TIMEOUT:3
-  
-  [CUSTOM01]
-  @BROWSER_PATH:
-  @DISABLED
-  @TOP_PAGE_ONLY
-  @REDIRECT_PAGE_ACTION:0
-  @CLOSE_TIMEOUT:3
-  
-  [CUSTOM02]
-  @BROWSER_PATH:
-  @DISABLED
-  @TOP_PAGE_ONLY
-  @REDIRECT_PAGE_ACTION:0
-  @CLOSE_TIMEOUT:3
-  
-  [CUSTOM03]
-  @BROWSER_PATH:
-  @DISABLED
-  @TOP_PAGE_ONLY
-  @REDIRECT_PAGE_ACTION:0
-  @CLOSE_TIMEOUT:3
-  
-  [CUSTOM04]
-  @BROWSER_PATH:
-  @DISABLED
-  @TOP_PAGE_ONLY
-  @REDIRECT_PAGE_ACTION:0
-  @CLOSE_TIMEOUT:3
-  
-  [CUSTOM05]
-  @BROWSER_PATH:
-  @DISABLED
-  @TOP_PAGE_ONLY
-  @REDIRECT_PAGE_ACTION:0
-  @CLOSE_TIMEOUT:3
-  
-  [CUSTOM18]
-  @BROWSER_PATH:
-  @TOP_PAGE_ONLY
-  @REDIRECT_PAGE_ACTION:0
-  @CLOSE_TIMEOUT:3
-  *://ranguba.org/*
-  
-  [CUSTOM19]
-  @BROWSER_PATH:
-  @DISABLED
-  @TOP_PAGE_ONLY
-  @REDIRECT_PAGE_ACTION:0
-  @CLOSE_TIMEOUT:3
-  
-  [CUSTOM20]
-  @BROWSER_PATH:
-  @DISABLED
-  @TOP_PAGE_ONLY
-  @REDIRECT_PAGE_ACTION:0
-  @CLOSE_TIMEOUT:3
-  ```
+* [PreReleaseVerification/senario4.ini](PreReleaseVerification/senario4.ini) を `C:\Program Files\ThinBridge\ThinBridgeBHO.ini` に配置する。
 * `Computer Configuration\Administrative Templates\Windows Components\Internet Explorer\Security Features\Add-on Management` （`コンピューターの構成\管理用テンプレート\Windows コンポーネント\Internet Explorer\セキュリティの機能\アドオン管理`）を開いて、以下のポリシーを設定する。
   * `Add-on List`（`アドオンの一覧`）
     * `Enabled`（`有効`）に設定して、`Add-on List`→`Show...`（`アドオンの一覧`→`表示...`）をクリックし、以下の名前の項目を設定（項目がなければ追加）して、`OK` を押してダイアログを閉じ、`OK` を押して変更を保存する。
@@ -1157,6 +703,7 @@ crxパッケージ化されたアドオンをGPOでインストールした状�
 #### 準備
 
 設定は`EdgeのIEモード境界をまたぐページ遷移におけるDefault設定の動作`と同一とする。
+（[PreReleaseVerification/senario3.ini](PreReleaseVerification/senario3.ini) を `C:\Program Files\ThinBridge\ThinBridgeBHO.ini` に配置する。）
 
 1. Edgeを起動する。
 2. 拡張機能の管理画面（`edge://extensions`）を開く。
@@ -1277,38 +824,7 @@ crxパッケージ化されたアドオンをGPOでインストールした状�
 
 #### 準備
 
-`C:\Program Files\ThinBridge\ThinBridgeBHO.ini` を以下の内容に設定する。
-
-```
-[GLOBAL]
-@DISABLED
-@TRUSTED_ZONE
-@RDP_APPMODE
-@DISABLE_IE_DDE
-
-[Chrome]
-@BROWSER_PATH:
-@DISABLED
-@REDIRECT_PAGE_ACTION:0
-@CLOSE_TIMEOUT:3
-
-[Edge]
-@BROWSER_PATH:
-@REDIRECT_PAGE_ACTION:0
-@CLOSE_TIMEOUT:3
-
-[Default]
-@BROWSER_PATH:Chrome
-@REDIRECT_PAGE_ACTION:0
-@CLOSE_TIMEOUT:3
-
-[CUSTOM18]
-@BROWSER_PATH:
-@REDIRECT_PAGE_ACTION:0
-@CLOSE_TIMEOUT:3
-*://www.fluentd.org/*
-*://platform.twitter.com/*
-```
+[PreReleaseVerification/senario5.ini](PreReleaseVerification/senario5.ini) を `C:\Program Files\ThinBridge\ThinBridgeBHO.ini` に配置する。
 
 #### 検証
 
@@ -1326,6 +842,7 @@ crxパッケージ化されたアドオンをGPOでインストールした状�
 #### 準備
 
 設定は`サブフレームでのリダイレクトの動作検証`と同一とする。
+（[PreReleaseVerification/senario5.ini](PreReleaseVerification/senario5.ini) を `C:\Program Files\ThinBridge\ThinBridgeBHO.ini` に配置する。）
 
 #### 検証
 
@@ -1358,6 +875,7 @@ crxパッケージ化されたアドオンをGPOでインストールした状�
 #### 準備
 
 1. 設定は`サブフレームでのリダイレクトの動作検証`と同一とする。
+   （[PreReleaseVerification/senario5.ini](PreReleaseVerification/senario5.ini) を `C:\Program Files\ThinBridge\ThinBridgeBHO.ini` に配置する。）
 2. Windowsの既定のブラウザをEdgeに設定する。
 3. 全てのEdgeウインドウを閉じる
 
