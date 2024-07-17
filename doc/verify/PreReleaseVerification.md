@@ -62,10 +62,10 @@
 5. EdgeのIEモードタブを有効化する。
    1. Edgeを起動する。
    2. `edge://settings/defaultBrowser` を開く。
-   3. `Allow sites to be reloaded in Internet Explorer mode (IE mode)` を `Allow` に設定する。
+   3. `Allow sites to be reloaded in Internet Explorer mode (IE mode)`（`Internet Explorer モード (IE モード) でサイトの再読み込みを許可`） を `Allow` （`許可`）に設定する。
    4. `edge://settings/system` を開く。
-   5. `Startup boost` をオフにする。
-   6. `Continue running background extensions and apps when Microsoft Edge is closed` をオフにする。
+   5. `Startup boost`（`スタートアップ ブースト`） をオフにする。
+   6. `Continue running background extensions and apps when Microsoft Edge is closed`（`Microsoft Edge が終了してもバック グラウンドの拡張機能およびアプリの実行を続行する`） をオフにする。
    7. Edgeを終了する。
 
 ## 検証
