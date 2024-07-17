@@ -6,11 +6,11 @@
 `/doc/verify` 配下の物ではない他のWindows環境を使用する場合は、以下の条件を事前に整えておく。
 
 * Active Directoryドメイン参加状態である。
-  （または、`/doc/verify/join-to-fake-domain.reg` の内容を管理者権限でインポート済みである。）
+  （または、[/doc/verify/join-to-fake-domain.reg](join-to-fake-domain.reg) の内容を管理者権限でインポート済みである。）
 * Google Chrome、Microsoft Edgeをインストール済みである。
 * Google Chrome、Microsoft EdgeのGPO用ポリシーテンプレートを導入済みである。
 * `C:\Users\Public\webextensions` 配下に `/webextensions/` の内容を配置済みである。
-* `C:\Users\Public\webextensions\manifest.xml` の位置に `/doc/verify/manifest.xml` と同等のファイルを配置済みである。
+  * `C:\Users\Public\webextensions\manifest.xml` の位置に [/doc/verify/manifest.xml](manifest.xml) と同等のファイルを配置済みである。
 
 準備は以下の手順で行う。
 
