@@ -11,6 +11,8 @@
 * Google Chrome、Microsoft EdgeのGPO用ポリシーテンプレートを導入済みである。
 * `C:\Users\Public\webextensions` 配下に `/webextensions/` の内容を配置済みである。
   * `C:\Users\Public\webextensions\manifest.xml` の位置に [/doc/verify/manifest.xml](manifest.xml) と同等のファイルを配置済みである。
+* IEのセキュリティ設定で「インターネットゾーン」の保護モードを無効化してある。
+  （[/doc/verify/disable-protect-mode.reg](disable-protect-mode.reg) の内容をインポート済みである。）
 
 準備は以下の手順で行う。
 
