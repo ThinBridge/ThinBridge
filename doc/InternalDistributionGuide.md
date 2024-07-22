@@ -333,7 +333,10 @@ ADドメイン参加端末全体を対象として、ThinBridge拡張機能を�
    14. 以下の項目が存在する場合、項目を削除します。
        
        * `jcamehnjflombcdhafhiogbojgghefec`
+       * `knldjmfmopnpolahpmmgbagdohdnhkik`
+       * `loigjahhocfdkpoikniacpfbhailfkfi`
        * `famoofbkcpjdkihdngnhgbdfkfenhcnf`
+       
    15. 以下の項目を追加します。
        
        * `jcamehnjflombcdhafhiogbojgghefec;（manifest.xmlのURL）`
