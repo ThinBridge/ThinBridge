@@ -358,6 +358,8 @@ ADドメイン参加端末全体を対象として、ThinBridge拡張機能を�
    21. 以下の項目が存在する場合、項目を削除します。
        
        * `XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX`
+       * `knldjmfmopnpolahpmmgbagdohdnhkik`
+       * `oabjkjegmjblopakfhiboalfnlkhkkem`
        * `iiajmhibpjkpmfmbhegccdfmfnfeffmh`
    22. 以下の項目を追加します。
        
