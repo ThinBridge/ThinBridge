@@ -14,6 +14,17 @@
 * IEのセキュリティ設定で「インターネットゾーン」の保護モードを無効化してある。
   （[/doc/verify/disable-protect-mode.reg](disable-protect-mode.reg) の内容をインポート済みである。）
 
+Windows Enterprise マルチセッションのテストをする場合は、以下の条件を事前に整えておく。
+
+* Windows Enterprise マルチセッションの構築方法は以下。
+  * https://learn.microsoft.com/ja-jp/azure/virtual-desktop/windows-multisession-faq
+    * 以下の手順に従いながら、[ホスト プールの種類]にプール方式を指定してマルチセッション環境を作成する。
+    * https://learn.microsoft.com/ja-jp/azure/virtual-desktop/tutorial-try-deploy-windows-11-desktop?tabs=windows-client
+    * https://learn.microsoft.com/ja-jp/azure/virtual-desktop/add-session-hosts-host-pool?tabs=portal%2Cgui
+* 予め2ユーザーを作成しておく
+  * ユーザーA（セッションA）: テスト手順を実施するユーザー（セッション）。
+  * ユーザーB（セッションB）: テスト中に常にログオンしておくユーザー（セッション）。別ユーザーでリダイレクトが発生しないかの確認用。
+
 準備は以下の手順で行う。
 
 1. https://github.com/ThinBridge/ThinBridge/releases/latest もしくは
@@ -69,6 +80,7 @@
    5. `Startup boost`（`スタートアップ ブースト`） をオフにする。
    6. `Continue running background extensions and apps when Microsoft Edge is closed`（`Microsoft Edge が終了してもバック グラウンドの拡張機能およびアプリの実行を続行する`） をオフにする。
    7. Edgeを終了する。
+6. (Windows Enterprise マルチセッションのみ) ユーザーBにログオンする
 
 ## 検証
 
@@ -100,6 +112,7 @@
       * 期待される結果：
         * 空白のページが現在のタブに読み込まれ、すぐに元のページに戻る。
         * Chromeでタブが開かれ、https://groonga.org/ が読み込まれる。
+        * (Windows Enterprise マルチセッションのみ) ユーザーBでEdgeやChromeが開いていない。
    3. Edge（IEモード）→Chromeの検証のため、Edgeで https://piro.sakura.ne.jp/apps/jspanel.html を開く。
       * 期待される結果：
         * EdgeのタブがIEモードに切り替わる。
@@ -113,6 +126,7 @@
       * 期待される結果：
         * EdgeのIEモードのタブで https://groonga.org/ が読み込まれる。（Manifest V2版と非互換の動作だが、仕様上不可避な挙動）
         * Chromeでタブが開かれ、https://groonga.org/ が読み込まれる。
+        * (Windows Enterprise マルチセッションのみ) ユーザーBでEdgeやChromeが開いていない。
 3. JavaScriptによるEdgeからChromeへのページ遷移の検証：
    1. Edge→Chromeの検証のため、Edgeで https://piro.sakura.ne.jp/apps/jspanel を開く。
       * 期待される結果：
@@ -124,6 +138,7 @@
       * 期待される結果：
         * Chromeでタブが開かれ、https://example.net/ が読み込まれる。
         * 空白のタブがEdge上に残っていない。
+        * (Windows Enterprise マルチセッションのみ) ユーザーBでEdgeやChromeが開いていない。
    3. 以下のスクリプトを貼り付けて実行する。
       ```
       window.open('https://example.net/', '_blank', 'toolbar=no');
@@ -131,6 +146,7 @@
       * 期待される結果：
         * Chromeでタブが開かれ、https://example.net/ が読み込まれる。
         * 空白のポップアップウィンドウがEdge上に残っていない。
+        * (Windows Enterprise マルチセッションのみ) ユーザーBでEdgeやChromeが開いていない。
 4. リンクによるChromeからEdgeへのページ遷移の検証 (`@EXCLUDE_GROUP`を使用するためThinBridge v4.2.0.0以降が必要)：
    1. Chrome→Edgeの検証のため、Chromeで https://groonga.org/ を開く。
       * 期待される結果：
@@ -139,6 +155,7 @@
       * 期待される結果：
         * 空白のページが現在のタブに読み込まれ、すぐに元のページに戻る。
         * Edgeでタブが開かれ、https://groonga.org/ja/ が読み込まれる。
+        * (Windows Enterprise マルチセッションのみ) ユーザーBでEdgeやChromeが開いていない。
 5. JavaScriptによるChromeからEdgeへのページ遷移の検証：
    1. Chrome→Edgeの検証のため、Chromeで https://www.piro.sakura.ne.jp/apps/jspanel.html を開く。
       * 期待される結果：
@@ -151,6 +168,7 @@
       * 期待される結果：
         * Edgeでタブが開かれ、 https://example.com/ が読み込まれる。
         * 空白のタブがChrome上に残っていない。
+        * (Windows Enterprise マルチセッションのみ) ユーザーBでEdgeやChromeが開いていない。
    3. 以下のスクリプトを貼り付けて実行する。
       ```
       window.open('https://example.com/', '_blank', 'toolbar=no');
@@ -158,6 +176,7 @@
       * 期待される結果：
         * Edgeでタブが開かれ、https://example.com/ が読み込まれる。
         * 空白のポップアップウィンドウがChrome上に残っていない。
+        * (Windows Enterprise マルチセッションのみ) ユーザーBでEdgeやChromeが開いていない。
 6. EdgeのIEモードのタブから開かれたポップアップウィンドウからのページ遷移の検証：
    1. Edgeで https://piro.sakura.ne.jp/apps/jspanel.html を開く。
       * 期待される結果：
@@ -169,6 +188,7 @@
       * 期待される結果：
         * IEモードのポップアップウィンドウが開かれるがすぐ閉じる。
         * Chrome上でhttps://example.net/ が読み込まれる。
+        * (Windows Enterprise マルチセッションのみ) ユーザーBでEdgeやChromeが開いていない。
 7. リダイレクト対象のURLを新規タブで開いた際の挙動の検証：
    1. Edgeで https://example.com/ を開く。
       * 期待される結果：
@@ -177,6 +197,7 @@
       * 期待される結果：
         * Chrome上で https://www.iana.org/help/example-domains が開かれる。
         * 空白のタブがEdge上に残っていない。
+        * (Windows Enterprise マルチセッションのみ) ユーザーBでEdgeやChromeが開いていない。
    3. Chromeで https://www.piro.sakura.ne.jp/ を開く。
       * 期待される結果：
         * Chrome上で https://www.piro.sakura.ne.jp/ が読み込まれる。
@@ -184,6 +205,7 @@
       * 期待される結果：
         * Edge上で https://piro.sakura.ne.jp/ が開かれる。
         * 空白のタブがChrome上に残っていない。
+        * (Windows Enterprise マルチセッションのみ) ユーザーBでEdgeやChromeが開いていない。
 8. Edge、Chromeを終了する。
 
 ### BHO有効時のIEモードのタブの挙動を含む、Manifest V3での動作
@@ -220,6 +242,7 @@
       * 期待される結果：
         * EdgeのIEモードのタブがページ遷移しないでそのまま維持される。
         * Chromeでタブが開かれ、https://groonga.org/ が読み込まれる。
+        * (Windows Enterprise マルチセッションのみ) ユーザーBでEdgeやChromeが開いていない。
 2. EdgeのIEモードのタブから開かれたポップアップウィンドウからのページ遷移の検証：
    1. Edgeで https://piro.sakura.ne.jp/apps/jspanel.html を開く。
       * 期待される結果：
@@ -231,6 +254,7 @@
       * 期待される結果：
         * Chromeでタブが開かれ、https://example.net/ が読み込まれる。
         * IEモードのポップアップウィンドウが残っていない。
+        * (Windows Enterprise マルチセッションのみ) ユーザーBでEdgeやChromeが開いていない。
 3. クエリーパラメーターを含むURLをリダイレクトする際の挙動の検証：
    1. Edgeの通常タブ→Chromeの検証のため、Edgeで https://piro.sakura.ne.jp/apps/jspanel を開く。
       * 期待される結果：
@@ -242,6 +266,7 @@
       * 期待される結果：
         * Chromeでタブが開かれ、https://example.net/?query-parameter=value が読み込まれる。
         * 空白のタブがEdge上に残っていない。
+        * (Windows Enterprise マルチセッションのみ) ユーザーBでEdgeやChromeが開いていない。
    3. EdgeのIEモードのタブ→Chromeの検証のため、Edgeで https://piro.sakura.ne.jp/apps/jspanel.html を開く。
       * 期待される結果：
         * Edge上で https://piro.sakura.ne.jp/apps/jspanel.html が読み込まれる。
@@ -252,6 +277,7 @@
       * 期待される結果：
         * Chromeでタブが開かれ、https://example.net/?query-parameter=value が読み込まれる。
         * 空白のタブがEdge上に残っていない。
+        * (Windows Enterprise マルチセッションのみ) ユーザーBでEdgeやChromeが開いていない。
 4. Edge、Chromeを終了する。
 
 
@@ -387,6 +413,7 @@
       * 期待される結果：
         * タブがページ遷移しない。
         * ThinBridgeによるリダイレクトが発生し、 https://mroonga.org/ がIEで開かれるか、IEの起動を試みている旨を示すダイアログが表示される。
+        * (Windows Enterprise マルチセッションのみ) ユーザーBでIEへのリダイレクトが発生しない。
    4. Edge（通常モード）→Edge（IEモード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
       * 追加： https://mroonga.org/
    5. Edgeで新しいタブで https://groonga.org/related-projects.html を開く。
@@ -397,6 +424,7 @@
       * 期待される結果：
         * タブがIEモードに切り替わらず、ページ遷移しない。
         * ThinBridgeによるリダイレクトが発生し、 https://mroonga.org/ がIEで開かれるか、IEの起動を試みている旨を示すダイアログが表示される。
+        * (Windows Enterprise マルチセッションのみ) ユーザーBでIEへのリダイレクトが発生しない。
    7. Edge（IEモード）→Edge（通常モード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
       * 削除： https://mroonga.org/
       * 追加： https://groonga.org/related-projects.html
@@ -408,6 +436,7 @@
       * 期待される結果：
         * Edgeのタブがページ遷移しない。また、試行回によってはタブがThinBridgeによって閉じられる。
         * ThinBridgeによるリダイレクトが発生し、 https://mroonga.org/ がIEで開かれるか、IEの起動を試みている旨を示すダイアログが表示される。
+        * (Windows Enterprise マルチセッションのみ) ユーザーBでIEへのリダイレクトが発生しない。
    10. Edge（IEモード）→Edge（IEモード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
        * 追加： https://mroonga.org/
    11. Edgeで新しいタブで https://groonga.org/related-projects.html を開く。
@@ -418,6 +447,7 @@
        * 期待される結果：
           * Edgeのタブがページ遷移しない。
           * ThinBridgeによるリダイレクトが発生し、 https://mroonga.org/ がIEで開かれるか、IEの起動を試みている旨を示すダイアログが表示される。
+          * (Windows Enterprise マルチセッションのみ) ユーザーBでIEへのリダイレクトが発生しない。
 4. 共用URL（CUSTOM18）に該当するURLの動作の検証：
    1. Edge（通常モード）→Edge（通常モード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
       * 削除： 全項目
@@ -471,6 +501,7 @@
       * 期待される結果：
         * Edgeのタブがページ遷移しない。
         * ThinBridgeによるリダイレクトが発生し、「Citrixがインストールされていないか、設定されていないため起動できません。」というメッセージが表示される。
+        * (Windows Enterprise マルチセッションのみ) ユーザーBでCitrixへのリダイレクトが発生しない。
    4. Edge（通常モード）→Edge（IEモード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
       * 追加： https://pgroonga.github.io/
    5. Edgeで新しいタブで https://groonga.org/related-projects.html を開く。
@@ -481,6 +512,7 @@
       * 期待される結果：
         * Edgeのタブがページ遷移しない。
         * ThinBridgeによるリダイレクトが発生し、「Citrixがインストールされていないか、設定されていないため起動できません。」というメッセージが表示される。
+        * (Windows Enterprise マルチセッションのみ) ユーザーBでCitrixへのリダイレクトが発生しない。
    7. Edge（IEモード）→Edge（通常モード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
       * 削除： https://pgroonga.github.io/
       * 追加： https://groonga.org/related-projects.html
@@ -492,6 +524,7 @@
       * 期待される結果：
         * Edgeのタブがページ遷移しない。また、試行回によってはタブがThinBridgeによって閉じられる。
         * ThinBridgeによるリダイレクトが発生し、「Citrixがインストールされていないか、設定されていないため起動できません。」というメッセージが表示される。
+        * (Windows Enterprise マルチセッションのみ) ユーザーBでCitrixへのリダイレクトが発生しない。
    10. Edge（IEモード）→Edge（IEモード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
        * 追加： https://pgroonga.github.io/
    11. Edgeで新しいタブで https://groonga.org/related-projects.html を開く。
@@ -502,6 +535,7 @@
        * 期待される結果：
          * Edgeのタブがページ遷移しない。
          * ThinBridgeによるリダイレクトが発生し、「Citrixがインストールされていないか、設定されていないため起動できません。」というメッセージが表示される。
+         * (Windows Enterprise マルチセッションのみ) ユーザーBでCitrixへのリダイレクトが発生しない。
 6. Edgeを終了する。
 
 ### EdgeのIEモード境界をまたぐページ遷移におけるDefault設定なしの動作
@@ -574,6 +608,7 @@
       * 期待される結果：
         * Edgeのタブがページ遷移しない。
         * ThinBridgeによるリダイレクトが発生し、 https://mroonga.org/ がIEで開かれるか、IEの起動を試みている旨を示すダイアログが表示される。
+        * (Windows Enterprise マルチセッションのみ) ユーザーBでIEへのリダイレクトが発生しない。
    4. Edge（通常モード）→Edge（IEモード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
       * 追加： https://mroonga.org/
    5. Edgeで新しいタブで https://groonga.org/related-projects.html を開く。
@@ -584,6 +619,7 @@
       * 期待される結果：
         * タブがIEモードに切り替わらず、ページ遷移しない。
         * ThinBridgeによるリダイレクトが発生し、 https://mroonga.org/ がIEで開かれるか、IEの起動を試みている旨を示すダイアログが表示される。
+        * (Windows Enterprise マルチセッションのみ) ユーザーBでIEへのリダイレクトが発生しない。
    7. Edge（IEモード）→Edge（通常モード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
       * 削除： https://mroonga.org/
       * 追加： https://groonga.org/related-projects.html
@@ -595,6 +631,7 @@
       * 期待される結果：
         * Edgeのタブがページ遷移しない。また、試行回によってはタブがThinBridgeによって閉じられる。
         * ThinBridgeによるリダイレクトが発生し、 https://mroonga.org/ がIEで開かれるか、IEの起動を試みている旨を示すダイアログが表示される。
+        * (Windows Enterprise マルチセッションのみ) ユーザーBでIEへのリダイレクトが発生しない。
    10. Edge（IEモード）→Edge（IEモード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
        * 追加： https://mroonga.org/
    11. Edgeで新しいタブで https://groonga.org/related-projects.html を開く。
@@ -605,6 +642,7 @@
        * 期待される結果：
           * Edgeのタブがページ遷移しない。
           * ThinBridgeによるリダイレクトが発生し、 https://mroonga.org/ がIEで開かれるか、IEの起動を試みている旨を示すダイアログが表示される。
+          * (Windows Enterprise マルチセッションのみ) ユーザーBでIEへのリダイレクトが発生しない。
 4. 共用URL（CUSTOM18）に該当するURLの動作の検証：
    1. Edge（通常モード）→Edge（通常モード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
       * 削除： 全項目
@@ -736,6 +774,7 @@ crxパッケージ化されたアドオンをGPOでインストールした状�
       * 期待される結果：
         * タブが一瞬ページ遷移するが、 https://groonga.org/related-projects.html に戻っている。
         * ThinBridgeによるリダイレクトが発生し、 https://mroonga.org/ がIEで開かれるか、IEの起動を試みている旨を示すダイアログが表示される。
+        * (Windows Enterprise マルチセッションのみ) ユーザーBでIEへのリダイレクトが発生しない。
    4. Edge（通常モード）→Edge（IEモード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
       * 追加： https://mroonga.org/
    5. Edgeで新しいタブで https://groonga.org/ を開き、`Related projects` のリンクを辿って https://groonga.org/related-projects.html を開く。
@@ -746,6 +785,7 @@ crxパッケージ化されたアドオンをGPOでインストールした状�
       * 期待される結果：
         * タブが一瞬ページ遷移するが、通常モードのタブで https://groonga.org/related-projects.html に戻っている。
         * ThinBridgeによるリダイレクトが発生し、 https://mroonga.org/ がIEで開かれるか、IEの起動を試みている旨を示すダイアログが表示される。
+        * (Windows Enterprise マルチセッションのみ) ユーザーBでIEへのリダイレクトが発生しない。
    7. Edge（IEモード）→Edge（通常モード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
       * 削除： https://mroonga.org/
       * 追加： https://groonga.org/related-projects.html
@@ -757,6 +797,7 @@ crxパッケージ化されたアドオンをGPOでインストールした状�
       * 期待される結果：
         * タブが一瞬ページ遷移するが、 https://groonga.org/related-projects.html に戻っている。また、試行回によってはタブがThinBridgeによって閉じられる。
         * ThinBridgeによるリダイレクトが発生し、 https://mroonga.org/ がIEで開かれるか、IEの起動を試みている旨を示すダイアログが表示される。
+        * (Windows Enterprise マルチセッションのみ) ユーザーBでIEへのリダイレクトが発生しない。
    10. Edge（IEモード）→Edge（IEモード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
        * 追加： https://mroonga.org/
    11. Edgeで新しいタブで https://groonga.org/ を開き、`Related projects` のリンクを辿って https://groonga.org/related-projects.html を開く。
@@ -767,6 +808,7 @@ crxパッケージ化されたアドオンをGPOでインストールした状�
        * 期待される結果：
          * タブが一瞬ページ遷移するが、 https://groonga.org/related-projects.html に戻っている。
          * ThinBridgeによるリダイレクトが発生し、 https://mroonga.org/ がIEで開かれるか、IEの起動を試みている旨を示すダイアログが表示される。
+         * (Windows Enterprise マルチセッションのみ) ユーザーBでIEへのリダイレクトが発生しない。
 3. いずれのブラウザーにも該当しないURLの動作の検証：
    1. Edge（通常モード）→Edge（通常モード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
       * 削除： 全項目
@@ -778,6 +820,7 @@ crxパッケージ化されたアドオンをGPOでインストールした状�
       * 期待される結果：
         * タブが一瞬ページ遷移するが、 https://groonga.org/related-projects.html に戻っている。
         * ThinBridgeによるリダイレクトが発生し、「Citrixがインストールされていないか、設定されていないため起動できません。」というメッセージが表示される。
+        * (Windows Enterprise マルチセッションのみ) ユーザーBでCitrixへのリダイレクトが発生しない。
    4. Edge（通常モード）→Edge（IEモード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
       * 追加： https://pgroonga.github.io/
    5. Edgeで新しいタブで https://groonga.org/ を開き、`Related projects` のリンクを辿って https://groonga.org/related-projects.html を開く。
@@ -788,6 +831,7 @@ crxパッケージ化されたアドオンをGPOでインストールした状�
       * 期待される結果：
         * タブが一瞬ページ遷移するが、 https://groonga.org/related-projects.html に戻っている。
         * ThinBridgeによるリダイレクトが発生し、「Citrixがインストールされていないか、設定されていないため起動できません。」というメッセージが表示される。
+        * (Windows Enterprise マルチセッションのみ) ユーザーBでCitrixへのリダイレクトが発生しない。
    7. Edge（IEモード）→Edge（通常モード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
       * 削除： https://pgroonga.github.io/
       * 追加： https://groonga.org/related-projects.html
@@ -799,6 +843,7 @@ crxパッケージ化されたアドオンをGPOでインストールした状�
       * 期待される結果：
         * タブが一瞬ページ遷移するが、 https://groonga.org/related-projects.html に戻っている。また、試行回によってはタブがThinBridgeによって閉じられる。
         * ThinBridgeによるリダイレクトが発生し、「Citrixがインストールされていないか、設定されていないため起動できません。」というメッセージが表示される。
+        * (Windows Enterprise マルチセッションのみ) ユーザーBでCitrixへのリダイレクトが発生しない。
    10. Edge（IEモード）→Edge（IEモード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
        * 追加： https://pgroonga.github.io/
    11. Edgeで新しいタブで https://groonga.org/ を開き、`Related projects` のリンクを辿って https://groonga.org/related-projects.html を開く。
@@ -809,6 +854,7 @@ crxパッケージ化されたアドオンをGPOでインストールした状�
        * 期待される結果：
          * タブが一瞬ページ遷移するが、 https://groonga.org/related-projects.html に戻っている。
          * ThinBridgeによるリダイレクトが発生し、「Citrixがインストールされていないか、設定されていないため起動できません。」というメッセージが表示される。
+         * (Windows Enterprise マルチセッションのみ) ユーザーBでCitrixへのリダイレクトが発生しない。
 
 #### 後始末
 
@@ -837,6 +883,7 @@ crxパッケージ化されたアドオンをGPOでインストールした状�
      * トップフレームは https://www.fluentd.org に遷移する。
      * 「Featured Video」のサブフレームは空白ページに遷移する。
      * 「Featured Video」サブフレーム内のコンテンツ https://www.youtube.com/embed/sIVGsQgMHIo がChromeにリダイレクトされる。
+     * (Windows Enterprise マルチセッションのみ) ユーザーBでChromeへのリダイレクトが発生しない。
 
 
 ### アドオンインストール前から存在する既存タブでの挙動
@@ -854,6 +901,7 @@ crxパッケージ化されたアドオンをGPOでインストールした状�
    * 期待される結果：
      * Chromeでタブが開かれ、https://www.google.com/ が読み込まれる。
      * Edgeのタブは閉じたりページ遷移したりせず新規タブがそのまま表示される。
+     * (Windows Enterprise マルチセッションのみ) ユーザーBでChromeへのリダイレクトが発生しない。
 4. GPOでインストールした拡張機能を一時的にアンインストールする。
    1. `gpedit.msc` を起動する。
    2. `Computer Configuration\Administrative Templates\Microsoft Edge\Extensions`（`コンピューターの構成\管理用テンプレート\Microsoft Edge\拡張機能`）の `Control which extensions are installed silently`（`サイレント インストールされる拡張機能を制御する`）を開き、検証環境の準備段階で追加した項目について、先頭に `_` を挿入して保存する。
@@ -869,6 +917,7 @@ crxパッケージ化されたアドオンをGPOでインストールした状�
 6. 2.で開いたタブのアドレスバーに https://www.google.com を入力し、Enterする。
    * 期待される結果：
      * Chromeでタブが開かれ、https://www.google.com/ が読み込まれる。
+     * (Windows Enterprise マルチセッションのみ) ユーザーBでChromeへのリダイレクトが発生しない。
      * Edgeのタブは閉じたりページ遷移したりせず新規タブがそのまま表示される。
 
 
@@ -888,3 +937,4 @@ crxパッケージ化されたアドオンをGPOでインストールした状�
    * 期待される結果：
      * 一瞬Edgeウインドウが開いたあと、すぐに閉じる
      * Chromeでタブが開かれ、https://www.google.com/ が読み込まれる。
+     * (Windows Enterprise マルチセッションのみ) ユーザーBでChromeのタブが開かない。
