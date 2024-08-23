@@ -107,105 +107,105 @@ Windows Enterprise マルチセッションのテストをする場合は、以�
 2. リンクによるEdgeからChromeへのページ遷移の検証：
    1. Edge→Chromeの検証のため、Edgeで https://groonga.org/ja/ を開く。
       * 期待される結果：
-        * Edge上で https://groonga.org/ja/ が読み込まれる。
+        * [ ] Edge上で https://groonga.org/ja/ が読み込まれる。
    2. `English` のリンクをクリックする。
       * 期待される結果：
-        * 空白のページが現在のタブに読み込まれ、すぐに元のページに戻る。
-        * Chromeでタブが開かれ、https://groonga.org/ が読み込まれる。
-        * (Windows Enterprise マルチセッションのみ) ユーザーBでEdgeやChromeが開いていない。
+        * [ ] 空白のページが現在のタブに読み込まれ、すぐに元のページに戻る。
+        * [ ] Chromeでタブが開かれ、https://groonga.org/ が読み込まれる。
+        * [ ] (Windows Enterprise マルチセッションのみ) ユーザーBでEdgeやChromeが開いていない。
    3. Edge（IEモード）→Chromeの検証のため、Edgeで https://piro.sakura.ne.jp/apps/jspanel.html を開く。
       * 期待される結果：
-        * EdgeのタブがIEモードに切り替わる。
+        * [ ] EdgeのタブがIEモードに切り替わる。
    4. 以下のスクリプトを貼り付けて実行する。
       ```
       location.href='https://groonga.org/ja/';
       ```
       * 期待される結果：
-        * EdgeのIEモードのタブで https://groonga.org/ja/ が読み込まれる。
+        * [ ] EdgeのIEモードのタブで https://groonga.org/ja/ が読み込まれる。
    5. `English` のリンクをクリックする。
       * 期待される結果：
-        * EdgeのIEモードのタブで https://groonga.org/ が読み込まれる。（Manifest V2版と非互換の動作だが、仕様上不可避な挙動）
-        * Chromeでタブが開かれ、https://groonga.org/ が読み込まれる。
-        * (Windows Enterprise マルチセッションのみ) ユーザーBでEdgeやChromeが開いていない。
+        * [ ] EdgeのIEモードのタブで https://groonga.org/ が読み込まれる。（Manifest V2版と非互換の動作だが、仕様上不可避な挙動）
+        * [ ] Chromeでタブが開かれ、https://groonga.org/ が読み込まれる。
+        * [ ] (Windows Enterprise マルチセッションのみ) ユーザーBでEdgeやChromeが開いていない。
 3. JavaScriptによるEdgeからChromeへのページ遷移の検証：
    1. Edge→Chromeの検証のため、Edgeで https://piro.sakura.ne.jp/apps/jspanel を開く。
       * 期待される結果：
-        * Edge上で https://piro.sakura.ne.jp/apps/jspanel が読み込まれる。
+        * [ ] Edge上で https://piro.sakura.ne.jp/apps/jspanel が読み込まれる。
    2. 以下のスクリプトを貼り付けて実行する。
       ```
       window.open('https://example.net/', '_blank');
       ```
       * 期待される結果：
-        * Chromeでタブが開かれ、https://example.net/ が読み込まれる。
-        * 空白のタブがEdge上に残っていない。
-        * (Windows Enterprise マルチセッションのみ) ユーザーBでEdgeやChromeが開いていない。
+        * [ ] Chromeでタブが開かれ、https://example.net/ が読み込まれる。
+        * [ ] 空白のタブがEdge上に残っていない。
+        * [ ] (Windows Enterprise マルチセッションのみ) ユーザーBでEdgeやChromeが開いていない。
    3. 以下のスクリプトを貼り付けて実行する。
       ```
       window.open('https://example.net/', '_blank', 'toolbar=no');
       ```
       * 期待される結果：
-        * Chromeでタブが開かれ、https://example.net/ が読み込まれる。
-        * 空白のポップアップウィンドウがEdge上に残っていない。
-        * (Windows Enterprise マルチセッションのみ) ユーザーBでEdgeやChromeが開いていない。
+        * [ ] Chromeでタブが開かれ、https://example.net/ が読み込まれる。
+        * [ ] 空白のポップアップウィンドウがEdge上に残っていない。
+        * [ ] (Windows Enterprise マルチセッションのみ) ユーザーBでEdgeやChromeが開いていない。
 4. リンクによるChromeからEdgeへのページ遷移の検証 (`@EXCLUDE_GROUP`を使用するためThinBridge v4.2.0.0以降が必要)：
    1. Chrome→Edgeの検証のため、Chromeで https://groonga.org/ を開く。
       * 期待される結果：
-        * Chrome上で https://groonga.org/ が読み込まれる。
+        * [ ] Chrome上で https://groonga.org/ が読み込まれる。
    2. `日本語` リンクをクリックする。
       * 期待される結果：
-        * 空白のページが現在のタブに読み込まれ、すぐに元のページに戻る。
-        * Edgeでタブが開かれ、https://groonga.org/ja/ が読み込まれる。
-        * (Windows Enterprise マルチセッションのみ) ユーザーBでEdgeやChromeが開いていない。
+        * [ ] 空白のページが現在のタブに読み込まれ、すぐに元のページに戻る。
+        * [ ] Edgeでタブが開かれ、https://groonga.org/ja/ が読み込まれる。
+        * [ ] (Windows Enterprise マルチセッションのみ) ユーザーBでEdgeやChromeが開いていない。
 5. JavaScriptによるChromeからEdgeへのページ遷移の検証：
    1. Chrome→Edgeの検証のため、Chromeで https://www.piro.sakura.ne.jp/apps/jspanel.html を開く。
       * 期待される結果：
-        * 証明書の警告が表示される。
-        * 警告を無視して先に進むと、Chrome上で https://www.piro.sakura.ne.jp/apps/jspanel.html が読み込まれる。
+        * [ ] 証明書の警告が表示される。
+        * [ ] 警告を無視して先に進むと、Chrome上で https://www.piro.sakura.ne.jp/apps/jspanel.html が読み込まれる。
    2. 以下のスクリプトを貼り付けて実行する。
       ```
       window.open('https://example.com/', '_blank');
       ```
       * 期待される結果：
-        * Edgeでタブが開かれ、 https://example.com/ が読み込まれる。
-        * 空白のタブがChrome上に残っていない。
-        * (Windows Enterprise マルチセッションのみ) ユーザーBでEdgeやChromeが開いていない。
+        * [ ] Edgeでタブが開かれ、 https://example.com/ が読み込まれる。
+        * [ ] 空白のタブがChrome上に残っていない。
+        * [ ] (Windows Enterprise マルチセッションのみ) ユーザーBでEdgeやChromeが開いていない。
    3. 以下のスクリプトを貼り付けて実行する。
       ```
       window.open('https://example.com/', '_blank', 'toolbar=no');
       ```
       * 期待される結果：
-        * Edgeでタブが開かれ、https://example.com/ が読み込まれる。
-        * 空白のポップアップウィンドウがChrome上に残っていない。
-        * (Windows Enterprise マルチセッションのみ) ユーザーBでEdgeやChromeが開いていない。
+        * [ ] Edgeでタブが開かれ、https://example.com/ が読み込まれる。
+        * [ ] 空白のポップアップウィンドウがChrome上に残っていない。
+        * [ ] (Windows Enterprise マルチセッションのみ) ユーザーBでEdgeやChromeが開いていない。
 6. EdgeのIEモードのタブから開かれたポップアップウィンドウからのページ遷移の検証：
    1. Edgeで https://piro.sakura.ne.jp/apps/jspanel.html を開く。
       * 期待される結果：
-        * タブがIEモードに切り替わる。
+        * [ ] タブがIEモードに切り替わる。
    2. 以下のスクリプトを貼り付けて実行する。
       ```
       window.open('https://example.net/', '_blank', 'toolbar=no');
       ```
       * 期待される結果：
-        * IEモードのポップアップウィンドウが開かれるがすぐ閉じる。
-        * Chrome上でhttps://example.net/ が読み込まれる。
-        * (Windows Enterprise マルチセッションのみ) ユーザーBでEdgeやChromeが開いていない。
+        * [ ] IEモードのポップアップウィンドウが開かれるがすぐ閉じる。
+        * [ ] Chrome上でhttps://example.net/ が読み込まれる。
+        * [ ] (Windows Enterprise マルチセッションのみ) ユーザーBでEdgeやChromeが開いていない。
 7. リダイレクト対象のURLを新規タブで開いた際の挙動の検証：
    1. Edgeで https://example.com/ を開く。
       * 期待される結果：
-        * Edge上で https://example.com/ が読み込まれる。
+        * [ ] Edge上で https://example.com/ が読み込まれる。
    2. `More information...` のリンクをミドルクリックする。
       * 期待される結果：
-        * Chrome上で https://www.iana.org/help/example-domains が開かれる。
-        * 空白のタブがEdge上に残っていない。
-        * (Windows Enterprise マルチセッションのみ) ユーザーBでEdgeやChromeが開いていない。
+        * [ ] Chrome上で https://www.iana.org/help/example-domains が開かれる。
+        * [ ] 空白のタブがEdge上に残っていない。
+        * [ ] (Windows Enterprise マルチセッションのみ) ユーザーBでEdgeやChromeが開いていない。
    3. Chromeで https://www.piro.sakura.ne.jp/ を開く。
       * 期待される結果：
-        * Chrome上で https://www.piro.sakura.ne.jp/ が読み込まれる。
+        * [ ] Chrome上で https://www.piro.sakura.ne.jp/ が読み込まれる。
    4. ページ最下部の `outsider reflex` のリンクをミドルクリックする。
       * 期待される結果：
-        * Edge上で https://piro.sakura.ne.jp/ が開かれる。
-        * 空白のタブがChrome上に残っていない。
-        * (Windows Enterprise マルチセッションのみ) ユーザーBでEdgeやChromeが開いていない。
+        * [ ] Edge上で https://piro.sakura.ne.jp/ が開かれる。
+        * [ ] 空白のタブがChrome上に残っていない。
+        * [ ] (Windows Enterprise マルチセッションのみ) ユーザーBでEdgeやChromeが開いていない。
 8. Edge、Chromeを終了する。
 
 ### BHO有効時のIEモードのタブの挙動を含む、Manifest V3での動作
@@ -231,53 +231,53 @@ Windows Enterprise マルチセッションのテストをする場合は、以�
 2. リンクによるEdgeからChromeへのページ遷移の検証：
    1. Edge（IEモード）→Chromeの検証のため、Edgeで https://piro.sakura.ne.jp/apps/jspanel.html を開く。
       * 期待される結果：
-        * EdgeのタブがIEモードに切り替わる。
+        * [ ] EdgeのタブがIEモードに切り替わる。
    2. 以下のスクリプトを貼り付けて実行する。
       ```
       location.href='https://groonga.org/ja/';
       ```
       * 期待される結果：
-        * EdgeのIEモードのタブで https://groonga.org/ja/ が読み込まれる。
+        * [ ] EdgeのIEモードのタブで https://groonga.org/ja/ が読み込まれる。
    3. `English` のリンクをクリックする。
       * 期待される結果：
-        * EdgeのIEモードのタブがページ遷移しないでそのまま維持される。
-        * Chromeでタブが開かれ、https://groonga.org/ が読み込まれる。
-        * (Windows Enterprise マルチセッションのみ) ユーザーBでEdgeやChromeが開いていない。
+        * [ ] EdgeのIEモードのタブがページ遷移しないでそのまま維持される。
+        * [ ] Chromeでタブが開かれ、https://groonga.org/ が読み込まれる。
+        * [ ] (Windows Enterprise マルチセッションのみ) ユーザーBでEdgeやChromeが開いていない。
 2. EdgeのIEモードのタブから開かれたポップアップウィンドウからのページ遷移の検証：
    1. Edgeで https://piro.sakura.ne.jp/apps/jspanel.html を開く。
       * 期待される結果：
-        * タブがIEモードに切り替わる。
+        * [ ] タブがIEモードに切り替わる。
    2. 以下のスクリプトを貼り付けて実行する。
       ```
       window.open('https://example.net/', '_blank', 'toolbar=no');
       ```
       * 期待される結果：
-        * Chromeでタブが開かれ、https://example.net/ が読み込まれる。
-        * IEモードのポップアップウィンドウが残っていない。
-        * (Windows Enterprise マルチセッションのみ) ユーザーBでEdgeやChromeが開いていない。
+        * [ ] Chromeでタブが開かれ、https://example.net/ が読み込まれる。
+        * [ ] IEモードのポップアップウィンドウが残っていない。
+        * [ ] (Windows Enterprise マルチセッションのみ) ユーザーBでEdgeやChromeが開いていない。
 3. クエリーパラメーターを含むURLをリダイレクトする際の挙動の検証：
    1. Edgeの通常タブ→Chromeの検証のため、Edgeで https://piro.sakura.ne.jp/apps/jspanel を開く。
       * 期待される結果：
-        * Edge上で https://piro.sakura.ne.jp/apps/jspanel が読み込まれる。
+        * [ ] Edge上で https://piro.sakura.ne.jp/apps/jspanel が読み込まれる。
    2. 以下のスクリプトを貼り付けて実行する。
       ```
       window.open('https://example.net/?query-parameter=value', '_blank');
       ```
       * 期待される結果：
-        * Chromeでタブが開かれ、https://example.net/?query-parameter=value が読み込まれる。
-        * 空白のタブがEdge上に残っていない。
-        * (Windows Enterprise マルチセッションのみ) ユーザーBでEdgeやChromeが開いていない。
+        * [ ] Chromeでタブが開かれ、https://example.net/?query-parameter=value が読み込まれる。
+        * [ ] 空白のタブがEdge上に残っていない。
+        * [ ] (Windows Enterprise マルチセッションのみ) ユーザーBでEdgeやChromeが開いていない。
    3. EdgeのIEモードのタブ→Chromeの検証のため、Edgeで https://piro.sakura.ne.jp/apps/jspanel.html を開く。
       * 期待される結果：
-        * Edge上で https://piro.sakura.ne.jp/apps/jspanel.html が読み込まれる。
+        * [ ] Edge上で https://piro.sakura.ne.jp/apps/jspanel.html が読み込まれる。
    4. 以下のスクリプトを貼り付けて実行する。
       ```
       location.href = 'https://example.net/?query-parameter=value';
       ```
       * 期待される結果：
-        * Chromeでタブが開かれ、https://example.net/?query-parameter=value が読み込まれる。
-        * 空白のタブがEdge上に残っていない。
-        * (Windows Enterprise マルチセッションのみ) ユーザーBでEdgeやChromeが開いていない。
+        * [ ] Chromeでタブが開かれ、https://example.net/?query-parameter=value が読み込まれる。
+        * [ ] 空白のタブがEdge上に残っていない。
+        * [ ] (Windows Enterprise マルチセッションのみ) ユーザーBでEdgeやChromeが開いていない。
 4. Edge、Chromeを終了する。
 
 
@@ -303,43 +303,43 @@ Windows Enterprise マルチセッションのテストをする場合は、以�
 2. リンクによるページ遷移でのEdge上での閲覧継続の検証：
    1. Edge（通常モード）→Edge（通常モード）の検証のため、Edgeで新しいタブで https://example.com/ を開く。
       * 期待される結果：
-        * Edgeの通常タブで https://example.com/ が読み込まれる。
-        * ThinBridgeによるリダイレクトが発生しない。
+        * [ ] Edgeの通常タブで https://example.com/ が読み込まれる。
+        * [ ] ThinBridgeによるリダイレクトが発生しない。
    2. `More information...` のリンクをクリックする。
       * 期待される結果：
-        * Edgeの通常タブで https://www.iana.org/help/example-domains が開かれる。
-        * ThinBridgeによるリダイレクトが発生しない。
+        * [ ] Edgeの通常タブで https://www.iana.org/help/example-domains が開かれる。
+        * [ ] ThinBridgeによるリダイレクトが発生しない。
    3. Edge（通常モード）→Edge（IEモード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
       * 追加： https://www.iana.org/help/example-domains
    4. Edgeで新しいタブで https://example.com/ を開く。
       * 期待される結果：
-        * Edgeの通常タブで https://example.com/ が読み込まれる。
-        * ThinBridgeによるリダイレクトが発生しない。
+        * [ ] Edgeの通常タブで https://example.com/ が読み込まれる。
+        * [ ] ThinBridgeによるリダイレクトが発生しない。
    5. `More information...` のリンクをクリックする。
       * 期待される結果：
-        * タブがIEモードに切り替わり、 https://www.iana.org/help/example-domains が開かれる。
-        * ThinBridgeによるリダイレクトが発生しない。
+        * [ ] タブがIEモードに切り替わり、 https://www.iana.org/help/example-domains が開かれる。
+        * [ ] ThinBridgeによるリダイレクトが発生しない。
    6. Edge（IEモード）→Edge（通常モード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
       * 削除： https://www.iana.org/help/example-domains
       * 追加： https://example.com/
    7. Edgeで新しいタブで https://example.com/ を開く。
       * 期待される結果：
-        * EdgeのIEモードのタブで https://example.com/ が読み込まれる。
-        * ThinBridgeによるリダイレクトが発生しない。
+        * [ ] EdgeのIEモードのタブで https://example.com/ が読み込まれる。
+        * [ ] ThinBridgeによるリダイレクトが発生しない。
    8. アドレスバーに https://www.iana.org/help/example-domains を入力し、Enterする。
       * 期待される結果：
-        * タブが通常モードに切り替わり、 https://www.iana.org/help/example-domains が開かれる。
-        * ThinBridgeによるリダイレクトが発生しない。
+        * [ ] タブが通常モードに切り替わり、 https://www.iana.org/help/example-domains が開かれる。
+        * [ ] ThinBridgeによるリダイレクトが発生しない。
    9. Edge（IEモード）→Edge（IEモード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
       * 追加： https://www.iana.org/help/example-domains
    7. Edgeで新しいタブで https://example.com/ を開く。
       * 期待される結果：
-        * EdgeのIEモードのタブで https://example.com/ が読み込まれる。
-        * ThinBridgeによるリダイレクトが発生しない。
+        * [ ] EdgeのIEモードのタブで https://example.com/ が読み込まれる。
+        * [ ] ThinBridgeによるリダイレクトが発生しない。
    8. アドレスバーに https://www.iana.org/help/example-domains を入力し、Enterする。
       * 期待される結果：
-        * EdgeのIEモードのタブで https://www.iana.org/help/example-domains が読み込まれる。
-        * ThinBridgeによるリダイレクトが発生しない。
+        * [ ] EdgeのIEモードのタブで https://www.iana.org/help/example-domains が読み込まれる。
+        * [ ] ThinBridgeによるリダイレクトが発生しない。
 3. Edgeを終了する。
 
 
@@ -365,177 +365,177 @@ Windows Enterprise マルチセッションのテストをする場合は、以�
 2. EdgeとIEの両方に該当するURLの動作の検証：
    1. Edge（通常モード）→Edge（通常モード）の検証のため、Edgeで新しいタブで https://example.com/ を開く。
       * 期待される結果：
-        * Edgeの通常タブで https://example.com/ が読み込まれる。
-        * ThinBridgeによるリダイレクトが発生しない。
+        * [ ] Edgeの通常タブで https://example.com/ が読み込まれる。
+        * [ ] ThinBridgeによるリダイレクトが発生しない。
    2. `More information...` のリンクをクリックする。
       * 期待される結果：
-        * Edgeの通常タブで https://www.iana.org/help/example-domains が開かれる。
-        * ThinBridgeによるリダイレクトが発生しない。
+        * [ ] Edgeの通常タブで https://www.iana.org/help/example-domains が開かれる。
+        * [ ] ThinBridgeによるリダイレクトが発生しない。
    3. Edge（通常モード）→Edge（IEモード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
       * 追加： https://www.iana.org/help/example-domains
    4. Edgeで新しいタブで https://example.com/ を開く。
       * 期待される結果：
-        * Edgeの通常タブで https://example.com/ が読み込まれる。
-        * ThinBridgeによるリダイレクトが発生しない。
+        * [ ] Edgeの通常タブで https://example.com/ が読み込まれる。
+        * [ ] ThinBridgeによるリダイレクトが発生しない。
    5. `More information...` のリンクをクリックする。
       * 期待される結果：
-        * タブがIEモードに切り替わり、 https://www.iana.org/help/example-domains が開かれる。
-        * ThinBridgeによるリダイレクトが発生しない。
+        * [ ] タブがIEモードに切り替わり、 https://www.iana.org/help/example-domains が開かれる。
+        * [ ] ThinBridgeによるリダイレクトが発生しない。
    6. Edge（IEモード）→Edge（通常モード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
       * 削除： https://www.iana.org/help/example-domains
       * 追加： https://example.com/
    7. Edgeで新しいタブで https://example.com/ を開く。
       * 期待される結果：
-        * EdgeのIEモードのタブで https://example.com/ が読み込まれる。
-        * ThinBridgeによるリダイレクトが発生しない。
+        * [ ] EdgeのIEモードのタブで https://example.com/ が読み込まれる。
+        * [ ] ThinBridgeによるリダイレクトが発生しない。
    8. アドレスバーに https://www.iana.org/help/example-domains を入力し、Enterする。
       * 期待される結果：
-        * タブが通常モードに切り替わり、 https://www.iana.org/help/example-domains が開かれる。
-        * ThinBridgeによるリダイレクトが発生しない。
+        * [ ] タブが通常モードに切り替わり、 https://www.iana.org/help/example-domains が開かれる。
+        * [ ] ThinBridgeによるリダイレクトが発生しない。
    9. Edge（IEモード）→Edge（IEモード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
       * 追加： https://www.iana.org/help/example-domains
    7. Edgeで新しいタブで https://example.com/ を開く。
       * 期待される結果：
-        * EdgeのIEモードのタブで https://example.com/ が読み込まれる。
-        * ThinBridgeによるリダイレクトが発生しない。
+        * [ ] EdgeのIEモードのタブで https://example.com/ が読み込まれる。
+        * [ ] ThinBridgeによるリダイレクトが発生しない。
    8. `More information...` のリンクをクリックする。
       * 期待される結果：
-        * EdgeのIEモードのタブで https://www.iana.org/help/example-domains が読み込まれる。
-        * ThinBridgeによるリダイレクトが発生しない。
+        * [ ] EdgeのIEモードのタブで https://www.iana.org/help/example-domains が読み込まれる。
+        * [ ] ThinBridgeによるリダイレクトが発生しない。
 3. IEのみに該当するURLの動作の検証：
    1. Edge（通常モード）→Edge（通常モード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
       * 削除： 全項目
    2. Edgeで新しいタブで https://groonga.org/related-projects.html を開く。
       * 期待される結果：
-        * Edgeの通常タブで https://groonga.org/related-projects.html が読み込まれる。
-        * ThinBridgeによるリダイレクトが発生しない。
+        * [ ] Edgeの通常タブで https://groonga.org/related-projects.html が読み込まれる。
+        * [ ] ThinBridgeによるリダイレクトが発生しない。
    3. `Mroonga` のリンクをクリックする。
       * 期待される結果：
-        * タブがページ遷移しない。
-        * ThinBridgeによるリダイレクトが発生し、 https://mroonga.org/ がIEで開かれるか、IEの起動を試みている旨を示すダイアログが表示される。
-        * (Windows Enterprise マルチセッションのみ) ユーザーBでIEへのリダイレクトが発生しない。
+        * [ ] タブがページ遷移しない。
+        * [ ] ThinBridgeによるリダイレクトが発生し、 https://mroonga.org/ がIEで開かれるか、IEの起動を試みている旨を示すダイアログが表示される。
+        * [ ] (Windows Enterprise マルチセッションのみ) ユーザーBでIEへのリダイレクトが発生しない。
    4. Edge（通常モード）→Edge（IEモード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
       * 追加： https://mroonga.org/
    5. Edgeで新しいタブで https://groonga.org/related-projects.html を開く。
       * 期待される結果：
-        * Edgeの通常タブで https://groonga.org/related-projects.html が読み込まれる。
-        * ThinBridgeによるリダイレクトが発生しない。
+        * [ ] Edgeの通常タブで https://groonga.org/related-projects.html が読み込まれる。
+        * [ ] ThinBridgeによるリダイレクトが発生しない。
    6. `Mroonga` のリンクをクリックする。
       * 期待される結果：
-        * タブがIEモードに切り替わらず、ページ遷移しない。
-        * ThinBridgeによるリダイレクトが発生し、 https://mroonga.org/ がIEで開かれるか、IEの起動を試みている旨を示すダイアログが表示される。
-        * (Windows Enterprise マルチセッションのみ) ユーザーBでIEへのリダイレクトが発生しない。
+        * [ ] タブがIEモードに切り替わらず、ページ遷移しない。
+        * [ ] ThinBridgeによるリダイレクトが発生し、 https://mroonga.org/ がIEで開かれるか、IEの起動を試みている旨を示すダイアログが表示される。
+        * [ ] (Windows Enterprise マルチセッションのみ) ユーザーBでIEへのリダイレクトが発生しない。
    7. Edge（IEモード）→Edge（通常モード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
       * 削除： https://mroonga.org/
       * 追加： https://groonga.org/related-projects.html
    8. Edgeで新しいタブで https://groonga.org/related-projects.html を開く。
       * 期待される結果：
-        * EdgeのIEモードのタブで https://groonga.org/related-projects.html が読み込まれる。
-        * ThinBridgeによるリダイレクトが発生しない。
+        * [ ] EdgeのIEモードのタブで https://groonga.org/related-projects.html が読み込まれる。
+        * [ ] ThinBridgeによるリダイレクトが発生しない。
    9. アドレスバーに https://mroonga.org/ を入力し、Enterする。
       * 期待される結果：
-        * Edgeのタブがページ遷移しない。また、試行回によってはタブがThinBridgeによって閉じられる。
-        * ThinBridgeによるリダイレクトが発生し、 https://mroonga.org/ がIEで開かれるか、IEの起動を試みている旨を示すダイアログが表示される。
-        * (Windows Enterprise マルチセッションのみ) ユーザーBでIEへのリダイレクトが発生しない。
+        * [ ] Edgeのタブがページ遷移しない。また、試行回によってはタブがThinBridgeによって閉じられる。
+        * [ ] ThinBridgeによるリダイレクトが発生し、 https://mroonga.org/ がIEで開かれるか、IEの起動を試みている旨を示すダイアログが表示される。
+        * [ ] (Windows Enterprise マルチセッションのみ) ユーザーBでIEへのリダイレクトが発生しない。
    10. Edge（IEモード）→Edge（IEモード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
        * 追加： https://mroonga.org/
    11. Edgeで新しいタブで https://groonga.org/related-projects.html を開く。
        * 期待される結果：
-         * EdgeのIEモードのタブで https://groonga.org/related-projects.html が読み込まれる。
-         * ThinBridgeによるリダイレクトが発生しない。
+         * [ ] EdgeのIEモードのタブで https://groonga.org/related-projects.html が読み込まれる。
+         * [ ] ThinBridgeによるリダイレクトが発生しない。
    12. `Mroonga` のリンクをクリックする。
        * 期待される結果：
-          * Edgeのタブがページ遷移しない。
-          * ThinBridgeによるリダイレクトが発生し、 https://mroonga.org/ がIEで開かれるか、IEの起動を試みている旨を示すダイアログが表示される。
-          * (Windows Enterprise マルチセッションのみ) ユーザーBでIEへのリダイレクトが発生しない。
+          * [ ] Edgeのタブがページ遷移しない。
+          * [ ] ThinBridgeによるリダイレクトが発生し、 https://mroonga.org/ がIEで開かれるか、IEの起動を試みている旨を示すダイアログが表示される。
+          * [ ] (Windows Enterprise マルチセッションのみ) ユーザーBでIEへのリダイレクトが発生しない。
 4. 共用URL（CUSTOM18）に該当するURLの動作の検証：
    1. Edge（通常モード）→Edge（通常モード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
       * 削除： 全項目
    2. Edgeで新しいタブで https://groonga.org/related-projects.html を開く。
       * 期待される結果：
-        * Edgeの通常タブで https://groonga.org/related-projects.html が読み込まれる。
-        * ThinBridgeによるリダイレクトが発生しない。
+        * [ ] Edgeの通常タブで https://groonga.org/related-projects.html が読み込まれる。
+        * [ ] ThinBridgeによるリダイレクトが発生しない。
    3. `Rroonga` のリンクをクリックする。
       * 期待される結果：
-        * Edgeの通常タブで http://ranguba.org/#about-rroonga が開かれる。
-        * ThinBridgeによるリダイレクトが発生しない。
+        * [ ] Edgeの通常タブで http://ranguba.org/#about-rroonga が開かれる。
+        * [ ] ThinBridgeによるリダイレクトが発生しない。
    4. Edge（通常モード）→Edge（IEモード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
       * 追加： http://ranguba.org/#about-rroonga
    5. Edgeで新しいタブで https://groonga.org/related-projects.html を開く。
       * 期待される結果：
-        * Edgeの通常タブで https://groonga.org/related-projects.html が読み込まれる。
-        * ThinBridgeによるリダイレクトが発生しない。
+        * [ ] Edgeの通常タブで https://groonga.org/related-projects.html が読み込まれる。
+        * [ ] ThinBridgeによるリダイレクトが発生しない。
    6. `Rroonga` のリンクをクリックする。
       * 期待される結果：
-        * タブがIEモードに切り替わり、 http://ranguba.org/#about-rroonga が開かれる。
-        * ThinBridgeによるリダイレクトが発生しない。
+        * [ ] タブがIEモードに切り替わり、 http://ranguba.org/#about-rroonga が開かれる。
+        * [ ] ThinBridgeによるリダイレクトが発生しない。
    7. Edge（IEモード）→Edge（通常モード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
       * 削除： http://ranguba.org/#about-rroonga
       * 追加： https://groonga.org/related-projects.html
    8. Edgeで新しいタブで https://groonga.org/related-projects.html を開く。
       * 期待される結果：
-        * EdgeのIEモードのタブで https://groonga.org/related-projects.html が読み込まれる。
-        * ThinBridgeによるリダイレクトが発生しない。
+        * [ ] EdgeのIEモードのタブで https://groonga.org/related-projects.html が読み込まれる。
+        * [ ] ThinBridgeによるリダイレクトが発生しない。
    9. アドレスバーに http://ranguba.org/#about-rroonga を入力し、Enterする。
       * 期待される結果：
-        * タブが通常モードに切り替わり、 http://ranguba.org/#about-rroonga が開かれる。
-        * ThinBridgeによるリダイレクトが発生しない。
+        * [ ] タブが通常モードに切り替わり、 http://ranguba.org/#about-rroonga が開かれる。
+        * [ ] ThinBridgeによるリダイレクトが発生しない。
    10. Edge（IEモード）→Edge（IEモード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
        * 追加： http://ranguba.org/#about-rroonga
    11. Edgeで新しいタブで https://groonga.org/related-projects.html を開く。
        * 期待される結果：
-         * EdgeのIEモードのタブで https://groonga.org/related-projects.html が読み込まれる。
-         * ThinBridgeによるリダイレクトが発生しない。
+         * [ ] EdgeのIEモードのタブで https://groonga.org/related-projects.html が読み込まれる。
+         * [ ] ThinBridgeによるリダイレクトが発生しない。
    12. `Rroonga` のリンクをクリックする。
        * 期待される結果：
-         * EdgeのIEモードのタブで http://ranguba.org/#about-rroonga が読み込まれる。
-         * ThinBridgeによるリダイレクトが発生しない。
+         * [ ] EdgeのIEモードのタブで http://ranguba.org/#about-rroonga が読み込まれる。
+         * [ ] ThinBridgeによるリダイレクトが発生しない。
 5. いずれのブラウザーにも該当しないURLの動作の検証：
    1. Edge（通常モード）→Edge（通常モード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
       * 削除： 全項目
    2. Edgeで新しいタブで https://groonga.org/related-projects.html を開く。
       * 期待される結果：
-        * Edgeの通常タブで https://groonga.org/related-projects.html が読み込まれる。
-        * ThinBridgeによるリダイレクトが発生しない。
+        * [ ] Edgeの通常タブで https://groonga.org/related-projects.html が読み込まれる。
+        * [ ] ThinBridgeによるリダイレクトが発生しない。
    3. `PGroonga` のリンクをクリックする。
       * 期待される結果：
-        * Edgeのタブがページ遷移しない。
-        * ThinBridgeによるリダイレクトが発生し、「Citrixがインストールされていないか、設定されていないため起動できません。」というメッセージが表示される。
-        * (Windows Enterprise マルチセッションのみ) ユーザーBでCitrixへのリダイレクトが発生しない。
+        * [ ] Edgeのタブがページ遷移しない。
+        * [ ] ThinBridgeによるリダイレクトが発生し、「Citrixがインストールされていないか、設定されていないため起動できません。」というメッセージが表示される。
+        * [ ] (Windows Enterprise マルチセッションのみ) ユーザーBでCitrixへのリダイレクトが発生しない。
    4. Edge（通常モード）→Edge（IEモード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
       * 追加： https://pgroonga.github.io/
    5. Edgeで新しいタブで https://groonga.org/related-projects.html を開く。
       * 期待される結果：
-        * Edgeの通常タブで https://groonga.org/related-projects.html が読み込まれる。
-        * ThinBridgeによるリダイレクトが発生しない。
+        * [ ] Edgeの通常タブで https://groonga.org/related-projects.html が読み込まれる。
+        * [ ] ThinBridgeによるリダイレクトが発生しない。
    6. `PGroonga` のリンクをクリックする。
       * 期待される結果：
-        * Edgeのタブがページ遷移しない。
-        * ThinBridgeによるリダイレクトが発生し、「Citrixがインストールされていないか、設定されていないため起動できません。」というメッセージが表示される。
-        * (Windows Enterprise マルチセッションのみ) ユーザーBでCitrixへのリダイレクトが発生しない。
+        * [ ] Edgeのタブがページ遷移しない。
+        * [ ] ThinBridgeによるリダイレクトが発生し、「Citrixがインストールされていないか、設定されていないため起動できません。」というメッセージが表示される。
+        * [ ] (Windows Enterprise マルチセッションのみ) ユーザーBでCitrixへのリダイレクトが発生しない。
    7. Edge（IEモード）→Edge（通常モード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
       * 削除： https://pgroonga.github.io/
       * 追加： https://groonga.org/related-projects.html
    8. Edgeで新しいタブで https://groonga.org/related-projects.html を開く。
       * 期待される結果：
-        * EdgeのIEモードのタブで https://groonga.org/related-projects.html が読み込まれる。
-        * ThinBridgeによるリダイレクトが発生しない。
+        * [ ] EdgeのIEモードのタブで https://groonga.org/related-projects.html が読み込まれる。
+        * [ ] ThinBridgeによるリダイレクトが発生しない。
    9. アドレスバーに https://pgroonga.github.io/ を入力し、Enterする。
       * 期待される結果：
-        * Edgeのタブがページ遷移しない。また、試行回によってはタブがThinBridgeによって閉じられる。
-        * ThinBridgeによるリダイレクトが発生し、「Citrixがインストールされていないか、設定されていないため起動できません。」というメッセージが表示される。
-        * (Windows Enterprise マルチセッションのみ) ユーザーBでCitrixへのリダイレクトが発生しない。
+        * [ ] Edgeのタブがページ遷移しない。また、試行回によってはタブがThinBridgeによって閉じられる。
+        * [ ] ThinBridgeによるリダイレクトが発生し、「Citrixがインストールされていないか、設定されていないため起動できません。」というメッセージが表示される。
+        * [ ] (Windows Enterprise マルチセッションのみ) ユーザーBでCitrixへのリダイレクトが発生しない。
    10. Edge（IEモード）→Edge（IEモード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
        * 追加： https://pgroonga.github.io/
    11. Edgeで新しいタブで https://groonga.org/related-projects.html を開く。
        * 期待される結果：
-         * EdgeのIEモードのタブで https://groonga.org/related-projects.html が読み込まれる。
-         * ThinBridgeによるリダイレクトが発生しない。
+         * [ ] EdgeのIEモードのタブで https://groonga.org/related-projects.html が読み込まれる。
+         * [ ] ThinBridgeによるリダイレクトが発生しない。
    12. `PGroonga` のリンクをクリックする。
        * 期待される結果：
-         * Edgeのタブがページ遷移しない。
-         * ThinBridgeによるリダイレクトが発生し、「Citrixがインストールされていないか、設定されていないため起動できません。」というメッセージが表示される。
-         * (Windows Enterprise マルチセッションのみ) ユーザーBでCitrixへのリダイレクトが発生しない。
+         * [ ] Edgeのタブがページ遷移しない。
+         * [ ] ThinBridgeによるリダイレクトが発生し、「Citrixがインストールされていないか、設定されていないため起動できません。」というメッセージが表示される。
+         * [ ] (Windows Enterprise マルチセッションのみ) ユーザーBでCitrixへのリダイレクトが発生しない。
 6. Edgeを終了する。
 
 ### EdgeのIEモード境界をまたぐページ遷移におけるDefault設定なしの動作
@@ -560,173 +560,173 @@ Windows Enterprise マルチセッションのテストをする場合は、以�
 2. EdgeとIEの両方に該当するURLの動作の検証：
    1. Edge（通常モード）→Edge（通常モード）の検証のため、Edgeで新しいタブで https://example.com/ を開く。
       * 期待される結果：
-        * Edgeの通常タブで https://example.com/ が読み込まれる。
-        * ThinBridgeによるリダイレクトが発生しない。
+        * [ ] Edgeの通常タブで https://example.com/ が読み込まれる。
+        * [ ] ThinBridgeによるリダイレクトが発生しない。
    2. `More information...` のリンクをクリックする。
       * 期待される結果：
-        * Edgeの通常タブで https://www.iana.org/help/example-domains が開かれる。
-        * ThinBridgeによるリダイレクトが発生しない。
+        * [ ] Edgeの通常タブで https://www.iana.org/help/example-domains が開かれる。
+        * [ ] ThinBridgeによるリダイレクトが発生しない。
    3. Edge（通常モード）→Edge（IEモード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
       * 追加： https://www.iana.org/help/example-domains
    4. Edgeで新しいタブで https://example.com/ を開く。
       * 期待される結果：
-        * Edgeの通常タブで https://example.com/ が読み込まれる。
-        * ThinBridgeによるリダイレクトが発生しない。
+        * [ ] Edgeの通常タブで https://example.com/ が読み込まれる。
+        * [ ] ThinBridgeによるリダイレクトが発生しない。
    5. `More information...` のリンクをクリックする。
       * 期待される結果：
-        * タブがIEモードに切り替わり、 https://www.iana.org/help/example-domains が開かれる。
-        * ThinBridgeによるリダイレクトが発生しない。
+        * [ ] タブがIEモードに切り替わり、 https://www.iana.org/help/example-domains が開かれる。
+        * [ ] ThinBridgeによるリダイレクトが発生しない。
    6. Edge（IEモード）→Edge（通常モード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
       * 削除： https://www.iana.org/help/example-domains
       * 追加： https://example.com/
    7. Edgeで新しいタブで https://example.com/ を開く。
       * 期待される結果：
-        * EdgeのIEモードのタブで https://example.com/ が読み込まれる。
-        * ThinBridgeによるリダイレクトが発生しない。
+        * [ ] EdgeのIEモードのタブで https://example.com/ が読み込まれる。
+        * [ ] ThinBridgeによるリダイレクトが発生しない。
    8. アドレスバーに https://www.iana.org/help/example-domains を入力し、Enterする。
       * 期待される結果：
-        * タブが通常モードに切り替わり、 https://www.iana.org/help/example-domains が開かれる。
-        * ThinBridgeによるリダイレクトが発生しない。
+        * [ ] タブが通常モードに切り替わり、 https://www.iana.org/help/example-domains が開かれる。
+        * [ ] ThinBridgeによるリダイレクトが発生しない。
    9. Edge（IEモード）→Edge（IEモード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
       * 追加： https://www.iana.org/help/example-domains
    7. Edgeで新しいタブで https://example.com/ を開く。
       * 期待される結果：
-        * EdgeのIEモードのタブで https://example.com/ が読み込まれる。
-        * ThinBridgeによるリダイレクトが発生しない。
+        * [ ] EdgeのIEモードのタブで https://example.com/ が読み込まれる。
+        * [ ] ThinBridgeによるリダイレクトが発生しない。
    8. `More information...` のリンクをクリックする。
       * 期待される結果：
-        * EdgeのIEモードのタブで https://www.iana.org/help/example-domains が読み込まれる。
-        * ThinBridgeによるリダイレクトが発生しない。
+        * [ ] EdgeのIEモードのタブで https://www.iana.org/help/example-domains が読み込まれる。
+        * [ ] ThinBridgeによるリダイレクトが発生しない。
 3. IEのみに該当するURLの動作の検証：
    1. Edge（通常モード）→Edge（通常モード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
       * 削除： 全項目
    2. Edgeで新しいタブで https://groonga.org/related-projects.html を開く。
       * 期待される結果：
-        * Edgeの通常タブで https://groonga.org/related-projects.html が読み込まれる。
-        * ThinBridgeによるリダイレクトが発生しない。
+        * [ ] Edgeの通常タブで https://groonga.org/related-projects.html が読み込まれる。
+        * [ ] ThinBridgeによるリダイレクトが発生しない。
    3. `Mroonga` のリンクをクリックする。
       * 期待される結果：
-        * Edgeのタブがページ遷移しない。
-        * ThinBridgeによるリダイレクトが発生し、 https://mroonga.org/ がIEで開かれるか、IEの起動を試みている旨を示すダイアログが表示される。
-        * (Windows Enterprise マルチセッションのみ) ユーザーBでIEへのリダイレクトが発生しない。
+        * [ ] Edgeのタブがページ遷移しない。
+        * [ ] ThinBridgeによるリダイレクトが発生し、 https://mroonga.org/ がIEで開かれるか、IEの起動を試みている旨を示すダイアログが表示される。
+        * [ ] (Windows Enterprise マルチセッションのみ) ユーザーBでIEへのリダイレクトが発生しない。
    4. Edge（通常モード）→Edge（IEモード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
       * 追加： https://mroonga.org/
    5. Edgeで新しいタブで https://groonga.org/related-projects.html を開く。
       * 期待される結果：
-        * Edgeの通常タブで https://groonga.org/related-projects.html が読み込まれる。
-        * ThinBridgeによるリダイレクトが発生しない。
+        * [ ] Edgeの通常タブで https://groonga.org/related-projects.html が読み込まれる。
+        * [ ] ThinBridgeによるリダイレクトが発生しない。
    6. `Mroonga` のリンクをクリックする。
       * 期待される結果：
-        * タブがIEモードに切り替わらず、ページ遷移しない。
-        * ThinBridgeによるリダイレクトが発生し、 https://mroonga.org/ がIEで開かれるか、IEの起動を試みている旨を示すダイアログが表示される。
-        * (Windows Enterprise マルチセッションのみ) ユーザーBでIEへのリダイレクトが発生しない。
+        * [ ] タブがIEモードに切り替わらず、ページ遷移しない。
+        * [ ] ThinBridgeによるリダイレクトが発生し、 https://mroonga.org/ がIEで開かれるか、IEの起動を試みている旨を示すダイアログが表示される。
+        * [ ] (Windows Enterprise マルチセッションのみ) ユーザーBでIEへのリダイレクトが発生しない。
    7. Edge（IEモード）→Edge（通常モード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
       * 削除： https://mroonga.org/
       * 追加： https://groonga.org/related-projects.html
    8. Edgeで新しいタブで https://groonga.org/related-projects.html を開く。
       * 期待される結果：
-        * EdgeのIEモードのタブで https://groonga.org/related-projects.html が読み込まれる。
-        * ThinBridgeによるリダイレクトが発生しない。
+        * [ ] EdgeのIEモードのタブで https://groonga.org/related-projects.html が読み込まれる。
+        * [ ] ThinBridgeによるリダイレクトが発生しない。
    9. アドレスバーに https://mroonga.org/ を入力し、Enterする。
       * 期待される結果：
-        * Edgeのタブがページ遷移しない。また、試行回によってはタブがThinBridgeによって閉じられる。
-        * ThinBridgeによるリダイレクトが発生し、 https://mroonga.org/ がIEで開かれるか、IEの起動を試みている旨を示すダイアログが表示される。
-        * (Windows Enterprise マルチセッションのみ) ユーザーBでIEへのリダイレクトが発生しない。
+        * [ ] Edgeのタブがページ遷移しない。また、試行回によってはタブがThinBridgeによって閉じられる。
+        * [ ] ThinBridgeによるリダイレクトが発生し、 https://mroonga.org/ がIEで開かれるか、IEの起動を試みている旨を示すダイアログが表示される。
+        * [ ] (Windows Enterprise マルチセッションのみ) ユーザーBでIEへのリダイレクトが発生しない。
    10. Edge（IEモード）→Edge（IEモード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
        * 追加： https://mroonga.org/
    11. Edgeで新しいタブで https://groonga.org/related-projects.html を開く。
        * 期待される結果：
-         * EdgeのIEモードのタブで https://groonga.org/related-projects.html が読み込まれる。
-         * ThinBridgeによるリダイレクトが発生しない。
+         * [ ] EdgeのIEモードのタブで https://groonga.org/related-projects.html が読み込まれる。
+         * [ ] ThinBridgeによるリダイレクトが発生しない。
    12. `Mroonga` のリンクをクリックする。
        * 期待される結果：
-          * Edgeのタブがページ遷移しない。
-          * ThinBridgeによるリダイレクトが発生し、 https://mroonga.org/ がIEで開かれるか、IEの起動を試みている旨を示すダイアログが表示される。
-          * (Windows Enterprise マルチセッションのみ) ユーザーBでIEへのリダイレクトが発生しない。
+          * [ ] Edgeのタブがページ遷移しない。
+          * [ ] ThinBridgeによるリダイレクトが発生し、 https://mroonga.org/ がIEで開かれるか、IEの起動を試みている旨を示すダイアログが表示される。
+          * [ ] (Windows Enterprise マルチセッションのみ) ユーザーBでIEへのリダイレクトが発生しない。
 4. 共用URL（CUSTOM18）に該当するURLの動作の検証：
    1. Edge（通常モード）→Edge（通常モード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
       * 削除： 全項目
    2. Edgeで新しいタブで https://groonga.org/related-projects.html を開く。
       * 期待される結果：
-        * Edgeの通常タブで https://groonga.org/related-projects.html が読み込まれる。
-        * ThinBridgeによるリダイレクトが発生しない。
+        * [ ] Edgeの通常タブで https://groonga.org/related-projects.html が読み込まれる。
+        * [ ] ThinBridgeによるリダイレクトが発生しない。
    3. `Rroonga` のリンクをクリックする。
       * 期待される結果：
-        * Edgeの通常タブで http://ranguba.org/#about-rroonga が開かれる。
-        * ThinBridgeによるリダイレクトが発生しない。
+        * [ ] Edgeの通常タブで http://ranguba.org/#about-rroonga が開かれる。
+        * [ ] ThinBridgeによるリダイレクトが発生しない。
    4. Edge（通常モード）→Edge（IEモード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
       * 追加： http://ranguba.org/#about-rroonga
    5. Edgeで新しいタブで https://groonga.org/related-projects.html を開く。
       * 期待される結果：
-        * Edgeの通常タブで https://groonga.org/related-projects.html が読み込まれる。
-        * ThinBridgeによるリダイレクトが発生しない。
+        * [ ] Edgeの通常タブで https://groonga.org/related-projects.html が読み込まれる。
+        * [ ] ThinBridgeによるリダイレクトが発生しない。
    6. `Rroonga` のリンクをクリックする。
       * 期待される結果：
-        * タブがIEモードに切り替わり、 http://ranguba.org/#about-rroonga が開かれる。
-        * ThinBridgeによるリダイレクトが発生しない。
+        * [ ] タブがIEモードに切り替わり、 http://ranguba.org/#about-rroonga が開かれる。
+        * [ ] ThinBridgeによるリダイレクトが発生しない。
    7. Edge（IEモード）→Edge（通常モード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
       * 削除： http://ranguba.org/#about-rroonga
       * 追加： https://groonga.org/related-projects.html
    8. Edgeで新しいタブで https://groonga.org/related-projects.html を開く。
       * 期待される結果：
-        * EdgeのIEモードのタブで https://groonga.org/related-projects.html が読み込まれる。
-        * ThinBridgeによるリダイレクトが発生しない。
+        * [ ] EdgeのIEモードのタブで https://groonga.org/related-projects.html が読み込まれる。
+        * [ ] ThinBridgeによるリダイレクトが発生しない。
    9. アドレスバーに http://ranguba.org/#about-rroonga を入力し、Enterする。
       * 期待される結果：
-        * タブが通常モードに切り替わり、 http://ranguba.org/#about-rroonga が開かれる。
-        * ThinBridgeによるリダイレクトが発生しない。
+        * [ ] タブが通常モードに切り替わり、 http://ranguba.org/#about-rroonga が開かれる。
+        * [ ] ThinBridgeによるリダイレクトが発生しない。
    10. Edge（IEモード）→Edge（IEモード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
        * 追加： http://ranguba.org/#about-rroonga
    11. Edgeで新しいタブで https://groonga.org/related-projects.html を開く。
        * 期待される結果：
-         * EdgeのIEモードのタブで https://groonga.org/related-projects.html が読み込まれる。
-         * ThinBridgeによるリダイレクトが発生しない。
+         * [ ] EdgeのIEモードのタブで https://groonga.org/related-projects.html が読み込まれる。
+         * [ ] ThinBridgeによるリダイレクトが発生しない。
    12. `Rroonga` のリンクをクリックする。
        * 期待される結果：
-         * EdgeのIEモードのタブで http://ranguba.org/#about-rroonga が読み込まれる。
-         * ThinBridgeによるリダイレクトが発生しない。
+         * [ ] EdgeのIEモードのタブで http://ranguba.org/#about-rroonga が読み込まれる。
+         * [ ] ThinBridgeによるリダイレクトが発生しない。
 5. いずれのブラウザーにも該当しないURLの動作の検証：
    1. Edge（通常モード）→Edge（通常モード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
       * 削除： 全項目
    2. Edgeで新しいタブで https://groonga.org/related-projects.html を開く。
       * 期待される結果：
-        * Edgeの通常タブで https://groonga.org/related-projects.html が読み込まれる。
-        * ThinBridgeによるリダイレクトが発生しない。
+        * [ ] Edgeの通常タブで https://groonga.org/related-projects.html が読み込まれる。
+        * [ ] ThinBridgeによるリダイレクトが発生しない。
    3. `PGroonga` のリンクをクリックする。
       * 期待される結果：
-        * Edgeの通常タブで https://pgroonga.github.io/ が読み込まれる。
-        * ThinBridgeによるリダイレクトが発生しない。
+        * [ ] Edgeの通常タブで https://pgroonga.github.io/ が読み込まれる。
+        * [ ] ThinBridgeによるリダイレクトが発生しない。
    4. Edge（通常モード）→Edge（IEモード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
       * 追加： https://pgroonga.github.io/
    5. Edgeで新しいタブで https://groonga.org/related-projects.html を開く。
       * 期待される結果：
-        * Edgeの通常タブで https://groonga.org/related-projects.html が読み込まれる。
-        * ThinBridgeによるリダイレクトが発生しない。
+        * [ ] Edgeの通常タブで https://groonga.org/related-projects.html が読み込まれる。
+        * [ ] ThinBridgeによるリダイレクトが発生しない。
    6. `PGroonga` のリンクをクリックする。
       * 期待される結果：
-        * EdgeのIEモードのタブで https://pgroonga.github.io/ が読み込まれる。
-        * ThinBridgeによるリダイレクトが発生しない。
+        * [ ] EdgeのIEモードのタブで https://pgroonga.github.io/ が読み込まれる。
+        * [ ] ThinBridgeによるリダイレクトが発生しない。
    7. Edge（IEモード）→Edge（通常モード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
       * 削除： https://pgroonga.github.io/
       * 追加： https://groonga.org/related-projects.html
    8. Edgeで新しいタブで https://groonga.org/related-projects.html を開く。
       * 期待される結果：
-        * EdgeのIEモードのタブで https://groonga.org/related-projects.html が読み込まれる。
-        * ThinBridgeによるリダイレクトが発生しない。
+        * [ ] EdgeのIEモードのタブで https://groonga.org/related-projects.html が読み込まれる。
+        * [ ] ThinBridgeによるリダイレクトが発生しない。
    9. アドレスバーに https://pgroonga.github.io/ を入力し、Enterする。
       * 期待される結果：
-        * Edgeの通常タブで https://pgroonga.github.io/ が読み込まれる。
-        * ThinBridgeによるリダイレクトが発生しない。
+        * [ ] Edgeの通常タブで https://pgroonga.github.io/ が読み込まれる。
+        * [ ] ThinBridgeによるリダイレクトが発生しない。
    10. Edge（IEモード）→Edge（IEモード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
        * 追加： https://pgroonga.github.io/
    11. Edgeで新しいタブで https://groonga.org/related-projects.html を開く。
        * 期待される結果：
-         * EdgeのIEモードのタブで https://groonga.org/related-projects.html が読み込まれる。
-         * ThinBridgeによるリダイレクトが発生しない。
+         * [ ] EdgeのIEモードのタブで https://groonga.org/related-projects.html が読み込まれる。
+         * [ ] ThinBridgeによるリダイレクトが発生しない。
    12. `PGroonga` のリンクをクリックする。
        * 期待される結果：
-        * EdgeのIEモードのタブで https://pgroonga.github.io/ が読み込まれる。
-        * ThinBridgeによるリダイレクトが発生しない。
+        * [ ] EdgeのIEモードのタブで https://pgroonga.github.io/ が読み込まれる。
+        * [ ] ThinBridgeによるリダイレクトが発生しない。
 6. Edgeを終了する。
 
 
@@ -768,93 +768,93 @@ crxパッケージ化されたアドオンをGPOでインストールした状�
       * 削除： 全項目
    2. Edgeで新しいタブで https://groonga.org/ を開き、`Related projects` のリンクを辿って https://groonga.org/related-projects.html を開く。
       * 期待される結果：
-        * Edgeの通常タブで https://groonga.org/related-projects.html が読み込まれる。
-        * ThinBridgeによるリダイレクトが発生しない。
+        * [ ] Edgeの通常タブで https://groonga.org/related-projects.html が読み込まれる。
+        * [ ] ThinBridgeによるリダイレクトが発生しない。
    3. `Mroonga` のリンクをクリックする。
       * 期待される結果：
-        * タブが一瞬ページ遷移するが、 https://groonga.org/related-projects.html に戻っている。
-        * ThinBridgeによるリダイレクトが発生し、 https://mroonga.org/ がIEで開かれるか、IEの起動を試みている旨を示すダイアログが表示される。
-        * (Windows Enterprise マルチセッションのみ) ユーザーBでIEへのリダイレクトが発生しない。
+        * [ ] タブが一瞬ページ遷移するが、 https://groonga.org/related-projects.html に戻っている。
+        * [ ] ThinBridgeによるリダイレクトが発生し、 https://mroonga.org/ がIEで開かれるか、IEの起動を試みている旨を示すダイアログが表示される。
+        * [ ] (Windows Enterprise マルチセッションのみ) ユーザーBでIEへのリダイレクトが発生しない。
    4. Edge（通常モード）→Edge（IEモード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
       * 追加： https://mroonga.org/
    5. Edgeで新しいタブで https://groonga.org/ を開き、`Related projects` のリンクを辿って https://groonga.org/related-projects.html を開く。
       * 期待される結果：
-        * Edgeの通常タブで https://groonga.org/related-projects.html が読み込まれる。
-        * ThinBridgeによるリダイレクトが発生しない。
+        * [ ] Edgeの通常タブで https://groonga.org/related-projects.html が読み込まれる。
+        * [ ] ThinBridgeによるリダイレクトが発生しない。
    6. `Mroonga` のリンクをクリックする。
       * 期待される結果：
-        * タブが一瞬ページ遷移するが、通常モードのタブで https://groonga.org/related-projects.html に戻っている。
-        * ThinBridgeによるリダイレクトが発生し、 https://mroonga.org/ がIEで開かれるか、IEの起動を試みている旨を示すダイアログが表示される。
-        * (Windows Enterprise マルチセッションのみ) ユーザーBでIEへのリダイレクトが発生しない。
+        * [ ] タブが一瞬ページ遷移するが、通常モードのタブで https://groonga.org/related-projects.html に戻っている。
+        * [ ] ThinBridgeによるリダイレクトが発生し、 https://mroonga.org/ がIEで開かれるか、IEの起動を試みている旨を示すダイアログが表示される。
+        * [ ] (Windows Enterprise マルチセッションのみ) ユーザーBでIEへのリダイレクトが発生しない。
    7. Edge（IEモード）→Edge（通常モード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
       * 削除： https://mroonga.org/
       * 追加： https://groonga.org/related-projects.html
    8. Edgeで新しいタブで https://groonga.org/ を開き、`Related projects` のリンクを辿って https://groonga.org/related-projects.html を開く。
       * 期待される結果：
-        * EdgeのIEモードのタブで https://groonga.org/related-projects.html が読み込まれる。
-        * ThinBridgeによるリダイレクトが発生しない。
+        * [ ] EdgeのIEモードのタブで https://groonga.org/related-projects.html が読み込まれる。
+        * [ ] ThinBridgeによるリダイレクトが発生しない。
    9. アドレスバーに https://mroonga.org/ を入力し、Enterする。
       * 期待される結果：
-        * タブが一瞬ページ遷移するが、 https://groonga.org/related-projects.html に戻っている。また、試行回によってはタブがThinBridgeによって閉じられる。
-        * ThinBridgeによるリダイレクトが発生し、 https://mroonga.org/ がIEで開かれるか、IEの起動を試みている旨を示すダイアログが表示される。
-        * (Windows Enterprise マルチセッションのみ) ユーザーBでIEへのリダイレクトが発生しない。
+        * [ ] タブが一瞬ページ遷移するが、 https://groonga.org/related-projects.html に戻っている。また、試行回によってはタブがThinBridgeによって閉じられる。
+        * [ ] ThinBridgeによるリダイレクトが発生し、 https://mroonga.org/ がIEで開かれるか、IEの起動を試みている旨を示すダイアログが表示される。
+        * [ ] (Windows Enterprise マルチセッションのみ) ユーザーBでIEへのリダイレクトが発生しない。
    10. Edge（IEモード）→Edge（IEモード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
        * 追加： https://mroonga.org/
    11. Edgeで新しいタブで https://groonga.org/ を開き、`Related projects` のリンクを辿って https://groonga.org/related-projects.html を開く。
        * 期待される結果：
-         * EdgeのIEモードのタブで https://groonga.org/related-projects.html が読み込まれる。
-         * ThinBridgeによるリダイレクトが発生しない。
+         * [ ] EdgeのIEモードのタブで https://groonga.org/related-projects.html が読み込まれる。
+         * [ ] ThinBridgeによるリダイレクトが発生しない。
    12. `Mroonga` のリンクをクリックする。
        * 期待される結果：
-         * タブが一瞬ページ遷移するが、 https://groonga.org/related-projects.html に戻っている。
-         * ThinBridgeによるリダイレクトが発生し、 https://mroonga.org/ がIEで開かれるか、IEの起動を試みている旨を示すダイアログが表示される。
-         * (Windows Enterprise マルチセッションのみ) ユーザーBでIEへのリダイレクトが発生しない。
+         * [ ] タブが一瞬ページ遷移するが、 https://groonga.org/related-projects.html に戻っている。
+         * [ ] ThinBridgeによるリダイレクトが発生し、 https://mroonga.org/ がIEで開かれるか、IEの起動を試みている旨を示すダイアログが表示される。
+         * [ ] (Windows Enterprise マルチセッションのみ) ユーザーBでIEへのリダイレクトが発生しない。
 3. いずれのブラウザーにも該当しないURLの動作の検証：
    1. Edge（通常モード）→Edge（通常モード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
       * 削除： 全項目
    2. Edgeで新しいタブで https://groonga.org/ を開き、`Related projects` のリンクを辿って https://groonga.org/related-projects.html を開く。
       * 期待される結果：
-        * Edgeの通常タブで https://groonga.org/related-projects.html が読み込まれる。
-        * ThinBridgeによるリダイレクトが発生しない。
+        * [ ] Edgeの通常タブで https://groonga.org/related-projects.html が読み込まれる。
+        * [ ] ThinBridgeによるリダイレクトが発生しない。
    3. `PGroonga` のリンクをクリックする。
       * 期待される結果：
-        * タブが一瞬ページ遷移するが、 https://groonga.org/related-projects.html に戻っている。
-        * ThinBridgeによるリダイレクトが発生し、「Citrixがインストールされていないか、設定されていないため起動できません。」というメッセージが表示される。
-        * (Windows Enterprise マルチセッションのみ) ユーザーBでCitrixへのリダイレクトが発生しない。
+        * [ ] タブが一瞬ページ遷移するが、 https://groonga.org/related-projects.html に戻っている。
+        * [ ] ThinBridgeによるリダイレクトが発生し、「Citrixがインストールされていないか、設定されていないため起動できません。」というメッセージが表示される。
+        * [ ] (Windows Enterprise マルチセッションのみ) ユーザーBでCitrixへのリダイレクトが発生しない。
    4. Edge（通常モード）→Edge（IEモード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
       * 追加： https://pgroonga.github.io/
    5. Edgeで新しいタブで https://groonga.org/ を開き、`Related projects` のリンクを辿って https://groonga.org/related-projects.html を開く。
       * 期待される結果：
-        * Edgeの通常タブで https://groonga.org/related-projects.html が読み込まれる。
-        * ThinBridgeによるリダイレクトが発生しない。
+        * [ ] Edgeの通常タブで https://groonga.org/related-projects.html が読み込まれる。
+        * [ ] ThinBridgeによるリダイレクトが発生しない。
    6. `PGroonga` のリンクをクリックする。
       * 期待される結果：
-        * タブが一瞬ページ遷移するが、 https://groonga.org/related-projects.html に戻っている。
-        * ThinBridgeによるリダイレクトが発生し、「Citrixがインストールされていないか、設定されていないため起動できません。」というメッセージが表示される。
-        * (Windows Enterprise マルチセッションのみ) ユーザーBでCitrixへのリダイレクトが発生しない。
+        * [ ] タブが一瞬ページ遷移するが、 https://groonga.org/related-projects.html に戻っている。
+        * [ ] ThinBridgeによるリダイレクトが発生し、「Citrixがインストールされていないか、設定されていないため起動できません。」というメッセージが表示される。
+        * [ ] (Windows Enterprise マルチセッションのみ) ユーザーBでCitrixへのリダイレクトが発生しない。
    7. Edge（IEモード）→Edge（通常モード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
       * 削除： https://pgroonga.github.io/
       * 追加： https://groonga.org/related-projects.html
    8. Edgeで新しいタブで https://groonga.org/ を開き、`Related projects` のリンクを辿って https://groonga.org/related-projects.html を開く。
       * 期待される結果：
-        * EdgeのIEモードのタブで https://groonga.org/related-projects.html が読み込まれる。
-        * ThinBridgeによるリダイレクトが発生しない。
+        * [ ] EdgeのIEモードのタブで https://groonga.org/related-projects.html が読み込まれる。
+        * [ ] ThinBridgeによるリダイレクトが発生しない。
    9. アドレスバーに https://pgroonga.github.io/ を入力し、Enterする。
       * 期待される結果：
-        * タブが一瞬ページ遷移するが、 https://groonga.org/related-projects.html に戻っている。また、試行回によってはタブがThinBridgeによって閉じられる。
-        * ThinBridgeによるリダイレクトが発生し、「Citrixがインストールされていないか、設定されていないため起動できません。」というメッセージが表示される。
-        * (Windows Enterprise マルチセッションのみ) ユーザーBでCitrixへのリダイレクトが発生しない。
+        * [ ] タブが一瞬ページ遷移するが、 https://groonga.org/related-projects.html に戻っている。また、試行回によってはタブがThinBridgeによって閉じられる。
+        * [ ] ThinBridgeによるリダイレクトが発生し、「Citrixがインストールされていないか、設定されていないため起動できません。」というメッセージが表示される。
+        * [ ] (Windows Enterprise マルチセッションのみ) ユーザーBでCitrixへのリダイレクトが発生しない。
    10. Edge（IEモード）→Edge（IEモード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
        * 追加： https://pgroonga.github.io/
    11. Edgeで新しいタブで https://groonga.org/ を開き、`Related projects` のリンクを辿って https://groonga.org/related-projects.html を開く。
        * 期待される結果：
-         * EdgeのIEモードのタブで https://groonga.org/related-projects.html が読み込まれる。
-         * ThinBridgeによるリダイレクトが発生しない。
+         * [ ] EdgeのIEモードのタブで https://groonga.org/related-projects.html が読み込まれる。
+         * [ ] ThinBridgeによるリダイレクトが発生しない。
    12. `PGroonga` のリンクをクリックする。
        * 期待される結果：
-         * タブが一瞬ページ遷移するが、 https://groonga.org/related-projects.html に戻っている。
-         * ThinBridgeによるリダイレクトが発生し、「Citrixがインストールされていないか、設定されていないため起動できません。」というメッセージが表示される。
-         * (Windows Enterprise マルチセッションのみ) ユーザーBでCitrixへのリダイレクトが発生しない。
+         * [ ] タブが一瞬ページ遷移するが、 https://groonga.org/related-projects.html に戻っている。
+         * [ ] ThinBridgeによるリダイレクトが発生し、「Citrixがインストールされていないか、設定されていないため起動できません。」というメッセージが表示される。
+         * [ ] (Windows Enterprise マルチセッションのみ) ユーザーBでCitrixへのリダイレクトが発生しない。
 
 #### 後始末
 
@@ -880,10 +880,10 @@ crxパッケージ化されたアドオンをGPOでインストールした状�
 2. 新規タブを開く。
 3. URLエントリに `https://www.fluentd.org` を入力してEnterキーを押下する。
    * 期待される結果
-     * トップフレームは https://www.fluentd.org に遷移する。
-     * 「Featured Video」のサブフレームは空白ページに遷移する。
-     * 「Featured Video」サブフレーム内のコンテンツ https://www.youtube.com/embed/sIVGsQgMHIo がChromeにリダイレクトされる。
-     * (Windows Enterprise マルチセッションのみ) ユーザーBでChromeへのリダイレクトが発生しない。
+     * [ ] トップフレームは https://www.fluentd.org に遷移する。
+     * [ ] 「Featured Video」のサブフレームは空白ページに遷移する。
+     * [ ] 「Featured Video」サブフレーム内のコンテンツ https://www.youtube.com/embed/sIVGsQgMHIo がChromeにリダイレクトされる。
+     * [ ] (Windows Enterprise マルチセッションのみ) ユーザーBでChromeへのリダイレクトが発生しない。
 
 
 ### アドオンインストール前から存在する既存タブでの挙動
@@ -899,9 +899,9 @@ crxパッケージ化されたアドオンをGPOでインストールした状�
 2. 新規タブを開く。
 3. アドレスバーに https://www.google.com を入力し、Enterする。
    * 期待される結果：
-     * Chromeでタブが開かれ、https://www.google.com/ が読み込まれる。
-     * Edgeのタブは閉じたりページ遷移したりせず新規タブがそのまま表示される。
-     * (Windows Enterprise マルチセッションのみ) ユーザーBでChromeへのリダイレクトが発生しない。
+     * [ ] Chromeでタブが開かれ、https://www.google.com/ が読み込まれる。
+     * [ ] Edgeのタブは閉じたりページ遷移したりせず新規タブがそのまま表示される。
+     * [ ] (Windows Enterprise マルチセッションのみ) ユーザーBでChromeへのリダイレクトが発生しない。
 4. GPOでインストールした拡張機能を一時的にアンインストールする。
    1. `gpedit.msc` を起動する。
    2. `Computer Configuration\Administrative Templates\Microsoft Edge\Extensions`（`コンピューターの構成\管理用テンプレート\Microsoft Edge\拡張機能`）の `Control which extensions are installed silently`（`サイレント インストールされる拡張機能を制御する`）を開き、検証環境の準備段階で追加した項目について、先頭に `_` を挿入して保存する。
@@ -912,13 +912,13 @@ crxパッケージ化されたアドオンをGPOでインストールした状�
    3. Edgeの拡張機能管理画面（`edge://extensions/`）にThinBridgeが再度表示されたことを確認する。
    4. アドオン再インストール後の既存タブの挙動を確認する。
      * 期待される結果：
-       * 2.で開いたタブが閉じられない。
-	   * 2で開いたタブのURLがChromeで新たに開かれていない。
+      * [ ] 2.で開いたタブが閉じられない。
+	   * [ ] 2で開いたタブのURLがChromeで新たに開かれていない。
 6. 2.で開いたタブのアドレスバーに https://www.google.com を入力し、Enterする。
    * 期待される結果：
-     * Chromeでタブが開かれ、https://www.google.com/ が読み込まれる。
-     * (Windows Enterprise マルチセッションのみ) ユーザーBでChromeへのリダイレクトが発生しない。
-     * Edgeのタブは閉じたりページ遷移したりせず新規タブがそのまま表示される。
+     * [ ] Chromeでタブが開かれ、https://www.google.com/ が読み込まれる。
+     * [ ] (Windows Enterprise マルチセッションのみ) ユーザーBでChromeへのリダイレクトが発生しない。
+     * [ ] Edgeのタブは閉じたりページ遷移したりせず新規タブがそのまま表示される。
 
 
 ### 既定のブラウザによるリダイレクト対象URLの挙動
@@ -935,6 +935,6 @@ crxパッケージ化されたアドオンをGPOでインストールした状�
 1. `Win + R`キーで「ファイル名を指定して実行」ウインドウを開く。
 2. https://www.google.com を入力し、Enterする。
    * 期待される結果：
-     * 一瞬Edgeウインドウが開いたあと、すぐに閉じる
-     * Chromeでタブが開かれ、https://www.google.com/ が読み込まれる。
-     * (Windows Enterprise マルチセッションのみ) ユーザーBでChromeのタブが開かない。
+     * [ ] 一瞬Edgeウインドウが開いたあと、すぐに閉じる
+     * [ ] Chromeでタブが開かれ、https://www.google.com/ が読み込まれる。
+     * [ ] (Windows Enterprise マルチセッションのみ) ユーザーBでChromeのタブが開かない。
