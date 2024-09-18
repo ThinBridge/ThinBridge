@@ -1,0 +1,258 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#ifndef APSTUDIO_INVOKED
+#include "targetver.h"
+#endif
+#include "afxres.h"
+#include "verrsrc.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// 日本語 (日本) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_JPN)
+LANGUAGE LANG_JAPANESE, SUBLANG_DEFAULT
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#ifndef APSTUDIO_INVOKED\r\n"
+    "#include ""targetver.h""\r\n"
+    "#endif\r\n"
+    "#include ""afxres.h""\r\n"
+    "#include ""verrsrc.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_JPN)\r\n"
+    "LANGUAGE 17, 1\r\n"
+    "#include ""res\\ThinBridgeRuleUpdater.rc2""  // Microsoft Visual C++ 以外で編集されたリソース\r\n"
+    "#include ""l.JPN\\afxres.rc""      // 標準コンポーネント\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_MAINFRAME           ICON                    "res\\ThinBridgeRuleUpdater.ico"
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_ThinBridgeRuleUpdater_DIALOG DIALOGEX 0, 0, 475, 136
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_APPWINDOW
+CAPTION "ThinBridge リダイレクト定義ファイル更新"
+FONT 9, "MS UI Gothic", 0, 0, 0x1
+BEGIN
+    ICON            IDR_MAINFRAME,IDC_STATIC,14,14,20,20
+    LTEXT           "ThinBridge リダイレクト定義ファイル取得先 (例 http://xxx/ThinBridge/ThinBridgeBHO.ini",IDC_STATIC,41,11,427,8
+    EDITTEXT        IDC_EDIT1,41,22,408,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "+",IDC_BUTTON1,453,20,15,16
+    PUSHBUTTON      "接続＆取得データ テスト",IDC_BUTTON_TEST,376,38,92,22
+    LTEXT           "",IDC_STATIC_MSG,246,64,181,16
+    PUSHBUTTON      "ThinBridgeBHO.ini更新",IDC_BUTTON_WRITEINI_NOW,85,85,92,31
+    DEFPUSHBUTTON   "設定のみ保存",IDOK,181,85,92,31
+    PUSHBUTTON      "ThinBridgeBHO.ini更新＆設定保存",IDC_BUTTON_WRITEINI,277,85,136,31
+    PUSHBUTTON      "閉じる",IDCANCEL,417,85,50,31
+END
+
+IDD_DLG_MSGBOX DIALOGEX 0, 0, 556, 183
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "詳細メッセージ"
+FONT 10, "ＭＳ ゴシック", 400, 0, 0x80
+BEGIN
+    EDITTEXT        IDC_EDIT1,6,6,542,152,ES_MULTILINE | ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_WANTRETURN | WS_VSCROLL | WS_HSCROLL
+    PUSHBUTTON      "OK",IDOK,445,162,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,499,162,50,14
+END
+
+IDD_DIALOG1 DIALOGEX 0, 0, 477, 235
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "追加取得先"
+FONT 9, "MS UI Gothic", 400, 0, 0x80
+BEGIN
+    LTEXT           "ThinBridge リダイレクト定義ファイル取得先2",IDC_STATIC,7,11,466,8
+    EDITTEXT        IDC_EDIT2,7,21,466,13,ES_AUTOHSCROLL
+    LTEXT           "ThinBridge リダイレクト定義ファイル取得先3",IDC_STATIC,7,42,466,8
+    EDITTEXT        IDC_EDIT3,7,52,466,13,ES_AUTOHSCROLL
+    LTEXT           "ThinBridge リダイレクト定義ファイル取得先4",IDC_STATIC,7,73,466,8
+    EDITTEXT        IDC_EDIT4,7,84,466,13,ES_AUTOHSCROLL
+    LTEXT           "ThinBridge リダイレクト定義ファイル取得先5",IDC_STATIC,7,104,466,8
+    EDITTEXT        IDC_EDIT5,7,114,466,13,ES_AUTOHSCROLL
+    LTEXT           "ThinBridge リダイレクト定義ファイル取得先6",IDC_STATIC,7,135,466,8
+    EDITTEXT        IDC_EDIT6,7,146,466,13,ES_AUTOHSCROLL
+    GROUPBOX        "サーバー接続ルール",IDC_STATIC,7,167,189,28
+    CONTROL         "ランダム(負荷分散)",IDC_RADIO1,"Button",BS_AUTORADIOBUTTON,20,179,73,10
+    CONTROL         "設定順",IDC_RADIO2,"Button",BS_AUTORADIOBUTTON,120,179,39,10
+    LTEXT           "ピークアウト間隔",IDC_STATIC,237,179,49,8
+    EDITTEXT        IDC_EDIT_INT,293,176,24,16,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "分 (0-60)",IDC_STATIC,320,178,32,8
+    LTEXT           "取得先を複数（最大6個）設定した場合は、サーバー接続ルールにしたがって取得先を決定します。\nサーバーへの接続などで問題が発生した場合は順次設定されている他の取得先へと接続を試みます。",IDC_STATIC,7,200,353,28,0,WS_EX_CLIENTEDGE
+    DEFPUSHBUTTON   "OK",IDOK,366,214,50,14
+    PUSHBUTTON      "キャンセル",IDCANCEL,423,214,50,14
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 9,8,7,6
+ PRODUCTVERSION 9,8,7,6
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x40004L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "041104b0"
+        BEGIN
+            VALUE "CompanyName", "ThinBridge"
+            VALUE "FileDescription", "ThinBridgeRuleUpdater"
+            VALUE "FileVersion", "9.8.7.6"
+            VALUE "InternalName", "ThinBridgeRuleUpdater.exe"
+            VALUE "LegalCopyright", "ThinBridge"
+            VALUE "OriginalFilename", "ThinBridgeRuleUpdater.exe"
+            VALUE "ProductName", "ThinBridgeRuleUpdater"
+            VALUE "ProductVersion", "9.8.7.6"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x411, 1200
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO
+BEGIN
+    IDD_ThinBridgeRuleUpdater_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 468
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 129
+    END
+
+    IDD_DLG_MSGBOX, DIALOG
+    BEGIN
+    END
+
+    IDD_DIALOG1, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 473
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 228
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// AFX_DIALOG_LAYOUT
+//
+
+IDD_ThinBridgeRuleUpdater_DIALOG AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_DLG_MSGBOX AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_DIALOG1 AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE
+BEGIN
+    IDS_ABOUTBOX            "バージョン情報 ThinBridgeRuleUpdater(&A)..."
+END
+
+#endif    // 日本語 (日本) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_JPN)
+LANGUAGE 17, 1
+#include "res\ThinBridgeRuleUpdater.rc2"  // Microsoft Visual C++ 以外で編集されたリソース
+#include "l.JPN\afxres.rc"      // 標準コンポーネント
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+
