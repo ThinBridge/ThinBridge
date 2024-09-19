@@ -1,4 +1,4 @@
-﻿;ThinBridge Setup--
+;ThinBridge Setup--
 
 [Setup]
 AppName=ThinBridge

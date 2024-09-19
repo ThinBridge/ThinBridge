@@ -1,0 +1,693 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#ifndef APSTUDIO_INVOKED
+#include "targetver.h"
+#endif
+#include "afxres.h"
+#include "verrsrc.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// 日本語 (日本) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_JPN)
+LANGUAGE LANG_JAPANESE, SUBLANG_DEFAULT
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#ifndef APSTUDIO_INVOKED\r\n"
+    "#include ""targetver.h""\r\n"
+    "#endif\r\n"
+    "#include ""afxres.h""\r\n"
+    "#include ""verrsrc.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_JPN)\r\n"
+    "LANGUAGE 17, 1\r\n"
+    "#include ""res\\ThinBridge.rc2""  // Microsoft Visual C++ 以外で編集されたリソース\r\n"
+    "#include ""l.JPN\\afxres.rc""      // 標準コンポーネント\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_MAINFRAME           ICON                    "res\\ThinBridge.ico"
+
+IDI_ICON_Chrome         ICON                    "res\\chrome.ico"
+
+IDI_ICON_Ctrix          ICON                    "res\\ctx.ico"
+
+IDI_ICON_Edge           ICON                    "res\\edge.ico"
+
+IDI_ICON_Firefox        ICON                    "res\\firefox.ico"
+
+IDI_ICON_IE             ICON                    "res\\ie.ico"
+
+IDI_ICON_RDP            ICON                    "res\\rdp.ico"
+
+IDI_ICON_VMH            ICON                    "res\\vmh.ico"
+
+IDI_ICON_o365           ICON                    "res\\o365.ico"
+
+IDI_ICON_DMZ            ICON                    "res\\DMZ.ico"
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_DIALOG1 DIALOGEX 0, 0, 306, 58
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_TOPMOST
+CAPTION "ThinBridge"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    LTEXT           "アプリケーションを起動しています。　しばらくお待ち下さい。",IDC_STATIC,9,9,191,8
+    CONTROL         "",IDC_PROGRESS1,"msctls_progress32",PBS_MARQUEE | WS_BORDER,38,23,248,15
+    CONTROL         "",IDC_STATIC_MSG,"Static",SS_LEFTNOWORDWRAP | WS_GROUP,6,43,296,8
+    ICON            "",IDC_STATIC_IMAGE,9,21,20,20,SS_CENTERIMAGE
+END
+
+IDD_DIALOG2 DIALOGEX 0, 0, 406, 67
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "URL"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    LTEXT           "URL",IDC_STATIC,12,27,18,9
+    EDITTEXT        IDC_EDIT1,31,26,366,12,ES_AUTOHSCROLL
+    DEFPUSHBUTTON   "OK",IDOK,290,46,50,14
+    PUSHBUTTON      "キャンセル",IDCANCEL,346,46,50,14
+    LTEXT           "動作確認用URLを入力します。 ブラウザーからのリダイレクト時は、自動的にURLが引き継がれます。",IDC_STATIC,12,9,326,8
+END
+
+IDD_DIALOG3 DIALOGEX 0, 0, 379, 344
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "詳細設定パラメータ編集"
+FONT 10, "ＭＳ ゴシック", 400, 0, 0x80
+BEGIN
+    EDITTEXT        IDC_EDIT1,6,6,366,312,ES_MULTILINE | ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_WANTRETURN | WS_VSCROLL | WS_HSCROLL
+    PUSHBUTTON      "保存",IDOK,270,325,50,14
+    PUSHBUTTON      "閉じる",IDCANCEL,324,325,50,14
+END
+
+IDD_DLG_SETTING DIALOGEX 0, 0, 575, 460
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Settings"
+FONT 9, "MS UI Gothic", 0, 0, 0x1
+BEGIN
+    CONTROL         "Tree1",IDC_TREE_CTRL,"SysTreeView32",TVS_HASBUTTONS | TVS_HASLINES | TVS_DISABLEDRAGDROP | TVS_SHOWSELALWAYS | WS_BORDER | WS_HSCROLL | WS_TABSTOP,3,3,118,417
+    CONTROL         "",IDC_PAGE_FRAME,"Static",SS_GRAYFRAME,124,25,446,395
+    DEFPUSHBUTTON   "設定保存",IDOK,412,428,75,25
+    PUSHBUTTON      "閉じる",IDCANCEL,495,428,75,25
+    LTEXT           "",IDC_CAPTION_BAR,124,4,446,17,SS_CENTERIMAGE
+    LTEXT           "スタティック",IDC_STATIC_PCNAME,3,429,118,12,0,WS_EX_STATICEDGE
+END
+
+IDD_DLG_RDP DIALOGEX 0, 0, 441, 390
+STYLE DS_SETFONT | DS_CONTROL | WS_CHILD | WS_CAPTION
+CAPTION "Dialog"
+FONT 9, "MS UI Gothic", 0, 0, 0x1
+BEGIN
+    GROUPBOX        "【Microsoft】 Remote Desktop Service(MS-RDP) 設定",IDC_STATIC,7,7,430,375
+    LTEXT           "接続先サーバー",IDC_STATIC,18,58,48,8
+    LTEXT           "<サーバー名 または IPアドレス>:<ポート番号> 例)rdshost.local:3389",IDC_STATIC,74,45,217,8
+    EDITTEXT        IDC_EDIT1,74,56,223,12,ES_AUTOHSCROLL
+    GROUPBOX        "表示モード",IDC_STATIC,17,75,280,26
+    CONTROL         "RemoteApp(公開アプリケーション)",IDC_RADIO1,"Button",BS_AUTORADIOBUTTON,23,86,115,10
+    CONTROL         "RemoteDesktop(公開デスクトップ)",IDC_RADIO2,"Button",BS_AUTORADIOBUTTON,155,86,119,10
+    GROUPBOX        "リモートアプリ設定",IDC_STATIC,17,109,280,114
+    LTEXT           "アプリ名",IDC_STATIC,23,126,26,8
+    EDITTEXT        IDC_EDIT2,54,124,238,12,ES_AUTOHSCROLL
+    LTEXT           "アプリのフルパス",IDC_STATIC,23,144,45,8
+    EDITTEXT        IDC_EDIT3,24,155,269,12,ES_AUTOHSCROLL
+    LTEXT           "追加用 コマンド引数",IDC_STATIC,23,173,63,8
+    EDITTEXT        IDC_EDIT4,24,185,269,13,ES_AUTOHSCROLL
+    PUSHBUTTON      "IE設定値セット",IDC_BUTTON_IE,24,203,59,13
+    PUSHBUTTON      "Firefox設定値セット",IDC_BUTTON_FF,84,203,75,13
+    PUSHBUTTON      "Chrome設定値セット",IDC_BUTTON_GC,160,203,75,13
+    PUSHBUTTON      "設定値クリア",IDC_BUTTON_CLR,236,203,57,13
+    GROUPBOX        "ローカル デバイスとリソース設定",IDC_STATIC,17,231,280,43
+    CONTROL         "クリップボードのリダイレクトを許可する",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,24,244,133,9
+    CONTROL         "プリンターのリダイレクトを許可する",IDC_CHECK2,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,171,244,123,9
+    CONTROL         "ディスク・ドライブのリダイレクトを許可する",IDC_CHECK3,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,24,261,143,9
+    PUSHBUTTON      "接続テスト(MS-RDP)...",IDC_BUTTON1,17,286,89,13
+    PUSHBUTTON      "RDP接続 - 詳細設定パラメータ編集....",IDC_BUTTON_ST,155,286,143,13
+    ICON            "",IDC_STATIC_IMAGE,16,24,20,20,SS_CENTERIMAGE
+END
+
+IDD_DLG_VMW DIALOGEX 0, 0, 441, 390
+STYLE DS_SETFONT | DS_CONTROL | WS_CHILD | WS_CAPTION
+CAPTION "Dialog"
+FONT 9, "MS UI Gothic", 0, 0, 0x1
+BEGIN
+    GROUPBOX        "【VMware】 Horizon(Horizon RDSH / VDI) 設定",IDC_STATIC,7,7,430,375
+    LTEXT           "Connectionサーバー",IDC_STATIC,12,58,63,8
+    LTEXT           "BrokerHostname Connection Server名",IDC_STATIC,77,43,112,8
+    EDITTEXT        IDC_EDIT_VHOST,77,56,204,12,ES_AUTOHSCROLL
+    LTEXT           "アプリ名",IDC_STATIC,46,98,24,8
+    LTEXT           "RDSH アプリケーション名(表示名) / VDI プール名(表示名)",IDC_STATIC,77,85,176,8
+    EDITTEXT        IDC_EDIT_VAPP,77,96,204,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "接続テスト(VMware Horizon)...",IDC_BUTTON_TEST_V,18,137,112,14
+    ICON            "",IDC_STATIC_IMAGE,16,24,20,20,SS_CENTERIMAGE
+END
+
+IDD_DLG_ETC DIALOGEX 0, 0, 441, 390
+STYLE DS_SETFONT | DS_CONTROL | WS_CHILD | WS_CAPTION
+CAPTION "Dialog"
+FONT 9, "MS UI Gothic", 0, 0, 0x1
+BEGIN
+    GROUPBOX        "全般設定",IDC_STATIC,9,7,430,380
+    ICON            IDR_MAINFRAME,IDC_STATIC,311,25,20,20
+    LTEXT           "ThinBridge Version 9.8.7.6",IDC_STATIC_VER,339,32,89,8,SS_NOPREFIX
+    GROUPBOX        "【重要】URLマッチングルール全体設定",IDC_STATIC,14,49,381,94
+    CONTROL         "クイック判定機能を有効にする (※IE専用機能)",IDC_CHK_GLOVAL_QUICK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,64,156,10
+    LTEXT           "注意：\nナビゲーション前イベントを優先的に利用しリダイレクトを高速化します。\nリダイレクト通知画面は表示されません。",IDC_STATIC,18,77,372,32,0,WS_EX_STATICEDGE
+    CONTROL         "URL部分のみ基準とし判定する　(Getパラメータ部分を無視する #  ? 以降のURLStringを判断しない)",IDC_CHK_GLOVAL_URL_ONLY,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,115,360,10
+    CONTROL         "アドレスバーに表示されるURLのみを判定する",IDC_CHK_GLOVAL_TOP_PAGE_ONLY,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,128,360,10
+    CONTROL         "Internet Explorer (ローカル)を開く時に別ウィンドウを表示する (タブを追加しない) ",IDC_CHK_GLOVAL_DISABLE_DDE,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,160,256,10
+    GROUPBOX        "TRACE Log (※IE専用機能)",IDC_STATIC,14,198,381,107
+    CONTROL         "TRACE Logを出力する",IDC_CHK_GLOVAL_TRACE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,213,80,10
+    PUSHBUTTON      "TRACE Log モニター ウインドウを開く...",IDC_BUTTON1,17,228,117,23
+    LTEXT           "注意：\nTRACE Logを出力する場合は、Internet Explorerの保護モードを無効にし再スタートする必要があります。\n\n[インターネット オプション]-[セキュリティ]タブ-[保護モードを有効にする(Internet Explorerの再起動が必要)]のチェックをOFF",IDC_STATIC,18,258,372,39,0,WS_EX_STATICEDGE
+END
+
+IDD_DLG_RD_RDP DIALOGEX 0, 0, 441, 390
+STYLE DS_SETFONT | DS_CONTROL | WS_CHILD | WS_CAPTION
+CAPTION "Dialog"
+FONT 9, "MS UI Gothic", 0, 0, 0x1
+BEGIN
+    CONTROL         "無効にする",IDC_CHECK_DISABLE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,6,5,46,10
+    ICON            "",IDC_STATIC_IMAGE,8,19,20,20,SS_CENTERIMAGE
+    GROUPBOX        "※IEからのリダイレクト時に表示される通知画面設定",IDC_STATIC_IEG,52,3,387,32
+    LTEXT           "リダイレクトページ動作設定",IDC_STATIC_TY,56,22,81,8
+    COMBOBOX        IDC_COMBO1,139,19,228,12,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "表示秒数",IDC_STATIC_SEC,372,12,31,8
+    EDITTEXT        IDC_EDIT1,408,10,25,14,ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "(1 - 60秒)",IDC_STATIC_SEC2,404,25,35,8
+    GROUPBOX        "【ターゲットURL ルール】",IDC_STATIC,2,48,438,174,WS_GROUP
+    CONTROL         "List1",IDC_LIST1,"SysListView32",LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,5,61,432,140
+    PUSHBUTTON      "新規登録",IDC_BUTTON_INS,3,203,38,14
+    PUSHBUTTON      "編集",IDC_BUTTON_UPDATE,42,203,38,14
+    PUSHBUTTON      "削除",IDC_BUTTON_DEL,81,203,38,14
+    PUSHBUTTON      "一括登録・編集",IDC_BUTTON_EDITALL,120,203,50,14
+    PUSHBUTTON      "↑",IDC_BUTTON_UP,173,203,12,14,BS_PUSHLIKE
+    PUSHBUTTON      "↓",IDC_BUTTON_DOWN,187,203,12,14,BS_PUSHLIKE
+    RTEXT           "0件",IDC_STATIC_CNT,408,205,26,8
+    GROUPBOX        "【除外URL ルール】",IDC_STATIC2,2,225,438,162,WS_GROUP
+    CONTROL         "",IDC_LIST2,"SysListView32",LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,5,236,432,129
+    PUSHBUTTON      "新規登録",IDC_BUTTON_INS2,3,369,38,14
+    PUSHBUTTON      "編集",IDC_BUTTON_UPDATE2,42,369,38,14
+    PUSHBUTTON      "削除",IDC_BUTTON_DEL2,81,369,38,14
+    PUSHBUTTON      "一括登録・編集",IDC_BUTTON_EDITALL2,120,369,50,14
+    PUSHBUTTON      "↑",IDC_BUTTON_UP2,173,369,12,14
+    PUSHBUTTON      "↓",IDC_BUTTON_DOWN2,187,369,12,14
+    RTEXT           "0件",IDC_STATIC_CNT2,408,370,26,8
+END
+
+IDD_DLG_RD_CUSTOM DIALOGEX 0, 0, 441, 390
+STYLE DS_SETFONT | DS_CONTROL | WS_CHILD | WS_CAPTION
+CAPTION "Dialog"
+FONT 9, "MS UI Gothic", 0, 0, 0x1
+BEGIN
+    CONTROL         "無効にする",IDC_CHECK_DISABLE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,6,5,46,10
+    ICON            "",IDC_STATIC_IMAGE,8,19,20,20,SS_CENTERIMAGE
+    GROUPBOX        "※IEからのリダイレクト時に表示される通知画面設定",IDC_STATIC,52,3,387,32
+    LTEXT           "リダイレクトページ動作設定",IDC_STATIC,57,22,81,8
+    COMBOBOX        IDC_COMBO1,139,19,228,12,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "表示秒数",IDC_STATIC,372,12,31,8
+    EDITTEXT        IDC_EDIT1,408,10,25,14,ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "(1 - 60秒)",IDC_STATIC,404,25,35,8
+    LTEXT           "ブラウザーパス",IDC_STATIC,58,38,43,8
+    EDITTEXT        IDC_EDIT_LCB,106,36,230,13,ES_AUTOHSCROLL
+    PUSHBUTTON      "参照...",IDC_BUTTON_FDLG,340,36,37,13
+    GROUPBOX        "【ターゲットURL ルール】",IDC_STATIC,2,48,436,173,WS_GROUP
+    CONTROL         "List1",IDC_LIST1,"SysListView32",LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,5,61,432,140
+    PUSHBUTTON      "新規登録",IDC_BUTTON_INS,3,203,38,14
+    PUSHBUTTON      "編集",IDC_BUTTON_UPDATE,42,203,38,14
+    PUSHBUTTON      "削除",IDC_BUTTON_DEL,81,203,38,14
+    PUSHBUTTON      "一括登録・編集",IDC_BUTTON_EDITALL,120,203,50,14
+    PUSHBUTTON      "↑",IDC_BUTTON_UP,173,203,12,14,BS_PUSHLIKE
+    PUSHBUTTON      "↓",IDC_BUTTON_DOWN,187,203,12,14,BS_PUSHLIKE
+    RTEXT           "0件",IDC_STATIC_CNT,408,205,26,8
+    GROUPBOX        "【除外URL ルール】",IDC_STATIC2,2,225,438,162,WS_GROUP
+    CONTROL         "",IDC_LIST2,"SysListView32",LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,5,236,432,129
+    PUSHBUTTON      "新規登録",IDC_BUTTON_INS2,3,369,38,14
+    PUSHBUTTON      "編集",IDC_BUTTON_UPDATE2,42,369,38,14
+    PUSHBUTTON      "削除",IDC_BUTTON_DEL2,81,369,38,14
+    PUSHBUTTON      "一括登録・編集",IDC_BUTTON_EDITALL2,120,369,50,14
+    PUSHBUTTON      "↑",IDC_BUTTON_UP2,173,369,12,14
+    PUSHBUTTON      "↓",IDC_BUTTON_DOWN2,187,369,12,14
+    RTEXT           "0件",IDC_STATIC_CNT2,408,370,26,8
+END
+
+IDD_DLG_RD_O365 DIALOGEX 0, 0, 441, 390
+STYLE DS_SETFONT | DS_CONTROL | WS_CHILD | WS_CAPTION
+CAPTION "Dialog"
+FONT 9, "MS UI Gothic", 0, 0, 0x1
+BEGIN
+    CONTROL         "無効にする",IDC_CHECK_DISABLE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,6,5,46,10
+    ICON            "",IDC_STATIC_IMAGE,8,19,20,20,SS_CENTERIMAGE
+    GROUPBOX        "※IEからのリダイレクト時に表示される通知画面設定",IDC_STATIC,52,3,387,32
+    LTEXT           "リダイレクトページ動作設定",IDC_STATIC,57,22,81,8
+    COMBOBOX        IDC_COMBO1,139,19,228,12,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "表示秒数",IDC_STATIC,372,12,31,8
+    EDITTEXT        IDC_EDIT1,408,10,25,14,ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "(1 - 60秒)",IDC_STATIC,404,25,35,8
+    LTEXT           "ブラウザー種別",IDC_STATIC,57,38,43,8
+    COMBOBOX        IDC_COMBO2,106,36,230,30,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "参照...",IDC_BUTTON_FDLG,340,36,37,13
+    LTEXT           "※Office365設定は、ThinBridge Office365設定から行います。",IDC_STATIC,8,58,192,8
+    PUSHBUTTON      "ThinBridge Office365設定起動...",IDC_BUTTON_O365,247,56,124,14
+    PUSHBUTTON      "ルール再読込み",IDC_BUTTON_O365_RELOAD,379,56,55,14
+    GROUPBOX        "【ターゲットURL ルール】",IDC_STATIC,2,71,436,161,WS_GROUP
+    CONTROL         "List1",IDC_LIST1,"SysListView32",LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,5,84,432,129
+    RTEXT           "0件",IDC_STATIC_CNT,408,217,26,8
+    GROUPBOX        "【除外URL ルール】",IDC_STATIC2,2,238,438,149,WS_GROUP
+    CONTROL         "",IDC_LIST2,"SysListView32",LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,5,247,432,118
+    RTEXT           "0件",IDC_STATIC_CNT2,408,370,26,8
+    LTEXT           "※自動更新のため、参照専用",IDC_STATIC,6,219,144,8
+    LTEXT           "※自動更新のため、参照専用",IDC_STATIC,9,372,144,8
+    PUSHBUTTON      "クリップボードにコピー",IDC_BUTTON1,335,216,66,11
+    PUSHBUTTON      "クリップボードにコピー",IDC_BUTTON2,335,368,66,11
+END
+
+IDD_DLG_RD_Default DIALOGEX 0, 0, 441, 390
+STYLE DS_SETFONT | DS_CONTROL | WS_CHILD | WS_CAPTION
+CAPTION "Dialog"
+FONT 9, "MS UI Gothic", 0, 0, 0x1
+BEGIN
+    LTEXT           "ブラウザー種別",IDC_STATIC,9,38,43,8
+    COMBOBOX        IDC_COMBO2,58,36,230,30,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "参照...",IDC_BUTTON_FDLG,292,36,37,13
+    LTEXT           "※その他(未定義)URLの場合に表示するブラウザーを設定します。",IDC_STATIC,8,17,194,8
+END
+
+IDD_DLG_RD_EDIT DIALOGEX 0, 0, 406, 57
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "URL"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    LTEXT           "URL",IDC_STATIC,12,12,18,9
+    EDITTEXT        IDC_EDIT1,31,11,366,12,ES_AUTOHSCROLL
+    DEFPUSHBUTTON   "OK",IDOK,290,35,50,14
+    PUSHBUTTON      "キャンセル",IDCANCEL,347,35,50,14
+    CONTROL         "有効にする",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,12,36,51,10
+    LTEXT           "※先頭が - # ; から始まるURLは設定できません。",IDC_STATIC,78,36,178,8
+END
+
+IDD_DLG_EDIT_URL_ML DIALOGEX 0, 0, 550, 350
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "URLルール編集"
+FONT 10, "ＭＳ ゴシック", 400, 0, 0x80
+BEGIN
+    EDITTEXT        IDC_EDIT1,3,2,544,316,ES_MULTILINE | ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_WANTRETURN | WS_VSCROLL | WS_HSCROLL
+    PUSHBUTTON      "OK",IDOK,398,325,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,456,325,50,14
+    LTEXT           "※先頭に'#'または';'を記述すると、その行は無効化(コメントアウト)されます。\n空白行や先頭の半角スペース/末尾の半角スペースは、自動的に切り詰められます。",IDC_STATIC,7,322,305,19
+    LTEXT           "1行",IDC_STATIC_LINE,509,326,36,12,0,WS_EX_RIGHT | WS_EX_STATICEDGE
+END
+
+IDD_DLG_MSGBOX DIALOGEX 0, 0, 379, 183
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "詳細メッセージ"
+FONT 10, "ＭＳ ゴシック", 400, 0, 0x80
+BEGIN
+    EDITTEXT        IDC_EDIT1,6,6,366,152,ES_MULTILINE | ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_WANTRETURN | WS_VSCROLL | WS_HSCROLL
+    PUSHBUTTON      "OK",IDOK,270,162,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,324,162,50,14
+END
+
+IDD_DLG_CX DIALOGEX 0, 0, 441, 390
+STYLE DS_SETFONT | DS_CONTROL | WS_CHILD | WS_CAPTION
+CAPTION "Dialog"
+FONT 9, "MS UI Gothic", 0, 0, 0x1
+BEGIN
+    GROUPBOX        "【Citrix】 Virtual Apps/XenApp 設定",-1,7,7,430,375
+    LTEXT           "アプリ名",IDC_STATIC_CX3,23,59,24,8
+    LTEXT           "アプリケーション名(表示名)",IDC_STATIC_CX2,50,44,79,8
+    EDITTEXT        IDC_EDIT_CXAPP,49,57,204,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "接続テスト(Citrix Virtual Apps/XenApp)...",IDC_BUTTON_TEST_CX,19,99,159,14
+    ICON            "",IDC_STATIC_IMAGE,16,24,20,20,SS_CENTERIMAGE
+END
+
+IDD_DLG_DEBUG_WND DIALOGEX 0, 0, 630, 380
+STYLE DS_SETFONT | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+CAPTION "TRACE Log Monitor  Window"
+FONT 10, "ＭＳ ゴシック", 400, 0, 0x80
+BEGIN
+    EDITTEXT        IDC_EDIT1,3,25,622,354,ES_MULTILINE | ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_WANTRETURN | WS_VSCROLL | WS_HSCROLL
+    PUSHBUTTON      "クリップボードにコピー",IDC_BUTTON1,5,5,93,14
+    PUSHBUTTON      "表示クリア",IDOK,103,5,50,14
+    PUSHBUTTON      "閉じる",IDCANCEL,155,5,50,14
+    LTEXT           "1行",IDC_STATIC_LINE,210,6,42,12,0,WS_EX_RIGHT | WS_EX_STATICEDGE
+END
+
+IDD_DLG_RD_CH_SWITCH DIALOGEX 0, 0, 441, 390
+STYLE DS_SETFONT | DS_CONTROL | WS_CHILD | WS_CAPTION
+CAPTION "Dialog"
+FONT 9, "MS UI Gothic", 0, 0, 0x1
+BEGIN
+    CONTROL         "無効にする",IDC_CHECK_DISABLE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,6,5,46,10
+    ICON            "",IDC_STATIC_IMAGE,8,19,20,20,SS_CENTERIMAGE
+    GROUPBOX        "※IEからのリダイレクト時に表示される通知画面設定",IDC_STATIC,52,3,387,32
+    LTEXT           "リダイレクトページ動作設定",IDC_STATIC,57,22,81,8
+    COMBOBOX        IDC_COMBO1,139,19,228,12,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "表示秒数",IDC_STATIC,372,12,31,8
+    EDITTEXT        IDC_EDIT1,408,10,25,14,ES_RIGHT | ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "(1 - 60秒)",IDC_STATIC,404,25,35,8
+    LTEXT           "ブラウザーパス",IDC_STATIC,58,38,43,8
+    EDITTEXT        IDC_EDIT_LCB,106,36,230,13,ES_AUTOHSCROLL
+    PUSHBUTTON      "参照...",IDC_BUTTON_FDLG,340,36,37,13
+    LTEXT           "※Chrome自動切換え設定は、ThinBridge ChromeSwitcher設定から行います。",IDC_STATIC,8,58,242,8
+    PUSHBUTTON      "ThinBridge ChromeSwitcher設定起動...",IDC_BUTTON_CSW,254,56,149,14
+    GROUPBOX        "【ターゲットURL ルール】",IDC_STATIC,2,72,436,148,WS_GROUP
+    CONTROL         "List1",IDC_LIST1,"SysListView32",LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,5,84,432,117
+    PUSHBUTTON      "新規登録",IDC_BUTTON_INS,3,203,38,14
+    PUSHBUTTON      "編集",IDC_BUTTON_UPDATE,42,203,38,14
+    PUSHBUTTON      "削除",IDC_BUTTON_DEL,81,203,38,14
+    PUSHBUTTON      "一括登録・編集",IDC_BUTTON_EDITALL,120,203,50,14
+    PUSHBUTTON      "↑",IDC_BUTTON_UP,173,203,12,14,BS_PUSHLIKE
+    PUSHBUTTON      "↓",IDC_BUTTON_DOWN,187,203,12,14,BS_PUSHLIKE
+    RTEXT           "0件",IDC_STATIC_CNT,408,205,26,8
+    GROUPBOX        "【除外URL ルール】",IDC_STATIC2,2,225,438,162,WS_GROUP
+    CONTROL         "",IDC_LIST2,"SysListView32",LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,5,236,432,129
+    PUSHBUTTON      "新規登録",IDC_BUTTON_INS2,3,369,38,14
+    PUSHBUTTON      "編集",IDC_BUTTON_UPDATE2,42,369,38,14
+    PUSHBUTTON      "削除",IDC_BUTTON_DEL2,81,369,38,14
+    PUSHBUTTON      "一括登録・編集",IDC_BUTTON_EDITALL2,120,369,50,14
+    PUSHBUTTON      "↑",IDC_BUTTON_UP2,173,369,12,14
+    PUSHBUTTON      "↓",IDC_BUTTON_DOWN2,187,369,12,14
+    RTEXT           "0件",IDC_STATIC_CNT2,408,370,26,8
+END
+
+IDD_DLG_RD_DMZ DIALOGEX 0, 0, 441, 390
+STYLE DS_SETFONT | DS_CONTROL | WS_CHILD | WS_CAPTION
+CAPTION "Dialog"
+FONT 9, "MS UI Gothic", 0, 0, 0x1
+BEGIN
+    CONTROL         "無効にする",IDC_CHECK_DISABLE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,6,5,46,10
+    ICON            "",IDC_STATIC_IMAGE,8,19,20,20,SS_CENTERIMAGE
+    LTEXT           "※※IEやChrome等でリダイレクトを行わない(対象外)にしたいURLを設定します。※※\n\n使用例：\n　　　　　シングルサインオン(SSO)やSAML認証を利用したシステム等でIEとChrome等のブラウザー両方で\n　　　　　同じURLを経由する場合に共用URLを設定します。\n\n　　　　　※共用URLを設定しない場合は、IEかChrome等の何れか一方にリダイレクトされます。",-1,63,6,357,62
+    GROUPBOX        "【共用URL ルール】IE、Chrome等で表示するURL（リダイレクトしない物）",-1,2,72,436,315,WS_GROUP
+    CONTROL         "List1",IDC_LIST1,"SysListView32",LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,5,84,432,276
+    PUSHBUTTON      "新規登録",IDC_BUTTON_INS,3,369,38,14
+    PUSHBUTTON      "編集",IDC_BUTTON_UPDATE,42,369,38,14
+    PUSHBUTTON      "削除",IDC_BUTTON_DEL,81,369,38,14
+    PUSHBUTTON      "一括登録・編集",IDC_BUTTON_EDITALL,120,369,50,14
+    PUSHBUTTON      "↑",IDC_BUTTON_UP,173,369,12,14,BS_PUSHLIKE
+    PUSHBUTTON      "↓",IDC_BUTTON_DOWN,187,369,12,14,BS_PUSHLIKE
+    RTEXT           "0件",IDC_STATIC_CNT,408,371,26,8
+END
+
+IDD_DLG_REMOTE DIALOGEX 0, 0, 370, 291
+STYLE DS_SETFONT | DS_CONTROL | WS_CHILD | WS_CAPTION
+CAPTION "Dialog"
+FONT 9, "MS UI Gothic", 0, 0, 0x1
+BEGIN
+    LTEXT           "リモート転送 設定",IDC_STATIC,7,11,347,257
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 9,8,7,6
+ PRODUCTVERSION 9,8,7,6
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x40004L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "041104b0"
+        BEGIN
+            VALUE "FileDescription", "ThinBridgeX-Point"
+            VALUE "FileVersion", "9.8.7.6"
+            VALUE "InternalName", "ThinBridge.exe"
+            VALUE "OriginalFilename", "ThinBridge.exe"
+            VALUE "ProductVersion", "9.8.7.6"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x411, 1200
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO
+BEGIN
+    IDD_DIALOG1, DIALOG
+    BEGIN
+        BOTTOMMARGIN, 54
+    END
+
+    IDD_DIALOG2, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 399
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 60
+    END
+
+    IDD_DIALOG3, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 372
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 337
+    END
+
+    IDD_DLG_SETTING, DIALOG
+    BEGIN
+        RIGHTMARGIN, 570
+    END
+
+    IDD_DLG_RDP, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 440
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 372
+    END
+
+    IDD_DLG_VMW, DIALOG
+    BEGIN
+        RIGHTMARGIN, 370
+        BOTTOMMARGIN, 291
+    END
+
+    IDD_DLG_ETC, DIALOG
+    BEGIN
+        RIGHTMARGIN, 439
+        BOTTOMMARGIN, 387
+    END
+
+    IDD_DLG_RD_RDP, DIALOG
+    BEGIN
+        RIGHTMARGIN, 440
+        BOTTOMMARGIN, 386
+    END
+
+    IDD_DLG_RD_CUSTOM, DIALOG
+    BEGIN
+        RIGHTMARGIN, 371
+        BOTTOMMARGIN, 352
+    END
+
+    IDD_DLG_RD_O365, DIALOG
+    BEGIN
+    END
+
+    IDD_DLG_RD_Default, DIALOG
+    BEGIN
+    END
+
+    IDD_DLG_RD_EDIT, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 397
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 50
+    END
+
+    IDD_DLG_EDIT_URL_ML, DIALOG
+    BEGIN
+        LEFTMARGIN, 2
+        BOTTOMMARGIN, 343
+    END
+
+    IDD_DLG_MSGBOX, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 372
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 176
+    END
+
+    IDD_DLG_CX, DIALOG
+    BEGIN
+        RIGHTMARGIN, 370
+        BOTTOMMARGIN, 291
+    END
+
+    IDD_DLG_DEBUG_WND, DIALOG
+    BEGIN
+        LEFTMARGIN, 2
+        RIGHTMARGIN, 625
+        BOTTOMMARGIN, 373
+    END
+
+    IDD_DLG_RD_CH_SWITCH, DIALOG
+    BEGIN
+        BOTTOMMARGIN, 352
+    END
+
+    IDD_DLG_RD_DMZ, DIALOG
+    BEGIN
+        BOTTOMMARGIN, 387
+    END
+
+    IDD_DLG_REMOTE, DIALOG
+    BEGIN
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// AFX_DIALOG_LAYOUT
+//
+
+IDD_DLG_ETC AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_DLG_RD_CH_SWITCH AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_DLG_RD_DMZ AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_DLG_CX AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_DLG_RD_CUSTOM AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_DLG_RD_RDP AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_DLG_RD_O365 AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_DLG_RD_Default AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE
+BEGIN
+    IDS_ABOUTBOX            "バージョン情報 (&A)..."
+END
+
+#endif    // 日本語 (日本) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_JPN)
+LANGUAGE 17, 1
+#include "res\ThinBridge.rc2"  // Microsoft Visual C++ 以外で編集されたリソース
+#include "l.JPN\afxres.rc"      // 標準コンポーネント
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+
