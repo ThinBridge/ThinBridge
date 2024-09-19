@@ -34,7 +34,7 @@ ThinBridgeのリリース手順
  1. PowerShellウインドウ等を開き、script/ThinBridgeVersionUp.ps1 を使ってインストーラおよび各モジュールのバージョンを更新する
     ```console
     > cd script
-    > powershell.exe -ExecutionPolicy Bypass -file .\ThinBridgeVersionUp.ps1 4.2.1.0
+    > powershell.exe -ExecutionPolicy RemoteSigned -file .\ThinBridgeVersionUp.ps1 4.2.1.0
     ```
  2. 上記スクリプトによる変更を確認し、問題がなければコミットする。
     ```console

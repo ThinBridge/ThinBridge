@@ -17,7 +17,7 @@
 2. PowerShell ウィンドウで下記を実施する
 
 ```PowerShell
-~\browserselector\script> powershell.exe -ExecutionPolicy Bypass -file .\ThinBridgeVersionUp.ps1 [$new_version]
+~\browserselector\script> powershell.exe -ExecutionPolicy RemoteSigned -file .\ThinBridgeVersionUp.ps1 [$new_version]
 ```
 
 - 引数なしで`.\ThinBridgeVersionUp.ps1` を実行した時は、リポジトリ内のバージョン情報の grep 結果を表示する
@@ -32,7 +32,7 @@ PowerShell のテスティングフレームワーク「[Pester](https://pester.
 2. PowerShell ウィンドウで下記を実施する
 
 ```PowerShell
-~\browserselector\script> powershell.exe -ExecutionPolicy Bypass Invoke-Pester
+~\browserselector\script> powershell.exe -ExecutionPolicy RemoteSigned Invoke-Pester
 ```
 
 フォルダ内のテストファイル`ThinBridgeVersionUp.Tests.ps1` が実行される
