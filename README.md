@@ -29,21 +29,24 @@ ThinBridgeはエンタープライズ環境向けのブラウザ切替えソリ�
 ThinBridgeのリリース手順
 ------------------------
 
- 1. ThinBridge.slnをVisual Studio 2019で開き、変更があったモジュールについて、リソースビューから`*.rc`→`Version`→`VS_VERSION_INFO`を開き、`FILEVERSION`および`PRODUCTVERSION`を更新する。
- 2. 変更をcommitする。
- 3. 次のファイルのバージョンをインクリメントする
-    - ThinBridgeSetupX64.iss
-    - ThinBridgeSetupX86.iss
- 4. 次のコマンドでタグを打ってプッシュする
-    ```sh
-    $ make release
+以下、リリースするバージョンを4.2.1.0と仮定して説明する。
+
+ 1. PowerShellウインドウ等を開き、script/ThinBridgeVersionUp.ps1 を使ってインストーラおよび各モジュールのバージョンを更新する
+    ```console
+    > cd script
+    > powershell.exe -ExecutionPolicy Bypass -file .\ThinBridgeVersionUp.ps1 4.2.1.0
     ```
-    または
-    ```sh
-    $ git tag -a v4.0.2.4 -m "ThinBridge v4.0.2.4"
-    $ git push origin master --tags
+ 2. 上記スクリプトによる変更を確認し、問題がなければコミットする。
+    ```console
+    > git diff
+    > git commit -a
     ```
- 5. GitHubリリース上でリリースノートを作成する。
+ 3. 次のコマンドでタグを打ってプッシュする
+    ```console
+    > git tag -a v4.2.1.0 -m "ThinBridge v4.2.1.0"
+    > git push origin master --tags
+    ```
+ 4. GitHubリリース上でリリースノートを作成する。
      * 参考: [現在の最終リリースのリリースノート](https://github.com/ThinBridge/ThinBridge/releases/latest)
      * リリースノートのテンプレート：
        ```
@@ -65,7 +68,7 @@ ThinBridgeのリリース手順
        * **Templates.zip**
          * ThinBridge用のADMXテンプレートです。
        ```
- 6. GitHub Actionsで生成されたEXEインストーラを添付する。
+ 5. GitHub Actionsで生成されたEXEインストーラを添付する。
     [Build ThinBridge](https://github.com/ThinBridge/ThinBridge/actions/workflows/build-release.yaml)のArtifactsから取得した以下のファイルを使用する。
     * `ThinBridgeSetup_x64.exe` （`Installers`から取り出す）
     * `ThinBridgeSetup_x86.exe` （`Installers`から取り出す）
