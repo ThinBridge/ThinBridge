@@ -1,10 +1,10 @@
-;ThinBridge Setup--
+﻿;ThinBridge Setup--
 
 [Setup]
 AppName=ThinBridge
 AppVerName=ThinBridge
-VersionInfoVersion=4.0.2.7
-AppVersion=4.0.2.7
+VersionInfoVersion=4.2.1.0
+AppVersion=4.2.1.0
 AppMutex=ThinBridgeSetup
 ;DefaultDirName=C:\ThinBridge
 DefaultDirName={code:GetProgramFiles}\ThinBridge
@@ -24,7 +24,7 @@ UninstallDisplayIcon={app}\ThinBridge.exe
 Root: HKLM; Subkey: "Software\ThinBridge"; Flags: uninsdeletekey
 Root: HKLM; Subkey: "Software\ThinBridge"; ValueType: string; ValueName: "Path"; ValueData: "{app}\"
 Root: HKLM; Subkey: "Software\ThinBridge"; ValueType: string; ValueName: "ClientType"; ValueData: ""
-Root: HKLM; Subkey: "Software\ThinBridge"; ValueType: string; ValueName: "Version"; ValueData: "4.0.2.7"
+Root: HKLM; Subkey: "Software\ThinBridge"; ValueType: string; ValueName: "Version"; ValueData: "4.2.1.0"
 Root: HKLM; Subkey: "Software\ThinBridge"; ValueType: string; ValueName: "Rulefile"; ValueData: "{app}\ThinBridgeBHO.ini"
 Root: HKLM; Subkey: "Software\ThinBridge"; ValueType: string; ValueName: "RCAPfile"; ValueData: "{app}\ResourceCap.ini"
 Root: HKLM; Subkey: "Software\ThinBridge"; ValueType: string; ValueName: "ExtensionExecfile"; ValueData: "{app}\TBRedirector.exe"
@@ -32,7 +32,7 @@ Root: HKLM; Subkey: "Software\ThinBridge"; ValueType: string; ValueName: "Extens
 Root: HKLM; Subkey: "Software\WOW6432Node\ThinBridge"; Flags: uninsdeletekey
 Root: HKLM; Subkey: "Software\WOW6432Node\ThinBridge"; ValueType: string; ValueName: "Path"; ValueData: "{app}\"
 Root: HKLM; Subkey: "Software\WOW6432Node\ThinBridge"; ValueType: string; ValueName: "ClientType"; ValueData: ""
-Root: HKLM; Subkey: "Software\WOW6432Node\ThinBridge"; ValueType: string; ValueName: "Version"; ValueData: "4.0.2.7"
+Root: HKLM; Subkey: "Software\WOW6432Node\ThinBridge"; ValueType: string; ValueName: "Version"; ValueData: "4.2.1.0"
 Root: HKLM; Subkey: "Software\WOW6432Node\ThinBridge"; ValueType: string; ValueName: "Rulefile"; ValueData: "{app}\ThinBridgeBHO.ini"
 Root: HKLM; Subkey: "Software\WOW6432Node\ThinBridge"; ValueType: string; ValueName: "RCAPfile"; ValueData: "{app}\ResourceCap.ini"
 Root: HKLM; Subkey: "Software\WOW6432Node\ThinBridge"; ValueType: string; ValueName: "ExtensionExecfile"; ValueData: "{app}\TBRedirector.exe"
