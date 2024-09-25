@@ -385,7 +385,8 @@ const ThinBridgeTalkClient = {
       return;
     }
 
-    if (details.tabId < 0) {
+    if (details.tabId < 0 ||
+        details.documentLifecycle == 'prerender') {
       console.log(`* Ignore internal request`);
       return;
     }
