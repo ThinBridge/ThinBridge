@@ -205,6 +205,24 @@ describe('Redirect rule', () => {
           assert.equal(shouldBlock, true);
         });
 
+        it('treat URL as unmatched to custom18, when it matched to an exclude group', () => {
+          const url = "https://www.citrix.com/";
+          const conf = config(
+            [
+              {
+                "Name": "custom18",
+                "Patterns": ["*"],
+                "ExcludeGroups": ["Citrix"],
+              },
+              citrixSection,
+            ]
+          );
+          thinbridge_mock.expects("redirect").once().withArgs(url, tabId, shouldCloseTab);
+          const shouldBlock = thinbridge.handleURLAndBlock(conf, tabId, url, isClosableTab);
+          thinbridge_mock.verify();
+          assert.equal(shouldBlock, true);
+        });
+
         it('preserve query for redirection', () => {
           const conf = config([queryTestSection]);
           const url = "https://www.google.com/search?q=foobar";
