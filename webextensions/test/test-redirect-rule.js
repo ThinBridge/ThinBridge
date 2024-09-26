@@ -32,6 +32,7 @@ describe('Redirect rule', () => {
         "Excludes": [],
       };
       const mySection = isEdge() ? edgeSection : chromeSection;
+      const counterSection = isEdge() ? chromeSection : edgeSection;
       const citrixSection = {
         "Name": "citrix",
         "Patterns": ["https://www.citrix.com/*"],
@@ -97,7 +98,7 @@ describe('Redirect rule', () => {
 
         it('redirect matched URL', () => {
           const url = "https://www.google.com/";
-          const conf = config([chromeSection])
+          const conf = config([counterSection])
           thinbridge_mock.expects("redirect").once().withArgs(url, tabId, shouldCloseTab);
           const shouldBlock = thinbridge.handleURLAndBlock(conf, tabId, url, isClosableTab);
           thinbridge_mock.verify();
@@ -125,7 +126,7 @@ describe('Redirect rule', () => {
 
         it('do not close tab with CloseEmptyTab option', () => {
           const url = "https://www.google.com/";
-          const conf = config([chromeSection], { CloseEmptyTab: false })
+          const conf = config([counterSection], { CloseEmptyTab: false })
           thinbridge_mock.expects("redirect").once().withArgs(url, tabId, !shouldCloseTab);
           const shouldBlock = thinbridge.handleURLAndBlock(conf, tabId, url, isClosableTab);
           thinbridge_mock.verify();
@@ -134,7 +135,7 @@ describe('Redirect rule', () => {
 
         it('do not close non-closable tab', () => {
           const url = "https://www.google.com/";
-          const conf = config([chromeSection])
+          const conf = config([counterSection])
           thinbridge_mock.expects("redirect").once().withArgs(url, tabId, !shouldCloseTab);
           const shouldBlock = thinbridge.handleURLAndBlock(conf, tabId, url, !isClosableTab);
           thinbridge_mock.verify();
@@ -152,7 +153,7 @@ describe('Redirect rule', () => {
 
         it('treat custom18 prior than others', () => {
           const url = "https://www.example.com/";
-          const conf = config([chromeSection, custom18Section])
+          const conf = config([counterSection, custom18Section])
           thinbridge_mock.expects("redirect").never()
           const shouldBlock = thinbridge.handleURLAndBlock(conf, 0, url, isClosableTab);
           thinbridge_mock.verify();
