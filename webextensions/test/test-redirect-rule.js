@@ -31,6 +31,7 @@ describe('Redirect rule', () => {
         "Patterns": [isEdge() ? "*://*" : "https://www.clear-code.com/*"],
         "Excludes": [],
       };
+      const mySection = isEdge() ? edgeSection : chromeSection;
       const citrixSection = {
         "Name": "citrix",
         "Patterns": ["https://www.citrix.com/*"],
@@ -160,7 +161,7 @@ describe('Redirect rule', () => {
 
         it(`load URL matched to ${browser}`, () => {
           const url = "https://www.clear-code.com/";
-          const conf = config([isEdge() ? edgeSection : chromeSection])
+          const conf = config([mySection])
           thinbridge_mock.expects("redirect").never()
           const shouldBlock = thinbridge.handleURLAndBlock(conf, 0, url, isClosableTab);
           thinbridge_mock.verify();
@@ -270,7 +271,7 @@ describe('Redirect rule', () => {
 
         it('override default load action to redirect', () => {
           const url = "https://www.clear-code.com/";
-          const conf = config([{...(isEdge() ? edgeSection : chromeSection)}]);
+          const conf = config([mySection]);
           conf.Sections[0].Action = "redirect";
           thinbridge_mock.expects("redirect").once().withArgs(url, tabId, true);
           const shouldBlock = thinbridge.handleURLAndBlock(conf, tabId, url, isClosableTab);
@@ -279,8 +280,8 @@ describe('Redirect rule', () => {
         });
 
         it('set default redirect action explicitly', () => {
-          const url = "https://www.google.com/";
-          const conf = config([{...(isEdge() ? chromeSection : edgeSection)}]);
+          const url = "https://www.citrix.com/";
+          const conf = config([{...citrixSection}]);
           conf.Sections[0].Action = "redirect";
           thinbridge_mock.expects("redirect").once().withArgs(url, tabId, true);
           const shouldBlock = thinbridge.handleURLAndBlock(conf, tabId, url, isClosableTab);
@@ -290,7 +291,7 @@ describe('Redirect rule', () => {
 
         it('set default load action explicitly', () => {
           const url = "https://www.clear-code.com/";
-          const conf = config([{...(isEdge() ? edgeSection : chromeSection)}]);
+          const conf = config([mySection]);
           conf.Sections[0].Action = "load";
           thinbridge_mock.expects("redirect").never();
           const shouldBlock = thinbridge.handleURLAndBlock(conf, tabId, url, isClosableTab);
