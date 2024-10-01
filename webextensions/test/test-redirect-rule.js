@@ -4,13 +4,15 @@ const chromestub = require('./chrome-stub.js')
 
 describe('Redirect rule', () => {
   const redirectors = [
-    { browser: 'chrome',   module: require('../testee/chrome.js')   },
-    { browser: 'edge',   module: require('../testee/edge.js')   },
-  ].forEach(({browser, module}) => {
+    { browser: 'chrome', format: 'thinbridge', module: require('../testee/chrome.js') },
+    { browser: 'edge',   format: 'thinbridge', module: require('../testee/edge.js')   },
+    { browser: 'chrome', format: 'ie-view-we', module: require('../testee/chrome.js')   },
+    { browser: 'edge',   format: 'ie-view-we', module: require('../testee/edge.js')   },
+  ].forEach(({browser, format, module}) => {
     function isEdge() {
       return browser == "edge";
     }
-    describe(browser, () => {
+    describe(`Browser: ${browser}, Format: ${format}`, () => {
       const isClosableTab = true;
       const tabId = 123;
       const shouldCloseTab = true;
@@ -52,6 +54,20 @@ describe('Redirect rule', () => {
       function config(sections = [], additionals = {}) {
         const config = {...baseConfig, ...additionals};
         config.Sections = [...config.Sections, ...sections];
+        if (format === 'ie-view-we') {
+          config.Sections = config.Sections.map(section => {
+            return {
+              Name: section.Name,
+              URLPatterns: section.Patterns.map(pattern => {
+                return [pattern, 'chrome'];
+              }),
+              URLExcludePatterns: section.Excludes.map(pattern => {
+                return [pattern, 'chrome'];
+              }),
+              ExcludeGroups: section.ExcludeGroups,
+            }
+          })
+        }
         config.NamedSections = Object.fromEntries(config.Sections.map(section => [section.Name, section]));
         return config;
       }
@@ -180,8 +196,7 @@ describe('Redirect rule', () => {
 
         it('treat URL as unmatched to custom18, when it matched to exclude pattern', () => {
           const url = "https://www.example.com/index.html";
-          const conf = config([custom18Section])
-          conf.Sections[0].Excludes = [url]
+          const conf = config([{...custom18Section, Excludes: [url]}])
           thinbridge_mock.expects("redirect").once().withArgs(url, tabId, shouldCloseTab);
           const shouldBlock = thinbridge.handleURLAndBlock(conf, tabId, url, isClosableTab);
           thinbridge_mock.verify();
@@ -214,6 +229,7 @@ describe('Redirect rule', () => {
               {
                 "Name": "custom18",
                 "Patterns": ["*"],
+                "Excludes": [],
                 "ExcludeGroups": ["Citrix"],
               },
               citrixSection,
