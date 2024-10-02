@@ -93,7 +93,7 @@ const ThinBridgeTalkClient = {
       }
       const isStartup = (this.cached == null);
       this.cached = resp.config;
-      this.cached.NamedSections = Object.fromEntries(resp.config.Sections.map(section => [section.Name, section]));
+      this.cached.NamedSections = Object.fromEntries(resp.config.Sections.map(section => [section.Name.toLowerCase(), section]));
       console.log('Fetch config', JSON.stringify(this.cached));
 
       if (isStartup) {
@@ -173,10 +173,13 @@ const ThinBridgeTalkClient = {
   match(section, url, namedSections) {
     for (const name of (section.ExcludeGroups || [])) {
       const foreignSection = namedSections[name.toLowerCase()];
-      //console.log(`* Referring exclude group ${name}: ${JSON.stringify(foreignSection && foreignSection.Patterns)}`);
+      //console.log(`* Referring exclude group ${name}: ${JSON.stringify(foreignSection && (foreignSection.URLPatterns || foreignSection.Patterns))}`);
       if (!foreignSection)
         continue;
-      for (const pattern of foreignSection.Patterns) {
+      for (let pattern of (foreignSection.URLPatterns || foreignSection.Patterns || [])) {
+        if (Array.isArray(pattern)) {
+          pattern = pattern[0];
+        }
         if (wildcmp(pattern, url)) {
           console.log(`* Match Exclude ${section.Name} (referring ${name}) [${pattern}]`);
           return false;
@@ -184,14 +187,20 @@ const ThinBridgeTalkClient = {
       }
     }
 
-    for (const pattern of section.Excludes) {
+    for (let pattern of (section.URLExcludePatterns || section.Excludes || [])) {
+      if (Array.isArray(pattern)) {
+        pattern = pattern[0];
+      }
       if (wildcmp(pattern, url)) {
         console.log(`* Match Exclude ${section.Name} [${pattern}]`);
         return false;
       }
     }
 
-    for (const pattern of section.Patterns) {
+    for (let pattern of (section.URLPatterns || section.Patterns || [])) {
+      if (Array.isArray(pattern)) {
+        pattern = pattern[0];
+      }
       if (wildcmp(pattern, url)) {
         console.log(`* Match ${section.Name} [${pattern}]`);
         return true;
@@ -376,7 +385,8 @@ const ThinBridgeTalkClient = {
       return;
     }
 
-    if (details.tabId < 0) {
+    if (details.tabId < 0 ||
+        details.documentLifecycle == 'prerender') {
       console.log(`* Ignore internal request`);
       return;
     }
