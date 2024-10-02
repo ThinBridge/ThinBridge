@@ -56,16 +56,22 @@ describe('Redirect rule', () => {
         config.Sections = [...config.Sections, ...sections];
         if (format === 'ie-view-we') {
           config.Sections = config.Sections.map(section => {
-            return {
-              Name: section.Name,
-              URLPatterns: section.Patterns.map(pattern => {
-                return [pattern, 'chrome'];
-              }),
-              URLExcludePatterns: section.Excludes.map(pattern => {
-                return [pattern, 'chrome'];
-              }),
-              ExcludeGroups: section.ExcludeGroups,
+            let destSection = { Name: section.Name }
+            if (section.Patterns) {
+              destSection.URLPatterns = section.Patterns.map(pattern =>
+                // The second column is just remained for compatibility with
+                // IE View WE, not used in actual.
+                [pattern, 'chrome']);
             }
+            if (section.Excludes) {
+              destSection.URLExcludePatterns = section.Excludes.map(pattern =>
+                // Ditto
+                [pattern, 'chrome']);
+            }
+            if (section.ExcludeGroups) {
+              destSection.ExcludeGroups = section.ExcludeGroups;
+            }
+            return destSection;
           })
         }
         config.NamedSections = Object.fromEntries(config.Sections.map(section => [section.Name, section]));
@@ -110,6 +116,15 @@ describe('Redirect rule', () => {
           const shouldBlock = thinbridge.handleURLAndBlock(conf, tabId, url, isClosableTab);
           thinbridge_mock.verify();
           assert.equal(shouldBlock, false);
+        });
+
+        it('section with no patterns', () => {
+          const url = "https://www.google.com/";
+          const conf = config([{"Name": "firefox"}]);
+          thinbridge_mock.expects("redirect").once().withArgs(url, tabId, shouldCloseTab);
+          const shouldBlock = thinbridge.handleURLAndBlock(conf, tabId, url, isClosableTab);
+          thinbridge_mock.verify();
+          assert.equal(shouldBlock, true);
         });
 
         it('redirect matched URL', () => {
