@@ -1,36 +1,36 @@
 global.chrome = {
     alarms: {
-	create: function() {
-	},
-	onAlarm: {
-	    addListener: function() {
-	    }
-	},
+        create: function() {
+        },
+        onAlarm: {
+            addListener: function() {
+            }
+        },
     },
     runtime: {
-	sendNativeMessage: function() {
-	},
+        sendNativeMessage: function() {
+        },
     },
     tabs: {
-	onCreated: {
-	    addListener: function() {
-	    }
-	},
-	onUpdated: {
-	    addListener: function() {
-	    }
-	},
+        onCreated: {
+            addListener: function() {
+            }
+        },
+        onUpdated: {
+            addListener: function() {
+            }
+        },
     },
     webRequest: {
-	onBeforeRequest: {
-	    addListener: function() {
-	    },
-	},
+        onBeforeRequest: {
+            addListener: function() {
+            },
+        },
     },
     webNavigation: {
-	onCommitted: {
-	    addListener: function() {
-	    }
-	},
+        onCommitted: {
+            addListener: function() {
+            }
+        },
     },
 };
