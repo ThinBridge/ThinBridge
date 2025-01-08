@@ -110,8 +110,8 @@ const ThinBridgeTalkClient = {
     const query = new String('C ' + BROWSER);
 
     const resp = await chrome.runtime.sendNativeMessage(SERVER_NAME, query);
-    if (chrome.runtime.lastError) {
-      console.log('Cannot fetch config', JSON.stringify(chrome.runtime.lastError));
+    if (chrome.runtime.lastError || !resp) {
+      console.log('Cannot fetch config', query, JSON.stringify(chrome.runtime.lastError));
       return;
     }
     const isStartup = (this.cached == null);
@@ -168,7 +168,7 @@ const ThinBridgeTalkClient = {
    * * Request Example: "Q edge https://example.com/".
    */
   redirect(url, tabId, closeTab) {
-    chrome.tabs.get(tabId).then(async tab => {
+    return chrome.tabs.get(tabId).then(async tab => {
       if (chrome.runtime.lastError) {
         console.log(`* Ignore prefetch request`);
         return;
@@ -179,6 +179,7 @@ const ThinBridgeTalkClient = {
       }
 
       const query = new String('Q ' + BROWSER + ' ' + url);
+      console.log(`Redirector: redirecting with message: ${query}`);
       await chrome.runtime.sendNativeMessage(SERVER_NAME, query);
 
       if (!closeTab)
