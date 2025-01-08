@@ -178,6 +178,14 @@ const ThinBridgeTalkClient = {
         return;
       }
 
+      // Callers need to call checkRedirectIntervalLimit() by themselves on their
+      // own responsibility to avoid duplicated redirections.
+      // We cannot call checkRedirectIntervalLimit() here to see the result,
+      // because some listeners need to see the result of checkRedirectIntervalLimit()
+      // to skip their further operation and they call this method after that.
+      // All redirections will be blocked unexpectedly even when it is really first time,
+      // if we call checkRedirectIntervalLimit() here...
+
       const query = new String('Q ' + BROWSER + ' ' + url);
       console.log(`Redirector: redirecting with message: ${query}`);
       await chrome.runtime.sendNativeMessage(SERVER_NAME, query);
