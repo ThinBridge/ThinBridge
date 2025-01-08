@@ -400,6 +400,12 @@ const ThinBridgeTalkClient = {
       tabs.forEach((tab) => {
         const url = tab.url || tab.pendingUrl;
         console.log(`handleStartup ${url} (tab=${tab.id})`);
+
+        if (this.checkRedirectIntervalLimit(tab.id, url)) {
+          console.log(`A request for same URL and same tabId already occurred in ${REDIRECT_INTERVAL_LIMIT} msec. Skip it.`);
+          return;
+        }
+
         if (!this.handleURLAndBlock(config, tab.id, url, true))
           this.knownTabIds.add(tab.id);
       });
