@@ -1,4 +1,4 @@
-.PHONY: clean packages install_dependency lint format install_hook
+.PHONY: clean packages install_dependency lint format install_hook testee testee/chrome.js testee/edge.js
 
 NPM_MOD_DIR := $(CURDIR)/node_modules
 NPM_BIN_DIR := $(NPM_MOD_DIR)/.bin
@@ -6,7 +6,7 @@ NPM_BIN_DIR := $(NPM_MOD_DIR)/.bin
 all: packages
 
 testee:
-	mkdir $@
+	mkdir -p $@
 
 testee/chrome.js: edge/background.js testee
 	sed -e "s/ThinBridgeTalkClient.init();/exports.client = ThinBridgeTalkClient/g" -e "s/ResourceCap.init();//g" chrome/background.js > $@
