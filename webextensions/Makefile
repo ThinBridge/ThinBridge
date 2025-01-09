@@ -6,7 +6,7 @@ NPM_BIN_DIR := $(NPM_MOD_DIR)/.bin
 all: packages
 
 testee:
-	mkdir -p $@
+	mkdir $@
 
 testee/chrome.js: edge/background.js testee
 	sed -e "s/ThinBridgeTalkClient.init();/exports.client = ThinBridgeTalkClient/g" -e "s/ResourceCap.init();//g" chrome/background.js > $@
