@@ -1,4 +1,4 @@
-.PHONY: clean packages install_dependency lint format install_hook testee testee/chrome.js testee/edge.js
+.PHONY: clean packages install_dependency lint format install_hook
 
 NPM_MOD_DIR := $(CURDIR)/node_modules
 NPM_BIN_DIR := $(NPM_MOD_DIR)/.bin
