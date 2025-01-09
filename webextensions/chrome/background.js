@@ -110,8 +110,8 @@ const ThinBridgeTalkClient = {
     const query = new String('C ' + BROWSER);
 
     const resp = await chrome.runtime.sendNativeMessage(SERVER_NAME, query);
-    if (chrome.runtime.lastError) {
-      console.log('Cannot fetch config', JSON.stringify(chrome.runtime.lastError));
+    if (chrome.runtime.lastError || !resp) {
+      console.log('Cannot fetch config', query, JSON.stringify(chrome.runtime.lastError));
       return;
     }
     const isStartup = (this.cached == null);
@@ -168,7 +168,7 @@ const ThinBridgeTalkClient = {
    * * Request Example: "Q edge https://example.com/".
    */
   redirect(url, tabId, closeTab) {
-    chrome.tabs.get(tabId).then(async tab => {
+    return chrome.tabs.get(tabId).then(async tab => {
       if (chrome.runtime.lastError) {
         console.log(`* Ignore prefetch request`);
         return;
@@ -178,7 +178,16 @@ const ThinBridgeTalkClient = {
         return;
       }
 
+      // Callers need to call checkRedirectIntervalLimit() by themselves on their
+      // own responsibility to avoid duplicated redirections.
+      // We cannot call checkRedirectIntervalLimit() here to see the result,
+      // because some listeners need to see the result of checkRedirectIntervalLimit()
+      // to skip their further operation and they call this method after that.
+      // All redirections will be blocked unexpectedly even when it is really first time,
+      // if we call checkRedirectIntervalLimit() here...
+
       const query = new String('Q ' + BROWSER + ' ' + url);
+      console.log(`Redirector: redirecting with message: ${query}`);
       await chrome.runtime.sendNativeMessage(SERVER_NAME, query);
 
       if (!closeTab)
@@ -399,6 +408,12 @@ const ThinBridgeTalkClient = {
       tabs.forEach((tab) => {
         const url = tab.url || tab.pendingUrl;
         console.log(`handleStartup ${url} (tab=${tab.id})`);
+
+        if (this.checkRedirectIntervalLimit(tab.id, url)) {
+          console.log(`A request for same URL and same tabId already occurred in ${REDIRECT_INTERVAL_LIMIT} msec. Skip it.`);
+          return;
+        }
+
         if (!this.handleURLAndBlock(config, tab.id, url, true))
           this.knownTabIds.add(tab.id);
       });
