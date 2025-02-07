@@ -1,0 +1,12 @@
+{
+  "name": "com.clear_code.thinbridge",
+  "description": "ThinBridge Talk Serger",
+  "path": "ThinBridgeTalk.exe",
+  "type": "stdio",
+  "allowed_origins": [
+    "chrome-extension://iiajmhibpjkpmfmbhegccdfmfnfeffmh/",
+    "chrome-extension://knldjmfmopnpolahpmmgbagdohdnhkik/",
+    "chrome-extension://oabjkjegmjblopakfhiboalfnlkhkkem/",
+    "chrome-extension://XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX/"
+  ]
+}
