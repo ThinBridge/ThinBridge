@@ -52,6 +52,7 @@ ThinBridgeのリリース手順
     ```console
     > git switch master
     > git pull
+    > git branch -D release-v4.2.1.0 # マージ済みのブランチを削除
     ```
  7. 次のコマンドでタグを打ってプッシュする
     ```console
