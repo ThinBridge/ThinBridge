@@ -131,6 +131,7 @@ ThinBridgeアドオンのリリース手順
  10. 事前に共有された秘密鍵を使い、組織内配布用のCRXを作成する。
  11. GitHubリリース上でリリースノートを作成する。
      このとき、10で作成した組織内配布用のCRXをリリースに添付する。
+     また、作成したリリースはpre-releaseとする。
      * 参考: [v2.2.1リリースのリリースノート](https://github.com/ThinBridge/ThinBridge/releases/tag/addon-v2.2.1)
      * リリースノートのテンプレート：
        ```
