@@ -32,8 +32,9 @@ ThinBridgeのリリース手順
 以下、リリースするバージョンを4.2.1.0と仮定して説明する。
 
  1. [リリース前検証](doc/verify/PreReleaseVerification.md)を一通り実施し、不具合がないことを確認する。
- 2. バージョン繰り上げ用のブランチを作成する。
+ 2. masterブランチを元に、バージョン繰り上げ用のブランチを作成する。
     ```console
+    > git switch master
     > git switch -c release-v4.2.1.0
     ```
  3. PowerShellウインドウ等を開き、script/ThinBridgeVersionUp.ps1 を使ってインストーラおよび各モジュールのバージョンを更新する
@@ -47,7 +48,7 @@ ThinBridgeのリリース手順
     > git commit -a
     > git push --set-upstream origin release-v4.2.1.0
     ```
- 5. バージョン繰り上げ用のブランチからGitHubのプルリクエストを作成し、レビューを受ける。
+ 5. バージョン繰り上げ用のブランチからGitHubのプルリクエストを作成し、 @ashie、@piroor、@HashidaTKS いずれかの（自分以外の）レビューを受ける。
  6. GitHubでプルリクエストがマージされたら、ローカルリポジトリーのmasterに変更を反映する。
     ```console
     > git switch master
@@ -93,8 +94,10 @@ ThinBridgeアドオンのリリース手順
 以下、リリースするバージョンを2.3.1と仮定して説明する。
 
  1. [リリース前検証](doc/verify/PreReleaseVerification.md)を一通り実施し、不具合がないことを確認する。
- 2. バージョン繰り上げ用のブランチを作成する。
+    また、組織内配布用のCRX作成用の秘密鍵（`edge.pem`）をダウンロードしておく。
+ 2. masterブランチを元に、バージョン繰り上げ用のブランチを作成する。
     ```console
+    > git switch master
     > git switch -c release-addon-v2.3.1
     ```
  3. リリース対象のアドオンについて、マニフェスト内のバージョン番号を繰り上げる。
@@ -107,7 +110,7 @@ ThinBridgeアドオンのリリース手順
     > git commit -a
     > git push --set-upstream origin release-addon-v2.3.1
     ```
- 5. バージョン繰り上げ用のブランチからGitHubのプルリクエストを作成し、レビューを受ける。
+ 5. バージョン繰り上げ用のブランチからGitHubのプルリクエストを作成し、 @ashie、@piroor、@HashidaTKS いずれかの（自分以外の）レビューを受ける。
  6. GitHubでプルリクエストがマージされたら、ローカルリポジトリーのmasterに変更を反映する。
     ```console
     > git switch master
@@ -119,8 +122,9 @@ ThinBridgeアドオンのリリース手順
     > git tag -a addon-v2.3.1 -m "Edge/Chrome add-on v2.3.1"
     > git push origin master --tags
     ```
- 8. `webextensions` ディレクトリー内で `make` を実行し、アップロード用のファイルを作成する。
+ 8. `webextensions` ディレクトリー内で `make` を実行し、アドオンストアアップロード用のファイルを作成する。
  9. 各ブラウザーのアドオンストアに、8で作成したファイルをアップロードする。
+    * `Dev`サフィックスが付いていないファイルをアップロードする。
     * Edge用アドオンについては、使用手順の説明を以下の通り入力する。
       ```
       This extension requires its native messaging host.
@@ -128,11 +132,28 @@ ThinBridgeアドオンのリリース手順
       And this extension needs to be installed to Active Directory managed environments, via GPO. Steps:
       https://github.com/ThinBridge/ThinBridge/blob/master/DEVELOPMENT.md#how-to-try-extensions-for-development
       ```
- 10. 事前に共有された秘密鍵を使い、組織内配布用のCRXを作成する。
+ 10. 事前に用意した秘密鍵（`edge.pem`）を使用して、組織内配布用のCRXを作成する。
+     1. 8で作成したファイルのうち、`ThinBridgeEdge.zip` を展開する。
+        ```console
+        > unzip ThinBridgeEdge.zip -d ThinBridgeEdge
+        ```
+     2. Edgeを起動し、`edge://extensions` を開く。
+     3. 「開発者モード」を有効化する（左下トグルスイッチ）。
+     4. 「拡張機能のパック」をクリックする（右上）。
+     5. 表示されたポップアップで以下を指定し、「拡張機能のパック」をクリックする。
+        * 拡張ルートディレクトリー: zipを展開したフォルダー（`ThinBridge/webextensions/ThinBridgeEdge` など）
+        * 秘密キーファイル: 事前に用意した秘密鍵（`edge.pem`）
+     6. 拡張ルートディレクトリーで指定したディレクトリーの親ディレクトリーに、`ThinBridgeEdge.crx` が作成される。
+     7. `ThinBridgeEdge.crx` を上記Edge画面にドラッグ＆ドロップしてインストールする。
+     8. インストールされたThinBridge拡張機能のIDが `jcamehnjflombcdhafhiogbojgghefec` であることを確認する。
+     9. ThinBridge拡張機能をアンインストールする。
+     10. 取り扱い時に他のバージョンと混同しないよう、バージョン番号を含むファイル名に変更する。
+         例：`ThinBridgeEdge-v2.3.1.crx`
  11. GitHubリリース上でリリースノートを作成する。
      このとき、10で作成した組織内配布用のCRXをリリースに添付する。
-     また、作成したリリースはpre-releaseとする。
      * 参考: [v2.2.1リリースのリリースノート](https://github.com/ThinBridge/ThinBridge/releases/tag/addon-v2.2.1)
+     * `Set as a pre-release` のチェックはオンにする。
+     * `Set as the latest release` のチェックはオフにする。
      * リリースノートのテンプレート：
        ```
        ## 前バージョンからの変更点
