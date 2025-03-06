@@ -251,19 +251,3 @@ ThinBridgeアドオンのリリース手順
 8. ThinBridgeアドオンを更新した旨を顧客に連絡する。
    * 組織内配布用crxを提供している顧客には、githubリリースから組織内配布用crxをダウンロードして使用する旨を案内する。
 
-
-
-CRXファイルを取得する
----------------------
-
-### Chrome
-
-```bash
-$ curl -L -o ThinBridgeChrome.crx "https://clients2.google.com/service/update2/crx?response=redirect&prodversion=90.0.0&acceptformat=crx2,crx3&x=id%3Diiajmhibpjkpmfmbhegccdfmfnfeffmh%26uc"
-```
-
-### Edge
-
-```bash
-$ curl -L -o ThinBridgeEdge.crx "https://edge.microsoft.com/extensionwebstorebase/v1/crx?response=redirect&prod=chromiumcrx&prodchannel=&x=id%3Dfamoofbkcpjdkihdngnhgbdfkfenhcnf%26installsource%3Dondemand%26uc"
-```
