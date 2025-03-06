@@ -31,22 +31,34 @@ ThinBridgeのリリース手順
 
 以下、リリースするバージョンを4.2.1.0と仮定して説明する。
 
- 1. PowerShellウインドウ等を開き、script/ThinBridgeVersionUp.ps1 を使ってインストーラおよび各モジュールのバージョンを更新する
+ 1. [リリース前検証](doc/verify/PreReleaseVerification.md)を一通り実施し、不具合がないことを確認する。
+ 2. バージョン繰り上げ用のブランチを作成する。
+    ```console
+    > git switch -c release-v4.2.1.0
+    ```
+ 3. PowerShellウインドウ等を開き、script/ThinBridgeVersionUp.ps1 を使ってインストーラおよび各モジュールのバージョンを更新する
     ```console
     > cd script
     > powershell.exe -ExecutionPolicy RemoteSigned -file .\ThinBridgeVersionUp.ps1 4.2.1.0
     ```
- 2. 上記スクリプトによる変更を確認し、問題がなければコミットする。
+ 4. 上記スクリプトによる変更を確認し、問題がなければコミットする。
     ```console
     > git diff
     > git commit -a
+    > git push --set-upstream origin release-v4.2.1.0
     ```
- 3. 次のコマンドでタグを打ってプッシュする
+ 5. バージョン繰り上げ用のブランチからGitHubのプルリクエストを作成し、レビューを受ける。
+ 6. GitHubでプルリクエストがマージされたら、ローカルリポジトリーのmasterに変更を反映する。
+    ```console
+    > git switch master
+    > git pull
+    ```
+ 7. 次のコマンドでタグを打ってプッシュする
     ```console
     > git tag -a v4.2.1.0 -m "ThinBridge v4.2.1.0"
     > git push origin master --tags
     ```
- 4. GitHubリリース上でリリースノートを作成する。
+ 8. GitHubリリース上でリリースノートを作成する。
      * 参考: [現在の最終リリースのリリースノート](https://github.com/ThinBridge/ThinBridge/releases/latest)
      * リリースノートのテンプレート：
        ```
@@ -68,7 +80,7 @@ ThinBridgeのリリース手順
        * **Templates.zip**
          * ThinBridge用のADMXテンプレートです。
        ```
- 5. GitHub Actionsで生成されたEXEインストーラを添付する。
+ 9. GitHub Actionsで生成されたEXEインストーラを添付する。
     [Build ThinBridge](https://github.com/ThinBridge/ThinBridge/actions/workflows/build-release.yaml)のArtifactsから取得した以下のファイルを使用する。
     * `ThinBridgeSetup_x64.exe` （`Installers`から取り出す）
     * `ThinBridgeSetup_x86.exe` （`Installers`から取り出す）
