@@ -90,19 +90,84 @@ ThinBridgeのリリース手順
 ThinBridgeアドオンのリリース手順
 --------------------------------
 
- 1. リリース対象のアドオンについて、マニフェスト内のバージョン番号を繰り上げる。
+以下、リリースするバージョンを2.3.1と仮定して説明する。
+
+ 1. [リリース前検証](doc/verify/PreReleaseVerification.md)を一通り実施し、不具合がないことを確認する。
+ 2. バージョン繰り上げ用のブランチを作成する。
+    ```console
+    > git switch -c release-addon-v2.3.1
+    ```
+ 3. リリース対象のアドオンについて、マニフェスト内のバージョン番号を繰り上げる。
     * webextensions/edge/manifest.json
     * webextensions/chrome/manifest.json
     * webextensions/firefox/manifest.json
- 2. `webextensions` ディレクトリー内で `make` を実行し、アップロード用のファイルを作成する。
- 3. 各ブラウザーのアドオンストアに、2で作成したファイルをアップロードする。
+ 4. 変更を確認し、問題がなければコミットする。
+    ```console
+    > git diff
+    > git commit -a
+    > git push --set-upstream origin release-addon-v2.3.1
+    ```
+ 5. バージョン繰り上げ用のブランチからGitHubのプルリクエストを作成し、レビューを受ける。
+ 6. GitHubでプルリクエストがマージされたら、ローカルリポジトリーのmasterに変更を反映する。
+    ```console
+    > git switch master
+    > git pull
+    > git branch -D release-addon-v2.3.1 # マージ済みのブランチを削除
+    ```
+ 7. 次のコマンドでタグを打ってプッシュする
+    ```console
+    > git tag -a addon-v2.3.1 -m "Edge/Chrome add-on v2.3.1"
+    > git push origin master --tags
+    ```
+ 8. `webextensions` ディレクトリー内で `make` を実行し、アップロード用のファイルを作成する。
+ 9. 各ブラウザーのアドオンストアに、8で作成したファイルをアップロードする。
     * Edge用アドオンについては、使用手順の説明を以下の通り入力する。
       ```
       This extension requires its native messaging host.
-      https://github.com/ThinBridge/ThinBridge/releases/tag/v4.0.2.4
+      https://github.com/ThinBridge/ThinBridge/releases/tag/v4.2.1.0
       And this extension needs to be installed to Active Directory managed environments, via GPO. Steps:
       https://github.com/ThinBridge/ThinBridge/blob/master/DEVELOPMENT.md#how-to-try-extensions-for-development
       ```
+ 10. 事前に共有された秘密鍵を使い、組織内配布用のCRXを作成する。
+ 11. GitHubリリース上でリリースノートを作成する。
+     このとき、10で作成した組織内配布用のCRXをリリースに添付する。
+     * 参考: [v2.2.1リリースのリリースノート](https://github.com/ThinBridge/ThinBridge/releases/tag/addon-v2.2.1)
+     * リリースノートのテンプレート：
+       ```
+       ## 前バージョンからの変更点
+       
+       * 変更点1
+       * 変更点2
+       * ...
+       
+       ## リリースパッケージについて
+       
+       ### 組織内配布版
+       
+       本リリースの`Assets`に以下パッケージを添付しています。
+       
+       * Microsoft Edge用: ThinBridgeEdge-v2.3.1.crx
+       * Google Chrome用: 未リリース
+       
+       **注意事項**
+       バージョン末尾に **`-store`** がついているファイルは使用しないでください。
+       
+       <details><summary>その他のリリースパッケージ</summary>
+       
+       ### ストア公開版
+       
+       それぞれMicrosoft EdgeストアおよびGoogle Chromeストアで公開されている（いた）バージョンです。
+       ストアでは過去バージョンを取得することができないため、後日参照用に本リリースの`Assets`に添付しています。
+       
+       * Microsoft Edge用: ThinBridgeEdge-v2.3.1-store.crx
+       * Google Chrome用: ThinBridgeChrome-v2.3.1-store.crx
+       
+       **注意事項**
+       ストア公開版を使用する場合は、特段の理由がある場合を除いて、通常は各ブラウザの公式ストアから直接入手してください。
+       本ファイルを組織内配布で使用しても、最新版がストアから自動的にダウンロードされるためバージョン固定目的で使用することはできません。バージョン固定が必要な場合は上記組織内配布版を使用してください。
+       </details>
+       ```
+12. 当該バージョンがMicrosoft EdgeストアおよびGoogle Chromeストアで公開されたら、CRXをダウンロードしてリリースに添付する。
 
 
 CRXファイルを取得する
