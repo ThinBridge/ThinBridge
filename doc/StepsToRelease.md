@@ -181,9 +181,9 @@
        * `Set as the latest release` のチェックはオフにする。
        * `Publish release` で公開する、もしくは `Safe draft` で保存する。
 5. Microsoftストアへの登録申請
-   * 公開されると、ストアからインストールして利用中の実際のクライアントPCに直接デプロイされ、問題があると顧客業務への影響が非常に大きいので、間違いがないようリリースは画面を共有して2名以上で確認しながら行う。
-   * 申請前に、ストアからインストールして使用している顧客宛に、リリースの了承を得る。
-     （安全のため、顧客から明確な不具合報告が来ていない限り、ストア版の更新は行わない。）
+   * 公開されると、ストアからインストールして利用中の実際のクライアントPCに直接デプロイされ、問題があると利用者の業務への影響が非常に大きいので、間違いがないようリリースは画面を共有して2名以上で確認しながら行う。
+   * 申請前に、ストアからインストールして使用している利用者宛に、リリースの了承を得る。
+     （安全のため、利用者から明確な不具合報告が来ていない限り、ストア版の更新は行わない。）
    * アカウントは `edge@clear-code.com` を使用し、パスキーでログインする
    1. 申請前に、[現行版のGitHubリリース](https://github.com/ThinBridge/ThinBridge/releases)にストア版crxが添付されているかを確認する。
       * 添付されていない場合は、[ストアで公開されているcrxファイルをダウンロードして](https://edge.microsoft.com/extensionwebstorebase/v1/crx?response=redirect&x=id%3Dfamoofbkcpjdkihdngnhgbdfkfenhcnf%26installsource%3Dondemand%26uc)、現行版のgithubリリースに添付する。
@@ -200,9 +200,9 @@
       https://github.com/ThinBridge/ThinBridge/blob/master/DEVELOPMENT.md#how-to-try-extensions-for-development
       ```
 6. Chromeストアへの登録申請
-   * 公開されると、ストアからインストールして利用中の実際のクライアントPCに直接デプロイされ、問題があると顧客業務への影響が非常に大きいので、間違いがないようリリースは画面を共有して2名以上で確認しながら行う。
-   * 申請前に、ストアからインストールして使用している顧客宛に、リリースの了承を得る。
-     （安全のため、顧客から明確な不具合報告が来ていない限り、ストア版の更新は行わない。）
+   * 公開されると、ストアからインストールして利用中の実際のクライアントPCに直接デプロイされ、問題があると利用者の業務への影響が非常に大きいので、間違いがないようリリースは画面を共有して2名以上で確認しながら行う。
+   * 申請前に、ストアからインストールして使用している利用者宛に、リリースの了承を得る。
+     （安全のため、利用者から明確な不具合報告が来ていない限り、ストア版の更新は行わない。）
    * アカウントは `google@clear-code.com` を使用し、パスキーでログインする
    1. 申請前に、[現行版のGitHubリリース](https://github.com/ThinBridge/ThinBridge/releases)にストア版crxが添付されているかを確認する。
       * 添付されていない場合は、[ストアで公開されているcrxファイルをダウンロードして](https://clients2.google.com/service/update2/crx?response=redirect&prodversion=90.0.0&acceptformat=crx2,crx3&x=id%3Diiajmhibpjkpmfmbhegccdfmfnfeffmh%26uc)、現行版のgithubリリースに添付する。
@@ -221,6 +221,6 @@
       * `Set as a pre-release` のチェックはオンにする。
       * `Set as the latest release` のチェックはオフにする。
       * `Publish release` で公開する、もしくは `Safe draft` で保存する。
-8. ThinBridgeアドオンを更新した旨を顧客に連絡する。
-   * 組織内配布用crxを提供している顧客には、githubリリースから組織内配布用crxをダウンロードして使用する旨を案内する。
+8. ThinBridgeアドオンを更新した旨を利用者に連絡する。
+   * 組織内配布用crxを提供している利用者には、GitHubリリースから組織内配布用crxをダウンロードして使用する旨を案内する。
 
