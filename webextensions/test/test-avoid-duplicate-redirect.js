@@ -67,12 +67,12 @@ describe('avoidDuplicateRedirect', () => {
         sinon.stub(chrome.storage.session, 'get').resolves({ newTabIds: null, knownTabIds: null });
 
         thinbridge.cached = config;
+        thinbridge.queuedRedirectionURLs = [];
         await thinbridge.handleStartup(config);
         await thinbridge.onTabUpdated(tabId, { url: tab.url }, { ...tab });
         await Promise.resolve(true); // We need to wait until all async operations are finished
 
-        const redirectMessage = new String(`Q ${browser} ${tab.url}`);
-        assert.equal(sendNativeMessageStub.withArgs(SERVER_NAME, redirectMessage).callCount, 1);
+        assert.equal(JSON.stringify(thinbridge.queuedRedirectionURLs), JSON.stringify([tab.url]));
      });
 
       it('onTabUpdated => handleStartup', async () => {
@@ -88,12 +88,12 @@ describe('avoidDuplicateRedirect', () => {
         sinon.stub(chrome.storage.session, 'get').resolves({ newTabIds: null, knownTabIds: null });
 
         thinbridge.cached = config;
+        thinbridge.queuedRedirectionURLs = [];
         await thinbridge.onTabUpdated(tabId, { url: tab.url }, { ...tab });
         await thinbridge.handleStartup(config);
         await Promise.resolve(true); // We need to wait until all async operations are finished
 
-        const redirectMessage = new String(`Q ${browser} ${tab.url}`);
-        assert.equal(sendNativeMessageStub.withArgs(SERVER_NAME, redirectMessage).callCount, 1);
+        assert.equal(JSON.stringify(thinbridge.queuedRedirectionURLs), JSON.stringify([tab.url]));
      });
     });
   });
