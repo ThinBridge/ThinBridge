@@ -12,6 +12,8 @@ const DMZ_SECTION = 'custom18';
 const CONTINUOUS_SECTION = 'custom19';
 const SERVER_NAME = 'com.clear_code.thinbridge';
 const ALARM_MINUTES = 0.5;
+const REDIRECTION_QUEUE_INTERVAL_MSEC = 1000;
+const REDIRECTION_QUEUE_ALARM_MINUTES = REDIRECTION_QUEUE_INTERVAL_MSEC / 1000 / 60;
 /*
  * When `{cancel: 1}` is used to block loading, Edge shows a warning page which
  * indicates that loading is canceled by an add-on. To avoid it, move back to
@@ -89,6 +91,7 @@ function wildcmp(wild, string) {
 const ThinBridgeTalkClient = {
   newTabIds: new Set(),
   knownTabIds: new Set(),
+  queuedRedirectionURLs: [],
   resumed: false,
 
   init() {
@@ -128,6 +131,7 @@ const ThinBridgeTalkClient = {
     chrome.storage.session.set({
       newTabIds: [...this.newTabIds],
       knownTabIds: [...this.knownTabIds],
+      queuedRedirectionURLs: this.queuedRedirectionURLs,
     });
   },
 
@@ -138,7 +142,7 @@ const ThinBridgeTalkClient = {
     console.log(`Redirector: loading previous state`);
     return this.$promisedLoaded = new Promise(async (resolve, _reject) => {
       try {
-        const { newTabIds, knownTabIds } = await chrome.storage.session.get({ newTabIds: null, knownTabIds: null });
+        const { newTabIds, knownTabIds, queuedRedirectionURLs } = await chrome.storage.session.get({ newTabIds: null, knownTabIds: null });
         console.log(`ThinBridgeTalkClient: loaded newTabIds, knownTabIds => `, JSON.stringify(newTabIds), JSON.stringify(knownTabIds));
         this.resumed = !!(newTabIds || knownTabIds);
         if (newTabIds) {
@@ -150,6 +154,9 @@ const ThinBridgeTalkClient = {
           for (const tabId of knownTabIds) {
             this.knownTabIds.add(tabId);
           }
+        }
+        if (queuedRedirectionURLs) {
+          this.queuedRedirectionURLs = [...queuedRedirectionURLs, ...this.queuedRedirectionURLs];
         }
       }
       catch(error) {
@@ -186,9 +193,7 @@ const ThinBridgeTalkClient = {
       // All redirections will be blocked unexpectedly even when it is really first time,
       // if we call checkRedirectIntervalLimit() here...
 
-      const query = new String('Q ' + BROWSER + ' ' + url);
-      console.log(`Redirector: redirecting with message: ${query}`);
-      await chrome.runtime.sendNativeMessage(SERVER_NAME, query);
+      this.queuedRedirect(url);
 
       if (!closeTab)
         return;
@@ -208,6 +213,34 @@ const ThinBridgeTalkClient = {
       } while (existingTab = await chrome.tabs.get(tabId).catch(_error => null));
     });
   },
+  queuedRedirect(url) {
+    this.queuedRedirectionURLs.push(url);
+    this.processRedirectionQueue();
+  },
+  async processRedirectionQueue() {
+    if (this.queuedRedirectionURLs.length == 0 ||
+        Date.now() - this.lastRedirectionQueueProceeded < REDIRECTION_QUEUE_INTERVAL_MSEC) {
+      return;
+    }
+
+    const url = this.queuedRedirectionURLs.shift();
+    this.save();
+
+    if (!url) {
+      return this.processRedirectionQueue();
+    }
+
+    const query = new String('Q ' + BROWSER + ' ' + url);
+    console.log(`Redirector: redirecting with message: ${query}`);
+    try {
+      await chrome.runtime.sendNativeMessage(SERVER_NAME, query);
+    }
+    catch(error) {
+      console.log('Redirector: failed to redirect with the native messaging host: ', error.name, error.message);
+    }
+    this.lastRedirectionQueueProceeded = Date.now();
+  },
+  lastRedirectionQueueProceeded: -1,
 
   match(section, url, namedSections) {
     for (const name of (section.ExcludeGroups || [])) {
@@ -532,12 +565,21 @@ chrome.webRequest.onBeforeRequest.addListener(
 /* Refresh config for every N minute */
 console.log('Poll config for every', ALARM_MINUTES , 'minutes');
 chrome.alarms.create('poll-config', {'periodInMinutes': ALARM_MINUTES});
+console.log('Process redirection queue for every', REDIRECTION_QUEUE_ALARM_MINUTES , 'minutes');
+chrome.alarms.create('process-redirection-queue', {'periodInMinutes': REDIRECTION_QUEUE_ALARM_MINUTES});
 
 chrome.alarms.onAlarm.addListener((alarm) => {
-  if (alarm.name === 'poll-config') {
-    ThinBridgeTalkClient.configure();
+  switch (alarm.name) {
+    case 'poll-config':
+      ThinBridgeTalkClient.configure();
+      break;
+
+    case 'process-redirection-queue':
+      ThinBridgeTalkClient.processRedirectionQueue();
+      break;
   }
 });
+
 
 /* Tab book-keeping for intelligent tab handlings */
 chrome.tabs.onCreated.addListener(ThinBridgeTalkClient.onTabCreated.bind(ThinBridgeTalkClient));

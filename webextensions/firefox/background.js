@@ -13,6 +13,7 @@ const CONTINUOUS_SECTION = 'custom19';
 const SERVER_NAME = 'com.clear_code.thinbridge';
 const ALARM_MINUTES = 1;
 const CANCEL_REQUEST = {cancel: 1}
+const REDIRECTION_QUEUE_INTERVAL_MSEC = 1000;
 
 /*
  * ThinBridge's matching function (See BHORedirector/URLRedirectCore.h)
@@ -78,6 +79,7 @@ const ThinBridgeTalkClient = {
     this.cached = null;
     this.callback = this.onBeforeRequest.bind(this);
     this.isNewTab = {};
+    this.queuedRedirectionURLs = [];
     this.configure();
     this.listen();
     console.log('Running as Thinbridge Talk client');
@@ -151,7 +153,7 @@ const ThinBridgeTalkClient = {
    * * Request Example: "Q edge https://example.com/".
    */
   redirect(url, tabId, closeTab) {
-    browser.tabs.get(tabId).then(tab => {
+    browser.tabs.get(tabId).then(async tab => {
       if (browser.runtime.lastError) {
         console.log(`* Ignore prefetch request`);
         return;
@@ -161,14 +163,57 @@ const ThinBridgeTalkClient = {
         return;
       }
 
-      const query = new String('Q ' + BROWSER + ' ' + url);
-      browser.runtime.sendNativeMessage(SERVER_NAME, query).then(_resp => {
-        if (closeTab) {
-          browser.tabs.remove(tabId);
-        }
-      });
+      await this.queuedRedirect(url);
+
+      if (closeTab) {
+        browser.tabs.remove(tabId);
+      }
     });
   },
+  queuedRedirect(url) {
+    this.queuedRedirectionURLs.push(url);
+    this.processRedirectionQueue();
+  },
+  async processRedirectionQueue() {
+    this.processRedirectionQueueTimer = null;
+
+    if (this.queuedRedirectionURLs.length == 0) {
+      return;
+    }
+
+    const delta = Date.now() - this.lastRedirectionQueueProceeded;
+    if (delta < REDIRECTION_QUEUE_INTERVAL_MSEC) {
+      if (!this.processRedirectionQueueTimer) {
+        this.processRedirectionQueueTimer = setTimeout(() => {
+          this.processRedirectionQueue();
+        }, delta);
+      }
+      return;
+    }
+
+    const url = this.queuedRedirectionURLs.shift();
+    this.save();
+
+    if (!url) {
+      return this.processRedirectionQueue();
+    }
+
+    const query = new String('Q ' + BROWSER + ' ' + url);
+    console.log(`Redirector: redirecting with message: ${query}`);
+    try {
+      await chrome.runtime.sendNativeMessage(SERVER_NAME, query);
+    }
+    catch(error) {
+      console.log('Redirector: failed to redirect with the native messaging host: ', error.name, error.message);
+    }
+    this.lastRedirectionQueueProceeded = Date.now();
+
+    this.processRedirectionQueueTimer = setTimeout(() => {
+      this.processRedirectionQueue();
+    }, REDIRECTION_QUEUE_INTERVAL_MSEC);
+  },
+  lastRedirectionQueueProceeded: -1,
+  processRedirectionQueueTimer: null,
 
   match(section, url, namedSections) {
     for (const name of (section.ExcludeGroups || [])) {
