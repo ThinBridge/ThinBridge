@@ -413,6 +413,7 @@ public:
 	BOOL m_bRedirect_Drive;
 
 	BOOL m_bDisableIE_DDE;
+	BOOL m_bDisableSubframeRedirection;
 
 	CURLRedirectDataClass* m_pRDP;
 	CURLRedirectDataClass* m_pVMW;
@@ -917,6 +918,12 @@ public:
 				out.WriteString(strTempFormat);
 				pstrOutPutData += strTempFormat;
 			}
+			if (m_bDisableSubframeRedirection)
+			{
+				strTempFormat = _T("@DISABLE_SUBFRAME_REDIRECTION\n");
+				out.WriteString(strTempFormat);
+				pstrOutPutData += strTempFormat;
+			}
 
 			//VMware Horizon
 			if (!m_strHorizon_ConnectionServerName.IsEmpty())
@@ -1103,6 +1110,7 @@ public:
 			BOOL bTopPageOnly=FALSE;
 			DWORD dRedirectPageAction=0;
 			DWORD dwCloseTimeout=3;
+			BOOL bDisableSubframeRedirection = FALSE;
 
 			DWORD dwZone=ZONE_NA;
 			BOOL bDisabled=FALSE;
@@ -1162,6 +1170,7 @@ public:
 							m_bTraceLog=dRedirectPageAction==1?TRUE:FALSE;
 							m_bQuickRedirect = (dwZone&INTRANET_ZONE) == INTRANET_ZONE ? TRUE : FALSE;
 							m_bTopURLOnly = (dwZone&UNTRUSTED_ZONE) == UNTRUSTED_ZONE ? TRUE : FALSE;
+							m_bDisableSubframeRedirection = bDisableSubframeRedirection;
 						}
 						else if(strExecType.CompareNoCase(_T("RDP"))==0 && m_pRDP)
 							m_pRDP->Copy(pRedirectData);
@@ -1302,6 +1311,10 @@ public:
 					else if(strTempUpper.Find(_T("@UNTRUSTED_ZONE"))==0)
 					{
 						dwZone |= UNTRUSTED_ZONE;
+					}
+					if (strTempUpper.Find(_T("@DISABLE_SUBFRAME_REDIRECTION")) == 0)
+					{
+						bDisableSubframeRedirection = TRUE;
 					}
 
 					//VMware Horizon
@@ -1457,6 +1470,7 @@ public:
 						m_bTraceLog=dRedirectPageAction==1?TRUE:FALSE;
 						m_bQuickRedirect = (dwZone&INTRANET_ZONE) == INTRANET_ZONE ? TRUE : FALSE;
 						m_bTopURLOnly = (dwZone&UNTRUSTED_ZONE) == UNTRUSTED_ZONE ? TRUE : FALSE;
+						m_bDisableSubframeRedirection = bDisableSubframeRedirection;
 					}
 					else if(strExecType.CompareNoCase(_T("RDP"))==0)
 						m_pRDP->Copy(pRedirectData);
