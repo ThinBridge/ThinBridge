@@ -36,6 +36,7 @@ struct section {
 struct config {
 	int only_main_frame;
 	int ignore_query_string;
+	int disable_subframe_redirection;
 	char default_browser[MAX_PATH];
 	struct section *section;
 };
@@ -113,6 +114,9 @@ static void parse_conf(char *data, struct config *conf)
 				}
 				else if (strcmp(line, "@UNTRUSTED_ZONE") == 0) {
 					conf->only_main_frame = 1;
+				}
+				else if (strcmp(line, "@DISABLE_SUBFRAME_REDIRECTION") == 0) {
+					conf->disable_subframe_redirection = 1;
 				}
 			}
 			else if (_default) {
@@ -238,7 +242,12 @@ static char *dump_json(struct config *conf)
 	strbuf_concat(&sb, _itoa(conf->ignore_query_string, buf, 10));
 	strbuf_putchar(&sb, ',');
 
-	/* IgnoreQueryString */
+	/* DisableSubframeRedirection */
+	strbuf_concat(&sb, "\"DisableSubframeRedirection\":");
+	strbuf_concat(&sb, _itoa(conf->disable_subframe_redirection, buf, 10));
+	strbuf_putchar(&sb, ',');
+
+	/* DefaultBrowser */
 	strbuf_concat(&sb, "\"DefaultBrowser\":");
 	strbuf_concat_jsonstr(&sb, conf->default_browser, strlen(conf->default_browser));
 	strbuf_putchar(&sb, ',');
