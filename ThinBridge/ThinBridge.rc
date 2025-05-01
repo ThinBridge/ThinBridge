@@ -210,7 +210,7 @@ BEGIN
     CONTROL         "TRACE Logを出力する",IDC_CHK_GLOVAL_TRACE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,213,80,10
     PUSHBUTTON      "TRACE Log モニター ウインドウを開く...",IDC_BUTTON1,17,228,117,23
     LTEXT           "注意：\nTRACE Logを出力する場合は、Internet Explorerの保護モードを無効にし再スタートする必要があります。\n\n[インターネット オプション]-[セキュリティ]タブ-[保護モードを有効にする(Internet Explorerの再起動が必要)]のチェックをOFF",IDC_STATIC,18,258,372,39,0,WS_EX_STATICEDGE
-    CONTROL         "サブフレームのURLはリダイレクトしない",IDC_CHK_GLOVAL_DISABLE_SUBFRAME_REDIRECTION,
+    CONTROL         "サブフレームのURLをリダイレクトする",IDC_CHK_GLOVAL_ENABLE_SUBFRAME_REDIRECTION,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,173,256,10
 END
 
