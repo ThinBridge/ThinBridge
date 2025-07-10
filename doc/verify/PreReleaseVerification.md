@@ -756,7 +756,20 @@ crxパッケージ化されたアドオンをGPOでインストールした状�
    例：`bplpacmhanoonjdmoelfokbphgopcbma`
 6. `C:\Program Files\ThinBridge\ThinBridgeHost\edge.json` のアクセス権を変更し、ユーザー権限での書き込みを許可した上で、`"allowed_origins"` に、先ほど控えたIDに基づくURLを追加する。
    例：`"chrome-extension://bplpacmhanoonjdmoelfokbphgopcbma/"`
-7. （必要に応じて: 「サービスワーカー」をクリックし、DevToolsを起動する。当画面で逐次状況を観察しながらテストする。）
+7. BHOを有効化する
+   1. `gpedit.msc` を起動する。
+   2. `Computer Configuration\Administrative Templates\Windows Components\Internet Explorer\Security Features\Add-on Management` （`コンピューターの構成\管理用テンプレート\Windows コンポーネント\Internet Explorer\セキュリティの機能\アドオン管理`）を開いて、以下のポリシーを設定する。
+      * `Add-on List`（`アドオンの一覧`）
+      * `Enabled`（`有効`）に設定して、`Add-on List`→`Show...`（`アドオンの一覧`→`表示...`）をクリックし、以下の名前の項目を設定（項目がなければ追加）して、`OK` を押してダイアログを閉じ、`OK` を押して変更を保存する。
+        * `Value name`（`値の名前`）：`{3A56619B-37AC-40DA-833E-410F3BEDCBDC}`
+        * `Value`（`値`）：`1`
+8. もし、Edgeで「この拡張機能は既知のソースからのものではなく、ユーザーの知らないうちに追加された可能性があります。」の警告が出る場合、GPOでThinBridge拡張機能のインストールを許可する。
+   1. `gpedit.msc` を起動する。
+   2. `Computer Configuration\Administrative Templates\Microsoft Edge\Extensions`（`コンピューターの構成\管理用テンプレート\Microsoft Edge\拡張機能`）の `Allow specific extensions to be installed`（`特定の拡張機能のインストールを許可する`）を開く。
+   3. `Enabled`（`有効`）に設定して、`Extension IDs to exampt from the block list`→`Show...`（`禁止リストから除外する拡張子 ID`→`表示...`）をクリックする
+   4. 先程控えたIDを追加して、`OK` を押してダイアログを閉じ、`OK` を押して変更を保存する。
+      例：`bplpacmhanoonjdmoelfokbphgopcbma`
+9. （必要に応じて: 「サービスワーカー」をクリックし、DevToolsを起動する。当画面で逐次状況を観察しながらテストする。）
 
 #### 検証
 
