@@ -269,7 +269,7 @@ Windows Enterprise マルチセッションのテストをする場合は、以�
         * [ ] (Windows Enterprise マルチセッションのみ) ユーザーBでEdgeやChromeが開いていない。
    3. EdgeのIEモードのタブ→Chromeの検証のため、Edgeで https://piro.sakura.ne.jp/apps/jspanel.html を開く。
       * 期待される結果：
-        * [ ] Edge上で https://piro.sakura.ne.jp/apps/jspanel.html が読み込まれる。
+        * [ ] タブがIEモードに切り替わる。
    4. 以下のスクリプトを貼り付けて実行する。
       ```
       location.href = 'https://example.net/?query-parameter=value';
