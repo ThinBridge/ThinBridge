@@ -36,6 +36,7 @@ struct section {
 struct config {
 	int only_main_frame;
 	int ignore_query_string;
+	int enable_subframe_redirection;
 	char default_browser[MAX_PATH];
 	struct section *section;
 };
@@ -84,6 +85,7 @@ static void parse_conf(char *data, struct config *conf)
 	struct section *section;
 	struct section **indirect = &conf->section;
 
+	conf->enable_subframe_redirection = 1;
 	line = strtok(data, "\r\n");
 	while (line) {
 	    switch (line[0]) {
@@ -113,6 +115,17 @@ static void parse_conf(char *data, struct config *conf)
 				}
 				else if (strcmp(line, "@UNTRUSTED_ZONE") == 0) {
 					conf->only_main_frame = 1;
+				}
+				else if (strstr(line, "@ENABLE_SUBFRAME_REDIRECTION:") == line) {
+					const char* iPosC = line + strlen("@ENABLE_SUBFRAME_REDIRECTION:");
+					int value = atoi(iPosC);
+					if (value == 0) {
+						conf->enable_subframe_redirection = 0;
+					}
+					else {
+						//The default value of ENABLE_SUBFRAME_REDIRECTION is TRUE
+						conf->enable_subframe_redirection = 1;
+					}
 				}
 			}
 			else if (_default) {
@@ -238,7 +251,12 @@ static char *dump_json(struct config *conf)
 	strbuf_concat(&sb, _itoa(conf->ignore_query_string, buf, 10));
 	strbuf_putchar(&sb, ',');
 
-	/* IgnoreQueryString */
+	/* EnableSubframeRedirection */
+	strbuf_concat(&sb, "\"EnableSubframeRedirection\":");
+	strbuf_concat(&sb, _itoa(conf->enable_subframe_redirection, buf, 10));
+	strbuf_putchar(&sb, ',');
+
+	/* DefaultBrowser */
 	strbuf_concat(&sb, "\"DefaultBrowser\":");
 	strbuf_concat_jsonstr(&sb, conf->default_browser, strlen(conf->default_browser));
 	strbuf_putchar(&sb, ',');
