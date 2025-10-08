@@ -159,6 +159,9 @@ Source: "Release\TBo365URLSyncSetting.exe"; DestDir: "{app}\";Flags: ignoreversi
 Source: "Release\ThinBridgeBHO.dll"; DestDir: "{app}\";Flags: ignoreversion regserver 32bit;permissions:users-readexec admins-full system-full
 Source: "Release\ThinBridgeBHO64.dll"; DestDir: "{app}\";Flags: ignoreversion regserver 64bit; Check: IsWin64;permissions:users-readexec admins-full system-full
 
+;task
+Source: "ThinBridgeRuleUpdater\Task\ThinBridgeRuleUpdateTask.xml"; DestDir: "{tmp}";Flags: ignoreversion
+
 ;host
 Source: "Release\ThinBridgeTalk.exe"; DestDir: "{app}\ThinBridgeHost";Flags: ignoreversion;permissions:users-readexec admins-full system-full
 
@@ -182,6 +185,10 @@ Name: "{app}\TBUpdateLog";Permissions: users-modify;Flags: uninsneveruninstall
 
 [Run] 
 Filename: "{app}\ThinBridgeChecker.exe";Parameters: "/log"; Flags: runhidden 
+
+Filename: "schtasks.exe";Parameters: "/Create /F /TN ""ThinBridgeRuleUpdateTask"" /xml ""{tmp}\ThinBridgeRuleUpdateTask.xml"""; Flags: runhidden 
+;Filename: "schtasks.exe";Parameters: "/Change /TN ""ThinBridgeRuleUpdateTask"" /TR ""'{app}\ThinBridgeRuleUpdater.exe'"""; Flags: runhidden 
+Filename: "schtasks.exe";Parameters: "/Change /F /SC HOURLY /TN ""ThinBridgeRuleUpdateTask"" /RU SYSTEM /RL HIGHEST /TR ""'{app}\ThinBridgeRuleUpdater.exe'"""; Flags: runhidden 
 
 Filename: "{sys}\icacls.exe";Parameters: """{app}\TBo365URLSyncSetting.exe"" /inheritance:r"; Flags: runhidden shellexec
 Filename: "{sys}\icacls.exe";Parameters: """{app}\TBRedirector.exe"" /inheritance:r"; Flags: runhidden shellexec
