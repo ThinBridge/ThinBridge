@@ -187,8 +187,8 @@ Name: "{app}\TBUpdateLog";Permissions: users-modify;Flags: uninsneveruninstall
 Filename: "{app}\ThinBridgeChecker.exe";Parameters: "/log"; Flags: runhidden 
 
 Filename: "schtasks.exe";Parameters: "/Create /F /TN ""ThinBridgeRuleUpdateTask"" /xml ""{tmp}\ThinBridgeRuleUpdateTask.xml"""; Flags: runhidden 
-;Filename: "schtasks.exe";Parameters: "/Change /TN ""ThinBridgeRuleUpdateTask"" /TR ""'{app}\ThinBridgeRuleUpdater.exe'"""; Flags: runhidden 
-Filename: "schtasks.exe";Parameters: "/Change /F /SC HOURLY /TN ""ThinBridgeRuleUpdateTask"" /RU SYSTEM /RL HIGHEST /TR ""'{app}\ThinBridgeRuleUpdater.exe'"""; Flags: runhidden 
+;Filename: "schtasks.exe";Parameters: "/Change /TN ""ThinBridgeRuleUpdateTask"" /TR ""'{app}\ThinBridgeRuleUpdater.exe'"" /IT"; Flags: runhidden 
+Filename: "schtasks.exe";Parameters: "/Change /F /SC HOURLY /TN ""ThinBridgeRuleUpdateTask"" /RU SYSTEM /RL HIGHEST /TR ""'{app}\ThinBridgeRuleUpdater.exe'"" /IT"; Flags: runhidden 
 
 Filename: "{sys}\icacls.exe";Parameters: """{app}\TBo365URLSyncSetting.exe"" /inheritance:r"; Flags: runhidden shellexec
 Filename: "{sys}\icacls.exe";Parameters: """{app}\TBRedirector.exe"" /inheritance:r"; Flags: runhidden shellexec
