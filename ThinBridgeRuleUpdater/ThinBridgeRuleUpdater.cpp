@@ -608,6 +608,7 @@ CString CThinBridgeRuleUpdaterApp::WriteThinBridgeBHO(CConfData* pSettingConf,BO
 		}
 	}
 
+	strRet += LogFmt(_T("設定データ取得開始"));
 	//GUIからの場合
 	if(bFromGUI)
 	{
@@ -742,7 +743,9 @@ CString CThinBridgeRuleUpdaterApp::WriteThinBridgeBHO(CConfData* pSettingConf,BO
 		}
 	}
 	strRet += TBRuleUpdate.GetLog();
+	strRet += LogFmt(_T("設定データ取得完了"));
 
+	strRet += LogFmt(_T("設定データ差分確認開始"));
 	//ThinBridgeBHOのデータを全て読み込む
 	CStdioFile in;
 	CString strTemp;
@@ -808,7 +811,7 @@ CString CThinBridgeRuleUpdaterApp::WriteThinBridgeBHO(CConfData* pSettingConf,BO
 			}
 		}
 	}
-
+	strRet += LogFmt(_T("設定データ差分確認完了"));
 	//変更あり
 	if(bDiff)
 	{
@@ -916,8 +919,10 @@ CString CThinBridgeRuleUpdaterApp::WriteThinBridgeBHO(CConfData* pSettingConf,BO
 		CString strTemp1;
 		strTemp1 = strRet;
 		strRet =_T("【同一内容 変更なし】\r\n更新内容に差分がありませんでした。\r\n");
-		strTemp1.Format(_T("取得元：%s\r\n更新先：%s\r\n"), strConfigServerURL, m_strThinBridgeBHOFileFullPath);
+		CString strTemp2;
+		strTemp2.Format(_T("取得元：%s\r\n更新先：%s\r\n"), strConfigServerURL, m_strThinBridgeBHOFileFullPath);
 		strRet += strServerIndex;
+		strRet += strTemp2;
 		strRet += strTemp1;
 		m_iWriteThinBridgeBHO_ResultCode=SUCCESS_SAME_DATA;
 	}
