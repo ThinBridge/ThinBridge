@@ -422,6 +422,7 @@ BOOL CThinBridgeRuleUpdaterApp::InitInstance()
 				DWORD dWaitTime = 0;
 				dWaitTime = nRand * 1000*60;//分単位
 				WaitSec(dWaitTime);
+				strWaitTime.Format(_T(" 待機(%d分)"), nRand);
 			}
 		}
 		else
@@ -437,6 +438,33 @@ BOOL CThinBridgeRuleUpdaterApp::InitInstance()
 		//失敗している場合は、そのまま流す。
 		if (iRet==200)
 		{
+			CStdioFile out;
+			if (out.Open(m_strExecLogFileFullPath, CFile::modeWrite | CFile::shareDenyNone | CFile::modeCreate | CFile::modeNoTruncate))
+			{
+				TRY
+				{
+					out.SeekToEnd();
+					out.WriteString(_T("\n自動更新//////////////////////////////////////////////////////////////////////////////////////////////////\n"));
+					out.WriteString(time.Format(_T("%Y-%m-%d %H:%M:%S")));
+					out.WriteString(strWaitTime);
+					out.WriteString(_T("\nExecUser:["));
+					out.WriteString(m_strExecUserName);
+					out.WriteString(_T("]"));
+					out.WriteString(_T("LogonUser:["));
+					out.WriteString(m_strDomainUserName);
+					out.WriteString(_T("]"));
+					out.WriteString(_T("LogonUserSID:["));
+					out.WriteString(m_strSID);
+					out.WriteString(_T("]"));
+					out.WriteString(_T("CurrentSID:["));
+					out.WriteString(m_strCurrentSID);
+					out.WriteString(_T("]\n"));
+					out.WriteString(_T("アクティブなログオンユーザーで再実行します。"));
+					out.Close();
+				}
+					CATCH(CFileException, eP) {}
+				END_CATCH
+			}
 			return FALSE;
 		}
 	}
@@ -453,7 +481,6 @@ BOOL CThinBridgeRuleUpdaterApp::InitInstance()
 	{
 		m_hMutex = ::CreateMutex(NULL, FALSE, _T("Local\\TBRuleUpdateFlg"));
 	}
-	//strWaitTime.Format(_T(" 待機(%d分)"), nRand);
 	CString strResult;
 	strResult = WriteThinBridgeBHO(&SettingConf, TRUE, FALSE);
 	CStdioFile out;
