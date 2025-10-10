@@ -137,8 +137,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 4,2,1,1
- PRODUCTVERSION 4,2,1,1
+ FILEVERSION 4,2,2,0
+ PRODUCTVERSION 4,2,2,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -155,12 +155,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "ThinBridge"
             VALUE "FileDescription", "ThinBridgeRuleUpdater"
-            VALUE "FileVersion", "4.2.1.1"
+            VALUE "FileVersion", "4.2.2.0"
             VALUE "InternalName", "ThinBridgeRuleUpdater.exe"
             VALUE "LegalCopyright", "ThinBridge"
             VALUE "OriginalFilename", "ThinBridgeRuleUpdater.exe"
             VALUE "ProductName", "ThinBridgeRuleUpdater"
-            VALUE "ProductVersion", "4.2.1.1"
+            VALUE "ProductVersion", "4.2.2.0"
         END
     END
     BLOCK "VarFileInfo"
