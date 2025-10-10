@@ -314,6 +314,7 @@ BOOL CThinBridgeRuleUpdaterApp::InitInstance()
 	CString strMsg;
 	CString Command1;
 	CString Command2;
+	bool forceDelay = false;
 	//コマンドラインあり。
 	if(m_lpCmdLine[0] != '\0')
 	{
@@ -332,156 +333,161 @@ BOOL CThinBridgeRuleUpdaterApp::InitInstance()
 			dlg.DoModal();
 			return FALSE;
 		}
-	}
-	else
-	{
-		if (m_strExeNameNoExt.CompareNoCase(_T("ThinBridgeRuleUpdaterSetting")) == 0)
+		else if (Command1.CompareNoCase(_T("/ForceDelay")) == 0)
 		{
-			CThinBridgeRuleUpdaterDlg dlg;
-			m_pMainWnd = &dlg;
-			dlg.DoModal();
+			forceDelay = true;
+		}
+		else
+		{
 			return FALSE;
 		}
+	}
 
-		//タスクスケジューラからの起動の場合
-		//タスクスケジューラで1時間に1回 実行されるため負荷を分散するために、ランダムでWaitする。0-10分の範囲
-		int nRand = 0;
-		CString strWaitTime;
-		CTime time = CTime::GetCurrentTime();
+	if (m_strExeNameNoExt.CompareNoCase(_T("ThinBridgeRuleUpdaterSetting")) == 0)
+	{
+		CThinBridgeRuleUpdaterDlg dlg;
+		m_pMainWnd = &dlg;
+		dlg.DoModal();
+		return FALSE;
+	}
 
-		//systemアカウントのSID
-		if (m_strCurrentSID == _T("S-1-5-18"))
+	//タスクスケジューラからの起動の場合
+	//タスクスケジューラで1時間に1回 実行されるため負荷を分散するために、ランダムでWaitする。0-10分の範囲
+	int nRand = 0;
+	CString strWaitTime;
+
+	//systemアカウントのSID
+	if (forceDelay || m_strCurrentSID == _T("S-1-5-18"))
+	{
+		CTime cTime = CTime::GetCurrentTime();
+		int iMin=0;
+		iMin = cTime.GetMinute();
+		BOOL bWait=FALSE;
+		srand(GetTickCount());
+
+		//ログイン時にもタスクスケジューラ経由でこれが動く。
+		//タスクスケジューラ経由で実行しているので判断ができないため。
+		//30分の間は、スケジューラの30分起動なので0-10分Waitする。負荷分散(VDI)
+		if (InCtrixVDI())
 		{
-			CTime cTime = CTime::GetCurrentTime();
-			int iMin=0;
-			iMin = cTime.GetMinute();
-			BOOL bWait=FALSE;
-			srand(GetTickCount());
-
-			//ログイン時にもタスクスケジューラ経由でこれが動く。
-			//タスクスケジューラ経由で実行しているので判断ができないため。
-			//30分の間は、スケジューラの30分起動なので0-10分Waitする。負荷分散(VDI)
-			if (InCtrixVDI())
+			if (forceDelay || iMin == 30)
 			{
-				if (iMin == 30)
+				//VDIで30分の起動でタスクスケジュールからの場合　ログオンタスクの場合と定期実行が重なる場合がある。
+				//VDI側は、ドライブがリフレッシュされるのでThinBridgeBHO.iniが残らない。
+				//ファイルがない場合は、Waitせずにすぐに実行する。
+				if (PathFileExists(m_strThinBridgeBHOFileFullPath))
 				{
-					//VDIで30分の起動でタスクスケジュールからの場合　ログオンタスクの場合と定期実行が重なる場合がある。
-					//VDI側は、ドライブがリフレッシュされるのでThinBridgeBHO.iniが残らない。
-					//ファイルがない場合は、Waitせずにすぐに実行する。
-					if (PathFileExists(m_strThinBridgeBHOFileFullPath))
-					{
-						bWait = TRUE;
-						//1分(60秒)の中でランダム値でWaitさせる。少しでも負荷を分散したい。
-						nRand = rand() % 60;
-						DWORD dWaitTime = 0;
-						dWaitTime = nRand * 1000;//秒単位
-						WaitSec(dWaitTime);
-					}
-					else
-					{
-						bWait = FALSE;
-					}
-				}
-			}
-			//00分の間は、スケジューラの00分起動なので0-10分Waitする。負荷分散(LTSC)
-			else
-			{
-				//端末側は、ログインに関してスタートアップのショートカットで実行されるので
-				//タスク実行は定期実行のみ。ある程度遅延がある可能性を考慮し0-1分の間の場合はWaitする。
-				if (iMin == 0|| iMin == 1)
-				{
-					//ファイルがない場合は、Waitせずにすぐに実行する。
-					if (PathFileExists(m_strThinBridgeBHOFileFullPath))
-					{
-						bWait = TRUE;
-						//1分(60秒)の中でランダム値でWaitさせる。少しでも負荷を分散したい。
-						nRand = rand() % 60;
-						DWORD dWaitTime = 0;
-						dWaitTime = nRand * 1000;//秒単位
-						WaitSec(dWaitTime);
-					}
-					else
-					{
-						bWait = FALSE;
-					}
-				}
-			}
-			if(bWait)
-			{
-				EmptyWorkingSet(GetCurrentProcess());
-				if(SettingConf.m_iInterval!=0)
-				{
-					nRand = rand() % SettingConf.m_iInterval;
+					bWait = TRUE;
+					//1分(60秒)の中でランダム値でWaitさせる。少しでも負荷を分散したい。
+					nRand = rand() % 60;
 					DWORD dWaitTime = 0;
-					dWaitTime = nRand * 1000*60;//分単位
+					dWaitTime = nRand * 1000;//秒単位
 					WaitSec(dWaitTime);
 				}
-			}
-			else
-			{
-				//ログインがトリガーになっている可能性が高いのでWaitなし。
-				nRand=0;
-			}
-
-			int iRet = 0;
-			iRet = ExecActiveSession();
-			//実行に失敗した場合は、System権限で実行する
-			//200 OKの場合は、ログインセッションでこのEXEが実行されるので、ここで終了
-			//失敗している場合は、そのまま流す。
-			if (iRet==200)
-			{
-				return FALSE;
+				else
+				{
+					bWait = FALSE;
+				}
 			}
 		}
-		//2重起動制限
-		HANDLE hMutexCtx = NULL;
-		hMutexCtx = ::OpenMutex(MUTEX_ALL_ACCESS, FALSE, _T("Local\\TBRuleUpdateFlg"));
-		if (hMutexCtx != NULL)
+		//00分の間は、スケジューラの00分起動なので0-10分Waitする。負荷分散(LTSC)
+		else
 		{
-			//既に起動しているので、起動しているプロセスに任せる
+			//端末側は、ログインに関してスタートアップのショートカットで実行されるので
+			//タスク実行は定期実行のみ。ある程度遅延がある可能性を考慮し0-1分の間の場合はWaitする。
+			if (forceDelay || iMin == 0 || iMin == 1)
+			{
+				//ファイルがない場合は、Waitせずにすぐに実行する。
+				if (PathFileExists(m_strThinBridgeBHOFileFullPath))
+				{
+					bWait = TRUE;
+					//1分(60秒)の中でランダム値でWaitさせる。少しでも負荷を分散したい。
+					nRand = rand() % 60;
+					DWORD dWaitTime = 0;
+					dWaitTime = nRand * 1000;//秒単位
+					WaitSec(dWaitTime);
+				}
+				else
+				{
+					bWait = FALSE;
+				}
+			}
+		}
+		if(bWait)
+		{
+			EmptyWorkingSet(GetCurrentProcess());
+			if(SettingConf.m_iInterval!=0)
+			{
+				nRand = rand() % SettingConf.m_iInterval;
+				DWORD dWaitTime = 0;
+				dWaitTime = nRand * 1000*60;//分単位
+				WaitSec(dWaitTime);
+			}
+		}
+		else
+		{
+			//ログインがトリガーになっている可能性が高いのでWaitなし。
+			nRand=0;
+		}
+
+		int iRet = 0;
+		iRet = ExecActiveSession();
+		//実行に失敗した場合は、System権限で実行する
+		//200 OKの場合は、ログインセッションでこのEXEが実行されるので、ここで終了
+		//失敗している場合は、そのまま流す。
+		if (iRet==200)
+		{
 			return FALSE;
 		}
-		//Mutex作成
-		if (!m_hMutex)
+	}
+	//2重起動制限
+	HANDLE hMutexCtx = NULL;
+	hMutexCtx = ::OpenMutex(MUTEX_ALL_ACCESS, FALSE, _T("Local\\TBRuleUpdateFlg"));
+	if (hMutexCtx != NULL)
+	{
+		//既に起動しているので、起動しているプロセスに任せる
+		return FALSE;
+	}
+	//Mutex作成
+	if (!m_hMutex)
+	{
+		m_hMutex = ::CreateMutex(NULL, FALSE, _T("Local\\TBRuleUpdateFlg"));
+	}
+	//strWaitTime.Format(_T(" 待機(%d分)"), nRand);
+	CString strResult;
+	strResult = WriteThinBridgeBHO(&SettingConf, TRUE, FALSE);
+	CStdioFile out;
+	if (out.Open(m_strExecLogFileFullPath, CFile::modeWrite | CFile::shareDenyNone | CFile::modeCreate | CFile::modeNoTruncate))
+	{
+		TRY
 		{
-			m_hMutex = ::CreateMutex(NULL, FALSE, _T("Local\\TBRuleUpdateFlg"));
+			out.SeekToEnd();
+			out.WriteString(_T("\n自動更新//////////////////////////////////////////////////////////////////////////////////////////////////\n"));
+			out.WriteString(time.Format(_T("%Y-%m-%d %H:%M:%S")));
+			out.WriteString(strWaitTime);
+			out.WriteString(_T("\n処理結果："));
+			out.WriteString(GetErrorMsg());
+			out.WriteString(_T("\n"));
+			out.WriteString(_T("ExecUser:["));
+			out.WriteString(m_strExecUserName);
+			out.WriteString(_T("]"));
+			out.WriteString(_T("LogonUser:["));
+			out.WriteString(m_strDomainUserName);
+			out.WriteString(_T("]"));
+			out.WriteString(_T("LogonUserSID:["));
+			out.WriteString(m_strSID);
+			out.WriteString(_T("]"));
+			out.WriteString(_T("CurrentSID:["));
+			out.WriteString(m_strCurrentSID);
+			out.WriteString(_T("]\n"));
+			out.WriteString(_T("SettingType:"));
+			out.WriteString(SettingConf.IsGPO()?_T("GPO\n"):_T("File\n"));
+			strResult.Replace(_T("\r\n"), _T("\n"));
+			out.WriteString(strResult);
+			out.Close();
 		}
-		//strWaitTime.Format(_T(" 待機(%d分)"), nRand);
-		CString strResult;
-		strResult = WriteThinBridgeBHO(&SettingConf, TRUE, FALSE);
-		CStdioFile out;
-		if (out.Open(m_strExecLogFileFullPath, CFile::modeWrite | CFile::shareDenyNone | CFile::modeCreate | CFile::modeNoTruncate))
-		{
-			TRY
-			{
-				out.SeekToEnd();
-				out.WriteString(_T("\n自動更新//////////////////////////////////////////////////////////////////////////////////////////////////\n"));
-				out.WriteString(time.Format(_T("%Y-%m-%d %H:%M:%S")));
-				out.WriteString(strWaitTime);
-				out.WriteString(_T("\n処理結果："));
-				out.WriteString(GetErrorMsg());
-				out.WriteString(_T("\n"));
-				out.WriteString(_T("ExecUser:["));
-				out.WriteString(m_strExecUserName);
-				out.WriteString(_T("]"));
-				out.WriteString(_T("LogonUser:["));
-				out.WriteString(m_strDomainUserName);
-				out.WriteString(_T("]"));
-				out.WriteString(_T("LogonUserSID:["));
-				out.WriteString(m_strSID);
-				out.WriteString(_T("]"));
-				out.WriteString(_T("CurrentSID:["));
-				out.WriteString(m_strCurrentSID);
-				out.WriteString(_T("]\n"));
-				out.WriteString(_T("SettingType:"));
-				out.WriteString(SettingConf.IsGPO()?_T("GPO\n"):_T("File\n"));
-				strResult.Replace(_T("\r\n"), _T("\n"));
-				out.WriteString(strResult);
-				out.Close();
-			}
-				CATCH(CFileException, eP) {}
-			END_CATCH
-		}
+			CATCH(CFileException, eP) {}
+		END_CATCH
 	}
 	return FALSE;
 }
