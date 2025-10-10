@@ -77,8 +77,8 @@ IDR_MAINFRAME           ICON                    "res\\TBRedirector.ico"
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 4,2,1,1
- PRODUCTVERSION 4,2,1,1
+ FILEVERSION 4,2,2,0
+ PRODUCTVERSION 4,2,2,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -94,10 +94,10 @@ BEGIN
         BLOCK "041104b0"
         BEGIN
             VALUE "FileDescription", "TBRedirector"
-            VALUE "FileVersion", "4.2.1.1"
+            VALUE "FileVersion", "4.2.2.0"
             VALUE "InternalName", "TBRedirector.exe"
             VALUE "OriginalFilename", "TBRedirector.exe"
-            VALUE "ProductVersion", "4.2.1.1"
+            VALUE "ProductVersion", "4.2.2.0"
         END
     END
     BLOCK "VarFileInfo"

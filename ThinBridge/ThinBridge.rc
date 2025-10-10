@@ -196,7 +196,7 @@ FONT 9, "MS UI Gothic", 0, 0, 0x1
 BEGIN
     GROUPBOX        "全般設定",IDC_STATIC,9,7,430,380
     ICON            IDR_MAINFRAME,IDC_STATIC,311,25,20,20
-    LTEXT           "ThinBridge Version 4.2.1.1",IDC_STATIC_VER,339,32,89,8,SS_NOPREFIX
+    LTEXT           "ThinBridge Version 4.2.2.0",IDC_STATIC_VER,339,32,89,8,SS_NOPREFIX
     GROUPBOX        "【重要】URLマッチングルール全体設定",IDC_STATIC,14,49,381,94
     CONTROL         "クイック判定機能を有効にする (※IE専用機能)",IDC_CHK_GLOVAL_QUICK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,64,156,10
     LTEXT           "注意：\nナビゲーション前イベントを優先的に利用しリダイレクトを高速化します。\nリダイレクト通知画面は表示されません。",IDC_STATIC,18,77,372,32,0,WS_EX_STATICEDGE
@@ -455,8 +455,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 4,2,1,1
- PRODUCTVERSION 4,2,1,1
+ FILEVERSION 4,2,2,0
+ PRODUCTVERSION 4,2,2,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -472,10 +472,10 @@ BEGIN
         BLOCK "041104b0"
         BEGIN
             VALUE "FileDescription", "ThinBridgeX-Point"
-            VALUE "FileVersion", "4.2.1.1"
+            VALUE "FileVersion", "4.2.2.0"
             VALUE "InternalName", "ThinBridge.exe"
             VALUE "OriginalFilename", "ThinBridge.exe"
-            VALUE "ProductVersion", "4.2.1.1"
+            VALUE "ProductVersion", "4.2.2.0"
         END
     END
     BLOCK "VarFileInfo"
