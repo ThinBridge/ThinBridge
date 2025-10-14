@@ -84,6 +84,48 @@ Windows Enterprise マルチセッションのテストをする場合は、以�
 
 ## 検証
 
+### インストーラー検証
+
+#### タスクスケジューラー設定
+
+* ThinBridgeをインストール済みの場合、一旦アンインストールする
+* マシンのタスク スケジューラを起動する
+* 「タスク スケジューラ」->「タスク スケジューラ ライブラリ」を開く
+* もし、ThinBridgeRuleUpdateTaskというタスクが存在していた場合、削除する
+* ThinBridgeのインストーラーを実行する
+* 端末のタスク スケジューラを起動する
+* 「タスク スケジューラ」->「タスク スケジューラ ライブラリ」を開く
+  * [ ] ThinBridgeRuleUpdateTaskというタスクが存在すること
+  * [ ] ThinBridgeRuleUpdateTaskの設定内容が、以下の通りであること
+    * 全般
+      * 名前: ThinBridgeRuleUpdateTask
+      * セキュリティオプション
+        * タスクの実行時に使うユーザー アカウント: SYSTEM
+        * ユーザーがログオンしているかどうかに関わらず実行する: チェック
+        * 最上位の特権で実行する: チェック
+        * 構成: Windows Vista, Windows Server 2008
+    * トリガー
+      * タスクの開始: スケジュールに従う
+      * 設定
+        * 一回: チェック
+        * 開始: 2020/01/01 12:00:00
+      * 詳細設定
+        * 繰り返し間隔: 1時間
+        * 継続時間: 無制限
+        * 有効: チェック
+    * 操作
+      * 操作: プログラムの開始
+      * プログラム/スクリプト: `C:\Program Files\ThinBridge\ThinBridgeRuleUpdater.exe`
+      * 引数の追加: /ForceDelay
+    * 条件
+      * なし
+    * 設定
+      * タスクを要求時に実行する: チェック
+      * スケジュールされた時刻にタスクを開始できなかった場合、すぐにタスクを実行する: チェック
+      * タスクを停止するまでの時間: 3日間
+      * 要求時に実行中のタスクが終了しない場合、タスクを強制的に停止する: チェック
+      * 新しいインスタンスを開始しない
+
 ### BHO無効時のIEモードのタブの挙動を含む、Manifest V3での動作
 
 #### 準備
@@ -951,3 +993,165 @@ crxパッケージ化されたアドオンをGPOでインストールした状�
      * [ ] 一瞬Edgeウインドウが開いたあと、すぐに閉じる
      * [ ] Chromeでタブが開かれ、https://www.google.com/ が読み込まれる。
      * [ ] (Windows Enterprise マルチセッションのみ) ユーザーBでChromeのタブが開かない。
+
+## リダイレクト定義自動更新（ThinBridgeRuleUpdater）の動作確認
+
+### ファイルから取得
+
+#### 準備
+
+1. [PreReleaseVerification/senario5.ini](PreReleaseVerification/senario5.ini) を `C:\Temp\senario5.ini` に配置する。）
+2. リダイレクト定義自動更新設定（`C:\Program Files\ThinBridge\ThinBridgeRuleUpdaterSetting.exe`）を起動する
+3. 「ThinBridgeリダイレクト定義ファイル取得先」に`C:\Temp\senario5.ini`を指定する
+4. 「+」ボタンを押し、「ピークアウト間隔」に5分を指定する。
+5. OKを押してダイアログを閉じる
+6. 「接続＆取得データ テスト」ボタンを押し、接続テストを実行する
+7. 取得が成功することを確認する
+8. 「設定のみ保存」ボタンで設定を保存する
+
+#### スタートアッププログラムによるログオン時の実行の動作確認
+
+1. [PreReleaseVerification/senario1.ini](PreReleaseVerification/senario1.ini) を `C:\Program Files\ThinBridge\ThinBridgeBHO.ini` に配置する。）
+2. 現在のユーザーをログアウトする
+3. 再度ログオンする
+4. 一定時間待機する
+5. リダイレクト定義自動更新のログを開く（`C:\Program Files\ThinBridge\TBUpdateLog\ThinBridgeRuleUpdaterYYYY-MM-DD.log`、YYYY-MM-DDは日付。）
+  * [ ] 以下のようなログが出力されていること
+    ```
+    自動更新//////////////////////////////////////////////////////////////////////////////////////////////////
+    2025-10-14 13:41:33
+    処理結果：成功：全て処理に成功しました 差分あり SUCCESS_ALL
+    ExecUser:[XXX]LogonUser:[xXX]LogonUserSID:[XXX]CurrentSID:[XXX]
+    SettingType:File
+    【成功】
+    設定ファイルの保存に成功しました。
+    ThinBridgeRuleUpdater	2025-10-14 13:41:33	設定データ取得開始
+    ThinBridgeRuleUpdater	2025-10-14 13:41:33	1:OK 200 OK_SERVER C:\temp\senario5.ini
+    ThinBridgeRuleUpdater	2025-10-14 13:41:33	>>>ExecMain
+    ThinBridgeRuleUpdater	2025-10-14 13:41:33	>>>GetThinBridgeRedirectRuleCIFS C:\temp\senario5.ini
+    ...
+    ThinBridgeRuleUpdater	2025-10-14 13:41:33	<<<GetThinBridgeRedirectRuleCIFS OK_SERVER
+    ThinBridgeRuleUpdater	2025-10-14 13:41:33	>>>ExecMain
+    ThinBridgeRuleUpdater	2025-10-14 13:41:33	設定データ取得完了
+    ThinBridgeRuleUpdater	2025-10-14 13:41:33	設定データ差分確認開始
+    ThinBridgeRuleUpdater	2025-10-14 13:41:33	設定データ差分確認完了
+    ...
+    ```
+  * [ ] 待機時間が出力されていないこと（待機していないこと）
+  * [ ] 「設定データ取得開始」が出力されていること
+  * [ ] 「設定データ取得完了」が出力されていること
+  * [ ] 「設定データ差分確認開始」が出力されていること
+  * [ ] 「設定データ差分確認完了」が出力されていること
+  * [ ] 「GetThinBridgeRedirectRuleCIFS」が出力されていること
+6. `C:\Program Files\ThinBridge\ThinBridgeBHO.ini`の内容を確認する
+  * [ ] `C:\Temp\senario5.ini`と同じ内容になっていること
+
+#### タスクスケジューラーによる実行の動作確認
+
+1. [PreReleaseVerification/senario1.ini](PreReleaseVerification/senario1.ini) を `C:\Program Files\ThinBridge\ThinBridgeBHO.ini` に配置する。）
+2. 端末のタスク スケジューラを起動する
+3. 「タスク スケジューラ」->「タスク スケジューラ ライブラリ」を開く
+5. タスク スケジューラによるリダイレクト定義更新タスクの実行（12:00といった時刻の分の部分が0のときに発火する）を待つ
+6. ThinBridgeRuleUpdateTaskタスクの完了を待つ（適宜リスト表示の余白を右クリック->最新の状態に更新を実行する）
+7. リダイレクト定義自動更新のログを開く（`C:\Program Files\ThinBridge\TBUpdateLog\ThinBridgeRuleUpdaterYYYY-MM-DD.log`、YYYY-MM-DDは日付。）
+  * [ ] 以下のようなログが出力されていること
+    ```
+    自動更新//////////////////////////////////////////////////////////////////////////////////////////////////
+    2025-10-14 14:00:01 待機(1分)
+    ExecUser:[XXX]LogonUser:[XXX]LogonUserSID:[XXX]CurrentSID:[S-1-5-18]
+    アクティブなログオンユーザーで再実行します。
+    自動更新//////////////////////////////////////////////////////////////////////////////////////////////////
+    2025-10-14 14:01:21
+    処理結果：成功：全て処理に成功しました 差分あり SUCCESS_ALL
+    ExecUser:[YYY]LogonUser:[YYY]LogonUserSID:[YYY]CurrentSID:[YYY]
+    SettingType:File
+    【成功】
+    設定ファイルの保存に成功しました。
+    ThinBridgeRuleUpdater	2025-10-14 14:01:21	設定データ取得開始
+    ThinBridgeRuleUpdater	2025-10-14 14:01:21	1:OK 200 OK_SERVER C:\temp\senario5.ini
+    ThinBridgeRuleUpdater	2025-10-14 14:01:21	>>>ExecMain
+    ThinBridgeRuleUpdater	2025-10-14 14:01:21	>>>GetThinBridgeRedirectRuleCIFS C:\temp\senario5.ini
+    ...
+    ThinBridgeRuleUpdater	2025-10-14 14:01:21	<<<GetThinBridgeRedirectRuleCIFS OK_SERVER
+    ThinBridgeRuleUpdater	2025-10-14 14:01:21	>>>ExecMain
+    ThinBridgeRuleUpdater	2025-10-14 14:01:21	設定データ取得完了
+    ThinBridgeRuleUpdater	2025-10-14 14:01:21	設定データ差分確認開始
+    ThinBridgeRuleUpdater	2025-10-14 14:01:21	設定データ差分確認完了
+    ...
+    ```
+  * [ ] 待機時間が出力されていること
+  * [ ] 待機時間がピークアウト間隔以下の値であること
+  * [ ] 「アクティブなログオンユーザーで再実行します」が出力されていること
+  * [ ] 「設定データ取得開始」が出力されていること
+  * [ ] 「設定データ取得完了」が出力されていること
+  * [ ] 「設定データ差分確認開始」が出力されていること
+  * [ ] 「設定データ差分確認完了」が出力されていること
+  * [ ] 「GetThinBridgeRedirectRuleCIFS」が出力されていること
+8. `C:\Program Files\ThinBridge\ThinBridgeBHO.ini`の内容を確認する
+  * [ ] `C:\Temp\senario5.ini`と同じ内容になっていること
+
+### httpサーバーから取得
+
+#### 準備
+
+1. [PreReleaseVerification/senario5.ini](PreReleaseVerification/senario5.ini) を `C:\Temp\senario5.ini` に配置する。）
+2. コマンドプロンプトを起動する
+3. コマンドプロンプトで`.\tools\http-server`に移動する
+4. `http_server.exe --root ..\..\PreReleaseVerification`を実行する
+5. Webブラウザで`http://127.0.0.1:8080/`を開き、スーパーリロード（Ctrl+F5）をする。
+6. PreReleaseVerificationフォルダの内容が表示されていることを確認する
+7. リダイレクト定義自動更新設定（`C:\Program Files\ThinBridge\ThinBridgeRuleUpdaterSetting.exe`）を起動する
+8. 「ThinBridgeリダイレクト定義ファイル取得先」に`http://127.0.0.1:8080/senario5.ini`を指定する
+9. 「+」ボタンを押し、「ピークアウト間隔」に5分を指定する。
+10. OKを押してダイアログを閉じる
+11. 「接続＆取得データ テスト」ボタンを押し、接続テストを実行する
+12. 取得が成功することを確認する
+13. 「設定のみ保存」ボタンで設定を保存する
+
+#### タスクスケジューラーによる実行の動作確認
+
+※本テストの目的は確認は、データの取得にGetThinBridgeRedirectRuleが使われていることの確認なので、本1パターンのみで良い。
+
+1. [PreReleaseVerification/senario1.ini](PreReleaseVerification/senario1.ini) を `C:\Program Files\ThinBridge\ThinBridgeBHO.ini` に配置する。）
+2. 端末のタスク スケジューラを起動する
+3. 「タスク スケジューラ」->「タスク スケジューラ ライブラリ」を開く
+5. タスク スケジューラによるリダイレクト定義更新タスクの実行（12:00といった時刻の分の部分が0のときに発火する）を待つか、手動実行する
+6. ThinBridgeRuleUpdateTaskタスクの完了を待つ（適宜リスト表示の余白を右クリック->最新の状態に更新を実行する）
+7. リダイレクト定義自動更新のログを開く（`C:\Program Files\ThinBridge\TBUpdateLog\ThinBridgeRuleUpdaterYYYY-MM-DD.log`、YYYY-MM-DDは日付。）
+  * [ ] 以下のようなログが出力されていること
+    ```
+    自動更新//////////////////////////////////////////////////////////////////////////////////////////////////
+    2025-10-14 14:48:36 待機(0分)
+    ExecUser:[XXX]LogonUser:[XXX]LogonUserSID:[XXX]CurrentSID:[S-1-5-18]
+    アクティブなログオンユーザーで再実行します。
+    自動更新//////////////////////////////////////////////////////////////////////////////////////////////////
+    2025-10-14 14:49:11
+    処理結果：成功：全て処理に成功しました 差分あり SUCCESS_ALL
+    ExecUser:[XXX]LogonUser:[XXX]LogonUserSID:[XXX]CurrentSID:[XXX]
+    SettingType:File
+    【成功】
+    設定ファイルの保存に成功しました。
+    ThinBridgeRuleUpdater	2025-10-14 14:49:11	設定データ取得開始
+    ThinBridgeRuleUpdater	2025-10-14 14:49:11	1:OK 200 OK_SERVER http://127.0.0.1:8080/senario5.ini
+    ThinBridgeRuleUpdater	2025-10-14 14:49:11	>>>ExecMain
+    ThinBridgeRuleUpdater	2025-10-14 14:49:11	>>>GetThinBridgeRedirectRule http://127.0.0.1:8080/senario5.ini
+    ThinBridgeRuleUpdater	2025-10-14 14:49:11	>>>UserAgent ThinBridge PC:XXX ID:XXX
+    ThinBridgeRuleUpdater	2025-10-14 14:49:11	GetThinBridgeRedirectRule dwStatusCode:200
+    ...
+    ThinBridgeRuleUpdater	2025-10-14 14:49:11	<<<GetThinBridgeRedirectRule OK_SERVER
+    ThinBridgeRuleUpdater	2025-10-14 14:49:11	>>>ExecMain
+    ThinBridgeRuleUpdater	2025-10-14 14:49:11	設定データ取得完了
+    ThinBridgeRuleUpdater	2025-10-14 14:49:11	設定データ差分確認開始
+    ThinBridgeRuleUpdater	2025-10-14 14:49:11	設定データ差分確認完了
+    ...
+    ```
+  * [ ] 待機時間が出力されていること
+  * [ ] 待機時間がピークアウト間隔以下の値であること
+  * [ ] 「アクティブなログオンユーザーで再実行します」が出力されていること
+  * [ ] 「設定データ取得開始」が出力されていること
+  * [ ] 「設定データ取得完了」が出力されていること
+  * [ ] 「設定データ差分確認開始」が出力されていること
+  * [ ] 「設定データ差分確認完了」が出力されていること
+  * [ ] 「GetThinBridgeRedirectRule」が出力されていること
+8. `C:\Program Files\ThinBridge\ThinBridgeBHO.ini`の内容を確認する
+  * [ ] `C:\Temp\senario5.ini`と同じ内容になっていること
