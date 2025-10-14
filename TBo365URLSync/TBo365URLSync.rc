@@ -169,8 +169,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 4,2,1,1
- PRODUCTVERSION 4,2,1,1
+ FILEVERSION 4,2,2,0
+ PRODUCTVERSION 4,2,2,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -187,12 +187,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "ThinBridge"
             VALUE "FileDescription", "TBo365URLSync"
-            VALUE "FileVersion", "4.2.1.1"
+            VALUE "FileVersion", "4.2.2.0"
             VALUE "InternalName", "TBo365URLSync.exe"
             VALUE "LegalCopyright", "ThinBridge"
             VALUE "OriginalFilename", "TBo365URLSync.exe"
             VALUE "ProductName", "TBo365URLSync"
-            VALUE "ProductVersion", "4.2.1.1"
+            VALUE "ProductVersion", "4.2.2.0"
         END
     END
     BLOCK "VarFileInfo"
