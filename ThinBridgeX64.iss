@@ -207,6 +207,20 @@ Filename: "{sys}\icacls.exe";Parameters: """{app}\ThinBridgeHost\chrome.json"" /
 [UninstallRun]
 
 [Code]
+var
+  SetTaskSchedulerPage: TInputQueryWizardPage;
+  SetTaskSchedulerCheckBox: TNewCheckBox;
+  IsSetTaskScheculer: Boolean;
+  IsUpdateInstall: Boolean;
+
+procedure SetUpdateInstall();
+var
+  key: string;
+begin
+  key := 'Software\ThinBridge';
+  IsUpdateInstall := RegKeyExists(HKEY_LOCAL_MACHINE, key);
+end;
+
 function GetProgramFiles(Param: string): string;
   begin
     if IsWin64 then Result := ExpandConstant('{pf64}')
@@ -229,8 +243,33 @@ begin
 	TaskKill('ThinBridgeChecker.exe');
 	TaskKill('ThinBridgeRuleUpdater.exe');
 	TaskKill('ThinBridgeRuleUpdaterSetting.exe');
+  SetUpdateInstall();
 	Result := True; 
 end; 
+
+procedure InitializeWizard;
+var CmdParamSetTaskScheduler: string;
+
+begin
+  if IsUpdateInstall then
+  begin
+    CmdParamSetTaskScheduler := ExpandConstant('{param:SetTaskScheduler|no}');
+  end 
+  else
+  begin
+    CmdParamSetTaskScheduler := ExpandConstant('{param:SetTaskScheduler|yes}');
+  end;
+  
+  SetTaskSchedulerPage := CreateInputQueryPage(wpWelcome, CustomMessage('SetTaskSchedulerPage'), CustomMessage('SetTaskSchedulerPageDescription'), '');
+  CertCheckBox := TNewCheckBox.Create(WizardForm);
+  CertCheckBox.Parent := SetTaskSchedulerPage.Surface;
+  CertCheckBox.Width := SetTaskSchedulerPage.SurfaceWidth;
+  CertCheckBox.Left := 0;
+  CertCheckBox.Top := 0;
+  CertCheckBox.Caption := CustomMessage('SetTaskSchedulerCheckboxCaption');
+  CertCheckBox.Checked := CmdParamSetTaskScheduler = 'yes';
+end;
+
 
 function GetEdgeExtensionIndex(Value: string):string;
 var
