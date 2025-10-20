@@ -186,9 +186,9 @@ Name: "{app}\TBUpdateLog";Permissions: users-modify;Flags: uninsneveruninstall
 [Run] 
 Filename: "{app}\ThinBridgeChecker.exe";Parameters: "/log"; Flags: runhidden 
 
-Filename: "schtasks.exe";Parameters: "/Create /F /TN ""ThinBridgeRuleUpdateTask"" /xml ""{tmp}\ThinBridgeRuleUpdateTask.xml"""; Flags: runhidden 
+Filename: "schtasks.exe";Parameters: "/Create /F /TN ""ThinBridgeRuleUpdateTask"" /xml ""{tmp}\ThinBridgeRuleUpdateTask.xml"""; Flags: runhidden; Check: ShouldRegisterTaskScheduler;
 ;Filename: "schtasks.exe";Parameters: "/Change /TN ""ThinBridgeRuleUpdateTask"" /TR ""'{app}\ThinBridgeRuleUpdater.exe'"""; Flags: runhidden 
-Filename: "schtasks.exe";Parameters: "/Change /F /SC HOURLY /TN ""ThinBridgeRuleUpdateTask"" /RU SYSTEM /RL HIGHEST /TR ""'{app}\ThinBridgeRuleUpdater.exe'"""; Flags: runhidden 
+Filename: "schtasks.exe";Parameters: "/Change /F /SC HOURLY /TN ""ThinBridgeRuleUpdateTask"" /RU SYSTEM /RL HIGHEST /TR ""'{app}\ThinBridgeRuleUpdater.exe'"""; Flags: runhidden; Check: ShouldRegisterTaskScheduler;
 
 Filename: "{sys}\icacls.exe";Parameters: """{app}\TBo365URLSyncSetting.exe"" /inheritance:r"; Flags: runhidden shellexec
 Filename: "{sys}\icacls.exe";Parameters: """{app}\TBRedirector.exe"" /inheritance:r"; Flags: runhidden shellexec
@@ -207,6 +207,16 @@ Filename: "{sys}\icacls.exe";Parameters: """{app}\ThinBridgeHost\chrome.json"" /
 [UninstallRun]
 
 [Code]
+var
+  SetTaskSchedulerPage: TInputQueryWizardPage;
+  SetTaskSchedulerCheckBox: TNewCheckBox;
+  IsSetTaskScheculer: Boolean;
+
+function ShouldRegisterTaskScheduler(): Boolean;
+begin
+  Result := SetTaskSchedulerCheckBox.Checked;
+end;
+
 function GetProgramFiles(Param: string): string;
   begin
     if IsWin64 then Result := ExpandConstant('{pf64}')
@@ -231,6 +241,20 @@ begin
 	TaskKill('ThinBridgeRuleUpdaterSetting.exe');
 	Result := True; 
 end; 
+
+procedure InitializeWizard;
+var CmdParamSetTaskScheduler: string;
+begin
+  CmdParamSetTaskScheduler := ExpandConstant('{param:SetTaskScheduler|no}');
+  SetTaskSchedulerPage := CreateInputQueryPage(wpWelcome, CustomMessage('SetTaskSchedulerPage'), CustomMessage('SetTaskSchedulerPageDescription'), '');
+  SetTaskSchedulerCheckBox := TNewCheckBox.Create(WizardForm);
+  SetTaskSchedulerCheckBox.Parent := SetTaskSchedulerPage.Surface;
+  SetTaskSchedulerCheckBox.Width := SetTaskSchedulerPage.SurfaceWidth;
+  SetTaskSchedulerCheckBox.Left := 0;
+  SetTaskSchedulerCheckBox.Top := 0;
+  SetTaskSchedulerCheckBox.Caption := CustomMessage('SetTaskSchedulerCheckboxCaption');
+  SetTaskSchedulerCheckBox.Checked := CmdParamSetTaskScheduler = 'yes';
+end;
 
 function GetEdgeExtensionIndex(Value: string):string;
 var
@@ -269,4 +293,9 @@ begin
     //MsgBox('List of subkeys:'#13#10#13#10 + IntToStr(iMax), mbInformation, MB_OK);
   end;
 	Result:=IntToStr(iMax);
-end;	
+end;
+
+[CustomMessages]
+jp.SetTaskSchedulerPage=タスク スケジューラ設定
+jp.SetTaskSchedulerPageDescription=リダイレクト定義自動更新プログラムをタスク スケジューラに登録するかどうかを指定してください。
+jp.SetTaskSchedulerCheckboxCaption=リダイレクト定義自動更新プログラムをタスク スケジューラに登録する
