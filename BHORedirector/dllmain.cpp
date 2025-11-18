@@ -36,6 +36,18 @@ extern "C" BOOL WINAPI DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpRes
 		lstrcpyn(_AtlModule.m_gSZModuleName,str,MAX_PATH);
 
 		GetModuleFileName(NULL,szPath,MAX_PATH);
+
+		LPCTSTR filename = PathFindFileName(szPath);
+		if (filename) {
+			if (_tcsicmp(filename, _T("iexplore.exe")) &&
+				_tcsicmp(filename, _T("msedge.exe"))) {
+				ATL::CString strLog;
+				strLog.Format(_T("ThinBridge:BHO DllMain called from %s"),szPath);
+				OutputDebugString(strLog);
+				return FALSE;
+			}
+		}
+
 		memset(_AtlModule.m_gSZParentProcessFullPath,0x00,sizeof(TCHAR)*MAX_PATH);
 		lstrcpyn(_AtlModule.m_gSZParentProcessFullPath,szPath,MAX_PATH);
 
