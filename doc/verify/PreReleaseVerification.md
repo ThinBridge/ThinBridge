@@ -235,7 +235,7 @@ Windows Enterprise マルチセッションのテストをする場合は、以�
    1. Edgeで https://example.com/ を開く。
       * 期待される結果：
         * [ ] Edge上で https://example.com/ が読み込まれる。
-   2. `More information...` のリンクをミドルクリックする。
+   2. `Learn more` のリンクをミドルクリックする。
       * 期待される結果：
         * [ ] Chrome上で https://www.iana.org/help/example-domains が開かれる。
         * [ ] 空白のタブがEdge上に残っていない。
@@ -347,7 +347,7 @@ Windows Enterprise マルチセッションのテストをする場合は、以�
       * 期待される結果：
         * [ ] Edgeの通常タブで https://example.com/ が読み込まれる。
         * [ ] ThinBridgeによるリダイレクトが発生しない。
-   2. `More information...` のリンクをクリックする。
+   2. `Learn more` のリンクをクリックする。
       * 期待される結果：
         * [ ] Edgeの通常タブで https://www.iana.org/help/example-domains が開かれる。
         * [ ] ThinBridgeによるリダイレクトが発生しない。
@@ -357,7 +357,7 @@ Windows Enterprise マルチセッションのテストをする場合は、以�
       * 期待される結果：
         * [ ] Edgeの通常タブで https://example.com/ が読み込まれる。
         * [ ] ThinBridgeによるリダイレクトが発生しない。
-   5. `More information...` のリンクをクリックする。
+   5. `Learn more` のリンクをクリックする。
       * 期待される結果：
         * [ ] タブがIEモードに切り替わり、 https://www.iana.org/help/example-domains が開かれる。
         * [ ] ThinBridgeによるリダイレクトが発生しない。
@@ -409,7 +409,7 @@ Windows Enterprise マルチセッションのテストをする場合は、以�
       * 期待される結果：
         * [ ] Edgeの通常タブで https://example.com/ が読み込まれる。
         * [ ] ThinBridgeによるリダイレクトが発生しない。
-   2. `More information...` のリンクをクリックする。
+   2. `Learn more` のリンクをクリックする。
       * 期待される結果：
         * [ ] Edgeの通常タブで https://www.iana.org/help/example-domains が開かれる。
         * [ ] ThinBridgeによるリダイレクトが発生しない。
@@ -419,7 +419,7 @@ Windows Enterprise マルチセッションのテストをする場合は、以�
       * 期待される結果：
         * [ ] Edgeの通常タブで https://example.com/ が読み込まれる。
         * [ ] ThinBridgeによるリダイレクトが発生しない。
-   5. `More information...` のリンクをクリックする。
+   5. `Learn more` のリンクをクリックする。
       * 期待される結果：
         * [ ] タブがIEモードに切り替わり、 https://www.iana.org/help/example-domains が開かれる。
         * [ ] ThinBridgeによるリダイレクトが発生しない。
@@ -440,7 +440,7 @@ Windows Enterprise マルチセッションのテストをする場合は、以�
       * 期待される結果：
         * [ ] EdgeのIEモードのタブで https://example.com/ が読み込まれる。
         * [ ] ThinBridgeによるリダイレクトが発生しない。
-   11. `More information...` のリンクをクリックする。
+   11. `Learn more` のリンクをクリックする。
       * 期待される結果：
         * [ ] EdgeのIEモードのタブで https://www.iana.org/help/example-domains が読み込まれる。
         * [ ] ThinBridgeによるリダイレクトが発生しない。
@@ -604,7 +604,7 @@ Windows Enterprise マルチセッションのテストをする場合は、以�
       * 期待される結果：
         * [ ] Edgeの通常タブで https://example.com/ が読み込まれる。
         * [ ] ThinBridgeによるリダイレクトが発生しない。
-   2. `More information...` のリンクをクリックする。
+   2. `Learn more` のリンクをクリックする。
       * 期待される結果：
         * [ ] Edgeの通常タブで https://www.iana.org/help/example-domains が開かれる。
         * [ ] ThinBridgeによるリダイレクトが発生しない。
@@ -614,7 +614,7 @@ Windows Enterprise マルチセッションのテストをする場合は、以�
       * 期待される結果：
         * [ ] Edgeの通常タブで https://example.com/ が読み込まれる。
         * [ ] ThinBridgeによるリダイレクトが発生しない。
-   5. `More information...` のリンクをクリックする。
+   5. `Learn more` のリンクをクリックする。
       * 期待される結果：
         * [ ] タブがIEモードに切り替わり、 https://www.iana.org/help/example-domains が開かれる。
         * [ ] ThinBridgeによるリダイレクトが発生しない。
@@ -635,7 +635,7 @@ Windows Enterprise マルチセッションのテストをする場合は、以�
       * 期待される結果：
         * [ ] EdgeのIEモードのタブで https://example.com/ が読み込まれる。
         * [ ] ThinBridgeによるリダイレクトが発生しない。
-   11. `More information...` のリンクをクリックする。
+   11. `Learn more` のリンクをクリックする。
       * 期待される結果：
         * [ ] EdgeのIEモードのタブで https://www.iana.org/help/example-domains が読み込まれる。
         * [ ] ThinBridgeによるリダイレクトが発生しない。
