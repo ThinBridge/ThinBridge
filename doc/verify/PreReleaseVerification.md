@@ -374,11 +374,11 @@ Windows Enterprise マルチセッションのテストをする場合は、以�
         * [ ] ThinBridgeによるリダイレクトが発生しない。
    9. Edge（IEモード）→Edge（IEモード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
       * 追加： https://www.iana.org/help/example-domains
-   7. Edgeで新しいタブで https://example.com/ を開く。
+   10. Edgeで新しいタブで https://example.com/ を開く。
       * 期待される結果：
         * [ ] EdgeのIEモードのタブで https://example.com/ が読み込まれる。
         * [ ] ThinBridgeによるリダイレクトが発生しない。
-   8. アドレスバーに https://www.iana.org/help/example-domains を入力し、Enterする。
+   11. アドレスバーに https://www.iana.org/help/example-domains を入力し、Enterする。
       * 期待される結果：
         * [ ] EdgeのIEモードのタブで https://www.iana.org/help/example-domains が読み込まれる。
         * [ ] ThinBridgeによるリダイレクトが発生しない。
@@ -436,11 +436,11 @@ Windows Enterprise マルチセッションのテストをする場合は、以�
         * [ ] ThinBridgeによるリダイレクトが発生しない。
    9. Edge（IEモード）→Edge（IEモード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
       * 追加： https://www.iana.org/help/example-domains
-   7. Edgeで新しいタブで https://example.com/ を開く。
+   10. Edgeで新しいタブで https://example.com/ を開く。
       * 期待される結果：
         * [ ] EdgeのIEモードのタブで https://example.com/ が読み込まれる。
         * [ ] ThinBridgeによるリダイレクトが発生しない。
-   8. `More information...` のリンクをクリックする。
+   11. `More information...` のリンクをクリックする。
       * 期待される結果：
         * [ ] EdgeのIEモードのタブで https://www.iana.org/help/example-domains が読み込まれる。
         * [ ] ThinBridgeによるリダイレクトが発生しない。
@@ -631,11 +631,11 @@ Windows Enterprise マルチセッションのテストをする場合は、以�
         * [ ] ThinBridgeによるリダイレクトが発生しない。
    9. Edge（IEモード）→Edge（IEモード）の検証のため、`edge://settings/defaultBrowser` を開き、IEモードの対象URLを以下の通り設定する。
       * 追加： https://www.iana.org/help/example-domains
-   7. Edgeで新しいタブで https://example.com/ を開く。
+   10. Edgeで新しいタブで https://example.com/ を開く。
       * 期待される結果：
         * [ ] EdgeのIEモードのタブで https://example.com/ が読み込まれる。
         * [ ] ThinBridgeによるリダイレクトが発生しない。
-   8. `More information...` のリンクをクリックする。
+   11. `More information...` のリンクをクリックする。
       * 期待される結果：
         * [ ] EdgeのIEモードのタブで https://www.iana.org/help/example-domains が読み込まれる。
         * [ ] ThinBridgeによるリダイレクトが発生しない。
@@ -1051,9 +1051,9 @@ crxパッケージ化されたアドオンをGPOでインストールした状�
 1. [PreReleaseVerification/senario1.ini](PreReleaseVerification/senario1.ini) を `C:\Program Files\ThinBridge\ThinBridgeBHO.ini` に配置する。）
 2. 端末のタスク スケジューラを起動する
 3. 「タスク スケジューラ」->「タスク スケジューラ ライブラリ」を開く
-5. タスク スケジューラによるリダイレクト定義更新タスクの実行（12:00といった時刻の分の部分が0のときに発火する）を待つ
-6. ThinBridgeRuleUpdateTaskタスクの完了を待つ（適宜リスト表示の余白を右クリック->最新の状態に更新を実行する）
-7. リダイレクト定義自動更新のログを開く（`C:\Program Files\ThinBridge\TBUpdateLog\ThinBridgeRuleUpdaterYYYY-MM-DD.log`、YYYY-MM-DDは日付。）
+4. タスク スケジューラによるリダイレクト定義更新タスクの実行（12:00といった時刻の分の部分が0のときに発火する）を待つ
+5. ThinBridgeRuleUpdateTaskタスクの完了を待つ（適宜リスト表示の余白を右クリック->最新の状態に更新を実行する）
+6. リダイレクト定義自動更新のログを開く（`C:\Program Files\ThinBridge\TBUpdateLog\ThinBridgeRuleUpdaterYYYY-MM-DD.log`、YYYY-MM-DDは日付。）
   * [ ] 以下のようなログが出力されていること
     ```
     自動更新//////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1087,7 +1087,7 @@ crxパッケージ化されたアドオンをGPOでインストールした状�
   * [ ] 「設定データ差分確認開始」が出力されていること
   * [ ] 「設定データ差分確認完了」が出力されていること
   * [ ] 「GetThinBridgeRedirectRuleCIFS」が出力されていること
-8. `C:\Program Files\ThinBridge\ThinBridgeBHO.ini`の内容を確認する
+7. `C:\Program Files\ThinBridge\ThinBridgeBHO.ini`の内容を確認する
   * [ ] `C:\Temp\senario5.ini`と同じ内容になっていること
 
 ### httpサーバーから取得
@@ -1115,9 +1115,9 @@ crxパッケージ化されたアドオンをGPOでインストールした状�
 1. [PreReleaseVerification/senario1.ini](PreReleaseVerification/senario1.ini) を `C:\Program Files\ThinBridge\ThinBridgeBHO.ini` に配置する。）
 2. 端末のタスク スケジューラを起動する
 3. 「タスク スケジューラ」->「タスク スケジューラ ライブラリ」を開く
-5. タスク スケジューラによるリダイレクト定義更新タスクの実行（12:00といった時刻の分の部分が0のときに発火する）を待つか、手動実行する
-6. ThinBridgeRuleUpdateTaskタスクの完了を待つ（適宜リスト表示の余白を右クリック->最新の状態に更新を実行する）
-7. リダイレクト定義自動更新のログを開く（`C:\Program Files\ThinBridge\TBUpdateLog\ThinBridgeRuleUpdaterYYYY-MM-DD.log`、YYYY-MM-DDは日付。）
+4. タスク スケジューラによるリダイレクト定義更新タスクの実行（12:00といった時刻の分の部分が0のときに発火する）を待つか、手動実行する
+5. ThinBridgeRuleUpdateTaskタスクの完了を待つ（適宜リスト表示の余白を右クリック->最新の状態に更新を実行する）
+6. リダイレクト定義自動更新のログを開く（`C:\Program Files\ThinBridge\TBUpdateLog\ThinBridgeRuleUpdaterYYYY-MM-DD.log`、YYYY-MM-DDは日付。）
   * [ ] 以下のようなログが出力されていること
     ```
     自動更新//////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1153,5 +1153,5 @@ crxパッケージ化されたアドオンをGPOでインストールした状�
   * [ ] 「設定データ差分確認開始」が出力されていること
   * [ ] 「設定データ差分確認完了」が出力されていること
   * [ ] 「GetThinBridgeRedirectRule」が出力されていること
-8. `C:\Program Files\ThinBridge\ThinBridgeBHO.ini`の内容を確認する
+7. `C:\Program Files\ThinBridge\ThinBridgeBHO.ini`の内容を確認する
   * [ ] `C:\Temp\senario5.ini`と同じ内容になっていること
