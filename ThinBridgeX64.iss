@@ -205,6 +205,7 @@ Filename: "{sys}\icacls.exe";Parameters: """{app}\ThinBridgeHost\firefox.json"" 
 Filename: "{sys}\icacls.exe";Parameters: """{app}\ThinBridgeHost\chrome.json"" /inheritance:r"; Flags: runhidden shellexec
 
 [UninstallRun]
+Filename: "schtasks"; Parameters: "/Delete /TN ""ThinBridgeRuleUpdateTask"" /F"; Flags: runhidden
 
 [Code]
 function GetProgramFiles(Param: string): string;
