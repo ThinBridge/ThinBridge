@@ -413,6 +413,7 @@ public:
 	BOOL m_bRedirect_Drive;
 
 	BOOL m_bDisableIE_DDE;
+	BOOL m_bEnableSubframeRedirection;
 
 	CURLRedirectDataClass* m_pRDP;
 	CURLRedirectDataClass* m_pVMW;
@@ -917,6 +918,11 @@ public:
 				out.WriteString(strTempFormat);
 				pstrOutPutData += strTempFormat;
 			}
+			strTempFormat = m_bEnableSubframeRedirection ?
+				_T("@ENABLE_SUBFRAME_REDIRECTION:1\n") :
+				_T("@ENABLE_SUBFRAME_REDIRECTION:0\n");
+			out.WriteString(strTempFormat);
+			pstrOutPutData += strTempFormat;
 
 			//VMware Horizon
 			if (!m_strHorizon_ConnectionServerName.IsEmpty())
@@ -1103,6 +1109,7 @@ public:
 			BOOL bTopPageOnly=FALSE;
 			DWORD dRedirectPageAction=0;
 			DWORD dwCloseTimeout=3;
+			BOOL bEnableSubframeRedirection = TRUE;
 
 			DWORD dwZone=ZONE_NA;
 			BOOL bDisabled=FALSE;
@@ -1162,6 +1169,7 @@ public:
 							m_bTraceLog=dRedirectPageAction==1?TRUE:FALSE;
 							m_bQuickRedirect = (dwZone&INTRANET_ZONE) == INTRANET_ZONE ? TRUE : FALSE;
 							m_bTopURLOnly = (dwZone&UNTRUSTED_ZONE) == UNTRUSTED_ZONE ? TRUE : FALSE;
+							m_bEnableSubframeRedirection = bEnableSubframeRedirection;
 						}
 						else if(strExecType.CompareNoCase(_T("RDP"))==0 && m_pRDP)
 							m_pRDP->Copy(pRedirectData);
@@ -1303,7 +1311,22 @@ public:
 					{
 						dwZone |= UNTRUSTED_ZONE;
 					}
-
+					else if (strTempUpper.Find(_T("@ENABLE_SUBFRAME_REDIRECTION:")) == 0)
+					{
+						int iPosC = 0;
+						CString strDig;
+						strDig = _T("@ENABLE_SUBFRAME_REDIRECTION:");
+						iPosC = strDig.GetLength();
+						strDig = strTempUpper.Mid(iPosC);
+						int value = _ttoi(strDig);
+						if (value == 0) {
+							bEnableSubframeRedirection = FALSE;
+						}
+						else{
+							//The default value of ENABLE_SUBFRAME_REDIRECTION is TRUE
+							bEnableSubframeRedirection = TRUE;
+						}
+					}
 					//VMware Horizon
 					else if (strTempUpper.Find(_T("@VMW_SERVERNAME:")) == 0)
 					{
@@ -1457,6 +1480,7 @@ public:
 						m_bTraceLog=dRedirectPageAction==1?TRUE:FALSE;
 						m_bQuickRedirect = (dwZone&INTRANET_ZONE) == INTRANET_ZONE ? TRUE : FALSE;
 						m_bTopURLOnly = (dwZone&UNTRUSTED_ZONE) == UNTRUSTED_ZONE ? TRUE : FALSE;
+						m_bEnableSubframeRedirection = bEnableSubframeRedirection;
 					}
 					else if(strExecType.CompareNoCase(_T("RDP"))==0)
 						m_pRDP->Copy(pRedirectData);
