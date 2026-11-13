@@ -1,0 +1,35 @@
+name: Test Windows native code
+
+on:
+  pull_request:
+    branches: [master]
+  push:
+    branches: [master]
+
+jobs:
+  test:
+    runs-on: windows-2022
+    strategy:
+      matrix:
+        platform: [Win32, x64]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: microsoft/setup-msbuild@v2
+      - name: Build native tests
+        run: msbuild ThinBridge.Tests/ThinBridge.Tests.vcxproj /m /p:Configuration=Release /p:Platform=${{ matrix.platform }}
+      - name: Run native tests
+        shell: pwsh
+        run: |
+          $vswhere = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio/Installer/vswhere.exe'
+          $vstest = & $vswhere -latest -products '*' -find '**/vstest.console.exe' | Select-Object -First 1
+          if (-not $vstest) { throw 'vstest.console.exe was not found' }
+          $architecture = if ('${{ matrix.platform }}' -eq 'Win32') { 'x86' } else { 'x64' }
+          & $vstest "ThinBridge.Tests/Release/${{ matrix.platform }}/ThinBridge.Tests.dll" "/Platform:$architecture"
+      - name: Build ThinBridgeTalk
+        run: msbuild ThinBridgeTalk/ThinBridgeTalk.vcxproj /m /p:Configuration=Release /p:Platform=${{ matrix.platform }} /p:PlatformToolset=v143
+      - name: Test ThinBridgeTalk standard I/O
+        shell: pwsh
+        run: |
+          $platform = '${{ matrix.platform }}'
+          $output = if ($platform -eq 'Win32') { 'Release' } else { 'x64/Release' }
+          ./ThinBridge.Tests/Test-ThinBridgeTalk.ps1 -Executable "ThinBridgeTalk/$output/ThinBridgeTalk.exe"
