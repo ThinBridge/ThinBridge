@@ -7,7 +7,7 @@ $ErrorActionPreference = 'Stop'
 $Executable = (Resolve-Path -LiteralPath $Executable).ProviderPath
 
 function Test-App([string]$Name, [string[]]$Arguments, [string[]]$Expected,
-    [string]$LoopLog, [switch]$SignalEvent) {
+    [string]$LoopLog, [switch]$SignalEvent, [switch]$Route) {
     $start = [Diagnostics.ProcessStartInfo]::new($Executable)
     $start.UseShellExecute = $false
     $start.RedirectStandardOutput = $true
@@ -17,8 +17,10 @@ function Test-App([string]$Name, [string[]]$Arguments, [string[]]$Expected,
     }
     [void]$start.Environment.Remove('THINBRIDGE_TEST_LOOP_LOG')
     [void]$start.Environment.Remove('THINBRIDGE_TEST_LOOP_EVENT')
+    [void]$start.Environment.Remove('THINBRIDGE_TEST_ROUTE')
     if ($LoopLog) { $start.Environment['THINBRIDGE_TEST_LOOP_LOG'] = $LoopLog }
     if ($SignalEvent) { $start.Environment['THINBRIDGE_TEST_LOOP_EVENT'] = '1' }
+    if ($Route) { $start.Environment['THINBRIDGE_TEST_ROUTE'] = '1' }
 
     $process = [Diagnostics.Process]::Start($start)
     try {
@@ -80,3 +82,95 @@ try {
 finally {
     Remove-Item -LiteralPath $log.FullName
 }
+
+$url = 'https://example.com/a b?q=1#part'
+$quotedUrl = '"' + $url + '"'
+$chrome = @(
+    "ShellExecute|open|chrome.exe|$quotedUrl"
+    "ShellExecute||chrome.exe $quotedUrl|"
+    "ShellExecute||`"C:\Browser Test\chrome.exe`" $quotedUrl|"
+    "ShellExecute||`"C:\Program Files\Google\Chrome\Application\chrome.exe`" $quotedUrl|"
+    "ShellExecute||`"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe`" $quotedUrl|"
+)
+Test-App 'Chrome success stops at the first launch' @('--test-launch', 'chrome', $url, '1') @($chrome[0])
+Test-App 'Chrome fallback stops at the configured path on success' @('--test-launch', 'chrome', $url, '3') $chrome[0..2]
+Test-App 'Chrome falls back through both Program Files paths' @('--test-launch', 'chrome', $url, '0') $chrome
+Test-App 'Chrome launches without URL arguments when empty' @('--test-launch', 'chrome', '', '1') @('ShellExecute|open|chrome.exe|')
+
+$firefox = @(
+    "ShellExecute|open|firefox.exe|$quotedUrl"
+    "ShellExecute||firefox.exe $url|"
+    "ShellExecute||`"C:\Browser Test\firefox.exe`" $quotedUrl|"
+    "ShellExecute||`"C:\Program Files (x86)\Mozilla Firefox\firefox.exe`" $quotedUrl|"
+    "ShellExecute||`"C:\Program Files\Mozilla Firefox\firefox.exe`" $quotedUrl|"
+)
+Test-App 'Firefox retries with the existing fallback argument format' @('--test-launch', 'firefox', $url, '0') $firefox
+Test-App 'Edge uses the microsoft-edge protocol' @('--test-launch', 'edge', $url, '0') @("ShellExecute||microsoft-edge:$url|")
+Test-App 'IE without DDE first uses its executable name' @('--test-launch', 'ie', $url, '1') @("ShellExecute|open|iexplore.exe|$quotedUrl")
+Test-App 'Default browser fallback tries Explorer and IE' @('--test-launch', 'default', $url, '0') @(
+    "ShellExecute||$quotedUrl|"
+    "ShellExecute|open|$quotedUrl|"
+    "ShellExecute||explorer.exe|$quotedUrl"
+    "ShellExecute|open|iexplore.exe|$quotedUrl"
+)
+$customPath = '"C:\Browser Test\custom.exe"'
+$custom = @(
+    "CreateProcess|||$customPath $quotedUrl"
+    "CreateProcess||$customPath|$quotedUrl"
+    "ShellExecute|open|$customPath|$quotedUrl"
+    "ShellExecute||$customPath $quotedUrl|"
+)
+Test-App 'Custom browser stops after a successful process retry' @('--test-launch', 'custom', $url, '2') $custom[0..1]
+Test-App 'Custom browser falls back from CreateProcess to ShellExecute' @('--test-launch', 'custom', $url, '0') $custom
+
+$rdpPath = 'C:\Remote Session\session.rdp'
+Test-App 'RDP quotes the file path in the first MSTSC command' @('--test-launch', 'rdp', $rdpPath, '1') @(
+    "CreateProcess|||`"mstsc.exe`" `"$rdpPath`""
+)
+Test-App 'VMware percent-encodes the app name and complete URL' @('--test-launch', 'vmware', $url, '1') @(
+    'ShellExecute||vmware-view://horizon.example/Remote%20App?url=https%3A%2F%2Fexample.com%2Fa%20b%3Fq%3D1%23part|'
+)
+Test-App 'VMware omits the URL parameter when empty' @('--test-launch', 'vmware', '', '1') @(
+    'ShellExecute||vmware-view://horizon.example/Remote%20App|'
+)
+$citrix = '"c:\program files\Citrix\ICA Client\SelfServicePlugin\SelfService.exe"'
+Test-App 'Citrix quotes the published app name and URL' @('--test-launch', 'citrix', $url, '1') @(
+    "CreateProcess|||$citrix -qlaunch `"Published App`" $quotedUrl"
+)
+Test-App 'Citrix omits the URL argument when empty' @('--test-launch', 'citrix', '', '1') @(
+    "CreateProcess|||$citrix -qlaunch `"Published App`""
+)
+
+$rdpFile = New-TemporaryFile
+try {
+    foreach ($argument in @($url, '')) {
+        Test-App 'Generate RemoteApp file' @('--test-rdp-file', $rdpFile.FullName, $argument) @('RDP file generated')
+        $command = if ($argument) { "/open $argument" } else { '/open' }
+        $expected = @(
+            'full address:s:rdp.example'
+            'remoteapplicationmode:i:1'
+            'remoteapplicationname:s:Remote App'
+            'remoteapplicationprogram:s:C:\Remote App\app.exe'
+            'alternate shell:s:C:\Remote App\app.exe'
+            "remoteapplicationcmdline:s:$command"
+            'redirectclipboard:i:1'
+            'redirectprinters:i:0'
+            'RedirectDrives:i:1'
+            'screen mode id:i:2'
+            'prompt for credentials:i:1'
+        )
+        if ([IO.File]::ReadAllText($rdpFile.FullName) -cne (($expected -join "`r`n") + "`r`n")) {
+            throw 'Unexpected RemoteApp file contents'
+        }
+    }
+}
+finally {
+    Remove-Item -LiteralPath $rdpFile.FullName
+}
+
+$routes = [ordered]@{ RDP = '0'; VMware = '1'; Citrix = '2'; Default = '3'; IE = '4'; Firefox = '5'; Chrome = '6'; eDgE = '7'; Custom = '8' }
+foreach ($option in $routes.Keys) {
+    Test-App "Startup selects $option" @($option, $url) @($routes[$option], '') -Route
+}
+Test-App 'Startup keeps configured route without an explicit option' @($url) @('0', '') -Route
+Test-App 'Startup resolves a bare custom executable relative to ThinBridge' @($url, 'ThinBridgeTestBrowser.exe') @('8', 'C:\ThinBridge Test\ThinBridgeTestBrowser.exe') -Route

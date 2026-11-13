@@ -62,7 +62,9 @@ settings and record launch and warning arguments on stderr.
 
 The Win32 job also builds `ThinBridge.Test.exe` with
 `ThinBridge.Tests/ThinBridgeHooks.props`. Run `Test-ThinBridge.ps1` with that
-executable to check startup argument parsing and redirect loop prevention.
+executable to check startup arguments and routing, redirect loop prevention,
+local browser and remote client launch arguments, and RemoteApp file generation.
+The launch hooks record the API calls and simulate success or failure.
 The loop tests use a temporary history file, a fixed tick count, and a private
 event. The workflow keeps the test executable and its build outputs in
 `ThinBridge.Tests/Release/Win32/AppHooks/`.
