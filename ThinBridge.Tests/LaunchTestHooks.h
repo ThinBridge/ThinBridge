@@ -6,6 +6,20 @@ static int successfulAttempt;
 static bool testDdeConnection;
 static bool testRegisteredClient;
 static int registryKey;
+static LPCWSTR settingPolicy;
+
+static LSTATUS WINAPI TestReadSettingPolicy(HKEY root, LPCWSTR path, LPCWSTR name,
+    DWORD flags, LPDWORD, PVOID data, LPDWORD size)
+{
+    if (root != HKEY_LOCAL_MACHINE || wcscmp(path, L"SOFTWARE\\Policies\\ThinBridge") ||
+        wcscmp(name, L"DisableSetting") || flags != (RRF_RT_DWORD | RRF_SUBKEY_WOW6464KEY) ||
+        *size != sizeof(DWORD))
+        std::exit(2);
+    if (!settingPolicy || wcscmp(settingPolicy, L"missing") == 0)
+        return ERROR_FILE_NOT_FOUND;
+    *static_cast<DWORD*>(data) = wcstoul(settingPolicy, nullptr, 10);
+    return ERROR_SUCCESS;
+}
 
 static LSTATUS WINAPI TestOpenLaunchKey(HKEY root, LPCWSTR path, DWORD, REGSAM, PHKEY key)
 {
@@ -158,6 +172,8 @@ static void RunLaunchTest(CRedirectApp& app)
 #undef RegQueryValueEx
 #define RegQueryValueEx TestQueryLaunchValue
 #define RegCloseKey TestCloseLaunchKey
+#undef RegGetValue
+#define RegGetValue TestReadSettingPolicy
 #undef DdeInitialize
 #define DdeInitialize TestDdeInitialize
 #undef DdeCreateStringHandle

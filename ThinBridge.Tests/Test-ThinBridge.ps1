@@ -225,6 +225,9 @@ foreach ($option in $routes.Keys) {
 Test-App 'Startup keeps configured route without an explicit option' @($url) @('0', '') -Route
 Test-App 'Startup resolves a bare custom executable relative to ThinBridge' @($url, 'ThinBridgeTestBrowser.exe') @('8', 'C:\ThinBridge Test\ThinBridgeTestBrowser.exe') -Route
 Test-App 'Startup keeps the configured route when only a switch is present' @('/settings') @('0', '') -Route
+Test-App 'Missing DisableSetting policy leaves settings enabled' @('--test-setting-policy', 'missing') @('0')
+Test-App 'Zero DisableSetting policy leaves settings enabled' @('--test-setting-policy', '0') @('0')
+Test-App 'Nonzero DisableSetting policy disables settings' @('--test-setting-policy', '2') @('1')
 Test-App 'Startup clears an unresolved traversal-style custom path' @($url, '..\ThinBridgeTestBrowser.exe') @('8', '') -Route
 
 $customFile = New-TemporaryFile

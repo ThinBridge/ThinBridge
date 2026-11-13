@@ -29,6 +29,11 @@ static bool IsRdpFileTest()
 
 static void RunThinBridgeTest(CRedirectApp& app)
 {
+    if (__argc == 3 && wcscmp(__wargv[1], L"--test-setting-policy") == 0) {
+        settingPolicy = __wargv[2];
+        std::printf("%d\n", app.IsSettingDisabled());
+        return;
+    }
     if (IsRdpFileTest()) {
         app.m_strRDP_FileFullPath = __wargv[2];
         app.m_RedirectList.m_strRDP_ServerName = L"rdp.example";
