@@ -114,6 +114,13 @@ Test-App 'IE DDE preserves commas and Unicode in the quoted URL' @('--test-launc
 Test-App 'IE falls back to ShellExecute when DDE cannot connect' @('--test-launch', 'ie-dde-unavailable', $url, '1') @(
     "ShellExecute|open|iexplore.exe|$quotedUrl"
 )
+Test-App 'IE exhausts its executable fallbacks after DDE fails' @('--test-launch', 'ie-dde-unavailable', $url, '0') @(
+    "ShellExecute|open|iexplore.exe|$quotedUrl"
+    "ShellExecute||iexplorer.exe $quotedUrl|"
+    "ShellExecute||`"C:\Browser Test\iexplore.exe`" $quotedUrl|"
+    "ShellExecute||`"C:\Program Files (x86)\Internet Explorer\iexplore.exe`" $quotedUrl|"
+    "ShellExecute||`"C:\Program Files\Internet Explorer\iexplore.exe`" $quotedUrl|"
+)
 Test-App 'Default browser fallback tries Explorer and IE' @('--test-launch', 'default', $url, '0') @(
     "ShellExecute||$quotedUrl|"
     "ShellExecute|open|$quotedUrl|"
@@ -133,6 +140,9 @@ Test-App 'Custom browser falls back from CreateProcess to ShellExecute' @('--tes
 $rdpPath = 'C:\Remote Session\session.rdp'
 Test-App 'RDP quotes the file path in the first MSTSC command' @('--test-launch', 'rdp', $rdpPath, '1') @(
     "CreateProcess|||`"mstsc.exe`" `"$rdpPath`""
+)
+Test-App 'RDP starts MSTSC without a file argument when the path is empty' @('--test-launch', 'rdp', '', '1') @(
+    'CreateProcess|||"mstsc.exe"'
 )
 Test-App 'RDP falls back from CreateProcess to ShellExecute and file association' @('--test-launch', 'rdp', $rdpPath, '0') @(
     "CreateProcess|||`"mstsc.exe`" `"$rdpPath`""
@@ -172,16 +182,27 @@ Test-App 'Citrix retries the registered launcher before using ShellExecute' @('-
 
 $rdpFile = New-TemporaryFile
 try {
-    foreach ($argument in @($url, '')) {
-        Test-App 'Generate RemoteApp file' @('--test-rdp-file', $rdpFile.FullName, $argument) @('RDP file generated')
-        $command = if ($argument) { "/open $argument" } else { '/open' }
+    $rdpCases = @(
+        @{ Name = 'RemoteApp combines the configured command and URL'; Mode = 'remote-app'; Argument = $url; Command = "/open $url" }
+        @{ Name = 'RemoteApp uses the configured command alone'; Mode = 'remote-app'; Argument = ''; Command = '/open' }
+        @{ Name = 'RemoteApp uses the URL alone'; Mode = 'no-default-command'; Argument = $url; Command = $url }
+        @{ Name = 'RemoteApp omits an empty command'; Mode = 'no-default-command'; Argument = '' }
+        @{ Name = 'Desktop mode omits all RemoteApp settings'; Mode = 'desktop'; Argument = $url }
+    )
+    foreach ($case in $rdpCases) {
+        Test-App $case.Name @('--test-rdp-file', $rdpFile.FullName, $case.Argument, $case.Mode) @('RDP file generated')
+        $remoteApp = $case.Mode -ne 'desktop'
         $expected = @(
             'full address:s:rdp.example'
-            'remoteapplicationmode:i:1'
-            'remoteapplicationname:s:Remote App'
-            'remoteapplicationprogram:s:C:\Remote App\app.exe'
-            'alternate shell:s:C:\Remote App\app.exe'
-            "remoteapplicationcmdline:s:$command"
+            "remoteapplicationmode:i:$([int]$remoteApp)"
+            if ($remoteApp) {
+                'remoteapplicationname:s:Remote App'
+                'remoteapplicationprogram:s:C:\Remote App\app.exe'
+                'alternate shell:s:C:\Remote App\app.exe'
+                if ($case.Command) {
+                    "remoteapplicationcmdline:s:$($case.Command)"
+                }
+            }
             'redirectclipboard:i:1'
             'redirectprinters:i:0'
             'RedirectDrives:i:1'
@@ -189,7 +210,7 @@ try {
             'prompt for credentials:i:1'
         )
         if ([IO.File]::ReadAllText($rdpFile.FullName) -cne (($expected -join "`r`n") + "`r`n")) {
-            throw 'Unexpected RemoteApp file contents'
+            throw "$($case.Name) produced unexpected RDP file contents"
         }
     }
 }
@@ -203,3 +224,13 @@ foreach ($option in $routes.Keys) {
 }
 Test-App 'Startup keeps configured route without an explicit option' @($url) @('0', '') -Route
 Test-App 'Startup resolves a bare custom executable relative to ThinBridge' @($url, 'ThinBridgeTestBrowser.exe') @('8', 'C:\ThinBridge Test\ThinBridgeTestBrowser.exe') -Route
+Test-App 'Startup keeps the configured route when only a switch is present' @('/settings') @('0', '') -Route
+Test-App 'Startup clears an unresolved traversal-style custom path' @($url, '..\ThinBridgeTestBrowser.exe') @('8', '') -Route
+
+$customFile = New-TemporaryFile
+try {
+    Test-App 'Startup retains an existing absolute custom path' @($url, $customFile.FullName) @('8', $customFile.FullName) -Route
+}
+finally {
+    Remove-Item -LiteralPath $customFile.FullName
+}

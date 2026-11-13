@@ -24,7 +24,7 @@ static void PrintRoutingTest(CRedirectApp& app)
 
 static bool IsRdpFileTest()
 {
-    return __argc == 4 && wcscmp(__wargv[1], L"--test-rdp-file") == 0;
+    return __argc == 5 && wcscmp(__wargv[1], L"--test-rdp-file") == 0;
 }
 
 static void RunThinBridgeTest(CRedirectApp& app)
@@ -34,7 +34,12 @@ static void RunThinBridgeTest(CRedirectApp& app)
         app.m_RedirectList.m_strRDP_ServerName = L"rdp.example";
         app.m_RedirectList.m_strRemoteAppName = L"Remote App";
         app.m_RedirectList.m_strRemoteAppPath = L"C:\\Remote App\\app.exe";
-        app.m_RedirectList.m_strRemoteAppCommandLine = L"/open";
+        const CString mode = __wargv[4];
+        if (mode != L"desktop" && mode != L"remote-app" && mode != L"no-default-command")
+            std::exit(2);
+        app.m_RedirectList.m_bRemoteAppMode = mode != L"desktop";
+        if (mode == L"remote-app")
+            app.m_RedirectList.m_strRemoteAppCommandLine = L"/open";
         app.m_RedirectList.m_bRedirect_Clipboard = TRUE;
         app.m_RedirectList.m_bRedirect_Drive = TRUE;
         app.m_strRdp_Template_File_Data = L"screen mode id:i:2\n";
