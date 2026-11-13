@@ -23,6 +23,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ThinBridgeRuleUpdater", "Th
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TBo365URLSync", "TBo365URLSync\TBo365URLSync.vcxproj", "{83ACCC42-491A-476C-AD2C-92EA9794B28C}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ThinBridge.Tests", "ThinBridge.Tests\ThinBridge.Tests.vcxproj", "{A472B048-9C7B-4A98-9252-F9737DBF1D68}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -75,6 +77,10 @@ Global
 		{83ACCC42-491A-476C-AD2C-92EA9794B28C}.Release|Win32.ActiveCfg = Release|Win32
 		{83ACCC42-491A-476C-AD2C-92EA9794B28C}.Release|Win32.Build.0 = Release|Win32
 		{83ACCC42-491A-476C-AD2C-92EA9794B28C}.Release|x64.ActiveCfg = Release|x64
+		{A472B048-9C7B-4A98-9252-F9737DBF1D68}.Debug|Win32.ActiveCfg = Debug|Win32
+		{A472B048-9C7B-4A98-9252-F9737DBF1D68}.Debug|x64.ActiveCfg = Debug|x64
+		{A472B048-9C7B-4A98-9252-F9737DBF1D68}.Release|Win32.ActiveCfg = Release|Win32
+		{A472B048-9C7B-4A98-9252-F9737DBF1D68}.Release|x64.ActiveCfg = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

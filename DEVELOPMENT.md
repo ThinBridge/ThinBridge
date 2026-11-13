@@ -28,6 +28,40 @@ See https://github.com/ThinBridge/ThinBridge#thinbridge%E3%81%AE%E3%83%AA%E3%83%
 * Test assets for release
 * Publish release note
 
+## How to run native unit tests
+
+From a Visual Studio 2022 Developer Command Prompt, with Desktop development
+with C++ and the v143 MFC components installed:
+
+```bat
+msbuild ThinBridge.Tests\ThinBridge.Tests.vcxproj /p:Configuration=Release /p:Platform=Win32
+vstest.console ThinBridge.Tests\Release\Win32\ThinBridge.Tests.dll /Platform:x86
+```
+
+For x64, use `x64` for the build platform, output directory, and test platform.
+In Visual Studio, build `ThinBridge.Tests` explicitly and run it from Test
+Explorer. The test project is opt-in for solution builds so that the installer
+build does not require the native test framework.
+
+To test the ThinBridgeTalk executable over standard I/O, run the following
+from a Visual Studio developer shell using PowerShell 7:
+
+```powershell
+msbuild ThinBridgeTalk/ThinBridgeTalk.vcxproj /p:Configuration=Release /p:Platform=Win32 /p:PlatformToolset=v143
+./ThinBridge.Tests/Test-ThinBridgeTalk.ps1 -Executable ThinBridgeTalk/Release/ThinBridgeTalk.exe
+```
+
+For x64, build with `/p:Platform=x64` and use
+`ThinBridgeTalk/x64/Release/ThinBridgeTalk.exe`.
+
+The standard I/O suite always checks binary input. CI also checks binary
+output with a temporary rule file. To run that case locally, use an elevated
+PowerShell on a clean test machine and pass
+`-BinaryConfigResponseRegistryView Registry32` for Win32 or `Registry64` for
+x64. The test requires the selected registry view to have no existing
+`HKLM\SOFTWARE\ThinBridge\Rulefile` value and removes its temporary value
+after the test.
+
 ## How to try extensions for development
 
 ThinBridge addon depends on the native messaging host, which is a part of ThinBridge.
