@@ -1697,6 +1697,10 @@ class CConfData
 	//////////////////////////////////////////////////
 
 };
+#ifdef THINBRIDGE_APP_TEST_HOOKS
+#include "LoopTestHooks.h"
+#endif
+
 #define LB_OK 0
 #define LB_NG 1
 #define LB_NG_NO_MSG 2
@@ -1909,6 +1913,11 @@ public:
 	}
 
 };
+#ifdef THINBRIDGE_APP_TEST_HOOKS
+#pragma pop_macro("GetTickCount")
+#pragma pop_macro("OpenEvent")
+#endif
+
 class CRedirectApp : public CWinApp
 {
 public:

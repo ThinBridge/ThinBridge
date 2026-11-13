@@ -1,0 +1,8 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <PreprocessorDefinitions>THINBRIDGE_QUERY_TEST_HOOKS="QueryHooks.h";THINBRIDGE_CONFIG_TEST_HOOKS="ConfigHooks.h";THINBRIDGE_RESOURCE_TEST_HOOKS="ResourceHooks.h";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+</Project>

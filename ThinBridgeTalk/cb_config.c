@@ -18,6 +18,10 @@
 #include <sys/stat.h>
 #include "internal.h"
 
+#ifdef THINBRIDGE_CONFIG_TEST_HOOKS
+#include THINBRIDGE_CONFIG_TEST_HOOKS
+#endif
+
 /*
  * First, we define structs to store configuration. The "section" struct
  * represents each section block. The "config" struct holds the entire
