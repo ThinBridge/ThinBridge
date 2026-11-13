@@ -131,6 +131,33 @@ if ($BinaryConfigResponseRegistryView) {
         $key.SetValue('Rulefile', $rulefile.FullName, 'String')
         $registered = $true
         Test-Exchange 'Binary stdout length 2699' (New-Request '"C edge"') 0 -Response ($prefix + $url + $suffix)
+
+        $rules = @'
+[GLOBAL]
+@TOP_PAGE_ONLY
+@UNTRUSTED_ZONE
+[Default]
+@BROWSER_PATH:edge
+[Firefox]
+@BROWSER_PATH:C:\Browsers\Firefox.exe
+@EXCLUDE_GROUP:local
+https://example.com/first*
+https://example.com/second*
+-https://example.com/internal/*
+-#https://example.com/commented/*
+[Chrome]
+@DISABLED
+https://disabled.example/*
+[Edge]
+'@
+        [IO.File]::WriteAllText($rulefile.FullName, $rules, [Text.Encoding]::ASCII)
+        $config = '{"status":"OK","config":{"CloseEmptyTab":1,"OnlyMainFrame":1,"IgnoreQueryString":1,"DefaultBrowser":"edge","Sections":['
+        $config += '{"Name":"firefox","Path":"C:\\Browsers\\Firefox.exe","ExcludeGroups":["local"],'
+        $config += '"Patterns":["https://example.com/first*","https://example.com/second*"],"Excludes":["https://example.com/internal/*"]}]}}'
+        Test-Exchange 'Config response preserves rules and filters disabled sections' (New-Request '"C edge"') 0 -Response $config
+
+        [IO.File]::WriteAllText($rulefile.FullName, '')
+        Test-Exchange 'Config request with an empty rule file' (New-Request '"C edge"') 0 "cannot read $($rulefile.FullName)"
     }
     finally {
         if ($registered) {

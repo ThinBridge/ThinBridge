@@ -182,5 +182,74 @@ namespace ThinBridgeTests
             Assert::AreEqual(L"https://example.com/*", reloaded.m_pEdge->m_arr_URL[0].GetString());
             Assert::AreEqual(L"https://example.com/local/*", reloaded.m_pEdge->m_arr_URL_EX[0].GetString());
         }
+
+        TEST_METHOD(EmptySettingsFileUsesProductDefaults)
+        {
+            CURLRedirectList settings;
+            LoadSettings(settings, "");
+            Assert::IsTrue(settings.m_bURLOnly != FALSE);
+            Assert::IsTrue(settings.m_bTopURLOnly != FALSE);
+            Assert::IsTrue(settings.m_bQuickRedirect != FALSE);
+            Assert::IsNotNull(settings.m_pEdge);
+            Assert::IsTrue(settings.m_pEdge->m_arr_URL.IsEmpty());
+            Assert::AreEqual<DWORD>(3, settings.m_pEdge->m_dwCloseTimeout);
+        }
+
+        TEST_METHOD(CitrixCustomEnvironmentLoadsOnlyItsSupportedBrowserSections)
+        {
+            CURLRedirectList settings;
+            WriteSettings("[GLOBAL]\r\n[EDGE]\r\nhttps://edge.example/*\r\n"
+                "[CHROME]\r\nhttps://chrome.example/*\r\n[CUSTOM18]\r\nhttps://neutral.example/*\r\n");
+            settings.SetArrayData(settingsPath, TRUE);
+            Assert::IsNull(settings.m_pEdge);
+            Assert::IsNotNull(settings.m_pChrome);
+            Assert::IsNotNull(settings.m_pCustom18);
+            Assert::AreEqual(1, static_cast<int>(settings.m_pChrome->m_arr_URL.GetCount()));
+            Assert::AreEqual(1, static_cast<int>(settings.m_pCustom18->m_arr_URL.GetCount()));
+            Assert::AreEqual(L"https://chrome.example/*", settings.m_pChrome->m_arr_URL[0].GetString());
+            Assert::AreEqual(L"https://neutral.example/*", settings.m_pCustom18->m_arr_URL[0].GetString());
+        }
+
+        TEST_METHOD(SaveUsesGlobalTopUrlOnlyForBrowserDirective)
+        {
+            CURLRedirectList settings;
+            LoadSettings(settings, "[GLOBAL]\r\n@UNTRUSTED_ZONE\r\n[EDGE]\r\nhttps://example.com/*\r\n");
+            Assert::IsFalse(settings.m_pEdge->m_bTopPageOnly != FALSE);
+            CString serialized;
+            Assert::IsTrue(settings.SaveData(settingsPath, serialized) != FALSE);
+            CURLRedirectList reloaded;
+            reloaded.SetArrayData(settingsPath);
+            Assert::IsTrue(reloaded.m_pEdge->m_bTopPageOnly != FALSE);
+        }
+    };
+
+    TEST_CLASS(UrlHelpersTests)
+    {
+    public:
+        TEST_METHOD(UrlRecognitionUsesSchemePrefixes)
+        {
+            Assert::IsTrue(SBUtil::IsURL(L"HTTPS://example.com") != FALSE);
+            Assert::IsTrue(SBUtil::IsURL(L"file:///C:/page.html") != FALSE);
+            Assert::IsFalse(SBUtil::IsURL(L"C:\\page.html") != FALSE);
+            Assert::IsFalse(SBUtil::IsURL(nullptr) != FALSE);
+        }
+
+        TEST_METHOD(HttpRecognitionIsCaseSensitive)
+        {
+            Assert::IsTrue(SBUtil::IsURL_HTTP(L"http://example.com") != FALSE);
+            Assert::IsTrue(SBUtil::IsURL_HTTP(L"https://example.com") != FALSE);
+            Assert::IsFalse(SBUtil::IsURL_HTTP(L"HTTPS://example.com") != FALSE);
+            Assert::IsFalse(SBUtil::IsURL_HTTP(L"file:///C:/page.html") != FALSE);
+        }
+
+        TEST_METHOD(TrimUrlKeepsPathAndRemovesQueryAndFragment)
+        {
+            const auto unchanged = SBUtil::Trim_URLOnly(L"https://example.com/a%3Fb%23c");
+            const auto queryFirst = SBUtil::Trim_URLOnly(L"https://example.com/path?query#fragment");
+            const auto fragmentFirst = SBUtil::Trim_URLOnly(L"https://example.com/path#fragment?text");
+            Assert::AreEqual(L"https://example.com/a%3Fb%23c", unchanged.GetString());
+            Assert::AreEqual(L"https://example.com/path", queryFirst.GetString());
+            Assert::AreEqual(L"https://example.com/path", fragmentFirst.GetString());
+        }
     };
 }
