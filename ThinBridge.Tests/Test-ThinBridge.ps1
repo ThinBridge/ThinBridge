@@ -107,6 +107,13 @@ $firefox = @(
 Test-App 'Firefox retries with the existing fallback argument format' @('--test-launch', 'firefox', $url, '0') $firefox
 Test-App 'Edge uses the microsoft-edge protocol' @('--test-launch', 'edge', $url, '0') @("ShellExecute||microsoft-edge:$url|")
 Test-App 'IE without DDE first uses its executable name' @('--test-launch', 'ie', $url, '1') @("ShellExecute|open|iexplore.exe|$quotedUrl")
+$ddeUrl = 'https://example.com/a,b 日本語?q=x,y#part'
+Test-App 'IE DDE preserves commas and Unicode in the quoted URL' @('--test-launch', 'ie-dde', $ddeUrl, '0') @(
+    "DdeClientTransaction|XTYP_EXECUTE||`"$ddeUrl`""
+)
+Test-App 'IE falls back to ShellExecute when DDE cannot connect' @('--test-launch', 'ie-dde-unavailable', $url, '1') @(
+    "ShellExecute|open|iexplore.exe|$quotedUrl"
+)
 Test-App 'Default browser fallback tries Explorer and IE' @('--test-launch', 'default', $url, '0') @(
     "ShellExecute||$quotedUrl|"
     "ShellExecute|open|$quotedUrl|"
@@ -127,11 +134,25 @@ $rdpPath = 'C:\Remote Session\session.rdp'
 Test-App 'RDP quotes the file path in the first MSTSC command' @('--test-launch', 'rdp', $rdpPath, '1') @(
     "CreateProcess|||`"mstsc.exe`" `"$rdpPath`""
 )
+Test-App 'RDP falls back from CreateProcess to ShellExecute and file association' @('--test-launch', 'rdp', $rdpPath, '0') @(
+    "CreateProcess|||`"mstsc.exe`" `"$rdpPath`""
+    "CreateProcess||mstsc.exe|$rdpPath"
+    "ShellExecute|open|mstsc.exe|$rdpPath"
+    "ShellExecute||$rdpPath|"
+)
 Test-App 'VMware percent-encodes the app name and complete URL' @('--test-launch', 'vmware', $url, '1') @(
     'ShellExecute||vmware-view://horizon.example/Remote%20App?url=https%3A%2F%2Fexample.com%2Fa%20b%3Fq%3D1%23part|'
 )
 Test-App 'VMware omits the URL parameter when empty' @('--test-launch', 'vmware', '', '1') @(
     'ShellExecute||vmware-view://horizon.example/Remote%20App|'
+)
+$vmwareUri = 'vmware-view://horizon.example/Remote%20App?url=https%3A%2F%2Fexample.com%2Fa%20b%3Fq%3D1%23part'
+Test-App 'VMware registered protocol stops after successful open' @('--test-launch', 'vmware-registered', $url, '1') @(
+    "ShellExecute|open|$vmwareUri|"
+)
+Test-App 'VMware retries without the open verb after failure' @('--test-launch', 'vmware-registered', $url, '0') @(
+    "ShellExecute|open|$vmwareUri|"
+    "ShellExecute||$vmwareUri|"
 )
 $citrix = '"c:\program files\Citrix\ICA Client\SelfServicePlugin\SelfService.exe"'
 Test-App 'Citrix quotes the published app name and URL' @('--test-launch', 'citrix', $url, '1') @(
@@ -139,6 +160,14 @@ Test-App 'Citrix quotes the published app name and URL' @('--test-launch', 'citr
 )
 Test-App 'Citrix omits the URL argument when empty' @('--test-launch', 'citrix', '', '1') @(
     "CreateProcess|||$citrix -qlaunch `"Published App`""
+)
+$registeredCitrix = '"C:\Remote Test\SelfService.exe"'
+$citrixArguments = "-qlaunch `"Published App`" $quotedUrl"
+Test-App 'Citrix retries the registered launcher before using ShellExecute' @('--test-launch', 'citrix-registered', $url, '0') @(
+    "CreateProcess|||$registeredCitrix $citrixArguments"
+    "CreateProcess||$registeredCitrix|$citrixArguments"
+    "ShellExecute|open|$registeredCitrix|$citrixArguments"
+    "ShellExecute||$registeredCitrix $citrixArguments|"
 )
 
 $rdpFile = New-TemporaryFile
