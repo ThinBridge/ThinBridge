@@ -32,5 +32,11 @@ jobs:
         run: |
           $platform = '${{ matrix.platform }}'
           $output = if ($platform -eq 'Win32') { 'Release' } else { 'x64/Release' }
-          $view = if ($platform -eq 'Win32') { 'Registry32' } else { 'Registry64' }
-          ./ThinBridge.Tests/Test-ThinBridgeTalk.ps1 -Executable "ThinBridgeTalk/$output/ThinBridgeTalk.exe" -BinaryConfigResponseRegistryView $view
+          ./ThinBridge.Tests/Test-ThinBridgeTalk.ps1 -Executable "ThinBridgeTalk/$output/ThinBridgeTalk.exe"
+      - name: Build and test ThinBridgeTalk with test hooks
+        shell: pwsh
+        run: |
+          $output = "$pwd/ThinBridge.Tests/Release/${{ matrix.platform }}/TalkHooks/"
+          msbuild ThinBridgeTalk/ThinBridgeTalk.vcxproj /m /p:Configuration=Release /p:Platform=${{ matrix.platform }} /p:PlatformToolset=v143 /p:TargetName=ThinBridgeTalk.Test "/p:OutDir=$output" "/p:IntDir=${output}obj/" "/p:ForceImportBeforeCppTargets=$pwd/ThinBridge.Tests/ThinBridgeTalkHooks.props"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          ./ThinBridge.Tests/Test-ThinBridgeTalk.ps1 -Executable "${output}ThinBridgeTalk.Test.exe" -Hooks

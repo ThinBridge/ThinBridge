@@ -1,8 +1,7 @@
 param(
     [Parameter(Mandatory)]
     [string]$Executable,
-    [ValidateSet('Registry32', 'Registry64')]
-    [string]$BinaryConfigResponseRegistryView
+    [switch]$Hooks
 )
 
 $ErrorActionPreference = 'Stop'
@@ -18,7 +17,9 @@ function Test-Exchange(
     [byte[]]$Request,
     [int]$ExitCode,
     [string]$Diagnostic = '',
-    [string]$Response = ''
+    [string]$Response = '',
+    [switch]$FailLaunch,
+    [hashtable]$Fixture = @{}
 ) {
     $start = [Diagnostics.ProcessStartInfo]::new($Executable)
     $start.UseShellExecute = $false
@@ -26,6 +27,15 @@ function Test-Exchange(
     $start.RedirectStandardInput = $true
     $start.RedirectStandardOutput = $true
     $start.RedirectStandardError = $true
+    if ($Hooks) {
+        $start.Environment['THINBRIDGE_TEST_FAIL_LAUNCH'] = if ($FailLaunch) { '1' } else { '0' }
+        foreach ($fixtureName in @('RULEFILE', 'POLICY', 'WARNING_BUSY', 'NO_EXECFILE')) {
+            [void]$start.Environment.Remove("THINBRIDGE_TEST_$fixtureName")
+        }
+        foreach ($fixtureName in $Fixture.Keys) {
+            $start.Environment["THINBRIDGE_TEST_$fixtureName"] = $Fixture[$fixtureName]
+        }
+    }
     $process = [Diagnostics.Process]::Start($start)
     $output = [IO.MemoryStream]::new()
     try {
@@ -57,6 +67,87 @@ function Test-Exchange(
         $process.Dispose()
         $output.Dispose()
     }
+}
+
+function Test-ConfigResponses([string]$Rulefile) {
+    # BrowserSelector e7c170c records the 8B 0A 00 00 response header.
+    $prefix = '{"status":"OK","config":{"CloseEmptyTab":1,"OnlyMainFrame":0,"IgnoreQueryString":0,"DefaultBrowser":"","Sections":['
+    $prefix += '{"Name":"firefox","Path":"","ExcludeGroups":[],"Patterns":["'
+    $suffix = '"],"Excludes":[]}]}}'
+    $url = 'https://example.com/'
+    $url += 'a' * (0x0A8B - ($prefix + $url + $suffix).Length)
+    [IO.File]::WriteAllText($Rulefile, "[Firefox]`r`n$url`r`n", [Text.Encoding]::ASCII)
+    Test-Exchange 'Binary stdout length 2699' (New-Request '"C edge"') 0 -Response ($prefix + $url + $suffix) -Fixture @{ RULEFILE = $Rulefile }
+
+    $rules = @'
+[GLOBAL]
+@TOP_PAGE_ONLY
+@UNTRUSTED_ZONE
+[Default]
+@BROWSER_PATH:edge
+[Firefox]
+@BROWSER_PATH:C:\Browsers\Firefox.exe
+@EXCLUDE_GROUP:local
+https://example.com/first*
+https://example.com/second*
+-https://example.com/internal/*
+-#https://example.com/commented/*
+[Chrome]
+@DISABLED
+https://disabled.example/*
+[Edge]
+'@
+    [IO.File]::WriteAllText($Rulefile, $rules, [Text.Encoding]::ASCII)
+    $config = '{"status":"OK","config":{"CloseEmptyTab":1,"OnlyMainFrame":1,"IgnoreQueryString":1,"DefaultBrowser":"edge","Sections":['
+    $config += '{"Name":"firefox","Path":"C:\\Browsers\\Firefox.exe","ExcludeGroups":["local"],'
+    $config += '"Patterns":["https://example.com/first*","https://example.com/second*"],"Excludes":["https://example.com/internal/*"]}]}}'
+    Test-Exchange 'Config response preserves rules and filters disabled sections' (New-Request '"C edge"') 0 -Response $config -Fixture @{ RULEFILE = $Rulefile }
+
+    [IO.File]::WriteAllText($Rulefile, '')
+    Test-Exchange 'Config request with an empty rule file' (New-Request '"C edge"') 0 "cannot read $Rulefile" -Fixture @{ RULEFILE = $Rulefile }
+}
+
+if ($Hooks) {
+    $path = 'C:\ThinBridge Test\ThinBridge.exe'
+    $url = 'https://example.com/a b?x=1&y=2'
+    $command = ' "' + $url + '"'
+    $diagnostic = "path=$path`r`ncommand=$command`r`n"
+    $edgeLaunch = $diagnostic + "flags=512`r`ninherit=0`r`n"
+    $firefoxLaunch = $diagnostic + "flags=16777216`r`ninherit=0`r`n"
+    Test-Exchange 'Q launches Edge request in a new process group' (New-Request ('"Q edge ' + $url + '"')) 0 $edgeLaunch '{"status":"OK"}'
+    Test-Exchange 'Q launches Firefox request outside the job' (New-Request ('"Q firefox ' + $url + '"')) 0 $firefoxLaunch '{"status":"OK"}'
+    Test-Exchange 'Q launch failure emits no response' (New-Request ('"Q edge ' + $url + '"')) 0 ($edgeLaunch + "cannot exec '$path $command' (2)") -FailLaunch
+    Test-Exchange 'Q missing executable emits no response' (New-Request ('"Q edge ' + $url + '"')) 0 'cannot read SOFTWARE\ThinBridge (2)' -Fixture @{ NO_EXECFILE = '1' }
+    $emptyCommand = ' ""'
+    $emptyLaunch = "path=$path`r`ncommand=$emptyCommand`r`nflags=512`r`ninherit=0`r`n"
+    Test-Exchange 'Q accepts an empty URL' (New-Request '"Q edge "') 0 $emptyLaunch '{"status":"OK"}'
+
+    Test-Exchange 'C missing rulefile' (New-Request '"C edge"') 0 'cannot read SOFTWARE\ThinBridge (2)'
+    $rulefile = New-TemporaryFile
+    try {
+        Test-ConfigResponses $rulefile.FullName
+        Remove-Item -LiteralPath $rulefile.FullName
+        Test-Exchange 'C configured file does not exist' (New-Request '"C edge"') 0 "cannot read $($rulefile.FullName)" -Fixture @{ RULEFILE = $rulefile.FullName }
+    }
+    finally {
+        if (Test-Path -LiteralPath $rulefile.FullName) {
+            Remove-Item -LiteralPath $rulefile.FullName
+        }
+    }
+
+    $keepTab = '{"status":"OK","closeTab":0}'
+    $closeTab = '{"status":"OK","closeTab":1}'
+    $policy = @{ POLICY = '1' }
+    $warning = "warning=Warning`r`nTab count`r`ncaption=ThinBridge`r`nflags=4144`r`nseconds=3`r`n"
+    $limit = "warning=Limit reached`r`ncaption=ThinBridge`r`nflags=4144`r`nseconds=7`r`n"
+    Test-Exchange 'R without a tab policy' (New-Request '"R edge 11"') 0 -Response $keepTab
+    Test-Exchange 'R with tab policy explicitly disabled' (New-Request '"R edge 11"') 0 -Response $keepTab -Fixture @{ POLICY = '0' }
+    Test-Exchange 'R below warning threshold' (New-Request '"R edge 7"') 0 -Response $keepTab -Fixture $policy
+    Test-Exchange 'R at warning threshold' (New-Request '"R edge 8"') 0 $warning $keepTab -Fixture $policy
+    Test-Exchange 'R at maximum still warns without closing' (New-Request '"R edge 10"') 0 $warning $keepTab -Fixture $policy
+    Test-Exchange 'R above maximum requests tab closure' (New-Request '"R edge 11"') 0 $limit $closeTab -Fixture $policy
+    Test-Exchange 'R suppresses busy warning but still requests closure' (New-Request '"R edge 11"') 0 -Response $closeTab -Fixture @{ POLICY = '1'; WARNING_BUSY = '1' }
+    return
 }
 
 Test-Exchange 'Incomplete length prefix' ([byte[]]@(4, 0)) -1 'cannot read 4 bytes'
@@ -109,67 +200,6 @@ if ($hasRulefile) {
     Test-Exchange 'Config request with missing Rulefile' (New-Request '"C edge"') 0 'cannot read SOFTWARE\ThinBridge (2)'
 }
 
-# BrowserSelector e7c170c records a response length of 8B 0A 00 00.
-# Use a temporary Rulefile on a clean test machine to produce that same header.
-if ($BinaryConfigResponseRegistryView) {
-    $machine = [Microsoft.Win32.RegistryKey]::OpenBaseKey('LocalMachine', $BinaryConfigResponseRegistryView)
-    $key = $null
-    $registered = $false
-    $rulefile = New-TemporaryFile
-    try {
-        $key = $machine.CreateSubKey('SOFTWARE\ThinBridge')
-        if ($key.GetValueNames() -contains 'Rulefile') {
-            throw 'The binary response fixture requires an unused ThinBridge Rulefile value'
-        }
-
-        $prefix = '{"status":"OK","config":{"CloseEmptyTab":1,"OnlyMainFrame":0,"IgnoreQueryString":0,"DefaultBrowser":"","Sections":['
-        $prefix += '{"Name":"firefox","Path":"","ExcludeGroups":[],"Patterns":["'
-        $suffix = '"],"Excludes":[]}]}}'
-        $url = 'https://example.com/'
-        $url += 'a' * (0x0A8B - ($prefix + $url + $suffix).Length)
-        [IO.File]::WriteAllText($rulefile.FullName, "[Firefox]`r`n$url`r`n", [Text.Encoding]::ASCII)
-        $key.SetValue('Rulefile', $rulefile.FullName, 'String')
-        $registered = $true
-        Test-Exchange 'Binary stdout length 2699' (New-Request '"C edge"') 0 -Response ($prefix + $url + $suffix)
-
-        $rules = @'
-[GLOBAL]
-@TOP_PAGE_ONLY
-@UNTRUSTED_ZONE
-[Default]
-@BROWSER_PATH:edge
-[Firefox]
-@BROWSER_PATH:C:\Browsers\Firefox.exe
-@EXCLUDE_GROUP:local
-https://example.com/first*
-https://example.com/second*
--https://example.com/internal/*
--#https://example.com/commented/*
-[Chrome]
-@DISABLED
-https://disabled.example/*
-[Edge]
-'@
-        [IO.File]::WriteAllText($rulefile.FullName, $rules, [Text.Encoding]::ASCII)
-        $config = '{"status":"OK","config":{"CloseEmptyTab":1,"OnlyMainFrame":1,"IgnoreQueryString":1,"DefaultBrowser":"edge","Sections":['
-        $config += '{"Name":"firefox","Path":"C:\\Browsers\\Firefox.exe","ExcludeGroups":["local"],'
-        $config += '"Patterns":["https://example.com/first*","https://example.com/second*"],"Excludes":["https://example.com/internal/*"]}]}}'
-        Test-Exchange 'Config response preserves rules and filters disabled sections' (New-Request '"C edge"') 0 -Response $config
-
-        [IO.File]::WriteAllText($rulefile.FullName, '')
-        Test-Exchange 'Config request with an empty rule file' (New-Request '"C edge"') 0 "cannot read $($rulefile.FullName)"
-    }
-    finally {
-        if ($registered) {
-            $key.DeleteValue('Rulefile')
-        }
-        if ($null -ne $key) {
-            $key.Dispose()
-        }
-        $machine.Dispose()
-        Remove-Item -LiteralPath $rulefile.FullName
-    }
-}
 if ($hasExtensionExecfile) {
     Write-Host 'SKIP Missing ExtensionExecfile because a redirect executable is configured'
 } else {

@@ -54,13 +54,11 @@ msbuild ThinBridgeTalk/ThinBridgeTalk.vcxproj /p:Configuration=Release /p:Platfo
 For x64, build with `/p:Platform=x64` and use
 `ThinBridgeTalk/x64/Release/ThinBridgeTalk.exe`.
 
-The standard I/O suite always checks binary input. CI also checks binary
-output with a temporary rule file. To run that case locally, use an elevated
-PowerShell on a clean test machine and pass
-`-BinaryConfigResponseRegistryView Registry32` for Win32 or `Registry64` for
-x64. The test requires the selected registry view to have no existing
-`HKLM\SOFTWARE\ThinBridge\Rulefile` value and removes its temporary value
-after the test.
+The Windows test workflow also builds a separate `ThinBridgeTalk.Test.exe`
+with `ThinBridge.Tests/ThinBridgeTalkHooks.props`. Run the standard I/O script
+with `-Hooks` and this test executable to exercise config responses (including
+binary stdout), query launch results, and tab limits. The hooks provide test
+settings and record launch and warning arguments on stderr.
 
 ## How to try extensions for development
 
