@@ -44,11 +44,14 @@ function Test-App([string]$Name, [string[]]$Arguments, [string[]]$Expected,
 Test-App 'Empty arguments' @() @('', '', '')
 Test-App 'Quoted drive path with spaces' @('  "C:\Program Files\page.html"  ') @('C:\Program Files\page.html', '', '')
 Test-App 'Single switch' @('/settings') @('', '/settings', '')
+Test-App 'Empty quoted argument is ignored' @(' "" ') @('', '', '')
+Test-App 'Single dash option retains its spelling' @('-SETTINGS') @('', '-SETTINGS', '')
 Test-App 'Quoted URL preserves internal spaces and query' @('  "https://example.com/a b?q=hello world#part"  ') @('https://example.com/a b?q=hello world#part', '', '')
 Test-App 'Unrecognized single argument' @('relative.html') @('', '', '')
 Test-App 'Browser option preserves case and Unicode URL' @('eDgE', '  HTTPS://example.com/日本語?q=1#part  ') @('HTTPS://example.com/日本語?q=1#part', 'eDgE', '')
 Test-App 'Drive path in second position replaces option' @('Edge', 'C:\page.html') @('', 'C:\page.html', '')
 Test-App 'Third URL replaces earlier URLs' @('https://one.example', 'https://two.example', 'https://three.example') @('https://three.example', '', '')
+Test-App 'An empty second argument preserves the first URL' @('https://one.example', '') @('https://one.example', '', '')
 Test-App 'Custom path and ignored fourth argument' @('https://example.com', 'Custom', 'C:\Browser App\browser.exe', 'https://ignored.example') @('https://example.com', 'Custom', 'C:\Browser App\browser.exe')
 
 $log = New-TemporaryFile
@@ -71,6 +74,8 @@ try {
     Test-App 'Matching history at 15 seconds expires' @($url) @('0') -LoopLog $log.FullName
     [IO.File]::WriteAllText($log.FullName, ("https://other.example/`t60000`tOK`r`n" * 3))
     Test-App 'Recent history for a different URL does not block' @($url) @('0') -LoopLog $log.FullName
+    [IO.File]::WriteAllText($log.FullName, ("incomplete record`r`n$url`t60000`tOK`r`n" * 2))
+    Test-App 'Incomplete history records do not count toward the loop threshold' @($url) @('0') -LoopLog $log.FullName
 
     $history = "$url`t60000`tBLOCK`r`n"
     [IO.File]::WriteAllText($log.FullName, $history)
@@ -106,6 +111,11 @@ $firefox = @(
 )
 Test-App 'Firefox retries with the existing fallback argument format' @('--test-launch', 'firefox', $url, '0') $firefox
 Test-App 'Edge uses the microsoft-edge protocol' @('--test-launch', 'edge', $url, '0') @("ShellExecute||microsoft-edge:$url|")
+$longUrl = 'https://example.com/日本語/😀?q=%22#' + ('a' * 4096)
+Test-App 'Startup preserves a long URL with supplementary Unicode' @($longUrl) @($longUrl, '', '')
+Test-App 'Chrome passes the complete long Unicode URL as one quoted argument' @('--test-launch', 'chrome', $longUrl, '1') @(
+    "ShellExecute|open|chrome.exe|`"$longUrl`""
+)
 Test-App 'IE without DDE first uses its executable name' @('--test-launch', 'ie', $url, '1') @("ShellExecute|open|iexplore.exe|$quotedUrl")
 $ddeUrl = 'https://example.com/a,b 日本語?q=x,y#part'
 Test-App 'IE DDE preserves commas and Unicode in the quoted URL' @('--test-launch', 'ie-dde', $ddeUrl, '0') @(
@@ -155,6 +165,9 @@ Test-App 'VMware percent-encodes the app name and complete URL' @('--test-launch
 )
 Test-App 'VMware omits the URL parameter when empty' @('--test-launch', 'vmware', '', '1') @(
     'ShellExecute||vmware-view://horizon.example/Remote%20App|'
+)
+Test-App 'VMware percent-encodes UTF-8 and existing percent escapes' @('--test-launch', 'vmware', 'https://example.com/日本語/😀?q=%22', '1') @(
+    'ShellExecute||vmware-view://horizon.example/Remote%20App?url=https%3A%2F%2Fexample.com%2F%E6%97%A5%E6%9C%AC%E8%AA%9E%2F%F0%9F%98%80%3Fq%3D%2522|'
 )
 $vmwareUri = 'vmware-view://horizon.example/Remote%20App?url=https%3A%2F%2Fexample.com%2Fa%20b%3Fq%3D1%23part'
 Test-App 'VMware registered protocol stops after successful open' @('--test-launch', 'vmware-registered', $url, '1') @(
