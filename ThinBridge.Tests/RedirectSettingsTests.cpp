@@ -11,12 +11,17 @@ namespace ThinBridgeTests
     {
         wchar_t settingsPath[MAX_PATH] = {};
 
-        void LoadSettings(CURLRedirectList& settings, const char* contents)
+        void WriteSettings(const char* contents)
         {
             CFile file;
             Assert::IsTrue(file.Open(settingsPath, CFile::modeWrite | CFile::modeCreate) != FALSE);
             file.Write(contents, static_cast<UINT>(std::strlen(contents)));
             file.Close();
+        }
+
+        void LoadSettings(CURLRedirectList& settings, const char* contents)
+        {
+            WriteSettings(contents);
             settings.SetArrayData(settingsPath);
         }
 
@@ -58,6 +63,124 @@ namespace ThinBridgeTests
             LoadSettings(settings, "[GLOBAL]\r\n[EDGE]\r\n@TOP_PAGE_ONLY\r\nhttps://example.com/*\r\n");
             Assert::IsTrue(settings.m_pEdge->m_bTopPageOnly != FALSE);
             Assert::IsFalse(settings.m_bURLOnly != FALSE);
+        }
+
+        TEST_METHOD(GlobalTraceAndQuickRedirectAreLoaded)
+        {
+            CURLRedirectList settings;
+            LoadSettings(settings, "[global]\r\n@redirect_page_action:1\r\n@intranet_zone");
+            Assert::IsTrue(settings.m_bTraceLog != FALSE);
+            Assert::IsTrue(settings.m_bQuickRedirect != FALSE);
+            Assert::IsFalse(settings.m_bTopURLOnly != FALSE);
+        }
+
+        TEST_METHOD(BrowserRulePreservesPatternOrderAndCommentedExclusions)
+        {
+            CURLRedirectList settings;
+            LoadSettings(settings,
+                "https://ignored.example/*\r\n"
+                "[edge]\r\n;[ignored]\r\n#@DISABLED\r\n@UNKNOWN\r\n"
+                "  https://example.com/First*  \r\nhttps://example.com/second*\r\n"
+                "-https://example.com/excluded*\r\n;-https://example.com/commented*\r\n"
+                "@exclude_group:  Group A  \r\n");
+            const auto& edge = *settings.m_pEdge;
+            Assert::IsFalse(edge.m_bDisabled != FALSE);
+            Assert::IsTrue(edge.m_arr_URL.GetCount() == 2);
+            Assert::AreEqual(L"https://example.com/First*", edge.m_arr_URL[0].GetString());
+            Assert::AreEqual(L"https://example.com/second*", edge.m_arr_URL[1].GetString());
+            Assert::IsTrue(edge.m_arr_URL_EX.GetCount() == 2);
+            Assert::AreEqual(L"https://example.com/excluded*", edge.m_arr_URL_EX[0].GetString());
+            Assert::AreEqual(L"#https://example.com/commented*", edge.m_arr_URL_EX[1].GetString());
+            Assert::IsTrue(edge.m_arr_ExcludeGroup.GetCount() == 1);
+            Assert::AreEqual(L"Group A", edge.m_arr_ExcludeGroup[0].GetString());
+        }
+
+        TEST_METHOD(BrowserOptionsAreScopedToTheirSection)
+        {
+            CURLRedirectList settings;
+            LoadSettings(settings,
+                "[EDGE]\r\n@DISABLED\r\n@BROWSER_PATH:  C:\\Program Files\\Browser.exe  \r\n"
+                "@REDIRECT_PAGE_ACTION:9\r\n@CLOSE_TIMEOUT:99\r\n"
+                "[CHROME]\r\n@CLOSE_TIMEOUT:0\r\n"
+                "[FIREFOX]\r\n@REDIRECT_PAGE_ACTION:1\r\n@CLOSE_TIMEOUT:12\r\n");
+            Assert::IsTrue(settings.m_pEdge->m_bDisabled != FALSE);
+            Assert::AreEqual(L"C:\\Program Files\\Browser.exe", settings.m_pEdge->m_strExecExeFullPath.GetString());
+            Assert::AreEqual<DWORD>(2, settings.m_pEdge->m_dRedirectPageAction);
+            Assert::AreEqual<DWORD>(60, settings.m_pEdge->m_dwCloseTimeout);
+            Assert::IsFalse(settings.m_pChrome->m_bDisabled != FALSE);
+            Assert::IsTrue(settings.m_pChrome->m_strExecExeFullPath.IsEmpty());
+            Assert::AreEqual<DWORD>(0, settings.m_pChrome->m_dRedirectPageAction);
+            Assert::AreEqual<DWORD>(3, settings.m_pChrome->m_dwCloseTimeout);
+            Assert::AreEqual<DWORD>(1, settings.m_pFirefox->m_dRedirectPageAction);
+            Assert::AreEqual<DWORD>(12, settings.m_pFirefox->m_dwCloseTimeout);
+        }
+
+        TEST_METHOD(LastSectionForSameBrowserReplacesEarlierRule)
+        {
+            CURLRedirectList settings;
+            LoadSettings(settings, "[EDGE]\r\n@DISABLED\r\nhttps://old.example/*\r\n"
+                "[edge]\r\nhttps://new.example/*");
+            Assert::IsFalse(settings.m_pEdge->m_bDisabled != FALSE);
+            Assert::IsTrue(settings.m_pEdge->m_arr_URL.GetCount() == 1);
+            Assert::AreEqual(L"https://new.example/*", settings.m_pEdge->m_arr_URL[0].GetString());
+        }
+
+        TEST_METHOD(ReloadClearsPreviousSettings)
+        {
+            CURLRedirectList settings;
+            LoadSettings(settings, "[GLOBAL]\r\n@UNTRUSTED_ZONE\r\n@RDP_CLIPBOARD\r\n"
+                "[EDGE]\r\nhttps://old.example/*\r\n");
+            Assert::IsTrue(settings.m_bTopURLOnly != FALSE);
+            Assert::IsTrue(settings.m_bRedirect_Clipboard != FALSE);
+            Assert::IsTrue(settings.m_pEdge->m_arr_URL.GetCount() == 1);
+            LoadSettings(settings, "[GLOBAL]\r\n[CHROME]\r\nhttps://new.example/*\r\n");
+            Assert::IsFalse(settings.m_bTopURLOnly != FALSE);
+            Assert::IsFalse(settings.m_bRedirect_Clipboard != FALSE);
+            Assert::IsTrue(settings.m_pEdge->m_arr_URL.IsEmpty());
+            Assert::IsTrue(settings.m_pChrome->m_arr_URL.GetCount() == 1);
+        }
+
+        TEST_METHOD(GlobalReaderLoadsRemoteSettingsBeforeRdpSection)
+        {
+            CURLRedirectList settings;
+            WriteSettings("[global]\r\n@VMW_SERVERNAME: Horizon.Example\r\n@VMW_APPNAME: Horizon App\r\n"
+                "@CTX_APPNAME: Citrix App\r\n@RDP_SERVERNAME: Rdp.Example\r\n"
+                "@RDP_APPNAME: Remote App\r\n@RDP_APPPATH: C:\\Apps\\Remote.exe\r\n"
+                "@RDP_COMMANDLINE: /open %URL%\r\n@RDP_CLIPBOARD\r\n@RDP_PRINTER\r\n"
+                "@RDP_DRIVE\r\n@DISABLE_IE_DDE\r\n"
+                "[RDP]\r\n@RDP_SERVERNAME: ignored.example\r\n");
+            settings.SetGlobalData(settingsPath);
+            Assert::AreEqual(L"Horizon.Example", settings.m_strHorizon_ConnectionServerName.GetString());
+            Assert::AreEqual(L"Horizon App", settings.m_strHorizon_AppName.GetString());
+            Assert::AreEqual(L"Citrix App", settings.m_strCitrix_AppName.GetString());
+            Assert::AreEqual(L"Rdp.Example", settings.m_strRDP_ServerName.GetString());
+            Assert::AreEqual(L"Remote App", settings.m_strRemoteAppName.GetString());
+            Assert::AreEqual(L"C:\\Apps\\Remote.exe", settings.m_strRemoteAppPath.GetString());
+            Assert::AreEqual(L"/open %URL%", settings.m_strRemoteAppCommandLine.GetString());
+            Assert::IsTrue(settings.m_bRedirect_Clipboard != FALSE);
+            Assert::IsTrue(settings.m_bRedirect_Printer != FALSE);
+            Assert::IsTrue(settings.m_bRedirect_Drive != FALSE);
+            Assert::IsTrue(settings.m_bDisableIE_DDE != FALSE);
+        }
+
+        TEST_METHOD(SaveAndReloadPreservesGlobalAndBrowserSettings)
+        {
+            CURLRedirectList settings;
+            LoadSettings(settings, "[GLOBAL]\r\n@TOP_PAGE_ONLY\r\n@UNTRUSTED_ZONE\r\n"
+                "[EDGE]\r\n@DISABLED\r\n@BROWSER_PATH:C:\\Browser.exe\r\n"
+                "@CLOSE_TIMEOUT:12\r\nhttps://example.com/*\r\n-https://example.com/local/*\r\n");
+            CString serialized;
+            Assert::IsTrue(settings.SaveData(settingsPath, serialized) != FALSE);
+            CURLRedirectList reloaded;
+            reloaded.SetArrayData(settingsPath);
+            Assert::IsTrue(reloaded.m_bURLOnly != FALSE);
+            Assert::IsTrue(reloaded.m_bTopURLOnly != FALSE);
+            Assert::IsTrue(reloaded.m_pEdge->m_bDisabled != FALSE);
+            Assert::AreEqual<DWORD>(12, reloaded.m_pEdge->m_dwCloseTimeout);
+            Assert::IsTrue(reloaded.m_pEdge->m_arr_URL.GetCount() == 1);
+            Assert::IsTrue(reloaded.m_pEdge->m_arr_URL_EX.GetCount() == 1);
+            Assert::AreEqual(L"https://example.com/*", reloaded.m_pEdge->m_arr_URL[0].GetString());
+            Assert::AreEqual(L"https://example.com/local/*", reloaded.m_pEdge->m_arr_URL_EX[0].GetString());
         }
     };
 }
