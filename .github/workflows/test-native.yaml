@@ -40,3 +40,11 @@ jobs:
           msbuild ThinBridgeTalk/ThinBridgeTalk.vcxproj /m /p:Configuration=Release /p:Platform=${{ matrix.platform }} /p:PlatformToolset=v143 /p:TargetName=ThinBridgeTalk.Test "/p:OutDir=$output" "/p:IntDir=${output}obj/" "/p:ForceImportBeforeCppTargets=$pwd/ThinBridge.Tests/ThinBridgeTalkHooks.props"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           ./ThinBridge.Tests/Test-ThinBridgeTalk.ps1 -Executable "${output}ThinBridgeTalk.Test.exe" -Hooks
+      - name: Build and test ThinBridge with test hooks
+        if: matrix.platform == 'Win32'
+        shell: pwsh
+        run: |
+          $output = "$pwd/ThinBridge.Tests/Release/Win32/AppHooks/"
+          msbuild ThinBridge/ThinBridge.vcxproj /m /p:Configuration=Release /p:Platform=Win32 /p:TargetName=ThinBridge.Test "/p:OutDir=$output" "/p:IntDir=${output}obj/" "/p:ForceImportBeforeCppTargets=$pwd/ThinBridge.Tests/ThinBridgeHooks.props" /p:PostBuildEventUseInBuild=false
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          ./ThinBridge.Tests/Test-ThinBridge.ps1 -Executable "${output}ThinBridge.Test.exe"

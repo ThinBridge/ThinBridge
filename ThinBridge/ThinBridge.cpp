@@ -11,6 +11,10 @@
 #include "DlgETC.h"
 #include <DDEML.H>
 
+#ifdef THINBRIDGE_APP_TEST_HOOKS
+#include "AppTestHooks.h"
+#endif
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -448,6 +452,11 @@ void CRedirectApp::InitShowSettingDlg()
 
 BOOL CRedirectApp::InitInstance()
 {
+#ifdef THINBRIDGE_APP_TEST_HOOKS
+	RunThinBridgeTest(*this);
+	return FALSE;
+#endif
+
 	_wsetlocale(LC_ALL, _T("jpn")); 
 	INITCOMMONCONTROLSEX InitCtrls={0};
 	InitCtrls.dwSize = sizeof(InitCtrls);

@@ -60,6 +60,13 @@ with `-Hooks` and this test executable to exercise config responses (including
 binary stdout), query launch results, and tab limits. The hooks provide test
 settings and record launch and warning arguments on stderr.
 
+The Win32 job also builds `ThinBridge.Test.exe` with
+`ThinBridge.Tests/ThinBridgeHooks.props`. Run `Test-ThinBridge.ps1` with that
+executable to check startup argument parsing and redirect loop prevention.
+The loop tests use a temporary history file, a fixed tick count, and a private
+event. The workflow keeps the test executable and its build outputs in
+`ThinBridge.Tests/Release/Win32/AppHooks/`.
+
 ## How to try extensions for development
 
 ThinBridge addon depends on the native messaging host, which is a part of ThinBridge.
