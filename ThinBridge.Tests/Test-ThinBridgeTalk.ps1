@@ -89,6 +89,7 @@ function Test-ConfigResponses([string]$Rulefile) {
 [Firefox]
 @BROWSER_PATH:C:\Browsers\Firefox.exe
 @EXCLUDE_GROUP:local
+@EXCLUDE_GROUP:CiTrIx
 https://example.com/first*
 https://example.com/second*
 -https://example.com/internal/*
@@ -97,11 +98,14 @@ https://example.com/second*
 @DISABLED
 https://disabled.example/*
 [Edge]
+[Citrix]
+https://www.citrix.com/*
 '@
     [IO.File]::WriteAllText($Rulefile, $rules, [Text.Encoding]::ASCII)
     $config = '{"status":"OK","config":{"CloseEmptyTab":1,"OnlyMainFrame":1,"IgnoreQueryString":1,"DefaultBrowser":"edge","Sections":['
-    $config += '{"Name":"firefox","Path":"C:\\Browsers\\Firefox.exe","ExcludeGroups":["local"],'
-    $config += '"Patterns":["https://example.com/first*","https://example.com/second*"],"Excludes":["https://example.com/internal/*"]}]}}'
+    $config += '{"Name":"firefox","Path":"C:\\Browsers\\Firefox.exe","ExcludeGroups":["local","CiTrIx"],'
+    $config += '"Patterns":["https://example.com/first*","https://example.com/second*"],"Excludes":["https://example.com/internal/*"]},'
+    $config += '{"Name":"citrix","Path":"","ExcludeGroups":[],"Patterns":["https://www.citrix.com/*"],"Excludes":[]}]}}'
     Test-Exchange 'Config response preserves rules and filters disabled sections' (New-Request '"C edge"') 0 -Response $config -Fixture @{ RULEFILE = $Rulefile }
 
     $sectionName = 'Browser12345678'
@@ -141,6 +145,15 @@ if ($Hooks) {
     $utf8Launch = "path=$path`r`ncommand=$utf8Command`r`nflags=512`r`ninherit=0`r`n"
     Test-Exchange 'Q preserves a long URL with multibyte characters' (New-Request ('"Q edge ' + $utf8Url + '"')) 0 $utf8Launch '{"status":"OK"}'
 
+    # WebExtensions match without the query when configured, but send the original URL.
+    foreach ($browser in @('chrome', 'edge', 'firefox')) {
+        $redirectUrl = 'https://www.google.com/search?q=foo%20bar&next=%2Fpath#results'
+        $request = ConvertTo-Json -InputObject "Q $browser $redirectUrl" -Compress -EscapeHandling Default
+        $flags = if ($browser -eq 'firefox') { 16777216 } else { 512 }
+        $launch = "path=$path`r`ncommand= `"$redirectUrl`"`r`nflags=$flags`r`ninherit=0`r`n"
+        Test-Exchange "Q preserves the WebExtension redirect URL for $browser" (New-Request $request) 0 $launch '{"status":"OK"}'
+    }
+
     Test-Exchange 'C missing rulefile' (New-Request '"C edge"') 0 'cannot read SOFTWARE\ThinBridge (2)'
     $rulefile = New-TemporaryFile
     try {
@@ -157,7 +170,8 @@ if ($Hooks) {
     $keepTab = '{"status":"OK","closeTab":0}'
     $closeTab = '{"status":"OK","closeTab":1}'
     $policy = @{ POLICY = '1' }
-    $warning = "warning=Warning`r`nTab count`r`ncaption=ThinBridge`r`nflags=4144`r`nseconds=3`r`n"
+    # 2ba3431 switched the host to Unicode for warning text on non-Japanese Windows.
+    $warning = "warning=警告`r`nタブ数`r`ncaption=ThinBridge`r`nflags=4144`r`nseconds=3`r`n"
     $limit = "warning=Limit reached`r`ncaption=ThinBridge`r`nflags=4144`r`nseconds=7`r`n"
     Test-Exchange 'R without a tab policy' (New-Request '"R edge 11"') 0 -Response $keepTab
     Test-Exchange 'R with tab policy explicitly disabled' (New-Request '"R edge 11"') 0 -Response $keepTab -Fixture @{ POLICY = '0' }

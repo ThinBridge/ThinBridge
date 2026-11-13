@@ -29,7 +29,7 @@ static LSTATUS test_read_policy(HKEY key, LPCTSTR subkey, LPCTSTR name,
 		if (!_tcscmp(name, _T("TabLimit_MAX_MSG")))
 			message = _T("Limit reached");
 		else if (!_tcscmp(name, _T("TabLimit_WARNING_MSG")))
-			message = _T("Warning\\r\\nTab count");
+			message = L"\u8B66\u544A\\r\\n\u30BF\u30D6\u6570";
 		else
 			return ERROR_FILE_NOT_FOUND;
 		required = (DWORD)((_tcslen(message) + 1) * sizeof(TCHAR));
@@ -54,8 +54,12 @@ static DWORD WINAPI test_wait_for_warning(HANDLE mutex, DWORD timeout)
 
 static int test_show_warning(LPCTSTR message, LPCTSTR caption, UINT flags, int seconds)
 {
-	_ftprintf(stderr, _T("warning=%s\ncaption=%s\nflags=%u\nseconds=%d\n"),
-		message, caption, flags, seconds);
+	char utf8[256];
+	if (!WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, message, -1,
+		utf8, sizeof(utf8), NULL, NULL))
+		return 0;
+	fprintf(stderr, "warning=%s\ncaption=%ls\nflags=%u\nseconds=%d\n",
+		utf8, caption, flags, seconds);
 	return IDOK;
 }
 
