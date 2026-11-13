@@ -32,4 +32,5 @@ jobs:
         run: |
           $platform = '${{ matrix.platform }}'
           $output = if ($platform -eq 'Win32') { 'Release' } else { 'x64/Release' }
-          ./ThinBridge.Tests/Test-ThinBridgeTalk.ps1 -Executable "ThinBridgeTalk/$output/ThinBridgeTalk.exe"
+          $view = if ($platform -eq 'Win32') { 'Registry32' } else { 'Registry64' }
+          ./ThinBridge.Tests/Test-ThinBridgeTalk.ps1 -Executable "ThinBridgeTalk/$output/ThinBridgeTalk.exe" -BinaryConfigResponseRegistryView $view

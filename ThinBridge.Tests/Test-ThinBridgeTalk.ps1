@@ -1,6 +1,8 @@
 param(
     [Parameter(Mandatory)]
-    [string]$Executable
+    [string]$Executable,
+    [ValidateSet('Registry32', 'Registry64')]
+    [string]$BinaryConfigResponseRegistryView
 )
 
 $ErrorActionPreference = 'Stop'
@@ -72,6 +74,13 @@ $firstFrame = New-Request '"X first"'
 $secondFrame = New-Request '"X second"'
 Test-Exchange 'Only the first frame is dispatched' ($firstFrame + $secondFrame) 0 "unknown command 'X first'"
 
+# 760bf02 made stdin binary. In text mode, 0x1A in the length prefix acts as EOF,
+# and the 0x0D 0x0A pair in a 2573-byte length prefix collapses to 0x0A.
+foreach ($length in @(0x1A, 0x0A0D)) {
+    $command = 'X ' + ('a' * ($length - 4))
+    Test-Exchange "Binary stdin length $length" (New-Request ('"' + $command + '"')) 0 "unknown command '$command'"
+}
+
 # Check both registry views so the same script works with either executable.
 $hasRulefile = $false
 $hasExtensionExecfile = $false
@@ -98,6 +107,41 @@ if ($hasRulefile) {
     Write-Host 'SKIP Missing Rulefile because a ThinBridge rule file is configured'
 } else {
     Test-Exchange 'Config request with missing Rulefile' (New-Request '"C edge"') 0 'cannot read SOFTWARE\ThinBridge (2)'
+}
+
+# BrowserSelector e7c170c records a response length of 8B 0A 00 00.
+# Use a temporary Rulefile on a clean test machine to produce that same header.
+if ($BinaryConfigResponseRegistryView) {
+    $machine = [Microsoft.Win32.RegistryKey]::OpenBaseKey('LocalMachine', $BinaryConfigResponseRegistryView)
+    $key = $null
+    $registered = $false
+    $rulefile = New-TemporaryFile
+    try {
+        $key = $machine.CreateSubKey('SOFTWARE\ThinBridge')
+        if ($key.GetValueNames() -contains 'Rulefile') {
+            throw 'The binary response fixture requires an unused ThinBridge Rulefile value'
+        }
+
+        $prefix = '{"status":"OK","config":{"CloseEmptyTab":1,"OnlyMainFrame":0,"IgnoreQueryString":0,"DefaultBrowser":"","Sections":['
+        $prefix += '{"Name":"firefox","Path":"","ExcludeGroups":[],"Patterns":["'
+        $suffix = '"],"Excludes":[]}]}}'
+        $url = 'https://example.com/'
+        $url += 'a' * (0x0A8B - ($prefix + $url + $suffix).Length)
+        [IO.File]::WriteAllText($rulefile.FullName, "[Firefox]`r`n$url`r`n", [Text.Encoding]::ASCII)
+        $key.SetValue('Rulefile', $rulefile.FullName, 'String')
+        $registered = $true
+        Test-Exchange 'Binary stdout length 2699' (New-Request '"C edge"') 0 -Response ($prefix + $url + $suffix)
+    }
+    finally {
+        if ($registered) {
+            $key.DeleteValue('Rulefile')
+        }
+        if ($null -ne $key) {
+            $key.Dispose()
+        }
+        $machine.Dispose()
+        Remove-Item -LiteralPath $rulefile.FullName
+    }
 }
 if ($hasExtensionExecfile) {
     Write-Host 'SKIP Missing ExtensionExecfile because a redirect executable is configured'
