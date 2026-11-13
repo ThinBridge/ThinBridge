@@ -27,6 +27,7 @@ function Test-Exchange(
     $start.RedirectStandardInput = $true
     $start.RedirectStandardOutput = $true
     $start.RedirectStandardError = $true
+    $start.StandardErrorEncoding = [Text.Encoding]::UTF8
     if ($Hooks) {
         $start.Environment['THINBRIDGE_TEST_FAIL_LAUNCH'] = if ($FailLaunch) { '1' } else { '0' }
         foreach ($fixtureName in @('RULEFILE', 'POLICY', 'WARNING_BUSY', 'NO_EXECFILE')) {
@@ -103,6 +104,17 @@ https://disabled.example/*
     $config += '"Patterns":["https://example.com/first*","https://example.com/second*"],"Excludes":["https://example.com/internal/*"]}]}}'
     Test-Exchange 'Config response preserves rules and filters disabled sections' (New-Request '"C edge"') 0 -Response $config -Fixture @{ RULEFILE = $Rulefile }
 
+    $sectionName = 'Browser12345678'
+    $browserPath = 'C:\' + ('a' * 252) + '.exe'
+    $pattern = 'https://example.com/日本語/😀?q="a"' + "`t" + 'b'
+    $rules = "[$sectionName]`r`n@BROWSER_PATH:$browserPath`r`n$pattern"
+    [IO.File]::WriteAllText($Rulefile, $rules, [Text.UTF8Encoding]::new($false))
+    $escapedPath = $browserPath.Replace('\', '\\')
+    $edgeConfig = '{"status":"OK","config":{"CloseEmptyTab":1,"OnlyMainFrame":0,"IgnoreQueryString":0,"DefaultBrowser":"","Sections":['
+    $edgeConfig += '{"Name":"browser12345678","Path":"' + $escapedPath + '","ExcludeGroups":[],'
+    $edgeConfig += '"Patterns":["https://example.com/日本語/😀?q=\"a\"\tb"],"Excludes":[]}]}}'
+    Test-Exchange 'C handles maximum fitting fields and escapes UTF-8 patterns' (New-Request '"C edge"') 0 -Response $edgeConfig -Fixture @{ RULEFILE = $Rulefile }
+
     [IO.File]::WriteAllText($Rulefile, '')
     Test-Exchange 'Config request with an empty rule file' (New-Request '"C edge"') 0 "cannot read $Rulefile" -Fixture @{ RULEFILE = $Rulefile }
 }
@@ -121,6 +133,13 @@ if ($Hooks) {
     $emptyCommand = ' ""'
     $emptyLaunch = "path=$path`r`ncommand=$emptyCommand`r`nflags=512`r`ninherit=0`r`n"
     Test-Exchange 'Q accepts an empty URL' (New-Request '"Q edge "') 0 $emptyLaunch '{"status":"OK"}'
+    Test-Exchange 'Q accepts an empty browser name' (New-Request ('"Q  ' + $url + '"')) 0 $edgeLaunch '{"status":"OK"}'
+    Test-Exchange 'Q browser name comparison is case sensitive' (New-Request ('"Q Firefox ' + $url + '"')) 0 $edgeLaunch '{"status":"OK"}'
+
+    $utf8Url = 'https://example.com/日本語/😀?q=%22&long=' + ('a' * 4096)
+    $utf8Command = ' "' + $utf8Url + '"'
+    $utf8Launch = "path=$path`r`ncommand=$utf8Command`r`nflags=512`r`ninherit=0`r`n"
+    Test-Exchange 'Q preserves a long URL with multibyte characters' (New-Request ('"Q edge ' + $utf8Url + '"')) 0 $utf8Launch '{"status":"OK"}'
 
     Test-Exchange 'C missing rulefile' (New-Request '"C edge"') 0 'cannot read SOFTWARE\ThinBridge (2)'
     $rulefile = New-TemporaryFile
@@ -146,6 +165,9 @@ if ($Hooks) {
     Test-Exchange 'R at warning threshold' (New-Request '"R edge 8"') 0 $warning $keepTab -Fixture $policy
     Test-Exchange 'R at maximum still warns without closing' (New-Request '"R edge 10"') 0 $warning $keepTab -Fixture $policy
     Test-Exchange 'R above maximum requests tab closure' (New-Request '"R edge 11"') 0 $limit $closeTab -Fixture $policy
+    Test-Exchange 'R nonnumeric tab count is treated as zero' (New-Request '"R edge unknown"') 0 -Response $keepTab -Fixture $policy
+    Test-Exchange 'R accepts a numeric prefix followed by text' (New-Request '"R edge 8tabs"') 0 $warning $keepTab -Fixture $policy
+    Test-Exchange 'R accepts the largest signed tab count' (New-Request '"R edge 2147483647"') 0 $limit $closeTab -Fixture $policy
     Test-Exchange 'R suppresses busy warning but still requests closure' (New-Request '"R edge 11"') 0 -Response $closeTab -Fixture @{ POLICY = '1'; WARNING_BUSY = '1' }
     return
 }
