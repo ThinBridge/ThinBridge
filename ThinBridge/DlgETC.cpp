@@ -60,6 +60,9 @@ BOOL CDlgETC::OnInitDialog()
 		((CButton*)GetDlgItem(IDC_CHK_GLOVAL_DISABLE_DDE))->SetCheck(bDisableIE_DDE ? 1 : 0);
 	}
 
+	BOOL bEnableSubframeRedirection = theApp.m_RedirectList.m_bEnableSubframeRedirection;
+	((CButton*)GetDlgItem(IDC_CHK_GLOVAL_ENABLE_SUBFRAME_REDIRECTION))->SetCheck(bEnableSubframeRedirection ? 1 : 0);
+
 	CString strVersion;
 	strVersion = theApp.GetVersionStr();
 	GetDlgItem(IDC_STATIC_VER)->SetWindowText(strVersion);
@@ -90,6 +93,10 @@ LRESULT CDlgETC::Set_OK(WPARAM wParam, LPARAM lParam)
 		BOOL bDisableIE_DDE = ((CButton*)GetDlgItem(IDC_CHK_GLOVAL_DISABLE_DDE))->GetCheck() == 1 ? TRUE : FALSE;
 		theApp.m_RedirectListSaveData.m_bDisableIE_DDE = bDisableIE_DDE;
 	}
+
+	BOOL bEnableSubframeRedirection = ((CButton*)GetDlgItem(IDC_CHK_GLOVAL_ENABLE_SUBFRAME_REDIRECTION))->GetCheck() == 1 ? TRUE : FALSE;
+	theApp.m_RedirectListSaveData.m_bEnableSubframeRedirection = bEnableSubframeRedirection;
+
 	return 0;
 }
 
