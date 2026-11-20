@@ -11,6 +11,10 @@
 #include "DlgETC.h"
 #include <DDEML.H>
 
+#ifdef THINBRIDGE_APP_TEST_HOOKS
+#include "AppTestHooks.h"
+#endif
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -448,6 +452,16 @@ void CRedirectApp::InitShowSettingDlg()
 
 BOOL CRedirectApp::InitInstance()
 {
+#ifdef THINBRIDGE_APP_TEST_HOOKS
+	const bool testRouting = IsRoutingTest();
+	if (testRouting) {
+		PrepareRoutingTest(*this);
+	} else {
+		RunThinBridgeTest(*this);
+		return FALSE;
+	}
+#else
+
 	_wsetlocale(LC_ALL, _T("jpn")); 
 	INITCOMMONCONTROLSEX InitCtrls={0};
 	InitCtrls.dwSize = sizeof(InitCtrls);
@@ -467,6 +481,8 @@ BOOL CRedirectApp::InitInstance()
 		return FALSE;
 
 	//コマンドラインのセット
+#endif
+
 	this->InitCommandParamOptionParam();
 
 	//両方セットされている場合 ThinBridgeBHOからのCall
@@ -552,6 +568,12 @@ BOOL CRedirectApp::InitInstance()
 	}
 
 	//CommandLineがある場合。	
+#ifdef THINBRIDGE_APP_TEST_HOOKS
+	if (testRouting) {
+		PrintRoutingTest(*this);
+		return FALSE;
+	}
+#endif
 	if(!m_CommandParam.IsEmpty())
 	{
 		CString strCmd;
@@ -1051,6 +1073,10 @@ void CRedirectApp::CreateRDPFile(CString& strCommand)
 		out.WriteString(m_strRdp_ReadOnce_File_Data);
 		out.Close();
 	}
+#ifdef THINBRIDGE_APP_TEST_HOOKS
+	if (IsRdpFileTest())
+		return;
+#endif
 	theApp.Exec_MSTSC(m_strRDP_FileFullPath);
 
 	if(m_pReExecThread)

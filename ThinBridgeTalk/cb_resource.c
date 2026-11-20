@@ -18,6 +18,10 @@
 #include "internal.h"
 #include "messagebox.h"
 
+#ifdef THINBRIDGE_RESOURCE_TEST_HOOKS
+#include THINBRIDGE_RESOURCE_TEST_HOOKS
+#endif
+
 #define HKCU HKEY_CURRENT_USER
 #define TB_RCAP _T("SOFTWARE\\Policies\\ThinBridge\\RCAP")
 

@@ -3,6 +3,10 @@
 #include <stdlib.h>
 #include "internal.h"
 
+#ifdef THINBRIDGE_QUERY_TEST_HOOKS
+#include THINBRIDGE_QUERY_TEST_HOOKS
+#endif
+
 static int get_ThinBridgeExtensionExecfile(char *buf, DWORD size)
 {
 	int ret;

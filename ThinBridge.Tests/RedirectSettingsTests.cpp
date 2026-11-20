@@ -210,6 +210,26 @@ namespace ThinBridgeTests
             Assert::AreEqual(L"https://neutral.example/*", settings.m_pCustom18->m_arr_URL[0].GetString());
         }
 
+        TEST_METHOD(SaveAndReloadPreservesDisabledExcludeGroups)
+        {
+            CURLRedirectList settings;
+            LoadSettings(settings, "[EDGE]\r\nhttps://example.com/*\r\n"
+                "@EXCLUDE_GROUP:Active\r\n@EXCLUDE_GROUP:#Disabled\r\n"
+                "@EXCLUDE_GROUP:;AlsoDisabled\r\n#@EXCLUDE_GROUP:Comment\r\n");
+            CString serialized;
+            Assert::IsTrue(settings.SaveData(settingsPath, serialized) != FALSE);
+            Assert::IsTrue(serialized.Find(L"@EXCLUDE_GROUP:#Disabled\n") >= 0);
+            Assert::IsTrue(serialized.Find(L"@EXCLUDE_GROUP:;AlsoDisabled\n") >= 0);
+
+            CURLRedirectList reloaded;
+            reloaded.SetArrayData(settingsPath);
+            const auto& groups = reloaded.m_pEdge->m_arr_ExcludeGroup;
+            Assert::AreEqual(3, static_cast<int>(groups.GetCount()));
+            Assert::AreEqual(L"Active", groups[0].GetString());
+            Assert::AreEqual(L"#Disabled", groups[1].GetString());
+            Assert::AreEqual(L";AlsoDisabled", groups[2].GetString());
+        }
+
         TEST_METHOD(SaveUsesGlobalTopUrlOnlyForBrowserDirective)
         {
             CURLRedirectList settings;
